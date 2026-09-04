@@ -322,6 +322,8 @@
         // Backend API — di-host di Cloudflare Pages (GitHub Pages tidak bisa menjalankan server)
         const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev' : '';
         const WALLET_API_URL = API_BASE + '/api/wallet';
+        // Backend top-up Xendit — Base44 function (siap pakai dari GitHub Pages maupun Cloudflare Pages)
+        var TOPUP_API = 'https://koda-da05205d.base44.app/functions/topup';
         let currentBalance = 0;
         let selectedNominalAmount = 50000;
 
@@ -464,7 +466,7 @@
             var method = methodEl ? methodEl.value : 'QRIS Instant';
             var channel = XENDIT_METHOD_MAP[method] || 'qris';
             try {
-                var res = await fetch(API_BASE + '/api/topup', {
+                var res = await fetch(TOPUP_API, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'create', amount: selectedNominalAmount, method: channel })
@@ -477,7 +479,7 @@
                     return;
                 }
                 window.open(res.invoice_url, '_blank');
-                pollTopUpStatus(res.order_id);
+                pollTopUpStatus(res.order_id, channel);
                 if (res.mode === 'sandbox') {
                     showModal('Mode Sandbox (Test)', 'Halaman pembayaran Xendit TEST MODE telah dibuka di tab baru. Untuk menguji tanpa uang nyata, klik tautan "Click here to simulate your payment" di halaman tersebut. Saldo akan otomatis masuk begitu pembayaran terverifikasi.');
                 } else {
@@ -489,13 +491,17 @@
         }
 
         // Poll status — backend cek live ke Xendit, saldo masuk begitu dibayar
-        function pollTopUpStatus(orderId) {
+        function pollTopUpStatus(orderId, channel) {
             stopTopUpPoll();
             var attempts = 0;
             topupPollTimer = setInterval(async function() {
                 attempts++;
                 try {
-                    var data = await fetch(API_BASE + '/api/topup?action=status&order_id=' + encodeURIComponent(orderId)).then(function(r) { return r.json(); });
+                    var data = await fetch(TOPUP_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'status', order_id: orderId, method: channel || 'qris' })
+                    }).then(function(r) { return r.json(); });
                     if (data.status === 'paid') {
                         stopTopUpPoll();
                         await renderBalance();
