@@ -9,321 +9,317 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #ffffff;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-        :root {
-            --accent-color: #000000;
-            --accent-hover: #1f2937;
-            --accent-text: #ffffff;
-        }
-
-        .bg-accent { background-color: var(--accent-color) !important; }
-        .text-accent { color: var(--accent-color) !important; }
-        .border-accent { border-color: var(--accent-color) !important; }
-
         body.dark-mode {
             background-color: #000000;
             color: #ffffff;
         }
-        body.dark-mode .bg-white {
-            background-color: #0a0a0a !important;
+        /* Mode Gelap Kustom */
+        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #ffffff !important; }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600 { color: #888888 !important; }
+        body.dark-mode .text-gray-500 { color: #666666 !important; }
+        body.dark-mode .border-gray-200, body.dark-mode .border-gray-300 { border-color: #222222 !important; }
+        body.dark-mode .border-gray-100 { border-color: #1a1a1a !important; }
+        body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 { background-color: #111111 !important; }
+        body.dark-mode .hover\:bg-gray-50:hover { background-color: #1a1a1a !important; }
+        body.dark-mode input, body.dark-mode select {
+            background-color: #000000; color: #ffffff; border-color: #222222;
         }
-        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black {
-            color: #ffffff !important;
-        }
-        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 {
-            color: #888888 !important;
-        }
-        body.dark-mode .text-gray-400 {
-            color: #666666 !important;
-        }
-        body.dark-mode #sidebar-toggle,
-        body.dark-mode button[onclick="toggleSidebar()"],
-        body.dark-mode button[onclick="history.back()"],
-        body.dark-mode button[onclick="navigateTo('page-home')"],
-        body.dark-mode .header-glass button[onclick],
-        body.dark-mode header button[onclick] {
-            background-color: #000000 !important;
-            border: 1.5px solid rgba(255,255,255,0.4) !important;
-            color: #ffffff !important;
-        }
-        body.dark-mode #sidebar-toggle svg,
-        body.dark-mode button[onclick="toggleSidebar()"] svg,
-        body.dark-mode button[onclick="history.back()"] svg,
-        body.dark-mode button[onclick="navigateTo('page-home')"] svg,
-        body.dark-mode .header-glass button[onclick] svg,
-        body.dark-mode header button[onclick] svg {
-            color: #ffffff !important;
-            stroke: #ffffff !important;
-        }
-        body.dark-mode #sidebar-toggle:hover,
-        body.dark-mode button[onclick="toggleSidebar()"]:hover,
-        body.dark-mode button[onclick="history.back()"]:hover,
-        body.dark-mode button[onclick="navigateTo('page-home')"]:hover,
-        body.dark-mode .header-glass button[onclick]:hover,
-        body.dark-mode header button[onclick]:hover {
-            background-color: #1a1a1a !important;
-            border-color: rgba(255,255,255,0.7) !important;
-        }
-        body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 {
-            background-color: #0a0a0a !important;
-        }
-        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200 {
-            border-color: #222222 !important;
-        }
-        body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover {
-            background-color: #0a0a0a !important;
-        }
-        body.dark-mode .hover\:bg-gray-200:hover {
-            background-color: #222222 !important;
-        }
-        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
-            background-color: #0a0a0a; color: #ffffff; border-color: #222222;
-        }
-        body.dark-mode input:focus, body.dark-mode select:focus, body.dark-mode textarea:focus {
-            border-color: #444444; outline: none;
-        }
-        body.dark-mode .divide-gray-200 > * { border-color: #222222 !important; }
-        body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
-        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
-        body.dark-mode ::-webkit-scrollbar-thumb { background: #222222; }
-        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
-        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
-        body.dark-mode .text-accent { color: #ffffff !important; }
-        body.dark-mode .bg-blue-50 { background-color: #0a2a4a !important; }
-
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    /* auto-dark-fix v1 */
-    body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
-    body.dark-mode .bg-gray-200 { background-color: #262626 !important; }
-    body.dark-mode .bg-gray-300 { background-color: #333333 !important; }
-    body.dark-mode .bg-gray-400 { background-color: #444444 !important; }
-    body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
-    body.dark-mode .border-gray-200\/50,
-    body.dark-mode .border-gray-200\/60,
-    body.dark-mode .border-gray-200\/70 { border-color: #222222 !important; }
-    body.dark-mode .border-gray-300 { border-color: #333333 !important; }
-    body.dark-mode .border-gray-400 { border-color: #444444 !important; }
-    body.dark-mode .bg-blue-50,
-    body.dark-mode .bg-blue-50\/50 { background-color: #0d1a26 !important; }
-    body.dark-mode .border-blue-100,
-    body.dark-mode .border-blue-200 { border-color: #1e3a52 !important; }
-    body.dark-mode .bg-red-50,
-    body.dark-mode .bg-red-50\/50 { background-color: #2a1414 !important; }
-    body.dark-mode .bg-red-100 { background-color: #3a1a1a !important; }
-    body.dark-mode .border-red-100,
-    body.dark-mode .border-red-200 { border-color: #4a2020 !important; }
-    body.dark-mode .bg-green-100 { background-color: #14301c !important; }
-    body.dark-mode .bg-white\/95 { background-color: rgba(10,10,10,0.95) !important; }
-    body.dark-mode .hover\:bg-gray-50:hover,
-    body.dark-mode .hover\:bg-gray-50\/50:hover,
-    body.dark-mode .hover\:bg-gray-50\/80:hover { background-color: #1a1a1a !important; }
-    body.dark-mode .hover\:bg-gray-100:hover { background-color: #262626 !important; }
-    body.dark-mode .hover\:bg-gray-200:hover,
-    body.dark-mode .hover\:bg-gray-200\/50:hover { background-color: #333333 !important; }
-    body.dark-mode .hover\:bg-blue-50:hover,
-    body.dark-mode .hover\:bg-blue-100:hover { background-color: #163247 !important; }
-    body.dark-mode .hover\:bg-red-50:hover,
-    body.dark-mode .hover\:bg-red-100:hover { background-color: #3a1a1a !important; }
-    body.dark-mode .hover\:border-gray-300:hover,
-    body.dark-mode .hover\:border-gray-400:hover,
-    body.dark-mode .hover\:border-gray-900:hover { border-color: #555555 !important; }
-    body.dark-mode .focus\:border-gray-400:focus,
-    body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
-    body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
-</style>
-<!-- no-flash-v1 -->
-<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+        body.dark-mode input:focus, body.dark-mode select:focus { border-color: #444444; outline: none; }
+        
+        /* Utility Scroll Samping Tanpa Scrollbar Visual */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col text-gray-900 pt-16">
+<body class="min-h-screen flex flex-col text-gray-900 pt-16 bg-white dark:bg-black transition-colors duration-300 relative">
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
     
-    <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
-        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
-            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+    <header class="bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-[#222] flex justify-between items-center px-4 py-3 fixed top-0 w-full z-40 transition-colors duration-300">
+        <button onclick="history.back()" class="w-9 h-9 flex items-center justify-center rounded-full bg-transparent border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-all cursor-pointer text-gray-700 dark:text-gray-300 focus:outline-none">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
         </button>
-        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Kolaborasi</h1>
-        <div class="w-10"></div>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight text-center">Kolaborasi</h1>
+        <div class="w-9"></div>
     </header>
 
-    <main class="flex-1 w-full max-w-2xl mx-auto px-5 sm:px-6 pb-10 pt-4 flex flex-col">
-      
-      <div class="mb-5 flex items-start gap-3 p-3.5 rounded-xl bg-gray-50 border border-gray-100 transition-colors">
-        <i data-lucide="shield-check" class="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5"></i>
-        <div>
-          <h3 class="text-sm font-semibold text-gray-900">Akses Terbatas</h3>
-          <p class="text-[13px] text-gray-500 mt-0.5 leading-relaxed">Hanya kolega yang ada dalam daftar di bawah ini yang memiliki izin untuk mengakses ruang lingkup proyek.</p>
-        </div>
-      </div>
-
-      <div class="w-full flex flex-col">
-        <div class="pb-4">
-          <div class="flex items-center justify-between mb-5">
-            <div>
-              <h4 class="text-base font-bold text-gray-900 flex items-center gap-2">
-                <i data-lucide="users" class="w-5 h-5 text-blue-500"></i>
-                Anggota Tim
-              </h4>
-              <p class="text-[13px] text-gray-500 mt-1">Kelola akses dan daftar kolaborator proyek.</p>
-            </div>
-            <button onclick="document.getElementById('invite-row').classList.remove('hidden')" class="px-3 py-1.5 text-sm font-semibold text-blue-600 bg-blue-50/50 border border-blue-100 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 focus:outline-none">
-              <i data-lucide="user-plus" class="h-4 w-4"></i>
-              <span class="hidden sm:inline">Undang</span>
-            </button>
-          </div>
+    <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 md:px-8 pb-12 pt-6 flex flex-col">
+          <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+              Kolaborasi proyek
+          </h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-6">Kelola anggota tim dan atur hak akses masing-masing ke dalam proyek ini.</p>
           
-          <div id="invite-row" class="hidden mb-5 p-1">
-            <div class="flex flex-col sm:flex-row gap-2">
-              <div class="relative flex-1">
-                <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-                <input type="email" class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all bg-white shadow-sm" placeholder="Alamat email kolega...">
-              </div>
-              <div class="flex gap-2">
-                <div class="relative">
-                    <button onclick="toggleRoleDropdown('invite-role-dropdown', this, 'invite')" class="px-3 py-2 h-full text-sm rounded-lg border border-gray-200 hover:border-gray-300 bg-white flex items-center gap-2 shadow-sm focus:outline-none transition-colors">
-                        <span id="invite-role-text">Editor</span>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+      <div class="w-full flex flex-col">
+        
+        <!-- Horizontal Scrollable Real-Time Stat Cards -->
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1 mb-6 snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
+            <!-- Card 1: Total Anggota -->
+            <div class="min-w-[130px] sm:min-w-[140px] flex-1 flex-shrink-0 snap-start p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]">
+                <div class="mb-2">
+                    <i data-lucide="users" class="w-5 h-5 text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight" id="stat-total-users">3</div>
+                <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Total Anggota</div>
+            </div>
+
+            <!-- Card 2: Akses Edit -->
+            <div class="min-w-[130px] sm:min-w-[140px] flex-1 flex-shrink-0 snap-start p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]">
+                <div class="mb-2">
+                    <i data-lucide="pen-tool" class="w-5 h-5 text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight" id="stat-editors">2</div>
+                <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Memiliki Akses Edit</div>
+            </div>
+
+            <!-- Card 3: Peran Viewer -->
+            <div class="min-w-[130px] sm:min-w-[140px] flex-1 flex-shrink-0 snap-start p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]">
+                <div class="mb-2">
+                    <i data-lucide="eye" class="w-5 h-5 text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight" id="stat-viewers">1</div>
+                <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Peran Viewer</div>
+            </div>
+
+            <!-- Card 4: Aktif Hari Ini -->
+            <div class="min-w-[130px] sm:min-w-[140px] flex-1 flex-shrink-0 snap-start p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]">
+                <div class="mb-2">
+                    <i data-lucide="activity" class="w-5 h-5 text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">12</div>
+                <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Pembaruan Hari Ini</div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between mb-6">
+            <h4 class="text-lg font-bold text-gray-900 dark:text-white">
+              Anggota Proyek
+            </h4>
+            
+            <!-- CTA Undangan Kapsul dengan Dropdown Instant -->
+            <div class="relative" id="share-dropdown-container">
+                <button type="button" onclick="toggleShareDropdown()" class="px-4 py-1.5 text-sm font-medium text-gray-900 dark:text-white bg-transparent border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#111] rounded-full transition-all cursor-pointer flex items-center gap-1.5 focus:outline-none">
+                  <span>Tambah anggota</span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 opacity-70"></i>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="share-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border border-gray-100 dark:border-[#222] py-1.5 z-50">
+                    <button onclick="openEmailPopup()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
+                        <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>
+                        <span>Undang via Email</span>
+                    </button>
+                    <button onclick="shareDirect('whatsapp')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12.011 0C5.384 0 0 5.383 0 12.011c0 2.116.551 4.177 1.598 5.986L.057 24l6.182-1.621a11.96 11.96 0 0 0 5.772 1.482h.005c6.625 0 12.01-5.384 12.01-12.012A11.942 11.942 0 0 0 20.5 3.513 11.94 11.94 0 0 0 12.011 0zm0 21.921h-.004a9.904 9.904 0 0 1-5.048-1.383l-.362-.215-3.754.985 1.002-3.661-.236-.375a9.897 9.897 0 0 1-1.515-5.281c0-5.47 4.452-9.92 9.921-9.92 2.65 0 5.14 1.033 7.012 2.906a9.862 9.862 0 0 1 2.903 7.018c0 5.471-4.451 9.923-9.92 9.923zm5.438-7.43c-.298-.149-1.764-.87-2.037-.97-.272-.099-.47-.148-.669.15-.198.297-.768.97-.942 1.163-.173.198-.347.223-.644.074-.297-.149-1.258-.464-2.397-1.48-.886-.79-1.484-1.767-1.658-2.064-.173-.298-.018-.46.13-.607.135-.133.298-.347.447-.521.148-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347z"/></svg>
+                        <span>Undang via WhatsApp</span>
+                    </button>
+                    <button onclick="shareDirect('telegram')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-.13-.32.05-.44 2.2-1.2 3.67-1.99 4.41-2.37 2.1-.9 2.54-1.05 2.82-1.05.06 0 .2.01.29.08.08.06.1.14.11.21.01.06.01.12 0 .19z"/></svg>
+                        <span>Undang via Telegram</span>
+                    </button>
+                    <div class="h-px bg-gray-100 dark:bg-[#333] my-1 mx-2"></div>
+                    <button onclick="copyDirectLink()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
+                        <i data-lucide="link" class="w-4 h-4 flex-shrink-0"></i>
+                        <span>Salin Tautan Link</span>
                     </button>
                 </div>
-                <button onclick="document.getElementById('invite-row').classList.add('hidden'); showActionButtons();" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-black rounded-lg transition-colors cursor-pointer whitespace-nowrap shadow-sm focus:outline-none">
-                  Kirim
-                </button>
-              </div>
             </div>
-          </div>
-
-          <div class="space-y-1.5">
-            <!-- Owner -->
-            <div class="flex items-center gap-3 p-2.5 rounded-xl border border-transparent hover:bg-gray-50/80 transition-colors">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center text-white text-sm font-bold shadow-sm">CU</div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 truncate">Clincoo User</p>
-                <p class="text-[13px] text-gray-500 truncate">user@clincoo.com</p>
-              </div>
-              <span class="text-[11px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-600 uppercase tracking-wider">Owner</span>
-            </div>
-            
-            <!-- Other Member 1 -->
-            <div class="flex items-center gap-3 p-2.5 rounded-xl border border-transparent hover:border-gray-100 hover:bg-gray-50/50 transition-colors group relative">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">DA</div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">Dr. Aisha</p>
-                <p class="text-[13px] text-gray-500 truncate">aisha@clinic.com</p>
-              </div>
-              <button onclick="toggleRoleDropdown('member1-role-dropdown', this, 'member')" class="text-sm font-medium px-2.5 py-1.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-1 focus:outline-none">
-                <span id="member1-role-text">Editor</span>
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-50"></i>
-              </button>
-            </div>
-            
-            <!-- Other Member 2 -->
-            <div class="flex items-center gap-3 p-2.5 rounded-xl border border-transparent hover:border-gray-100 hover:bg-gray-50/50 transition-colors group relative">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-sm font-bold shadow-sm">BK</div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">Budi Karya</p>
-                <p class="text-[13px] text-gray-500 truncate">budi@clinic.com</p>
-              </div>
-              <button onclick="toggleRoleDropdown('member2-role-dropdown', this, 'member')" class="text-sm font-medium px-2.5 py-1.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-1 focus:outline-none">
-                <span id="member2-role-text">Viewer</span>
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-50"></i>
-              </button>
-            </div>
-          </div>
         </div>
 
-        <div class="pt-6 mt-2 border-t border-gray-100">
-          <h4 class="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4">
-            <i data-lucide="history" class="w-4 h-4 text-gray-500"></i>
-            Riwayat Aktivitas
-          </h4>
-          <div class="space-y-4">
-            <div class="flex gap-3">
-              <div class="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-600 flex-shrink-0 mt-0.5">
-                <i data-lucide="file-edit" class="w-3.5 h-3.5"></i>
-              </div>
-              <div>
-                <p class="text-sm text-gray-900"><span class="font-semibold">Dr. Aisha</span> memperbarui dokumen proyek</p>
-                <p class="text-[12px] text-gray-500 mt-0.5">2 jam yang lalu</p>
-              </div>
+        <div class="space-y-4" id="member-list">
+            <!-- Empty State / Belum Ada Anggota -->
+            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <i data-lucide="users" class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-4"></i>
+                <h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Belum ada anggota tim</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Undang rekan tim untuk mulai berkolaborasi di proyek ini.</p>
             </div>
-            <div class="flex gap-3">
-              <div class="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-600 flex-shrink-0 mt-0.5">
-                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-              </div>
-              <div>
-                <p class="text-sm text-gray-900"><span class="font-semibold">Anda</span> mengundang <span class="font-medium">Budi Karya</span></p>
-                <p class="text-[12px] text-gray-500 mt-0.5">Kemarin, 14:30</p>
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <div class="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-600 flex-shrink-0 mt-0.5">
-                <i data-lucide="rocket" class="w-3.5 h-3.5"></i>
-              </div>
-              <div>
-                <p class="text-sm text-gray-900">Ruang kolaborasi berhasil dibuat</p>
-                <p class="text-[12px] text-gray-500 mt-0.5">3 hari yang lalu</p>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-
-      <div id="action-buttons" class="mt-8 pt-5 hidden justify-end gap-3 opacity-0 transition-all duration-300 transform translate-y-2 border-t border-gray-100">
-        <button type="button" onclick="cancelChanges()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none">Batal</button>
-        <button id="btn-simpan" type="button" onclick="saveChanges()" class="px-5 py-2 text-sm font-semibold text-white bg-gray-900 hover:bg-black rounded-lg shadow-sm transition-colors focus:outline-none flex items-center gap-2">
-          Simpan
-        </button>
       </div>
     </main>
 
-    <div id="role-popover" class="hidden fixed z-50 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 transition-opacity duration-200 opacity-0 transform scale-95" style="transform-origin: top right;">
-        <button onclick="selectRole('Editor')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between group focus:outline-none">
-            Editor
-            <i data-lucide="check" class="w-4 h-4 text-blue-600 hidden check-icon" data-role="Editor"></i>
+    <!-- Role Popover (Anggota) -->
+    <div id="role-popover" class="hidden fixed z-50 w-44 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border border-gray-100 dark:border-[#222] py-1 transition-all duration-200 opacity-0 transform scale-95" style="transform-origin: top right;">
+        <button onclick="selectRole('Editor')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between group focus:outline-none transition-colors">
+            <span class="font-medium">Editor</span>
+            <i data-lucide="check" class="w-4 h-4 text-gray-900 dark:text-white hidden check-icon" data-role="Editor"></i>
         </button>
-        <button onclick="selectRole('Viewer')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between group focus:outline-none">
-            Viewer
-            <i data-lucide="check" class="w-4 h-4 text-blue-600 hidden check-icon" data-role="Viewer"></i>
+        <button onclick="selectRole('Viewer')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between group focus:outline-none transition-colors">
+            <span class="font-medium">Viewer</span>
+            <i data-lucide="check" class="w-4 h-4 text-gray-900 dark:text-white hidden check-icon" data-role="Viewer"></i>
         </button>
-        <div id="delete-role-divider" class="h-px bg-gray-100 my-1"></div>
-        <button id="delete-role-btn" onclick="selectRole('Hapus Akses', true)" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 focus:outline-none">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
+        
+        <div class="h-px bg-gray-100 dark:bg-[#333] my-1 mx-2"></div>
+        <button id="delete-role-btn" onclick="confirmRemoveMember()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-between group focus:outline-none transition-colors">
             Hapus Akses
         </button>
     </div>
 
-  <script>
-    let isEdited = false;
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 z-[60] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm transition-opacity opacity-0" id="confirm-backdrop" onclick="closeConfirmModal()"></div>
+        <div class="bg-white dark:bg-[#111] rounded-2xl shadow-2xl border border-gray-100 dark:border-[#222] w-full max-w-sm m-4 p-6 relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="confirm-dialog">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Hapus Akses?</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Anggota ini tidak akan lagi dapat melihat atau mengedit proyek ini.</p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#222] hover:bg-gray-200 dark:hover:bg-[#333] rounded-xl transition-colors">Batal</button>
+                <button onclick="executeRemoveMember()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Invite Centered Modal -->
+    <div id="email-modal" class="fixed inset-0 z-[70] hidden items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm transition-opacity opacity-0" id="email-backdrop" onclick="closeEmailPopup()"></div>
+        
+        <!-- Modal Content (Popup di Tengah) -->
+        <div class="bg-white dark:bg-[#111] rounded-2xl shadow-2xl border border-gray-100 dark:border-[#222] w-full max-w-[520px] m-4 p-6 relative z-10 transform scale-95 opacity-0 transition-all duration-300 flex flex-col" id="email-dialog">
+            
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Undang via Email</h3>
+                <button onclick="closeEmailPopup()" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-[#222] rounded-full transition-colors focus:outline-none">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">Kirim undangan kolaborasi ke rekan tim Anda melalui email.</p>
+            
+            <!-- Input Email & Dropdown Role dalam 1 Baris (Sejajar) -->
+            <div class="mb-6 flex gap-1.5 items-center">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="mail" class="h-4 w-4 text-gray-400"></i>
+                    </div>
+                    <input type="email" id="invite-email" placeholder="contoh@perusahaan.com" class="block w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-[#333] bg-gray-50 dark:bg-black text-gray-900 dark:text-white focus:bg-white dark:focus:bg-[#0a0a0a] outline-none placeholder-gray-400 h-[42px]">
+                </div>
+                
+                <div class="relative flex-shrink-0" id="invite-role-container">
+                    <button type="button" onclick="toggleInviteRoleDropdown()" class="h-[42px] px-3.5 py-2.5 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl flex items-center gap-1.5 hover:bg-gray-100 dark:hover:bg-[#222] focus:outline-none">
+                        <span id="selected-invite-role" class="text-sm font-medium text-gray-700 dark:text-gray-300">Viewer</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                    </button>
+                    
+                    <!-- Dropdown Content -->
+                    <div id="invite-role-dropdown" class="hidden absolute right-0 mt-2 w-36 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border border-gray-100 dark:border-[#222] py-1 z-50">
+                        <button onclick="selectInviteRole('Viewer')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between transition-colors focus:outline-none">
+                            <span>Viewer</span>
+                            <i data-lucide="check" class="w-3 h-3 text-gray-900 dark:text-white" data-invite-role="Viewer"></i>
+                        </button>
+                        <button onclick="selectInviteRole('Editor')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between transition-colors focus:outline-none">
+                            <span>Editor</span>
+                            <i data-lucide="check" class="w-3 h-3 text-gray-900 dark:text-white hidden" data-invite-role="Editor"></i>
+                        </button>
+                        <button onclick="selectInviteRole('Admin')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between transition-colors focus:outline-none">
+                            <span>Admin</span>
+                            <i data-lucide="check" class="w-3 h-3 text-gray-900 dark:text-white hidden" data-invite-role="Admin"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CTA Tanpa Ikon -->
+            <button id="send-email-btn" onclick="sendEmailInvite()" class="w-full py-2.5 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors focus:outline-none flex justify-center items-center shadow-lg shadow-gray-900/10 dark:shadow-white/5">
+                Kirim Undangan
+            </button>
+        </div>
+    </div>
+
+    <script>
     let activePopoverId = null;
     let activePopoverButton = null;
     let activeTextTarget = null;
+    let memberToRemove = null;
     
-    function toggleRoleDropdown(id, buttonEl, type = 'member') {
-        const popover = document.getElementById('role-popover');
-        const deleteBtn = document.getElementById('delete-role-btn');
-        const deleteDivider = document.getElementById('delete-role-divider');
+    lucide.createIcons();
+
+    /* ========================================================
+       Fungsi Update Statistik Real-Time
+       ======================================================== */
+    function updateRealtimeStats() {
+        const visibleMembers = document.querySelectorAll('#member-list .member-item:not([style*="display: none"])');
+        const totalCount = visibleMembers.length;
         
-        // Sembunyikan opsi hapus saat mode mengundang
-        if (type === 'invite') {
-            deleteBtn.style.display = 'none';
-            deleteDivider.style.display = 'none';
-        } else {
-            deleteBtn.style.display = 'flex';
-            deleteDivider.style.display = 'block';
+        let editorCount = 0;
+        let viewerCount = 0;
+
+        visibleMembers.forEach(member => {
+            const role = member.getAttribute('data-role');
+            if (role === 'Owner' || role === 'Editor') {
+                editorCount++;
+            } else if (role === 'Viewer') {
+                viewerCount++;
+            }
+        });
+
+        const totalEl = document.getElementById('stat-total-users');
+        const editorEl = document.getElementById('stat-editors');
+        const viewerEl = document.getElementById('stat-viewers');
+
+        if (totalEl) totalEl.innerText = totalCount;
+        if (editorEl) editorEl.innerText = editorCount;
+        if (viewerEl) viewerEl.innerText = viewerCount;
+    }
+
+    /* ========================================================
+       Fungsi Dropdown Share (Undangan Instan)
+       ======================================================== */
+    function toggleShareDropdown() {
+        const menu = document.getElementById('share-dropdown-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    function closeShareDropdown() {
+        const menu = document.getElementById('share-dropdown-menu');
+        if (menu && !menu.classList.contains('hidden')) {
+            menu.classList.add('hidden');
+        }
+    }
+
+    const staticShareLink = "https://clincoo.com/join/prj_98xYz2Q";
+
+    function copyDirectLink() {
+        const tempInput = document.createElement("input");
+        tempInput.value = staticShareLink;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+        
+        closeShareDropdown();
+    }
+
+    function shareDirect(platform) {
+        const text = encodeURIComponent(`Bergabung ke proyek Clincoo:\n${staticShareLink}`);
+        let url = '';
+
+        switch(platform) {
+            case 'whatsapp':
+                url = `https://api.whatsapp.com/send?text=${text}`;
+                break;
+            case 'telegram':
+                url = `https://t.me/share/url?url=${encodeURIComponent(staticShareLink)}&text=${encodeURIComponent('Bergabung ke proyek Clincoo.')}`;
+                break;
         }
 
-        // Jika klik tombol yang sama, tutup
+        if (url) {
+            window.open(url, '_blank');
+            closeShareDropdown(); 
+        }
+    }
+
+    /* ========================================================
+       Fungsi Popover Peran Anggota (Utama)
+       ======================================================== */
+    function toggleRoleDropdown(id, buttonEl) {
+        const popover = document.getElementById('role-popover');
+        
         if (activePopoverButton === buttonEl && !popover.classList.contains('hidden')) {
             closePopover();
             return;
@@ -331,25 +327,26 @@
 
         activePopoverId = id;
         activePopoverButton = buttonEl;
-        
-        // Tentukan di mana text akan diupdate
-        activeTextTarget = buttonEl.querySelector('span');
+        activeTextTarget = buttonEl.querySelector('.role-text-label');
 
-        // Kalkulasi Posisi
         const rect = buttonEl.getBoundingClientRect();
-        
         popover.classList.remove('hidden');
         
-        // Set posisi popover
-        popover.style.top = `${rect.bottom + window.scrollY + 5}px`;
-        const popoverWidth = 160; 
-        let leftPos = rect.right + window.scrollX - popoverWidth;
+        let topPos = rect.bottom + window.scrollY + 5;
+        let leftPos = rect.right + window.scrollX - popover.offsetWidth;
         
-        // Rata kiri jika mepet layar
-        if (leftPos < 10) leftPos = rect.left + window.scrollX;
+        if (topPos + popover.offsetHeight > window.innerHeight + window.scrollY) {
+            topPos = rect.top + window.scrollY - popover.offsetHeight - 5;
+            popover.style.transformOrigin = 'bottom right';
+        } else {
+            popover.style.transformOrigin = 'top right';
+        }
+
+        if (leftPos < 10) leftPos = 10; 
+        
+        popover.style.top = `${topPos}px`;
         popover.style.left = `${leftPos}px`;
 
-        // Tandai role yang aktif
         const currentRole = activeTextTarget ? activeTextTarget.innerText : '';
         document.querySelectorAll('#role-popover .check-icon').forEach(icon => {
             if (icon.dataset.role === currentRole) {
@@ -359,31 +356,27 @@
             }
         });
 
-        // Animasi popover
         setTimeout(() => {
             popover.classList.remove('opacity-0', 'scale-95');
             popover.classList.add('opacity-100', 'scale-100');
         }, 10);
     }
 
-    function selectRole(role, isRemove = false) {
-        if (isRemove) {
-            if(confirm("Yakin ingin menghapus akses anggota ini?")) {
-               if(activePopoverButton) {
-                   const row = activePopoverButton.closest('.group');
-                   if(row) row.style.display = 'none';
-                   showActionButtons();
-               }
-            }
-        } else if (activeTextTarget) {
+    function selectRole(role) {
+        if (activeTextTarget && activeTextTarget.innerText !== role) {
             activeTextTarget.innerText = role;
-            showActionButtons();
+            const parentMember = activePopoverButton.closest('.member-item');
+            if (parentMember) {
+                parentMember.setAttribute('data-role', role);
+            }
+            updateRealtimeStats();
         }
         closePopover();
     }
 
     function closePopover() {
         const popover = document.getElementById('role-popover');
+        if(!popover) return;
         popover.classList.remove('opacity-100', 'scale-100');
         popover.classList.add('opacity-0', 'scale-95');
         setTimeout(() => {
@@ -392,10 +385,184 @@
         activePopoverButton = null;
     }
 
-    // Klik di luar popover untuk menutup
+    function confirmRemoveMember() {
+        if (activePopoverButton) {
+            memberToRemove = activePopoverButton.closest('.group');
+            closePopover();
+            
+            const modal = document.getElementById('confirm-modal');
+            const backdrop = document.getElementById('confirm-backdrop');
+            const dialog = document.getElementById('confirm-dialog');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                dialog.classList.remove('opacity-0', 'scale-95');
+                dialog.classList.add('opacity-100', 'scale-100');
+            }, 10);
+        }
+    }
+
+    function closeConfirmModal() {
+        const modal = document.getElementById('confirm-modal');
+        const backdrop = document.getElementById('confirm-backdrop');
+        const dialog = document.getElementById('confirm-dialog');
+        
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0');
+        dialog.classList.remove('opacity-100', 'scale-100');
+        dialog.classList.add('opacity-0', 'scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            memberToRemove = null;
+        }, 300);
+    }
+
+    function executeRemoveMember() {
+        if (memberToRemove) {
+            memberToRemove.style.transition = 'all 0.3s ease';
+            memberToRemove.style.opacity = '0';
+            memberToRemove.style.transform = 'translateX(-10px)';
+            
+            setTimeout(() => {
+                memberToRemove.style.display = 'none';
+                updateRealtimeStats();
+            }, 300);
+        }
+        closeConfirmModal();
+    }
+
+    /* ========================================================
+       Fungsi Modal Email (Tengah) & Dropdown Role Input
+       ======================================================== */
+    function openEmailPopup() {
+        closeShareDropdown();
+        
+        const modal = document.getElementById('email-modal');
+        const backdrop = document.getElementById('email-backdrop');
+        const dialog = document.getElementById('email-dialog');
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        void modal.offsetWidth; // Trigger reflow
+        
+        backdrop.classList.remove('opacity-0');
+        backdrop.classList.add('opacity-100');
+        
+        dialog.classList.remove('scale-95', 'opacity-0');
+        dialog.classList.add('scale-100', 'opacity-100');
+    }
+
+    function closeEmailPopup() {
+        const modal = document.getElementById('email-modal');
+        const backdrop = document.getElementById('email-backdrop');
+        const dialog = document.getElementById('email-dialog');
+        
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0');
+        
+        dialog.classList.remove('scale-100', 'opacity-100');
+        dialog.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            closeInviteRoleDropdown();
+        }, 300);
+    }
+
+    function toggleInviteRoleDropdown() {
+        const dropdown = document.getElementById('invite-role-dropdown');
+        if(dropdown) {
+            dropdown.classList.toggle('hidden');
+            updateInviteRoleChecks();
+        }
+    }
+
+    function closeInviteRoleDropdown() {
+        const dropdown = document.getElementById('invite-role-dropdown');
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+            dropdown.classList.add('hidden');
+        }
+    }
+
+    function selectInviteRole(role) {
+        document.getElementById('selected-invite-role').innerText = role;
+        closeInviteRoleDropdown();
+    }
+    
+    function updateInviteRoleChecks() {
+        const currentRole = document.getElementById('selected-invite-role').innerText;
+        document.querySelectorAll('#invite-role-dropdown [data-lucide="check"]').forEach(icon => {
+            if (icon.getAttribute('data-invite-role') === currentRole) {
+                icon.classList.remove('hidden');
+            } else {
+                icon.classList.add('hidden');
+            }
+        });
+    }
+
+    function sendEmailInvite() {
+        const emailInput = document.getElementById('invite-email');
+        if(!emailInput.value || !emailInput.value.includes('@')) {
+            emailInput.focus();
+            return;
+        }
+
+        const btn = document.getElementById('send-email-btn');
+        const originalText = "Kirim Undangan"; // Teks asli
+        
+        // State: Mengirim (Tanpa Ikon)
+        btn.innerText = "Mengirim...";
+        btn.disabled = true;
+        
+        setTimeout(() => {
+            // State: Terkirim (Tanpa Ikon)
+            btn.innerText = "Terkirim!";
+            btn.classList.replace('bg-gray-900', 'bg-green-600');
+            btn.classList.replace('dark:bg-white', 'dark:bg-green-500');
+            btn.classList.replace('text-white', 'text-white'); 
+            btn.classList.replace('dark:text-gray-900', 'dark:text-white');
+            
+            setTimeout(() => {
+                closeEmailPopup();
+                
+                // Reset setelah popup tertutup
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    btn.className = "w-full py-2.5 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors focus:outline-none flex justify-center items-center shadow-lg shadow-gray-900/10 dark:shadow-white/5";
+                    emailInput.value = '';
+                }, 300);
+            }, 1000);
+        }, 1200);
+    }
+
+    /* ==========================================================
+       Global Event Listener (Tutup dropdown & popover di luar)
+       ========================================================== */
     document.addEventListener('click', (e) => {
+        // Dropdown Share
+        const shareContainer = document.getElementById('share-dropdown-container');
+        if (shareContainer && !shareContainer.contains(e.target)) {
+            closeShareDropdown();
+        }
+
+        // Dropdown Invite Role (Modal Email)
+        const inviteRoleContainer = document.getElementById('invite-role-container');
+        if (inviteRoleContainer && !inviteRoleContainer.contains(e.target)) {
+            closeInviteRoleDropdown();
+        }
+
+        // Popover Role Utama
         const popover = document.getElementById('role-popover');
-        if (!popover.classList.contains('hidden') && 
+        if (popover && !popover.classList.contains('hidden') && 
             activePopoverButton && 
             !activePopoverButton.contains(e.target) && 
             !popover.contains(e.target)) {
@@ -403,55 +570,8 @@
         }
     });
 
-    function showActionButtons() {
-        if (!isEdited) {
-            isEdited = true;
-            const c = document.getElementById('action-buttons');
-            c.classList.remove('hidden');
-            c.classList.add('flex');
-            // Memicu reflow
-            void c.offsetWidth;
-            c.classList.remove('opacity-0', 'translate-y-2');
-            c.classList.add('opacity-100', 'translate-y-0');
-        }
-    }
-
-    function cancelChanges() {
-        window.location.reload();
-    }
-
-    function saveChanges() {
-        // Menggunakan ID agar penargetan tombol selalu tepat meskipun warnanya diubah
-        const btn = document.getElementById('btn-simpan');
-        if (!btn) return;
-        
-        // Status sedang memproses
-        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...`;
-        lucide.createIcons();
-        btn.disabled = true;
-        btn.classList.add('opacity-80', 'cursor-not-allowed');
-        
-        // Simulasi pengiriman data
-        setTimeout(() => {
-            btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Tersimpan!`;
-            lucide.createIcons();
-            
-            // Ubah tombol jadi hijau sebagai indikasi berhasil
-            btn.classList.remove('bg-gray-900', 'hover:bg-black');
-            btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
-            
-            setTimeout(() => window.location.reload(), 1000);
-        }, 1000);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('input, textarea, select').forEach(input => {
-            input.addEventListener('input', showActionButtons);
-            input.addEventListener('change', showActionButtons);
-        });
-    });
-
-    lucide.createIcons();
-  </script>
+    // Inisialisasi statistik saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', updateRealtimeStats);
+    </script>
 </body>
 </html>
