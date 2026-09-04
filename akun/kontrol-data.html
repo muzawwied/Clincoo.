@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
   <title>Kontrol Data - Clincoo</title>
   <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,45 +52,26 @@
     body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
     body.dark-mode header { background-color: #000000 !important; }
     body.dark-mode .modal-card { background-color: #0a0a0a !important; border-color: #222222 !important; }
-  /* auto-dark-fix v1 */
-    body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
-    body.dark-mode .bg-gray-200 { background-color: #262626 !important; }
-    body.dark-mode .bg-gray-300 { background-color: #333333 !important; }
-    body.dark-mode .bg-gray-400 { background-color: #444444 !important; }
-    body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
-    body.dark-mode .border-gray-200\/50,
-    body.dark-mode .border-gray-200\/60,
-    body.dark-mode .border-gray-200\/70 { border-color: #222222 !important; }
-    body.dark-mode .border-gray-300 { border-color: #333333 !important; }
-    body.dark-mode .border-gray-400 { border-color: #444444 !important; }
-    body.dark-mode .bg-blue-50,
-    body.dark-mode .bg-blue-50\/50 { background-color: #0d1a26 !important; }
-    body.dark-mode .border-blue-100,
-    body.dark-mode .border-blue-200 { border-color: #1e3a52 !important; }
-    body.dark-mode .bg-red-50,
-    body.dark-mode .bg-red-50\/50 { background-color: #2a1414 !important; }
-    body.dark-mode .bg-red-100 { background-color: #3a1a1a !important; }
-    body.dark-mode .border-red-100,
-    body.dark-mode .border-red-200 { border-color: #4a2020 !important; }
-    body.dark-mode .bg-green-100 { background-color: #14301c !important; }
-    body.dark-mode .bg-white\/95 { background-color: rgba(10,10,10,0.95) !important; }
-    body.dark-mode .hover\:bg-gray-50:hover,
-    body.dark-mode .hover\:bg-gray-50\/50:hover,
-    body.dark-mode .hover\:bg-gray-50\/80:hover { background-color: #1a1a1a !important; }
-    body.dark-mode .hover\:bg-gray-100:hover { background-color: #262626 !important; }
-    body.dark-mode .hover\:bg-gray-200:hover,
-    body.dark-mode .hover\:bg-gray-200\/50:hover { background-color: #333333 !important; }
-    body.dark-mode .hover\:bg-blue-50:hover,
-    body.dark-mode .hover\:bg-blue-100:hover { background-color: #163247 !important; }
-    body.dark-mode .hover\:bg-red-50:hover,
-    body.dark-mode .hover\:bg-red-100:hover { background-color: #3a1a1a !important; }
-    body.dark-mode .hover\:border-gray-300:hover,
-    body.dark-mode .hover\:border-gray-400:hover,
-    body.dark-mode .hover\:border-gray-900:hover { border-color: #555555 !important; }
-    body.dark-mode .focus\:border-gray-400:focus,
-    body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
-    body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
-</style>
+
+    /* Shimmer loading */
+    .shimmer-bar {
+        display: inline-block;
+        height: 1em;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+        width: 60px;
+        vertical-align: middle;
+    }
+    .shimmer-bar-sm { height: 0.75em; width: 40px; }
+    .shimmer-bar-md { height: 0.875em; width: 120px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    body.dark-mode .shimmer-bar {
+        background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+        background-size: 200% 100%;
+    }
+  </style>
 
   <script>
     (function(){
@@ -95,8 +80,6 @@
       if(isDark) document.documentElement.classList.add('dark-mode');
     })();
   </script>
-<!-- no-flash-v1 -->
-<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
 <body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-[#f7f7f9]">
   <script>
@@ -117,12 +100,7 @@
 
   <div class="w-full h-full overflow-y-auto hide-scrollbar flex flex-col items-center pt-16">
     
-    <div class="w-full max-w-5xl px-4 sm:px-6 pt-4">
-      <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
-        <span>Kelola privasi, transparansi, dan ekspor data akun Anda secara mandiri.</span>
-      </div>
-    </div>
+
 
     <main class="w-full max-w-5xl px-4 sm:px-6 py-2 pb-32">
       <div class="w-full flex flex-col divide-y divide-gray-200 dark:divide-slate-800">
@@ -132,7 +110,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
               <h4 class="text-base font-semibold text-gray-900 dark:text-white">Ekspor Data Saya</h4>
-              <span class="px-2 py-0.5 text-[10px] font-semibold bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-md">JSON</span>
+              <span class="px-2 py-0.5 text-[10px] font-semibold text-red-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-md">JSON</span>
             </div>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Unduh salinan lengkap proyek, berkas, dan histori konfigurasi akun Anda.</p>
           </div>
@@ -197,11 +175,11 @@
             </div>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Cookie teknis yang wajib aktif agar sesi otentikasi dan keamanan akun tetap berjalan.</p>
           </div>
-          <span class="text-xs font-semibold px-2.5 py-1 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400 rounded-lg shrink-0">Selalu Aktif</span>
+          <span class="text-xs font-semibold px-2.5 py-1 dark:bg-slate-800 text-gray-500 dark:text-gray-400 rounded-lg shrink-0">Selalu Aktif</span>
         </div>
 
         <!-- Danger Zone - Hapus Akun -->
-        <div class="py-6 mt-4 rounded-2xl bg-red-50/50 dark:bg-red-950/10 border border-red-100 dark:border-red-900/30 p-4">
+        <div class="py-6 mt-4 ">
           <h4 class="text-base font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
             <i data-lucide="alert-triangle" class="w-5 h-5"></i>
             Zona Bahaya: Hapus Akun
@@ -209,9 +187,9 @@
           <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 mb-4 leading-relaxed">
             Menghapus akun Anda secara permanen beserta seluruh proyek, preferensi, dan riwayat yang tersimpan. Tindakan ini <strong>tidak dapat dibatalkan</strong>.
           </p>
-          <button onclick="openDeleteModal()" class="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 flex items-center gap-2">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-            <span>Hapus Akun Permanen...</span>
+          <button onclick="openDeleteModal()" class="px-5 py-2.5 text-sm font-semibold bg-transparant border border-red-500 hover:bg-red-700 rounded-xl transition-all cursor-pointer active:scale-95 flex items-center gap-2">
+           
+            <span>Hapus Akun</span>
           </button>
         </div>
 
@@ -219,32 +197,26 @@
     </main>
   </div>
 
-  <div id="action-buttons" class="fixed bottom-0 left-0 right-0 z-40 p-4 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-md border-t border-gray-200 dark:border-slate-800 hidden opacity-0 transition-all duration-300 transform translate-y-4">
-    <div class="max-w-5xl mx-auto flex items-center justify-between gap-3">
-      <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">Ada perubahan yang belum disimpan</span>
-      <div class="flex items-center gap-2">
-        <button onclick="cancelChanges()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer">
-          Batal
-        </button>
-        <button onclick="saveChanges()" class="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all cursor-pointer shadow-sm">
-          Simpan Perubahan
-        </button>
-      </div>
-    </div>
-  </div>
+
 
   <!-- Modal: Hapus Akun -->
   <div id="delete-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 p-4">
-    <div class="modal-card bg-white rounded-3xl p-6 w-full max-w-md border border-gray-100 shadow-2xl transform scale-95 transition-transform duration-300">
+    <div class="modal-card bg-white rounded-2xl p-6 w-full max-w-md border border-gray-100 shadow-2xl transform scale-95 transition-transform duration-300">
       <div id="delete-step-1">
-        <div class="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 mb-4">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-red-600 mb-4">
           <i data-lucide="alert-octagon" class="w-6 h-6"></i>
         </div>
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Konfirmasi Penghapusan</h3>
         <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
           Semua proyek, preferensi, dan data terkait akan dihapus secara permanen. Ketik <strong class="text-gray-900 dark:text-white font-mono bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">HAPUS AKUN</strong> di bawah ini untuk melanjutkan:
         </p>
-        <input type="text" id="delete-confirm-input" placeholder="HAPUS AKUN" class="w-full px-4 py-3 text-sm rounded-xl border border-gray-300 dark:border-slate-700 mb-5 font-mono" oninput="validateDeleteInput()">
+     <input 
+  type="text" 
+  id="delete-confirm-input" 
+  placeholder="HAPUS AKUN" 
+  class="w-full px-4 py-3 text-sm rounded-xl border border-gray-300 mb-5 font-mono focus:outline-none focus:ring-0"
+  oninput="validateDeleteInput()"
+/>
         <div class="flex gap-3">
           <button onclick="closeDeleteModal()" class="w-1/2 px-4 py-2.5 text-sm font-medium border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all cursor-pointer">
             Batal
@@ -267,8 +239,8 @@
     <div class="modal-card bg-white rounded-3xl p-6 w-full max-w-lg border border-gray-100 shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[85vh]">
       <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-slate-800">
         <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
-          Riwayat Aktivitas Terkini
+          
+          Riwayat Aktivitas
         </h3>
         <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -297,40 +269,45 @@
           <span class="text-[11px] text-gray-400">22 Agt 2026</span>
         </div>
       </div>
-      <div class="pt-4 border-t border-gray-100 dark:border-slate-800 flex justify-between items-center gap-3">
-        <button onclick="clearActivityHistory()" class="px-4 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all cursor-pointer">
-          Bersihkan Semua Log
+      <div class="pt-4 dark:border-slate-800 flex justify-between items-center gap-3">
+        <button onclick="clearActivityHistory()" class="px-2 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-950/30 rounded-xl transition-all cursor-pointer">
+          Bersihkan Semua
         </button>
-        <button onclick="closeHistoryModal()" class="px-4 py-2 text-xs font-semibold bg-gray-900 text-white dark:bg-white dark:text-black rounded-xl cursor-pointer">
-          Tutup
-        </button>
+        
       </div>
     </div>
   </div>
 
-
-  <!-- Toast Notification Container -->
-  <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100%] opacity-0 transition-all duration-300 pointer-events-none">
-    <div class="bg-gray-900 text-white dark:bg-white dark:text-black px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-semibold">
-      <i id="toast-icon" data-lucide="check-circle" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
-      <span id="toast-message">Perubahan tersimpan!</span>
-    </div>
-  </div>
-
   <script>
-    // Initialize icons
     lucide.createIcons();
 
-    // Application State Management
-    let state = {
-      analytics: localStorage.getItem('clincoo_analytics') !== 'false',
-      personalization: localStorage.getItem('clincoo_personalization') !== 'false'
-    };
-    
+    const PREF_API = 'https://clincoo.pages.dev/api/preferences';
+    const EXPORT_API = 'https://clincoo.pages.dev/api/export-data';
+    const ACTIVITY_API = 'https://clincoo.pages.dev/api/activity';
+
+    let state = { analytics: true, personalization: true };
     let initialState = { ...state };
     let isEdited = false;
+    let isLoading = true;
 
-    // Render Initial Toggle UI States
+    // Load preferences from D1
+    async function loadPreferences() {
+      try {
+        const res = await fetch(PREF_API);
+        const data = await res.json();
+        state.analytics = data.analytics !== 'false';
+        state.personalization = data.personalization !== 'false';
+        initialState = { ...state };
+        applyToggleState('analytics', state.analytics);
+        applyToggleState('personalization', state.personalization);
+      } catch(e) {
+        console.error('Failed to load preferences:', e);
+        applyToggleState('analytics', true);
+        applyToggleState('personalization', true);
+      }
+      isLoading = false;
+    }
+
     function applyToggleState(id, isChecked) {
       const bg = document.getElementById(id + '-bg');
       const knob = document.getElementById(id + '-knob');
@@ -349,133 +326,119 @@
       }
     }
 
-    // Initialize toggle positions
-    applyToggleState('analytics', state.analytics);
-    applyToggleState('personalization', state.personalization);
-
     function toggleSetting(key) {
+      if (isLoading) return;
       state[key] = !state[key];
       applyToggleState(key, state[key]);
-      localStorage.setItem('clincoo_' + key, state[key]);
-      initialState[key] = state[key];
-    }
-
-    function checkChanges() {
-      const changed = (state.analytics !== initialState.analytics) || (state.personalization !== initialState.personalization);
-      const container = document.getElementById('action-buttons');
-      
-      if (changed && !isEdited) {
-        isEdited = true;
-        container.classList.remove('hidden');
-        setTimeout(() => {
-          container.classList.remove('opacity-0', 'translate-y-4');
-        }, 10);
-      } else if (!changed && isEdited) {
-        isEdited = false;
-        container.classList.add('opacity-0', 'translate-y-4');
-        setTimeout(() => {
-          container.classList.add('hidden');
-        }, 300);
-      }
+      // Save to D1 immediately
+      fetch(PREF_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: key, value: String(state[key]) })
+      }).catch(e => console.error('Failed to save:', e));
+      // Log activity
+      fetch(ACTIVITY_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle_' + key, details: state[key] ? 'enabled' : 'disabled' })
+      }).catch(() => {});
     }
 
     function cancelChanges() {
       state = { ...initialState };
       applyToggleState('analytics', state.analytics);
       applyToggleState('personalization', state.personalization);
-      checkChanges();
       showToast("Perubahan dibatalkan", "info");
     }
 
     function saveChanges() {
       const btn = document.querySelector('#action-buttons button.bg-blue-600');
       if (!btn) return;
-      
       btn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
       btn.disabled = true;
 
-      setTimeout(() => {
-        localStorage.setItem('clincoo_analytics', state.analytics);
-        localStorage.setItem('clincoo_personalization', state.personalization);
+      fetch(PREF_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ analytics: String(state.analytics), personalization: String(state.personalization) })
+      }).then(() => {
         initialState = { ...state };
-        
         btn.innerHTML = 'Simpan Perubahan';
         btn.disabled = false;
-        
         isEdited = false;
         const container = document.getElementById('action-buttons');
         container.classList.add('opacity-0', 'translate-y-4');
         setTimeout(() => container.classList.add('hidden'), 300);
-
         showToast("Pengaturan berhasil disimpan!", "success");
-      }, 600);
+      }).catch(e => {
+        btn.innerHTML = 'Simpan Perubahan';
+        btn.disabled = false;
+        showToast("Gagal menyimpan. Coba lagi.", "error");
+      });
     }
 
-    // Export JSON functionality
+    // Export real data from D1
     function exportUserData() {
       const btnText = document.getElementById('export-text');
       const btn = document.getElementById('btn-export');
-      
-      btnText.innerText = 'Menyiapkan berkas...';
+      btnText.innerText = 'Menyiapkan...';
       btn.disabled = true;
 
-      setTimeout(() => {
-        const exportObj = {
-          export_date: new Date().toISOString(),
-          app_version: "2.4.0",
-          user_profile: {
-            username: "Pengguna Clincoo",
-            account_type: "Pro Plan",
-            language: "id"
-          },
-          preferences: state,
-          activity_summary: {
-            active_projects: 3,
-            storage_used_mb: 2400,
-            last_login: new Date().toISOString()
+      fetch(EXPORT_API)
+        .then(res => res.json())
+        .then(data => {
+          // Remove sensitive API keys from export
+          if (data.preferences) {
+            delete data.preferences.gemini_api_key;
+            delete data.preferences.e2b_api_key;
+            delete data.preferences.jina_api_key;
+            delete data.preferences.cloudflare_api_key;
+            delete data.preferences.cloudflare_account_id;
           }
-        };
+          if (data.env_vars) {
+            data.env_vars = data.env_vars.map(v => ({ key: v.key, is_secret: v.is_secret, created_at: v.created_at, updated_at: v.updated_at, value: '[REDACTED]' }));
+          }
 
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `Clincoo_Data_Export_${Date.now()}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
+          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+          const dl = document.createElement('a');
+          dl.setAttribute("href", dataStr);
+          dl.setAttribute("download", "Clincoo_Data_Export_" + Date.now() + ".json");
+          document.body.appendChild(dl);
+          dl.click();
+          dl.remove();
 
-        btnText.innerText = 'Ekspor Data';
-        btn.disabled = false;
-        showToast("Berkas JSON berhasil diunduh!", "success");
-      }, 1000);
+          btnText.innerText = 'Ekspor Data';
+          btn.disabled = false;
+          showToast("Berkas JSON berhasil diunduh!", "success");
+        })
+        .catch(e => {
+          btnText.innerText = 'Ekspor Data';
+          btn.disabled = false;
+          showToast("Gagal mengekspor data. Coba lagi.", "error");
+        });
     }
 
-    // Toast Functionality
+    // Toast
     function showToast(msg, type = "success") {
       const toast = document.getElementById('toast');
       const toastMsg = document.getElementById('toast-message');
       toastMsg.innerText = msg;
-
       toast.classList.remove('translate-y-[-100%]', 'opacity-0');
       toast.classList.add('translate-y-0', 'opacity-100');
-
       setTimeout(() => {
         toast.classList.remove('translate-y-0', 'opacity-100');
         toast.classList.add('translate-y-[-100%]', 'opacity-0');
       }, 3000);
     }
 
-    // Account Delete Workflow
+    // Delete modal
     function openDeleteModal() {
       const modal = document.getElementById('delete-modal');
-      const input = document.getElementById('delete-confirm-input');
-      input.value = '';
+      document.getElementById('delete-confirm-input').value = '';
       validateDeleteInput();
-
       document.getElementById('delete-step-1').classList.remove('hidden');
       document.getElementById('delete-step-loading').classList.add('hidden');
       document.getElementById('delete-step-loading').classList.remove('flex');
-
       modal.classList.remove('hidden');
       setTimeout(() => {
         modal.classList.remove('opacity-0');
@@ -504,26 +467,102 @@
       }
     }
 
+    // Real account deletion from D1
     function executeAccountDeletion() {
       document.getElementById('delete-step-1').classList.add('hidden');
       const loading = document.getElementById('delete-step-loading');
       loading.classList.remove('hidden');
       loading.classList.add('flex');
 
-      setTimeout(() => {
-        closeDeleteModal();
-        showToast("Akun dan data Anda telah dijadwalkan untuk dihapus.", "info");
-      }, 2000);
+      fetch(PREF_API, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+          closeDeleteModal();
+          showToast("Akun dan seluruh data Anda telah dihapus permanen.", "info");
+          // Clear localStorage too
+          try {
+            localStorage.removeItem('clincoo_fullname');
+            localStorage.removeItem('clincoo_email');
+            localStorage.removeItem('clincoo_theme');
+            localStorage.removeItem('clincoo_accent');
+            localStorage.removeItem('clincoo_profile_pic');
+            localStorage.removeItem('clincoo_current_page');
+            localStorage.removeItem('clincoo_analytics');
+            localStorage.removeItem('clincoo_personalization');
+          } catch(e) {}
+          setTimeout(() => { window.location.href = '../index.html'; }, 2000);
+        })
+        .catch(e => {
+          closeDeleteModal();
+          showToast("Gagal menghapus akun. Coba lagi.", "error");
+        });
     }
 
-    // Modal History Handlers
-    function openHistoryModal() {
+    // History modal - load from D1
+    async function openHistoryModal() {
       const modal = document.getElementById('history-modal');
+      const listEl = document.getElementById('history-list');
+      
+      // Show shimmer while loading
+      listEl.innerHTML = `
+        <div class="space-y-3">
+          <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-900"><span class="shimmer-bar shimmer-bar-md"></span></div>
+          <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-900"><span class="shimmer-bar shimmer-bar-md"></span></div>
+          <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-900"><span class="shimmer-bar shimmer-bar-md"></span></div>
+          <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-900"><span class="shimmer-bar shimmer-bar-md"></span></div>
+        </div>
+      `;
+
       modal.classList.remove('hidden');
       setTimeout(() => {
         modal.classList.remove('opacity-0');
         modal.querySelector('.modal-card').classList.remove('scale-95');
       }, 10);
+
+      // Load real activity from D1
+      try {
+        const res = await fetch(ACTIVITY_API + '?limit=20');
+        const data = await res.json();
+        const activities = data.activities || [];
+
+        if (activities.length === 0) {
+          listEl.innerHTML = `
+            <div class="py-8 text-center text-xs text-gray-400">
+              <i data-lucide="history" class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600"></i>
+              Belum ada riwayat aktivitas.
+            </div>
+          `;
+          lucide.createIcons();
+          return;
+        }
+
+        listEl.innerHTML = activities.map(a => {
+          const d = new Date(a.created_at);
+          const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+          const dateStr = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ', ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+          const actionLabel = a.action.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          let details = '';
+          try { details = a.details ? JSON.parse(a.details).details || a.details : ''; } catch(e) { details = a.details || ''; }
+          return `
+            <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-900 flex justify-between items-center text-xs">
+              <div>
+                <p class="font-semibold text-gray-900 dark:text-white">${actionLabel}</p>
+                <p class="text-gray-500">${details}</p>
+              </div>
+              <span class="text-[11px] text-gray-400 shrink-0 ml-2">${dateStr}</span>
+            </div>
+          `;
+        }).join('');
+        lucide.createIcons();
+      } catch(e) {
+        listEl.innerHTML = `
+          <div class="py-8 text-center text-xs text-gray-400">
+            <i data-lucide="wifi-off" class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600"></i>
+            Gagal memuat riwayat. Periksa koneksi.
+          </div>
+        `;
+        lucide.createIcons();
+      }
     }
 
     function closeHistoryModal() {
@@ -533,24 +572,38 @@
       setTimeout(() => modal.classList.add('hidden'), 300);
     }
 
+    // Clear activity log from D1
     function clearActivityHistory() {
-      document.getElementById('history-list').innerHTML = `
-        <div class="py-8 text-center text-xs text-gray-400">
-          <i data-lucide="check-circle-2" class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600"></i>
-          Semua riwayat dan log telah dibersihkan.
+      const listEl = document.getElementById('history-list');
+      listEl.innerHTML = `
+        <div class="py-8 text-center">
+          <div class="w-8 h-8 border-4 border-gray-200 dark:border-slate-700 rounded-full animate-spin mx-auto mb-2" style="border-top-color: #ef4444;"></div>
+          <p class="text-xs text-gray-400">Membersihkan...</p>
         </div>
       `;
-      lucide.createIcons();
-      showToast("Riwayat aktivitas berhasil dibersihkan");
+      
+      fetch(ACTIVITY_API + '?action=clear', { method: 'DELETE' })
+        .then(() => {
+          listEl.innerHTML = `
+            <div class="py-8 text-center text-xs text-gray-400">
+              <i data-lucide="check-circle-2" class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600"></i>
+              Semua riwayat dan log telah dibersihkan.
+            </div>
+          `;
+          lucide.createIcons();
+          
+        })
+        .catch(e => {
+          showToast("Gagal membersihkan riwayat", "error");
+          openHistoryModal();
+        });
     }
 
     function toggleCookiePopover(e) {
       if(e) e.stopPropagation();
-      const popover = document.getElementById('cookie-popover');
-      popover.classList.toggle('hidden');
+      document.getElementById('cookie-popover').classList.toggle('hidden');
     }
 
-    // Menutup popover saat mengklik area di luarnya
     document.addEventListener('click', (e) => {
       const popover = document.getElementById('cookie-popover');
       const btn = document.getElementById('cookie-btn');
@@ -558,6 +611,9 @@
         popover.classList.add('hidden');
       }
     });
+
+    // Load preferences on page load
+    loadPreferences();
   </script>
 </body>
 </html>
