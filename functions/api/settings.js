@@ -1,0 +1,142 @@
+// Cloudflare Pages Functions - General App Settings Backend
+// Stores app-level configuration in D1 user_preferences table
+
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type'
+};
+
+export async function onRequestOptions() {
+  return new Response(null, { headers: CORS });
+}
+
+// GET /api/settings — get all general settings + live stats
+export async function onRequestGet({ request, env }) {
+  const db = env.DB;
+  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+
+  try {
+    await db.prepare('CREATE TABLE IF NOT EXISTS user_preferences (key TEXT PRIMARY KEY, value TEXT)').run();
+
+    const defaults = {
+      app_name: '',
+      app_description: '',
+      runtime: 'Static HTML/JS/CSS',
+      maintenance_mode: 'false',
+      default_branch: 'main',
+      auto_deploy: 'true',
+      framework_preset: 'Static'
+    };
+
+    const settingKeys = Object.keys(defaults);
+    const rows = await db.prepare(`SELECT key, value FROM user_preferences WHERE key IN (${settingKeys.map(() => '?').join(',')})`).bind(...settingKeys).all();
+    
+    const data = { ...defaults };
+    for (const row of rows.results || []) {
+      data[row.key] = row.value;
+    }
+
+    // If project_id provided, load project name/description from projects table
+    const url = new URL(request.url);
+    const projectId = url.searchParams.get('project_id') || '';
+    if (projectId) {
+      try {
+        const proj = await db.prepare('SELECT name, description FROM projects WHERE id = ?').bind(projectId).first();
+        if (proj) {
+          data.app_name = proj.name || '';
+          data.app_description = proj.description || '';
+        } else {
+          data.app_name = '';
+          data.app_description = '';
+        }
+      } catch(e) {
+        data.app_name = '';
+        data.app_description = '';
+      }
+    }
+
+    let stats = { projects: 1, deploys: 0, chatSessions: 0, envVars: 0 };
+    if (projectId) {
+      try { const r = await db.prepare('SELECT COUNT(*) as c FROM deploy_logs WHERE project_id = ?').bind(projectId).first(); stats.deploys = r?.c || 0; } catch(e) {}
+      try { const r = await db.prepare('SELECT COUNT(*) as c FROM env_vars WHERE project_id = ?').bind(projectId).first(); stats.envVars = r?.c || 0; } catch(e) {}
+      try { const r = await db.prepare('SELECT COUNT(*) as c FROM chat_sessions WHERE project_id = ?').bind(projectId).first(); stats.chatSessions = r?.c || 0; } catch(e) {}
+    } else {
+      try { const r = await db.prepare('SELECT COUNT(*) as c FROM projects').first(); stats.projects = r?.c || 0; } catch(e) {}
+      try { const r = await db.prepare('SELECT COUNT(*) as c FROM deploy_logs').first(); stats.deploys = r?.c || 0; } catch(e) {}
+      try { const r = await db.prepare('SELECT COUNT(*) as c FROM chat_sessions').first(); stats.chatSessions = r?.c || 0; } catch(e) {}
+      try { const r = await db.prepare('SELECT COUNT(*) as c FROM env_vars').first(); stats.envVars = r?.c || 0; } catch(e) {}
+    }
+    return new Response(JSON.stringify({ settings: data, stats }), {
+      headers: { 'Content-Type': 'application/json', ...CORS }
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  }
+}
+
+// POST /api/settings — update settings
+export async function onRequestPost({ request, env }) {
+  const db = env.DB;
+  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+
+  try {
+    await db.prepare('CREATE TABLE IF NOT EXISTS user_preferences (key TEXT PRIMARY KEY, value TEXT)').run();
+    
+    const body = await request.json();
+    const allowedKeys = ['app_name', 'app_description', 'runtime', 'maintenance_mode', 'default_branch', 'auto_deploy', 'framework_preset'];
+    
+    const updates = {};
+    for (const [key, value] of Object.entries(body)) {
+      if (allowedKeys.includes(key)) {
+        updates[key] = String(value);
+      }
+    }
+
+    const projectId = body.project_id || '';
+    if (projectId && (updates.app_name || updates.app_description)) {
+      try {
+        const existing = await db.prepare('SELECT id FROM projects WHERE id = ?').bind(projectId).first();
+        if (existing) {
+          if (updates.app_name) await db.prepare('UPDATE projects SET name = ?, updated_at = datetime(\'now\') WHERE id = ?').bind(updates.app_name, projectId).run();
+          if (updates.app_description) await db.prepare('UPDATE projects SET description = ?, updated_at = datetime(\'now\') WHERE id = ?').bind(updates.app_description, projectId).run();
+        } else {
+          await db.prepare('INSERT INTO projects (id, name, description) VALUES (?, ?, ?)').bind(projectId, updates.app_name || '', updates.app_description || '').run();
+        }
+      } catch(e) {}
+    }
+
+    for (const [key, value] of Object.entries(updates)) {
+      await db.prepare("INSERT INTO user_preferences (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(key, value).run();
+    }
+
+    // Log activity
+    const changedKeys = Object.keys(updates);
+    if (changedKeys.length > 0) {
+      try {
+        await db.prepare("INSERT INTO activity_log (action, details) VALUES (?, ?)").bind('settings_update', JSON.stringify(updates)).run();
+      } catch(e) {}
+
+      // Create notifications for important changes
+      if ('maintenance_mode' in updates) {
+        const msg = updates.maintenance_mode === 'true' 
+          ? 'Mode pemeliharaan diaktifkan — akses publik ditutup sementara'
+          : 'Mode pemeliharaan dinonaktifkan — aplikasi kembali online';
+        try {
+          await db.prepare("INSERT INTO notifications (source, message) VALUES (?, ?)").bind('Sistem', msg).run();
+        } catch(e) {}
+      }
+      if ('app_name' in updates) {
+        try {
+          await db.prepare("INSERT INTO notifications (source, message) VALUES (?, ?)").bind('Sistem', `Nama aplikasi diubah ke "${updates.app_name}"`).run();
+        } catch(e) {}
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true, updated: updates }), {
+      headers: { 'Content-Type': 'application/json', ...CORS }
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  }
+}

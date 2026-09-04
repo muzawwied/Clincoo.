@@ -7,14 +7,24 @@ const PREFERRED_MODELS = [
   "gemini-3-flash-preview"
 ];
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type'
-};
+// CORS dibatasi: hanya domain Clincoo, preview deployment, dan localhost
+function corsHeaders(request) {
+  let origin = '';
+  try { origin = (request && request.headers && request.headers.get('origin')) || ''; } catch (e) {}
+  const allowed =
+    origin === 'https://clincoo.pages.dev' ||
+    /^https:\/[a-z0-9][a-z0-9-]*\.clincoo\.pages\.dev$/i.test(origin) ||
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+  return {
+    'Access-Control-Allow-Origin': allowed ? origin : 'https://clincoo.pages.dev',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Vary': 'Origin'
+  };
+}
 
-export async function onRequestOptions() {
-  return new Response(null, { headers: CORS });
+export async function onRequestOptions({ request }) {
+  return new Response(null, { headers: corsHeaders(request) });
 }
 
 async function getApiKey(env) {
@@ -197,7 +207,7 @@ function extractText(content) {
 // GET /api/chat — list all sessions
 export async function onRequestGet({ request, env }) {
   const db = env.DB;
-  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) } });
 
   try {
     try { await db.prepare('ALTER TABLE chat_sessions ADD COLUMN project_id TEXT').run(); } catch(e) {}
@@ -210,7 +220,7 @@ export async function onRequestGet({ request, env }) {
       const msgs = await db.prepare('SELECT * FROM chat_messages WHERE session_id = ? ORDER BY created_at ASC').bind(sessionId).all();
       const session = await db.prepare('SELECT * FROM chat_sessions WHERE id = ?').bind(sessionId).first();
       return new Response(JSON.stringify({ session, messages: msgs.results || [] }), {
-        headers: { 'Content-Type': 'application/json', ...CORS }
+        headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
       });
     }
 
@@ -221,17 +231,17 @@ export async function onRequestGet({ request, env }) {
       sessions = await db.prepare('SELECT * FROM chat_sessions ORDER BY updated_at DESC').all();
     }
     return new Response(JSON.stringify({ sessions: sessions.results || [] }), {
-      headers: { 'Content-Type': 'application/json', ...CORS }
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) } });
   }
 }
 
 // POST /api/chat — save user message, call Gemini, save AI response, return it
 export async function onRequestPost({ request, env }) {
   const db = env.DB;
-  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) } });
 
   try {
     const body = await request.json();
@@ -245,18 +255,18 @@ export async function onRequestPost({ request, env }) {
       try { await db.prepare('ALTER TABLE chat_sessions ADD COLUMN project_id TEXT').run(); } catch(e) {}
       await db.prepare('INSERT INTO chat_sessions (id, title, project_id) VALUES (?, ?, ?)').bind(sessionId, title, projectId).run();
       return new Response(JSON.stringify({ session_id: sessionId, title }), {
-        headers: { 'Content-Type': 'application/json', ...CORS }
+        headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
       });
     }
 
     // --- Delete session ---
     if (action === 'delete_session') {
       const sessionId = body.session_id;
-      if (!sessionId) return new Response(JSON.stringify({ error: 'session_id required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+      if (!sessionId) return new Response(JSON.stringify({ error: 'session_id required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) } });
       await db.prepare('DELETE FROM chat_messages WHERE session_id = ?').bind(sessionId).run();
       await db.prepare('DELETE FROM chat_sessions WHERE id = ?').bind(sessionId).run();
       return new Response(JSON.stringify({ success: true }), {
-        headers: { 'Content-Type': 'application/json', ...CORS }
+        headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
       });
     }
 
@@ -291,7 +301,7 @@ export async function onRequestPost({ request, env }) {
     const apiKey = await getApiKey(env);
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not configured in database' }), {
-        status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
+        status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
       });
     }
 
@@ -302,7 +312,7 @@ export async function onRequestPost({ request, env }) {
     if (result.error) {
       await db.prepare('INSERT INTO chat_messages (session_id, role, content) VALUES (?, ?, ?)').bind(sessionId, 'assistant', '[Error: ' + result.error + ']').run();
       return new Response(JSON.stringify({ error: result.error }), {
-        status: 502, headers: { 'Content-Type': 'application/json', ...CORS }
+        status: 502, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
       });
     }
 
@@ -310,7 +320,7 @@ export async function onRequestPost({ request, env }) {
     // Don't persist intermediate assistant turns; only the final text is saved below.
     if (result.tool_calls) {
       return new Response(JSON.stringify({ tool_calls: result.tool_calls, session_id: sessionId, model: result.model }), {
-        headers: { 'Content-Type': 'application/json', ...CORS }
+        headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
       });
     }
 
@@ -321,29 +331,29 @@ export async function onRequestPost({ request, env }) {
     try { await db.prepare('INSERT INTO activity_log (action, details) VALUES (?, ?)').bind('chat_message', 'AI response via ' + result.model).run(); } catch {}
 
     return new Response(JSON.stringify({ text: result.text, model: result.model, session_id: sessionId }), {
-      headers: { 'Content-Type': 'application/json', ...CORS }
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) } });
   }
 }
 
 // DELETE /api/chat?session_id=xxx — clear messages for a session
 export async function onRequestDelete({ request, env }) {
   const db = env.DB;
-  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) } });
 
   try {
     const url = new URL(request.url);
     const sessionId = url.searchParams.get('session_id');
-    if (!sessionId) return new Response(JSON.stringify({ error: 'session_id required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+    if (!sessionId) return new Response(JSON.stringify({ error: 'session_id required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) } });
     await db.prepare('DELETE FROM chat_messages WHERE session_id = ?').bind(sessionId).run();
     await db.prepare('UPDATE chat_sessions SET updated_at = datetime(\'now\') WHERE id = ?').bind(sessionId).run();
 
     return new Response(JSON.stringify({ success: true }), {
-      headers: { 'Content-Type': 'application/json', ...CORS }
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) } });
   }
 }

@@ -1,0 +1,191 @@
+// Cloudflare Pages Functions - Subscription Backend
+// Stores subscription plan data in D1 (real-time, interconnected between pages)
+
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type'
+};
+
+export async function onRequestOptions() {
+  return new Response(null, { headers: CORS });
+}
+
+const PLANS = {
+  'Starter': { price: 0, projectLimit: 3, storageLimit: 5, bandwidthLimit: 10, collaboratorLimit: 1 },
+  'Pro': { price: 49000, projectLimit: 10, storageLimit: 50, bandwidthLimit: 100, collaboratorLimit: 5 },
+  'Bisnis': { price: 129000, projectLimit: 50, storageLimit: 200, bandwidthLimit: 500, collaboratorLimit: 20 }
+};
+
+export async function onRequestGet({ request, env }) {
+  const db = env.DB;
+  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+
+  try {
+    const url = new URL(request.url);
+    const action = url.searchParams.get('action');
+
+    if (action === 'init') {
+      await db.prepare('CREATE TABLE IF NOT EXISTS subscription (key TEXT PRIMARY KEY, value TEXT)').run();
+      await db.prepare("INSERT OR IGNORE INTO subscription (key, value) VALUES ('plan', 'Starter')").run();
+      await db.prepare("INSERT OR IGNORE INTO subscription (key, value) VALUES ('billing_cycle', 'Bulanan')").run();
+      await db.prepare("INSERT OR IGNORE INTO subscription (key, value) VALUES ('start_date', ?)").bind(new Date().toISOString()).run();
+      await db.prepare("INSERT OR IGNORE INTO subscription (key, value) VALUES ('payment_method', '')").run();
+      return new Response(JSON.stringify({ success: true, message: 'Subscription table initialized' }), {
+        headers: { 'Content-Type': 'application/json', ...CORS }
+      });
+    }
+
+    const rows = await db.prepare('SELECT key, value FROM subscription').all();
+    const data = {};
+    for (const row of rows.results || []) {
+      data[row.key] = row.value;
+    }
+
+    const plan = data.plan || 'Starter';
+    const planInfo = PLANS[plan] || PLANS['Starter'];
+    const startDate = data.start_date || new Date().toISOString();
+    const billingCycle = data.billing_cycle || 'Bulanan';
+
+    // Calculate next billing date
+    const nextDate = new Date(startDate);
+    if (billingCycle === 'Tahunan') {
+      nextDate.setFullYear(nextDate.getFullYear() + 1);
+    } else {
+      nextDate.setMonth(nextDate.getMonth() + 1);
+    }
+    while (nextDate < new Date()) {
+      if (billingCycle === 'Tahunan') {
+        nextDate.setFullYear(nextDate.getFullYear() + 1);
+      } else {
+        nextDate.setMonth(nextDate.getMonth() + 1);
+      }
+    }
+
+    let projectCount = 0;
+    try {
+      const projResult = await db.prepare('SELECT COUNT(*) as c FROM projects').first();
+      projectCount = projResult?.c || 0;
+    } catch(e) {}
+
+    return new Response(JSON.stringify({
+      plan,
+      billingCycle,
+      startDate,
+      nextBillingDate: nextDate.toISOString(),
+      paymentMethod: data.payment_method || '',
+      price: planInfo.price,
+      projectLimit: planInfo.projectLimit,
+      storageLimit: planInfo.storageLimit,
+      bandwidthLimit: planInfo.bandwidthLimit,
+      collaboratorLimit: planInfo.collaboratorLimit,
+      projectCount,
+      storageUsed: parseFloat(data.storage_used || '0'),
+      bandwidthUsed: parseFloat(data.bandwidth_used || '0'),
+      collaboratorCount: parseInt(data.collaborator_count || '0')
+    }), {
+      headers: { 'Content-Type': 'application/json', ...CORS }
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  }
+}
+
+export async function onRequestPost({ request, env }) {
+  const db = env.DB;
+  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+
+  try {
+    const body = await request.json();
+    const { plan, billingCycle, paymentMethod, projects: projectList } = body;
+
+    // Sync projects from frontend to D1 (real-time per-project data)
+    if (projectList && Array.isArray(projectList)) {
+      try {
+        await db.prepare("CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, name TEXT NOT NULL, description TEXT, status TEXT DEFAULT 'active', created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')))").run();
+        // Get existing project IDs
+        const existing = await db.prepare('SELECT id FROM projects').all();
+        const existingIds = new Set((existing.results || []).map(r => r.id));
+        for (const proj of projectList) {
+          if (!existingIds.has(proj.id)) {
+            await db.prepare("INSERT OR IGNORE INTO projects (id, name, description, status) VALUES (?, ?, ?, ?)").bind(proj.id, proj.name || 'Untitled', proj.description || '', proj.status || 'active').run();
+          } else {
+            await db.prepare("UPDATE projects SET name = ?, description = ?, updated_at = datetime('now') WHERE id = ?").bind(proj.name || 'Untitled', proj.description || '', proj.id).run();
+          }
+        }
+      } catch(e) {}
+    }
+
+    await db.prepare('CREATE TABLE IF NOT EXISTS subscription (key TEXT PRIMARY KEY, value TEXT)').run();
+
+    if (plan) {
+      const validPlan = PLANS[plan] ? plan : 'Starter';
+      const planPrice = PLANS[validPlan].price;
+      const billing = billingCycle || 'Bulanan';
+      const totalPrice = billing === 'Tahunan' ? planPrice * 12 : planPrice;
+
+      // Check wallet balance for paid plans
+      if (planPrice > 0) {
+        try {
+          const balRow = await db.prepare("SELECT value FROM wallet_balance WHERE key = 'balance'").first();
+          const balance = parseFloat(balRow?.value || '0');
+          if (balance < totalPrice) {
+            return new Response(JSON.stringify({ 
+              success: false, 
+              error: 'Saldo tidak cukup',
+              balance: balance,
+              required: totalPrice
+            }), { status: 402, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+          // Deduct from wallet
+          await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method) VALUES (?, ?, ?, ?, ?)')
+            .bind('TX-' + Math.floor(100000 + Math.random() * 900000), 'Langganan ' + validPlan + ' (' + billing + ')', totalPrice, 'out', 'Saldo Dompet').run();
+          const newBalance = balance - totalPrice;
+          await db.prepare("INSERT INTO wallet_balance (key, value) VALUES ('balance', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value")
+            .bind(String(newBalance)).run();
+        } catch(e) {
+          // If wallet tables don't exist, still allow free plans but block paid
+          return new Response(JSON.stringify({ 
+            success: false, 
+            error: 'Gagal memverifikasi saldo dompet'
+          }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+        }
+      }
+
+      await db.prepare("INSERT INTO subscription (key, value) VALUES ('plan', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(validPlan).run();
+      const now = new Date().toISOString();
+      await db.prepare("INSERT INTO subscription (key, value) VALUES ('start_date', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(now).run();
+    }
+
+    if (billingCycle) {
+      const validCycle = ['Bulanan', 'Tahunan'].includes(billingCycle) ? billingCycle : 'Bulanan';
+      await db.prepare("INSERT INTO subscription (key, value) VALUES ('billing_cycle', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(validCycle).run();
+    }
+
+    if (paymentMethod !== undefined) {
+      await db.prepare("INSERT INTO subscription (key, value) VALUES ('payment_method', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(paymentMethod).run();
+    }
+
+    const rows = await db.prepare('SELECT key, value FROM subscription').all();
+    const data = {};
+    for (const row of rows.results || []) {
+      data[row.key] = row.value;
+    }
+
+    const currentPlan = data.plan || 'Starter';
+    const planInfo = PLANS[currentPlan] || PLANS['Starter'];
+
+    return new Response(JSON.stringify({
+      success: true,
+      plan: currentPlan,
+      billingCycle: data.billing_cycle || 'Bulanan',
+      startDate: data.start_date,
+      paymentMethod: data.payment_method || '',
+      price: planInfo.price
+    }), {
+      headers: { 'Content-Type': 'application/json', ...CORS }
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  }
+}
