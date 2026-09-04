@@ -32,13 +32,26 @@
         body.dark-mode .border-gray-200, body.dark-mode .border-gray-100, body.dark-mode .border-gray-50 { border-color: #222222 !important; }
         body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
         body.dark-mode input { background-color: #0a0a0a; color: #f0f0f0; border-color: #222222; }
-        body.dark-mode header, body.dark-mode .bg-\[\#f7f7f9\] { background-color: #000000 !important; border-color: #222222 !important; }
-        body.dark-mode button[onclick="PathRouter.goBack()"], body.dark-mode button[onclick="closeTopUpPage()"] {
-            background-color: #000000 !important; border: 1.5px solid rgba(255,255,255,0.4) !important; color: #ffffff !important;
+        
+        body.dark-mode .bg-\[\#f7f7f9\] { background-color: #000000 !important; }
+        body.dark-mode header { 
+            background-color: #000000 !important; 
+            border-color: #222222 !important; 
         }
-        body.dark-mode button[onclick="PathRouter.goBack()"]:hover, body.dark-mode button[onclick="closeTopUpPage()"]:hover {
-            background-color: #1a1a1a !important; border-color: rgba(255,255,255,0.7) !important;
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
         }
+        body.dark-mode header button[onclick] svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+
         .pay-method-card { transition: all 0.2s ease; }
         .pay-method-card.selected { border-width: 2px !important; border-color: #111827 !important; }
         body.dark-mode .pay-method-card.selected { border-color: #ffffff !important; }
@@ -51,8 +64,8 @@
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
 
     <div id="page-dompet" class="flex flex-col min-h-screen w-full">
-        <header class="bg-[#f7f7f9] flex justify-between items-center px-4 py-3 fixed top-0 w-full z-30 transition-colors border-b border-gray-100">
-            <button onclick="PathRouter.goBack()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
+        <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+            <button onclick="PathRouter.goBack()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </button>
             <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Dompet Saldo</h1>
@@ -88,8 +101,8 @@
     </div>
 
     <div id="page-topup" class="hidden flex-col bg-white min-h-screen w-full fixed inset-0 z-50 overflow-y-auto">
-        <header class="bg-[#f7f7f9] flex justify-between items-center px-4 py-3 sticky top-0 w-full z-40 transition-colors border-b border-gray-100">
-            <button onclick="closeTopUpPage()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
+        <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 sticky top-0 w-full z-40 transition-colors">
+            <button onclick="closeTopUpPage()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </button>
             <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Isi Saldo Clincoo</h1>
@@ -131,7 +144,7 @@
                     <label class="pay-method-card selected flex items-center justify-between p-4 border-2 border-gray-900 dark:border-white rounded-xl cursor-pointer transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="QRIS Instant" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
                             <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="/assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain">
+                                <img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain">
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">QRIS</p>
@@ -143,7 +156,7 @@
                     <!-- BCA -->
                     <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="BCA Virtual Account" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="/assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white dark:border-0 shadow-sm p-2"><img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">BCA Virtual Account</p>
                                 <p class="text-[11px] text-gray-500 mt-0.5">Bank Central Asia</p>
@@ -154,7 +167,7 @@
                     <!-- Mandiri -->
                     <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="Mandiri Virtual Account" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="/assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">Mandiri Virtual Account</p>
                                 <p class="text-[11px] text-gray-500 mt-0.5">Bank Mandiri</p>
@@ -165,7 +178,7 @@
                     <!-- BRI -->
                     <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="BRI Virtual Account" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="/assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain"></div>
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain"></div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">BRI Virtual Account</p>
                                 <p class="text-[11px] text-gray-500 mt-0.5">Bank Rakyat Indonesia</p>
@@ -176,7 +189,7 @@
                     <!-- BNI -->
                     <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="BNI Virtual Account" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="/assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">BNI Virtual Account</p>
                                 <p class="text-[11px] text-gray-500 mt-0.5">Bank Negara Indonesia</p>
@@ -188,7 +201,7 @@
                     <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="GoPay" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
                             <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="/assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain">
+                                <img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain">
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">GoPay</p>
@@ -201,7 +214,7 @@
                     <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="DANA" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
                             <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1">
-                                <img src="/assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain">
+                                <img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain">
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">DANA</p>
@@ -214,7 +227,7 @@
                     <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="OVO" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
                             <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-2">
-                                <img src="/assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain">
+                                <img src="assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain">
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">OVO</p>
@@ -227,7 +240,7 @@
                     <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="ShopeePay" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
                             <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="/assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain">
+                                <img src="assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain">
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">ShopeePay</p>
@@ -240,7 +253,7 @@
                     <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="LinkAja" onclick="selectPaymentMethod(this)">
                         <div class="flex items-center space-x-4">
                             <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="/assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain">
+                                <img src="assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain">
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">LinkAja</p>
@@ -249,14 +262,6 @@
                         </div>
                         <input type="radio" name="payment-method" value="LinkAja" class="accent-gray-900 w-4 h-4 ml-2">
                     </label>
-                    <!-- GoPay -->
-                    
-                    <!-- OVO -->
-                    
-                    <!-- BRI -->
-                    
-                    <!-- BNI -->
-                    
                 </div>
             </div>
 
@@ -305,16 +310,16 @@
 
         function getMethodLogo(method) {
             const logos = {
-                'QRIS Instant': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="/assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain"></div>',
-                'BCA Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="/assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>',
-                'Mandiri Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="/assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>',
-                'BRI Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="/assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain"></div>',
-                'BNI Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="/assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>',
-                'GoPay': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="/assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain"></div>',
-                'DANA': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-0.5"><img src="/assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain"></div>',
-                'OVO': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="/assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain"></div>',
-                'ShopeePay': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="/assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain"></div>',
-                'LinkAja': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="/assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain"></div>',
+                'QRIS Instant': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain"></div>',
+                'BCA Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>',
+                'Mandiri Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>',
+                'BRI Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain"></div>',
+                'BNI Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>',
+                'GoPay': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain"></div>',
+                'DANA': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-0.5"><img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain"></div>',
+                'OVO': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain"></div>',
+                'ShopeePay': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain"></div>',
+                'LinkAja': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain"></div>',
                 
                 'Saldo Dompet': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="wallet" class="w-5 h-5 text-white dark:text-black"></i></div>',
                 'Subscription': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="crown" class="w-5 h-5 text-white dark:text-black"></i></div>'
