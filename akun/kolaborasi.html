@@ -60,6 +60,9 @@
           
       <div class="w-full flex flex-col">
         
+        <!-- Banner Undangan (muncul jika URL punya ?invite=ID) -->
+        <div id="invite-banner" class="hidden mb-6"></div>
+
         <!-- Horizontal Scrollable Real-Time Stat Cards -->
         <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1 mb-6 snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
             <!-- Card 1: Total Anggota -->
@@ -132,6 +135,14 @@
                     </button>
                 </div>
             </div>
+        </div>
+
+        <div id="pending-section" class="hidden mb-6">
+            <div class="flex items-center gap-2 mb-3">
+                <h4 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Undangan Menunggu</h4>
+                <span id="pending-count" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-[#1a1a1a] rounded-full px-2 py-0.5"></span>
+            </div>
+            <div id="pending-list" class="space-y-2.5"></div>
         </div>
 
         <div class="space-y-4" id="member-list">
@@ -289,34 +300,67 @@
     // Jika domain custom dipasang di GitHub Pages, kode tidak perlu diubah.
     const staticShareLink = window.location.origin + window.location.pathname;
 
-    function copyDirectLink() {
+    // API kolaborasi (Base44) — data anggota & undangan real-time
+    const COLLAB_API = 'https://koda-da05205d.base44.app/functions/collabInvite';
+
+    function getInviterName() {
+        try {
+            var p = JSON.parse(localStorage.getItem('clincoo_profile') || localStorage.getItem('clincoo_user') || 'null');
+            if (p && (p.display_name || p.username)) return p.display_name || p.username;
+        } catch (e) {}
+        return 'Wikybook';
+    }
+
+    // Buat undangan baru -> dapat ID unik (inv_xxx)
+    async function createInvite(channel, role) {
+        try {
+            const res = await fetch(COLLAB_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'create', channel: channel, role: role || 'Viewer', invitedBy: getInviterName() })
+            });
+            const data = await res.json();
+            if (data && data.success && data.invite_id) return data.invite_id;
+        } catch (e) {}
+        return null;
+    }
+
+    function inviteLinkWithId(inviteId) {
+        if (!inviteId) return staticShareLink;
+        return staticShareLink + (staticShareLink.indexOf('?') > -1 ? '&' : '?') + 'invite=' + inviteId;
+    }
+
+    async function copyDirectLink() {
+        const inviteId = await createInvite('link', 'Viewer');
+        const link = inviteLinkWithId(inviteId);
         const tempInput = document.createElement("input");
-        tempInput.value = staticShareLink;
+        tempInput.value = link;
         document.body.appendChild(tempInput);
         tempInput.select();
         document.execCommand("copy");
         document.body.removeChild(tempInput);
         
         closeShareDropdown();
+        loadCollab();
     }
 
-    function shareDirect(platform) {
-        const text = encodeURIComponent(`Bergabung ke proyek Clincoo:\n${staticShareLink}`);
+    async function shareDirect(platform) {
+        closeShareDropdown();
+        const inviteId = await createInvite(platform, 'Viewer');
+        const link = inviteLinkWithId(inviteId);
         let url = '';
 
-        switch(platform) {
-            case 'whatsapp':
-                url = `https://api.whatsapp.com/send?text=${text}`;
-                break;
-            case 'telegram':
-                url = `https://t.me/share/url?url=${encodeURIComponent(staticShareLink)}&text=${encodeURIComponent('Bergabung ke proyek Clincoo.')}`;
-                break;
+        if (platform === 'whatsapp') {
+            const text = encodeURIComponent(`Bergabung ke proyek Clincoo:\n${link}`);
+            url = `https://api.whatsapp.com/send?text=${text}`;
+        } else if (platform === 'telegram') {
+            url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Bergabung ke proyek Clincoo.')}`;
         }
 
         if (url) {
             window.open(url, '_blank');
-            closeShareDropdown(); 
         }
+        loadCollab();
     }
 
     /* ========================================================
@@ -375,6 +419,13 @@
                 parentMember.setAttribute('data-role', role);
             }
             updateRealtimeStats();
+            if (activePopoverId) {
+                fetch(COLLAB_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'setRole', member_id: activePopoverId, role: role })
+                }).then(function() { loadCollab(); }).catch(function() {});
+            }
         }
         closePopover();
     }
@@ -430,6 +481,7 @@
 
     function executeRemoveMember() {
         if (memberToRemove) {
+            const removedId = memberToRemove.getAttribute('data-member-id');
             memberToRemove.style.transition = 'all 0.3s ease';
             memberToRemove.style.opacity = '0';
             memberToRemove.style.transform = 'translateX(-10px)';
@@ -438,6 +490,13 @@
                 memberToRemove.style.display = 'none';
                 updateRealtimeStats();
             }, 300);
+            if (removedId) {
+                fetch(COLLAB_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'remove', member_id: removedId })
+                }).then(function() { loadCollab(); }).catch(function() {});
+            }
         }
         closeConfirmModal();
     }
@@ -536,7 +595,7 @@
         fetch('https://koda-da05205d.base44.app/functions/sendInviteEmail', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to: email, role: role, project: 'Clincoo', link: staticShareLink })
+            body: JSON.stringify({ to: email, role: role, project: 'Clincoo', link: staticShareLink, inviter: getInviterName() })
         })
         .then(r => r.json())
         .then(res => {
@@ -550,6 +609,7 @@
 
                 setTimeout(() => {
                     closeEmailPopup();
+                    loadCollab();
                     setTimeout(() => {
                         btn.innerText = originalText;
                         btn.disabled = false;
@@ -606,6 +666,211 @@
 
     // Inisialisasi statistik saat halaman dimuat
     document.addEventListener('DOMContentLoaded', updateRealtimeStats);
+    </script>
+    <script>
+    /* ========================================================
+       Data Kolaborasi Real-time (Base44) + Alur Terima Undangan
+       ======================================================== */
+    var collabData = { members: [], pending: [] };
+
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+        });
+    }
+
+    function memberCard(m) {
+        return '' +
+        '<div class="member-item group flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]" data-member-id="' + esc(m.id) + '" data-role="' + esc(m.role) + '">' +
+            '<div class="flex items-center gap-3 min-w-0">' +
+                '<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-[#222] flex items-center justify-center text-[13px] font-bold text-gray-600 dark:text-gray-300 shrink-0">' + esc(m.initials) + '</div>' +
+                '<div class="min-w-0">' +
+                    '<div class="text-sm font-semibold text-gray-900 dark:text-white truncate">' + esc(m.name) + '</div>' +
+                    (m.email ? '<div class="text-xs text-gray-500 dark:text-gray-400 truncate">' + esc(m.email) + '</div>' : '') +
+                '</div>' +
+            '</div>' +
+            '<button type="button" onclick="toggleRoleDropdown(\'' + esc(m.id) + '\', this)" class="flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-full hover:bg-gray-50 dark:hover:bg-[#222] transition-colors cursor-pointer focus:outline-none shrink-0">' +
+                '<i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-60"></i>' +
+                '<span class="role-text-label">' + esc(m.role) + '</span>' +
+            '</button>' +
+        '</div>';
+    }
+
+    function pendingCard(p) {
+        var label = p.email ? esc(p.email) : 'Tautan Undangan';
+        var icon = p.channel === 'email' ? 'mail' : 'link';
+        return '' +
+        '<div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/70 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/10">' +
+            '<div class="flex items-center gap-2.5 min-w-0">' +
+                '<i data-lucide="' + icon + '" class="w-4 h-4 text-amber-500 shrink-0"></i>' +
+                '<div class="min-w-0">' +
+                    '<div class="text-[13px] font-medium text-gray-900 dark:text-white truncate">' + label + '</div>' +
+                    '<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">Diundang sebagai ' + esc(p.role) + ' &bull; ID: ' + esc(p.invite_id) + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<span class="text-[11px] font-medium text-amber-600 dark:text-amber-400 shrink-0 pl-2">Menunggu</span>' +
+        '</div>';
+    }
+
+    function renderCollab() {
+        var list = document.getElementById('member-list');
+        if (!list) return;
+        if (!collabData.members.length) {
+            list.innerHTML = '<div class="flex flex-col items-center justify-center py-16 px-4 text-center">' +
+                '<i data-lucide="users" class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-4"></i>' +
+                '<h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Belum ada anggota tim</h3>' +
+                '<p class="text-sm text-gray-500 dark:text-gray-400">Undang rekan tim untuk mulai berkolaborasi di proyek ini.</p>' +
+            '</div>';
+        } else {
+            list.innerHTML = collabData.members.map(memberCard).join('');
+        }
+
+        var psec = document.getElementById('pending-section');
+        var plist = document.getElementById('pending-list');
+        var pcount = document.getElementById('pending-count');
+        if (psec && plist) {
+            if (collabData.pending.length) {
+                psec.classList.remove('hidden');
+                plist.innerHTML = collabData.pending.map(pendingCard).join('');
+                if (pcount) pcount.innerText = collabData.pending.length;
+            } else {
+                psec.classList.add('hidden');
+                plist.innerHTML = '';
+            }
+        }
+
+        var total = collabData.members.length;
+        var editors = collabData.members.filter(function(m) { return m.role === 'Editor' || m.role === 'Admin'; }).length;
+        var viewers = collabData.members.filter(function(m) { return m.role === 'Viewer'; }).length;
+        var t = document.getElementById('stat-total-users'); if (t) t.innerText = total;
+        var e = document.getElementById('stat-editors'); if (e) e.innerText = editors;
+        var v = document.getElementById('stat-viewers'); if (v) v.innerText = viewers;
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function loadCollab() {
+        fetch(COLLAB_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'list' })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res && res.success) {
+                collabData.members = res.members || [];
+                collabData.pending = res.pending || [];
+            }
+            renderCollab();
+        })
+        .catch(function() { renderCollab(); });
+    }
+
+    /* ---- Banner Terima Undangan (?invite=ID) ---- */
+    var activeInvite = null;
+
+    function showInviteBanner(invite) {
+        activeInvite = invite;
+        var b = document.getElementById('invite-banner');
+        if (!b) return;
+        if (invite.status === 'pending') {
+            b.innerHTML = '' +
+            '<div class="p-5 rounded-2xl bg-white dark:bg-[#111] border border-gray-200 dark:border-[#222] shadow-sm">' +
+                '<div class="flex items-start gap-3 mb-4">' +
+                    '<div class="w-10 h-10 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center shrink-0"><i data-lucide="user-plus" class="w-5 h-5 text-white dark:text-gray-900"></i></div>' +
+                    '<div>' +
+                        '<h3 class="text-[15px] font-bold text-gray-900 dark:text-white">Anda diundang berkolaborasi</h3>' +
+                        '<p class="text-[13px] text-gray-500 dark:text-gray-400 mt-0.5">' + esc(invite.invited_by) + ' mengundang Anda ke proyek <span class="font-medium text-gray-900 dark:text-white">' + esc(invite.project) + '</span> sebagai <span class="font-medium text-gray-900 dark:text-white">' + esc(invite.role) + '</span>.</p>' +
+                    '</div>' +
+                '</div>' +
+                '<input id="accept-name" type="text" placeholder="Nama Anda" class="w-full mb-3 px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-gray-400" />' +
+                '<div id="accept-error" class="hidden text-xs text-red-500 mb-2"></div>' +
+                '<div class="flex gap-2.5">' +
+                    '<button onclick="acceptInvite()" class="flex-1 py-2.5 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors">Terima Undangan</button>' +
+                    '<button onclick="declineInvite()" class="px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Tolak</button>' +
+                '</div>' +
+            '</div>';
+        } else if (invite.status === 'accepted') {
+            b.innerHTML = '<div class="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 flex items-center gap-3">' +
+                '<i data-lucide="check-circle" class="w-5 h-5 text-emerald-500 shrink-0"></i>' +
+                '<p class="text-[13px] text-gray-700 dark:text-gray-300">Undangan sudah diterima. Selamat berkolaborasi di <span class="font-semibold">' + esc(invite.project) + '</span>!</p>' +
+            '</div>';
+        } else {
+            b.innerHTML = '<div class="p-4 rounded-2xl bg-gray-50 dark:bg-[#111] border border-gray-100 dark:border-[#222] flex items-center gap-3">' +
+                '<i data-lucide="clock" class="w-5 h-5 text-gray-400 shrink-0"></i>' +
+                '<p class="text-[13px] text-gray-500 dark:text-gray-400">Undangan ini sudah tidak aktif (status: ' + esc(invite.status) + ').</p>' +
+            '</div>';
+        }
+        b.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function acceptInvite() {
+        var nameEl = document.getElementById('accept-name');
+        var errEl = document.getElementById('accept-error');
+        var name = nameEl ? nameEl.value.trim() : '';
+        if (!name) {
+            if (errEl) { errEl.innerText = 'Masukkan nama Anda dulu.'; errEl.classList.remove('hidden'); }
+            return;
+        }
+        fetch(COLLAB_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'accept', invite_id: activeInvite.invite_id, name: name, email: activeInvite.email || '' })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res.success) {
+                activeInvite.status = 'accepted';
+                showInviteBanner(activeInvite);
+                loadCollab();
+            } else {
+                if (errEl) { errEl.innerText = res.message || 'Gagal menerima undangan.'; errEl.classList.remove('hidden'); }
+            }
+        })
+        .catch(function() {
+            if (errEl) { errEl.innerText = 'Tidak dapat terhubung ke server. Coba lagi.'; errEl.classList.remove('hidden'); }
+        });
+    }
+
+    function declineInvite() {
+        fetch(COLLAB_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'decline', invite_id: activeInvite.invite_id })
+        })
+        .then(function() {
+            activeInvite.status = 'declined';
+            showInviteBanner(activeInvite);
+        })
+        .catch(function() {});
+    }
+
+    // Init: muat data kolaborasi + cek param undangan di URL
+    (function() {
+        loadCollab();
+        var params = new URLSearchParams(window.location.search);
+        var inviteId = params.get('invite');
+        if (inviteId) {
+            fetch(COLLAB_API + '?invite_id=' + encodeURIComponent(inviteId))
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success && res.invite) {
+                    showInviteBanner(res.invite);
+                } else {
+                    var b = document.getElementById('invite-banner');
+                    if (b) {
+                        b.innerHTML = '<div class="p-4 rounded-2xl bg-gray-50 dark:bg-[#111] border border-gray-100 dark:border-[#222] flex items-center gap-3">' +
+                            '<i data-lucide="alert-circle" class="w-5 h-5 text-gray-400 shrink-0"></i>' +
+                            '<p class="text-[13px] text-gray-500 dark:text-gray-400">Undangan tidak ditemukan atau sudah kedaluwarsa.</p></div>';
+                        b.classList.remove('hidden');
+                        if (window.lucide) lucide.createIcons();
+                    }
+                }
+            })
+            .catch(function() {});
+        }
+    })();
     </script>
 </body>
 </html>
