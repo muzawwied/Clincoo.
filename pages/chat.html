@@ -2006,7 +2006,9 @@
                         apiMessagesWithTools.push({ role: 'assistant', content: assistantToolParts });
 
                         const functionResponses = resultJson.tool_calls.map(function(tc) {
-                            const result = executeWorkspaceTool(tc.name, tc.args || {});
+                            const result = (tc.result !== undefined && tc.result !== null)
+                                ? tc.result
+                                : executeWorkspaceTool(tc.name, tc.args || {});
                             return { type: 'function_response', name: tc.name, result: result };
                         });
                         apiMessagesWithTools.push({ role: 'user', content: functionResponses });
