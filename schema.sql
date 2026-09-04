@@ -92,8 +92,8 @@ CREATE TABLE IF NOT EXISTS topup_orders (
   amount REAL NOT NULL,
   method TEXT,
   status TEXT DEFAULT 'pending',
-  snap_token TEXT,
-  transaction_status TEXT,
+  xendit_id TEXT,
+  invoice_url TEXT,
   created_at TEXT DEFAULT (datetime('now')),
   paid_at TEXT
 );
