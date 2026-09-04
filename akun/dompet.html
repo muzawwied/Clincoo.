@@ -410,6 +410,24 @@
             lucide.createIcons();
         }
 
+        // ===== Real-time wallet: saldo & riwayat selalu ter-update tanpa reload =====
+        var _lastTxSnapshot = '';
+        async function refreshWalletLive() {
+            renderBalance();
+            try {
+                const txs = await getTransactions();
+                const snapshot = JSON.stringify(txs.map(function(t) { return t.id + '|' + t.amount + '|' + t.type + '|' + t.created_at; }));
+                if (snapshot !== _lastTxSnapshot) {
+                    _lastTxSnapshot = snapshot;
+                    await renderTransactions();
+                }
+            } catch(e) {}
+        }
+        var _walletLiveTimer = setInterval(refreshWalletLive, 5000);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) { refreshWalletLive(); }
+        });
+
         function openTopUpPage() { resetKeypad(); document.getElementById('page-topup').classList.remove('hidden'); document.getElementById('page-topup').classList.add('flex'); }
         function closeTopUpPage() { document.getElementById('page-topup').classList.add('hidden'); document.getElementById('page-topup').classList.remove('flex'); }
 
