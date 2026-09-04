@@ -275,7 +275,7 @@
     async function loadDomainSettings() {
         try {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
-            const res = await fetch((_isGHPages ? '/Clincoo' : '') + '/api/project-settings?project_id=' + encodeURIComponent(pid));
+            const res = await fetch('https://clincoo.pages.dev/api/project-settings?project_id=' + encodeURIComponent(pid));
             const data = await res.json();
             const settings = data.domain_settings ? JSON.parse(data.domain_settings) : {};
             const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
@@ -317,7 +317,7 @@
         };
         try {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
-            await fetch((_isGHPages ? '/Clincoo' : '') + '/api/project-settings', {
+            await fetch('https://clincoo.pages.dev/api/project-settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ project_id: pid, domain_settings: JSON.stringify(settings) })

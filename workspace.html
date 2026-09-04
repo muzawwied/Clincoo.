@@ -937,7 +937,7 @@
     async function handleGitHubOAuthCallback(code) {
       addNotification('GitHub', 'Menyelesaikan koneksi GitHub...');
       try {
-        const resp = await fetch('/api/github-oauth', {
+        const resp = await fetch('https://clincoo.pages.dev/api/github-oauth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code })

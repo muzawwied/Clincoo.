@@ -1,9 +1,8 @@
-const _isGHPagesN = window.location.pathname.includes('/Clincoo/'); const _BASE_N = _isGHPagesN ? '/Clincoo' : ''; const NOTIF_API = _BASE_N + '/api/notifications';
 /**
  * Clincoo Notifications System
  * Real-time D1-backed notifications with page links
  */
-const NOTIF_API = '/api/notifications';
+const NOTIF_API = 'https://clincoo.pages.dev/api/notifications';
 let d1Notifs = [];
 let d1UnreadCount = 0;
 

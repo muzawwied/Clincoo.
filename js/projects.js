@@ -3,8 +3,8 @@
  */
 
 // Detect GitHub Pages subpath
-const _isGHPages = window.location.pathname.includes('/Clincoo/');
-const _BASE = _isGHPages ? '/Clincoo' : '';
+const _isGHPages = window.location.pathname.includes('/Clincoo');
+const _BASE = _isGHPages ? '/Clincoo.' : '';
 
 function timeAgo(dateStr) {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -101,7 +101,7 @@ function deleteProject(id) {
     saveProjects(projects);
     
     try {
-        fetch(_BASE + '/api/activity', {
+        fetch('https://clincoo.pages.dev/api/activity', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'delete_project', details: 'Proyek dihapus' })
