@@ -1366,8 +1366,21 @@
             }
         }
 
+        const LOCK_SVG = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path stroke-linecap="round" d="M8 10V7a4 4 0 018 0v3"></path></svg>`;
+        let quotaLocked = false;
+        function setQuotaLock(locked) {
+            quotaLocked = locked;
+            if (quotaLocked) {
+                btnAction.innerHTML = LOCK_SVG;
+                btnAction.title = 'Kuota AI habis — klik untuk coba kirim ulang';
+            } else {
+                btnAction.title = '';
+                toggleActionState(false);
+            }
+        }
         function toggleActionState(isGen) {
             isGenerating = isGen;
+            if (quotaLocked) { btnAction.innerHTML = LOCK_SVG; return; }
             if (isGenerating) {
                 btnAction.innerHTML = `<svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"></rect><rect x="56" y="56" width="144" height="144" rx="16"></rect></svg>`; 
             } else {
@@ -1838,6 +1851,7 @@
                         isFetchComplete = true;
                         const msgIndex = messages.findIndex(m => m.id === aiMsgObj.id);
                         if (msgIndex !== -1) messages[msgIndex].isError = true;
+                        }
                     }
                 }
             } 
@@ -1986,10 +2000,11 @@
 
                         if (!response || !response.ok) {
                             let errDetail = '';
+                            let quotaHit = false;
                             if (response) {
-                                try { const errJson = await response.json(); errDetail = errJson.error || ''; } catch(e) {}
+                                try { const errJson = await response.json(); errDetail = errJson.error || ''; quotaHit = !!errJson.quota_exhausted; } catch(e) {}
                             }
-                            hopError = new Error(errDetail || `Proxy AI HTTP error! status: ${response ? response.status : 'No response'}`);
+                            hopError = new Error(quotaHit ? '__QUOTA__' : (errDetail || `Proxy AI HTTP error! status: ${response ? response.status : 'No response'}`));
                             break;
                         }
 
@@ -2017,6 +2032,7 @@
                     if (hopError) throw hopError;
 
                     hasReceivedData = true;
+                    if (quotaLocked) setQuotaLock(false);
                     clearTimeout(apiTimeout);
                     clearInterval(statusInterval);
 
@@ -2031,6 +2047,17 @@
                     isFetchComplete = true;
                 } catch (e) {
                     if (e.name !== 'AbortError') {
+                        if (e.message === '__QUOTA__') {
+                            streamingBuffer = "Kuota AI Gemini sedang habis untuk saat ini (limit penggunaan harian). Pesanmu sudah dikembalikan ke kolom ketik — klik ikon gembok untuk mencoba kirim ulang, atau tunggu sebentar dan coba lagi.";
+                            const lastUserIdx = messages.map(m => m.role).lastIndexOf('user');
+                            if (lastUserIdx !== -1 && !chatInput.value.trim()) {
+                                chatInput.value = messages[lastUserIdx].text || '';
+                                messages.splice(lastUserIdx, 1);
+                                renderMessages();
+                                adjustInputHeight();
+                            }
+                            setQuotaLock(true);
+                        } else {
                         streamingBuffer = "Maaf, terjadi kesalahan: " + (e.message || "Gagal menghubungi server AI") + ". Silakan coba lagi nanti.";
                         isFetchComplete = true;
                         const msgIndex = messages.findIndex(m => m.id === aiMsgObj.id);
@@ -2100,6 +2127,11 @@
 
         btnAction.addEventListener('click', (e) => {
             e.preventDefault();
+            if (quotaLocked && !isGenerating) {
+                setQuotaLock(false);
+                handleSubmit();
+                return;
+            }
             if (isGenerating) {
                 stopGeneration();
                 const currentMsg = messages.find(m => m.id === currentAiMessageId);
@@ -2116,6 +2148,7 @@
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
+                if (quotaLocked) return;
                 handleSubmit();
             }
         });
