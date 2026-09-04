@@ -13,6 +13,15 @@ export async function onRequestOptions() {
 
 // GET /api/preferences — get all preferences
 // GET /api/preferences?key=analytics — get specific key
+// Blind otomatis nilai sensitif di GET /api/preferences
+const SENSITIVE_RE = /(api[_-]?key|token|secret|password|credential|bearer)/i;
+function maskSensitive(key, value) {
+  if (!SENSITIVE_RE.test(key)) return value;
+  const s = String(value);
+  if (s.length <= 8) return 'MASKED::••••••';
+  return 'MASKED::' + s.slice(0, 4) + '••••••••';
+}
+
 export async function onRequestGet({ request, env }) {
   const db = env.DB;
   if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
@@ -31,7 +40,8 @@ export async function onRequestGet({ request, env }) {
 
     if (key) {
       const row = await db.prepare('SELECT value FROM user_preferences WHERE key = ?').bind(key).first();
-      const value = row?.value || defaults[key] || null;
+      let value = row?.value || defaults[key] || null;
+      if (value) value = maskSensitive(key, value);
       return new Response(JSON.stringify({ key, value }), {
         headers: { 'Content-Type': 'application/json', ...CORS }
       });
@@ -48,6 +58,10 @@ export async function onRequestGet({ request, env }) {
     const exportData = {
       preferences: data
     };
+
+    for (const k of Object.keys(data)) {
+      if (data[k] && typeof data[k] === 'string') data[k] = maskSensitive(k, data[k]);
+    }
 
     return new Response(JSON.stringify(data), {
       headers: { 'Content-Type': 'application/json', ...CORS }
@@ -72,6 +86,7 @@ export async function onRequestPost({ request, env }) {
     
     for (const [key, value] of Object.entries(updates)) {
       if (key === 'key' || key === 'value') continue; // skip wrapper fields
+      if (String(value).includes('MASKED::')) continue; // jangan timpa nilai asli dengan hasil masking
       await db.prepare("INSERT INTO user_preferences (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(key, String(value)).run();
     }
 
