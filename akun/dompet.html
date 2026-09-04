@@ -169,35 +169,11 @@
                 </div>
             </div>
 
-            <!-- Payment Method Selection -->
+            <!-- Payment Method Selection (dinamis — data real-time dari backend, logo Wikimedia Commons) -->
             <div class="space-y-3 w-full">
                 <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Metode Pembayaran</label>
-                <div class="space-y-3 w-full">
-                    <!-- Adjusted padding, borders, and icon background to be cleaner -->
-                    <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-900 transition-all w-full bg-white">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
-                                <i data-lucide="qr-code" class="w-5 h-5 text-gray-700"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900">QRIS Instant</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Gopay, OVO, Dana, BCA Mobile, dll</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="QRIS Instant" checked class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-900 transition-all w-full bg-white">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
-                                <i data-lucide="building-2" class="w-5 h-5 text-gray-700"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900">Virtual Account Bank</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">BCA, Mandiri, BRI, BNI</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="Virtual Account" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
+                <div class="space-y-3 w-full" id="payment-methods-list">
+                    <p class="text-xs text-gray-400 py-2">Memuat metode pembayaran...</p>
                 </div>
             </div>
 
@@ -237,6 +213,7 @@
             await initWalletFromD1();
             renderBalance();
             renderTransactions();
+            loadPaymentChannels();
         });
 
         // Initialize: seed D1 with starting balance if empty
@@ -378,19 +355,60 @@
             }
         }
 
-        // Process Top Up — Pembayaran Nyata via Midtrans Snap (verifikasi server, real-time)
-        let topupPollTimer = null;
-        let snapScriptLoaded = false;
+        // ===== Metode Pembayaran Dinamis (real-time dari backend, logo Wikimedia Commons) =====
+        let selectedChannelId = 'qris';
+        let paymentChannels = [];
 
-        function loadSnapScript(clientKey, isProduction, cb) {
-            if (snapScriptLoaded && window.snap) { cb(); return; }
-            const s = document.createElement('script');
-            s.src = (isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js');
-            s.setAttribute('data-client-key', clientKey);
-            s.onload = () => { snapScriptLoaded = true; cb(); };
-            s.onerror = () => showModal('Gagal Memuat Pembayaran', 'Tidak dapat memuat Midtrans Snap. Periksa koneksi internet Anda.');
-            document.body.appendChild(s);
+        async function loadPaymentChannels() {
+            const list = document.getElementById('payment-methods-list');
+            try {
+                const res = await fetch('/api/topup?action=channels').then(r => r.json());
+                if (res.channels && res.channels.length) {
+                    paymentChannels = res.channels;
+                } else {
+                    paymentChannels = fallbackChannels();
+                }
+            } catch (e) {
+                paymentChannels = fallbackChannels();
+            }
+            renderPaymentMethods();
         }
+
+        function fallbackChannels() {
+            return [
+                { id: 'qris', label: 'QRIS', note: 'Semua e-wallet & m-banking (DANA, ShopeePay, dll)', logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/QRIS%20Logo.svg?width=200' },
+                { id: 'bca', label: 'BCA Virtual Account', note: 'Transfer ke rekening virtual BCA', logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/Bank%20Central%20Asia.svg?width=200' }
+            ];
+        }
+
+        function renderPaymentMethods() {
+            const list = document.getElementById('payment-methods-list');
+            if (!list) return;
+            list.innerHTML = paymentChannels.map((ch, i) => `
+                <label class="flex items-center justify-between p-4 border ${ch.id === selectedChannelId ? 'border-gray-900 border-2' : 'border-gray-200'} rounded-xl cursor-pointer hover:border-gray-900 transition-all w-full bg-white payment-channel" data-channel="${ch.id}">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0 overflow-hidden">
+                            <img src="${ch.logo}" alt="${ch.label}" class="w-6 h-6 object-contain" loading="lazy" onerror="this.style.display='none'">
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900">${ch.label}</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5">${ch.note || ''}</p>
+                        </div>
+                    </div>
+                    <input type="radio" name="payment-method" value="${ch.id}" ${ch.id === selectedChannelId ? 'checked' : ''} class="accent-gray-900 w-4 h-4 ml-2">
+                </label>
+            `).join('');
+
+            list.querySelectorAll('.payment-channel').forEach(el => {
+                el.addEventListener('click', () => {
+                    selectedChannelId = el.getAttribute('data-channel');
+                    renderPaymentMethods();
+                });
+            });
+        }
+
+        // ===== Process Top Up — Pembayaran Nyata via Xendit Invoice (verifikasi server, real-time) =====
+        let topupPollTimer = null;
 
         async function processTopUp() {
             if (!selectedNominalAmount || selectedNominalAmount < 10000) {
@@ -398,14 +416,11 @@
                 return;
             }
 
-            const methodEl = document.querySelector('input[name="payment-method"]:checked');
-            const method = methodEl ? methodEl.value : 'QRIS Instant';
-
             try {
                 const res = await fetch('/api/topup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'create', amount: selectedNominalAmount, method: method })
+                    body: JSON.stringify({ action: 'create', amount: selectedNominalAmount, method: selectedChannelId })
                 }).then(r => r.json());
 
                 if (!res.success) {
@@ -416,21 +431,22 @@
                     return;
                 }
 
-                // Buka popup pembayaran Midtrans Snap
-                loadSnapScript(res.client_key, res.is_production, () => {
-                    window.snap.pay(res.token, {
-                        onSuccess: () => pollTopUpStatus(res.order_id),
-                        onPending: () => pollTopUpStatus(res.order_id),
-                        onError: () => showModal('Pembayaran Gagal', 'Transaksi tidak dapat diproses. Silakan coba lagi.'),
-                        onClose: () => { stopTopUpPoll(); showModal('Pembayaran Dibatalkan', 'Anda menutup halaman pembayaran sebelum menyelesaikan transaksi.'); }
-                    });
-                });
+                // Buka halaman pembayaran Xendit (QRIS QR / VA / e-wallet) di tab baru
+                const win = window.open(res.invoice_url, '_blank');
+
+                pollTopUpStatus(res.order_id);
+
+                if (win) {
+                    showModal('Selesaikan Pembayaran', 'Halaman pembayaran telah dibuka di tab baru. Saldo akan otomatis masuk ke dompet Clincoo Anda setelah pembayaran terverifikasi.');
+                } else {
+                    showModal('Popup Diblokir', 'Izinkan popup pada browser Anda, lalu klik tautan pembayaran pada riwayat transaksi.');
+                }
             } catch(e) {
                 showModal('Gagal', 'Tidak dapat terhubung ke server pembayaran.');
             }
         }
 
-        // Poll status order sampai webhook Midtrans verifikasi pembayaran (real-time)
+        // Poll status order — backend cek live ke Xendit, saldo masuk begitu dibayar (real-time)
         function pollTopUpStatus(orderId) {
             stopTopUpPoll();
             let attempts = 0;
@@ -448,12 +464,12 @@
                     }
                     if (data.status === 'failed') {
                         stopTopUpPoll();
-                        showModal('Pembayaran Gagal', 'Transaksi tidak selesai atau dibatalkan.');
+                        showModal('Pembayaran Tidak Selesai', 'Transaksi kedaluwarsa atau dibatalkan.');
                         return;
                     }
                 } catch(e) { /* lanjut polling */ }
-                if (attempts > 90) stopTopUpPoll(); // maks ~3 menit
-            }, 2000);
+                if (attempts > 300) stopTopUpPoll(); // maks ~15 menit
+            }, 3000);
         }
 
         function stopTopUpPoll() {
