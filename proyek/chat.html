@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
@@ -617,12 +618,21 @@
             });
         }
 
+        // --- Security helpers (anti-XSS) ---
+        function escText(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function escUrl(u) {
+            const s = String(u || '');
+            return (/^(https?:|data:image\/)/i.test(s)) ? escText(s) : '';
+        }
         function formatMarkdown(text) {
             if (!text) return '';
             try {
-                return marked.parse(text);
+                const html = marked.parse(text);
+                return window.DOMPurify ? DOMPurify.sanitize(html) : html;
             } catch (e) {
-                return text;
+                return escText(text);
             }
         }
 
@@ -1007,7 +1017,7 @@
             currentAttachments.forEach(att => {
                 let iconHtml = '';
                 if (att.type === 'image') {
-                    iconHtml = `<img src="${att.data}" class="w-[18px] h-[18px] rounded-full object-cover">`;
+                    iconHtml = `<img src="${escUrl(att.data)}" class="w-[18px] h-[18px] rounded-full object-cover">`;
                 } else {
                     iconHtml = getFileIcon(att.extension);
                 }
@@ -1018,7 +1028,7 @@
                     <div class="flex items-center justify-center flex-shrink-0">
                         ${iconHtml}
                     </div>
-                    <p class="text-xs font-medium text-gray-800 truncate leading-tight">${att.name}</p>
+                    <p class="text-xs font-medium text-gray-800 truncate leading-tight">${escText(att.name)}</p>
                     <button type="button" onclick="removeAttachment('${att.id}')" class="text-gray-400 hover:text-black transition-colors ml-0.5 focus:outline-none flex-shrink-0" title="Hapus">
                         <i class="ph-bold ph-x text-[12px]"></i>
                     </button>
@@ -1161,9 +1171,9 @@
                                             </summary>
                                             <div class="px-3 py-3 border-t border-gray-100 bg-white flex flex-wrap gap-2.5">
                                                 ${msg.sources.map(s => `
-                                                    <a href="${s.url}" target="_blank" class="flex items-center gap-2 py-1.5 px-2.5 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors text-decoration-none shadow-sm">
-                                                        <img src="${s.favicon}" class="w-4 h-4 rounded-sm" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCI+PC9jaXJjbGU+PGxpbmUgeDE9IjIiIHkxPSIxMiIgeDI9IjIyIiB5Mj0iMTIiPjwvbGluZT48cGF0aCBkPSJNMTIgMmExNS4zIDE1LjMgMCAwIDEgNCAxMGMtLjExIDUuNTQtMS45NCAxMC00IDEwLTIuMDYtLjA2LTQuODktNC40Ni01LTEwQzcuMSAxMS4zNiA4LjA2IDYuNTQgMTIgMnoiPjwvcGF0aD48L3N2Zz4='">
-                                                        <span class="text-[12px] text-gray-700 truncate max-w-[130px] font-medium">${s.domain}</span>
+                                                    <a href="${escUrl(s.url)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 py-1.5 px-2.5 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors text-decoration-none shadow-sm">
+                                                        <img src="${escUrl(s.favicon)}" class="w-4 h-4 rounded-sm" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCI+PC9jaXJjbGU+PGxpbmUgeDE9IjIiIHkxPSIxMiIgeDI9IjIyIiB5Mj0iMTIiPjwvbGluZT48cGF0aCBkPSJNMTIgMmExNS4zIDE1LjMgMCAwIDEgNCAxMGMtLjExIDUuNTQtMS45NCAxMC00IDEwLTIuMDYtLjA2LTQuODktNC40Ni01LTEwQzcuMSAxMS4zNiA4LjA2IDYuNTQgMTIgMnoiPjwvcGF0aD48L3N2Zz4='">
+                                                        <span class="text-[12px] text-gray-700 truncate max-w-[130px] font-medium">${escText(s.domain)}</span>
                                                     </a>
                                                 `).join('')}
                                             </div>
@@ -1202,7 +1212,7 @@
                         attachmentsHtml = '<div class="flex flex-wrap gap-2 mb-2 justify-end w-full">';
                         msg.attachments.forEach(att => {
                             if (att.type === 'image') {
-                                attachmentsHtml += `<img src="${att.data}" class="max-w-[200px] sm:max-w-[250px] rounded-2xl mb-1 border border-gray-200/50 shadow-sm object-cover" alt="Attached Image">`;
+                                attachmentsHtml += `<img src="${escUrl(att.data)}" class="max-w-[200px] sm:max-w-[250px] rounded-2xl mb-1 border border-gray-200/50 shadow-sm object-cover" alt="Attached Image">`;
                             } else {
                                 attachmentsHtml += `
                                     <div class="flex items-center gap-1.5 bg-black/5 px-3 py-1.5 rounded-full border border-black/5 max-w-full mb-1">
