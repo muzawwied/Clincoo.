@@ -284,10 +284,10 @@
         }
     }
 
-    // Link share dinamis: dihitung dari alamat asli halaman,
-    // jadi jika domain custom dipasang di GitHub Pages, kode tidak perlu diubah.
-    var _p = window.location.pathname.replace(/\.html?$/i, '').replace(/\/[^\/]+\/[^\/]+$/, '');
-    const staticShareLink = window.location.origin + (_p === '' || _p === '/' ? '/' : _p + '/');
+    // Link share dinamis: alamat asli halaman ini (kolaborasi),
+    // jadi yang disalin adalah halaman undangan, bukan index.
+    // Jika domain custom dipasang di GitHub Pages, kode tidak perlu diubah.
+    const staticShareLink = window.location.origin + window.location.pathname;
 
     function copyDirectLink() {
         const tempInput = document.createElement("input");
