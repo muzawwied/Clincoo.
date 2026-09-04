@@ -8,12 +8,14 @@
     <meta http-equiv="Expires" content="0">
     <title>Clincoo - Dompet Saldo</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%3Cg%20fill%3D%22%23000000%22%3E%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3C%2Fsvg%3E" type="image/svg+xml">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; transition: background-color 0.3s ease, color 0.3s ease; }
         :root { --accent-color: #000000; --accent-hover: #1f2937; --accent-text: #ffffff; }
@@ -22,6 +24,7 @@
         .border-accent { border-color: var(--accent-color) !important; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
         body.dark-mode { background-color: #000000; color: #e0e0e0; }
         body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black { color: #f0f0f0 !important; }
         body.dark-mode .text-gray-700 { color: #b0b0b0 !important; }
@@ -33,15 +36,28 @@
         body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
         body.dark-mode input { background-color: #0a0a0a; color: #f0f0f0; border-color: #222222; }
         body.dark-mode header, body.dark-mode .bg-\[\#f7f7f9\] { background-color: #000000 !important; border-color: #222222 !important; }
+        
         body.dark-mode button[onclick="PathRouter.goBack()"], body.dark-mode button[onclick="closeTopUpPage()"] {
             background-color: #000000 !important; border: 1.5px solid rgba(255,255,255,0.4) !important; color: #ffffff !important;
         }
         body.dark-mode button[onclick="PathRouter.goBack()"]:hover, body.dark-mode button[onclick="closeTopUpPage()"]:hover {
             background-color: #1a1a1a !important; border-color: rgba(255,255,255,0.7) !important;
         }
-        .pay-method-card { transition: all 0.2s ease; }
-        .pay-method-card.selected { border-width: 2px !important; border-color: #111827 !important; }
-        body.dark-mode .pay-method-card.selected { border-color: #ffffff !important; }
+        
+        .pay-method-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .pay-method-card:active { transform: scale(0.98); }
+        
+        .pay-method-card input[type="radio"] { display: none; }
+        .pay-method-card .radio-indicator { 
+            width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e7eb; 
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; 
+        }
+        body.dark-mode .pay-method-card .radio-indicator { border-color: #374151; }
+        .pay-method-card.selected .radio-indicator { border-color: #111827; background-color: #111827; }
+        .pay-method-card.selected .radio-indicator::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: white; }
+        body.dark-mode .pay-method-card.selected .radio-indicator { border-color: #ffffff; background-color: #ffffff; }
+        body.dark-mode .pay-method-card.selected .radio-indicator::after { background: #000000; }
+
         .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -51,8 +67,8 @@
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
 
     <div id="page-dompet" class="flex flex-col min-h-screen w-full">
-       <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
-            <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
+        <header class="bg-[#f7f7f9] flex justify-between items-center px-4 py-3 fixed top-0 w-full z-30 transition-colors border-b border-gray-100">
+            <button onclick="PathRouter.goBack()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </button>
             <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Dompet Saldo</h1>
@@ -77,8 +93,8 @@
                 <div class="px-5"><h2 class="text-base font-bold text-gray-900 tracking-tight">Riwayat Transaksi</h2></div>
                 <div id="transaction-list" class="flex flex-col w-full border-t border-gray-100"></div>
                 <div id="empty-history" class="hidden flex-col items-center justify-center py-12 text-center w-full">
-                    <div class="w-14 h-14 rounded-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center mb-3">
-                        <i data-lucide="receipt" class="w-7 h-7 text-gray-400"></i>
+                    <div class="mb-4">
+                        <i data-lucide="history" class="w-16 h-16 text-gray-300 dark:text-gray-600 stroke-[1.5]"></i>
                     </div>
                     <h3 class="text-sm font-bold text-gray-900 dark:text-white">Belum ada transaksi</h3>
                     <p class="text-xs text-gray-500 mt-1 max-w-[220px]">Riwayat pengisian dan penggunaan saldo akan muncul di sini.</p>
@@ -87,205 +103,249 @@
         </main>
     </div>
 
-    <div id="page-topup" class="hidden flex-col bg-white min-h-screen w-full fixed inset-0 z-50 overflow-y-auto">
-        <header class="bg-[#f7f7f9] flex justify-between items-center px-4 py-3 sticky top-0 w-full z-40 transition-colors border-b border-gray-100">
-            <button onclick="closeTopUpPage()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
-                <i data-lucide="arrow-left" class="w-5 h-5"></i>
-            </button>
-            <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Isi Saldo Clincoo</h1>
-            <div class="w-10"></div>
-        </header>
-
-        <main class="flex-1 w-full flex flex-col space-y-6 px-5 py-6">
-            <div class="pb-2 border-b border-gray-100 dark:border-gray-800 w-full">
-                <h3 class="text-lg font-bold text-black dark:text-white">Masukkan Jumlah</h3>
-                <p class="text-xs text-gray-500 mt-1">Ketik nominal top-up, lalu pilih metode pembayaran</p>
-            </div>
-
-            <!-- Tampilan jumlah gaya PIN -->
-            <div class="text-center py-3 w-full">
-                <p id="keypad-display" class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Rp 0</p>
-                <p class="text-[11px] text-gray-400 mt-2">Minimal Rp 10.000</p>
-            </div>
-
-            <!-- Keyboard custom web -->
-            <div class="grid grid-cols-3 gap-3 w-full max-w-md mx-auto select-none">
-                <button onclick="pressKey('1')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">1</button>
-                <button onclick="pressKey('2')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">2</button>
-                <button onclick="pressKey('3')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">3</button>
-                <button onclick="pressKey('4')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">4</button>
-                <button onclick="pressKey('5')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">5</button>
-                <button onclick="pressKey('6')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">6</button>
-                <button onclick="pressKey('7')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">7</button>
-                <button onclick="pressKey('8')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">8</button>
-                <button onclick="pressKey('9')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">9</button>
-                <button onclick="pressKey('000')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">000</button>
-                <button onclick="pressKey('0')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">0</button>
-                <button onclick="pressKey('back')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all flex items-center justify-center active:scale-95"><i data-lucide="delete" class="w-5 h-5 mx-auto"></i></button>
-            </div>
-
-            <div class="space-y-3 w-full">
-                <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Metode Pembayaran</label>
-                <div class="space-y-3 w-full" id="payment-methods-list">
-                    <!-- QRIS -->
-                    <label class="pay-method-card selected flex items-center justify-between p-4 border-2 border-gray-900 dark:border-white rounded-xl cursor-pointer transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="QRIS Instant" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">QRIS</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Gopay, OVO, Dana, BCA Mobile, dll</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="QRIS Instant" checked class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- BCA -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="BCA Virtual Account" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white dark:border-0 shadow-sm p-2"><img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">BCA Virtual Account</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Bank Central Asia</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="BCA Virtual Account" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- Mandiri -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="Mandiri Virtual Account" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">Mandiri Virtual Account</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Bank Mandiri</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="Mandiri Virtual Account" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- BRI -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="BRI Virtual Account" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain"></div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">BRI Virtual Account</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Bank Rakyat Indonesia</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="BRI Virtual Account" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- BNI -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="BNI Virtual Account" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">BNI Virtual Account</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Bank Negara Indonesia</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="BNI Virtual Account" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- GoPay -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="GoPay" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">GoPay</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Gojek e-wallet</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="GoPay" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- DANA -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="DANA" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1">
-                                <img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">DANA</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Dompet digital Indonesia</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="DANA" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- OVO -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="OVO" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-2">
-                                <img src="assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">OVO</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">OVO e-wallet</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="OVO" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- ShopeePay -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="ShopeePay" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">ShopeePay</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Shopee e-wallet</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="ShopeePay" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- LinkAja -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="LinkAja" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">LinkAja</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Dompet digital Telkomsel</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="LinkAja" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
-                    <!-- GoPay -->
-                    
-                    <!-- OVO -->
-                    
-                    <!-- BRI -->
-                    
-                    <!-- BNI -->
-                    
+    <div id="page-topup" class="hidden flex-col bg-white min-h-screen w-full fixed inset-0 z-50 overflow-x-hidden">
+        
+        <!-- STEP 1: PAYMENT METHOD -->
+        <div id="step-method" class="flex flex-col w-full min-h-screen overflow-y-auto">
+            <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
+                <button onclick="closeTopUpPage()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+            </header>
+            <main class="flex-1 w-full flex flex-col px-5 py-6">
+                <div class="mb-6 w-full">
+                    <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Isi Saldo</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5">Pilih metode pembayaran untuk mengisi dompet Anda.</p>
                 </div>
-            </div>
+                
+                <div class="space-y-6 w-full pb-4" id="payment-methods-list">
+                    
+                    <!-- Instant Payment -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">Pembayaran Instan</h4>
+                        <label class="pay-method-card selected flex items-center justify-between p-4 border-2 border-gray-900 dark:border-white rounded-2xl w-full bg-gray-50 dark:bg-[#1a1a1a]" data-method="QRIS Instant" onclick="selectPaymentMethod(this)">
+                            <div class="flex items-center space-x-3.5 flex-1 min-w-0 mr-2">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                    <img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">QRIS</p>
+                                    <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Gopay, OVO, Dana, BCA Mobile, dll</p>
+                                </div>
+                            </div>
+                            <div class="radio-indicator shrink-0"></div>
+                            <input type="radio" name="payment-method" value="QRIS Instant" checked>
+                        </label>
+                    </div>
 
-            <div class="pt-4 pb-8 w-full">
-                <button onclick="processTopUp()" class="w-full py-4 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-all shadow-lg active:scale-[0.98]">Lanjutkan Pembayaran</button>
-            </div>
-        </main>
+                    <!-- E-Wallet -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">E-Wallet</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="GoPay" onclick="selectPaymentMethod(this)">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+                                        <img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">GoPay</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Gojek e-wallet</p>
+                                    </div>
+                                </div>
+                                <div class="radio-indicator shrink-0"></div>
+                                <input type="radio" name="payment-method" value="GoPay">
+                            </label>
+                            
+                            <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="DANA" onclick="selectPaymentMethod(this)">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-1.5">
+                                        <img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">DANA</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Dompet digital</p>
+                                    </div>
+                                </div>
+                                <div class="radio-indicator shrink-0"></div>
+                                <input type="radio" name="payment-method" value="DANA">
+                            </label>
+                            
+                            <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="OVO" onclick="selectPaymentMethod(this)">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                        <img src="assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">OVO</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">OVO e-wallet</p>
+                                    </div>
+                                </div>
+                                <div class="radio-indicator shrink-0"></div>
+                                <input type="radio" name="payment-method" value="OVO">
+                            </label>
+                            
+                            <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="ShopeePay" onclick="selectPaymentMethod(this)">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+                                        <img src="assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ShopeePay</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Shopee e-wallet</p>
+                                    </div>
+                                </div>
+                                <div class="radio-indicator shrink-0"></div>
+                                <input type="radio" name="payment-method" value="ShopeePay">
+                            </label>
+                            
+                            <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="LinkAja" onclick="selectPaymentMethod(this)">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                        <img src="assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">LinkAja</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">BUMN e-wallet</p>
+                                    </div>
+                                </div>
+                                <div class="radio-indicator shrink-0"></div>
+                                <input type="radio" name="payment-method" value="LinkAja">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Virtual Account -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">Virtual Account</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="BCA Virtual Account" onclick="selectPaymentMethod(this)">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                        <img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">BCA</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Virtual Account</p>
+                                    </div>
+                                </div>
+                                <div class="radio-indicator shrink-0"></div>
+                                <input type="radio" name="payment-method" value="BCA Virtual Account">
+                            </label>
+                            
+                            <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="Mandiri Virtual Account" onclick="selectPaymentMethod(this)">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                        <img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">Mandiri</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Virtual Account</p>
+                                    </div>
+                                </div>
+                                <div class="radio-indicator shrink-0"></div>
+                                <input type="radio" name="payment-method" value="Mandiri Virtual Account">
+                            </label>
+                            
+                            <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="BRI Virtual Account" onclick="selectPaymentMethod(this)">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                        <img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">BRI</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Virtual Account</p>
+                                    </div>
+                                </div>
+                                <div class="radio-indicator shrink-0"></div>
+                                <input type="radio" name="payment-method" value="BRI Virtual Account">
+                            </label>
+                            
+                            <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="BNI Virtual Account" onclick="selectPaymentMethod(this)">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                        <img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">BNI</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Virtual Account</p>
+                                    </div>
+                                </div>
+                                <div class="radio-indicator shrink-0"></div>
+                                <input type="radio" name="payment-method" value="BNI Virtual Account">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-4 pb-8 w-full mt-auto">
+                    <button onclick="goToStep2()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Lanjut ke Nominal</button>
+                </div>
+            </main>
+        </div>
+
+        <!-- STEP 2: AMOUNT KEYPAD -->
+        <div id="step-amount" class="hidden flex-col w-full min-h-screen overflow-y-auto">
+            <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
+                <button onclick="goToStep1()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+            </header>
+
+            <main class="flex-1 w-full flex flex-col px-5 py-6">
+                <div class="flex flex-col items-center mb-4 w-full mt-2">
+                    <h2 class="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight text-center">Nominal Top Up</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5 text-center">Tentukan jumlah saldo yang ingin diisi</p>
+                </div>
+
+                <!-- PIN Keypad Display -->
+                <div class="flex flex-col items-center justify-center py-6 mb-4 w-full">
+                    <p id="keypad-display" class="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter">Rp 0</p>
+                    <div class="mt-4 bg-gray-100 dark:bg-gray-800/80 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700">
+                        <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Minimal pengisian Rp 10.000</p>
+                    </div>
+                </div>
+
+                <!-- Custom Web Keypad -->
+                <div class="grid grid-cols-3 gap-3 w-full max-w-md mx-auto select-none">
+                    <button onclick="pressKey('1')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">1</button>
+                    <button onclick="pressKey('2')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">2</button>
+                    <button onclick="pressKey('3')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">3</button>
+                    <button onclick="pressKey('4')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">4</button>
+                    <button onclick="pressKey('5')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">5</button>
+                    <button onclick="pressKey('6')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">6</button>
+                    <button onclick="pressKey('7')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">7</button>
+                    <button onclick="pressKey('8')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">8</button>
+                    <button onclick="pressKey('9')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">9</button>
+                    <button onclick="pressKey('000')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">000</button>
+                    <button onclick="pressKey('0')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">0</button>
+                    <button onclick="pressKey('back')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all flex items-center justify-center active:scale-95"><i data-lucide="delete" class="w-5 h-5 mx-auto"></i></button>
+                </div>
+
+                <div id="confirm-action-container" class="pt-4 pb-8 w-full mt-auto hidden animate-fade-in">
+                    <button onclick="processTopUp()" class="w-full py-4 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-all shadow-lg active:scale-[0.98]">Konfirmasi</button>
+                </div>
+            </main>
+        </div>
     </div>
 
     <div id="system-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
-        <div class="bg-white dark:bg-[#0a0a0a] rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl border border-gray-100 dark:border-gray-800">
-            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+        <div class="bg-white dark:bg-[#121212] rounded-xl p-5 md:p-6 w-full max-w-sm relative z-10 shadow-xl border border-gray-100 dark:border-gray-800 animate-fade-in text-center">
+            <div id="modal-icon-wrap" class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 mx-auto">
                 <i data-lucide="check-circle" class="w-6 h-6"></i>
             </div>
-            <h3 id="modal-title" class="text-lg font-bold text-gray-900 dark:text-white mb-2"></h3>
+            <h3 id="modal-title" class="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2"></h3>
             <p id="modal-message" class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed"></p>
-            <button onclick="closeModal()" class="w-full py-3.5 bg-gray-900 text-white rounded-xl font-semibold text-sm hover:bg-gray-800 transition-colors shadow-sm active:scale-95">Tutup</button>
+            <button onclick="closeModal()" class="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-black rounded-lg font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm active:scale-95">Tutup</button>
         </div>
     </div>
 
     <script>
-        // Backend API — di-host di Cloudflare Pages (GitHub Pages tidak bisa menjalankan server)
+        // Backend API — hosted on Cloudflare Pages
         const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev' : '';
         const WALLET_API_URL = API_BASE + '/api/wallet';
-        // Backend top-up Xendit — Base44 function (siap pakai dari GitHub Pages maupun Cloudflare Pages)
         var TOPUP_API = 'https://koda-da05205d.base44.app/functions/topup';
         let currentBalance = 0;
-        let selectedNominalAmount = 50000;
+        let selectedNominalAmount = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
             lucide.createIcons();
@@ -304,22 +364,21 @@
         function formatNumberOnly(num) { return Number(num).toLocaleString('id-ID'); }
 
         function getMethodLogo(method) {
-            const logos = {
-                'QRIS Instant': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain"></div>',
-                'BCA Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>',
-                'Mandiri Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>',
-                'BRI Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain"></div>',
-                'BNI Virtual Account': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>',
-                'GoPay': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain"></div>',
-                'DANA': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-0.5"><img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain"></div>',
-                'OVO': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain"></div>',
-                'ShopeePay': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain"></div>',
-                'LinkAja': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1"><img src="assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain"></div>',
-                
-                'Saldo Dompet': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="wallet" class="w-5 h-5 text-white dark:text-black"></i></div>',
-                'Subscription': '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="crown" class="w-5 h-5 text-white dark:text-black"></i></div>'
-            };
-            return logos[method] || '<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-gray-100 dark:bg-gray-800"><i data-lucide="credit-card" class="w-5 h-5 text-gray-500"></i></div>';
+            var m = (method || '').toLowerCase();
+            if (m.includes('qris')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain"></div>';
+            if (m.includes('bca')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>';
+            if (m.includes('mandiri')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>';
+            if (m.includes('bri')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain"></div>';
+            if (m.includes('bni')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>';
+            if (m.includes('gopay')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain"></div>';
+            if (m.includes('dana')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-0.5 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain"></div>';
+            if (m.includes('ovo')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain"></div>';
+            if (m.includes('shopee')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain"></div>';
+            if (m.includes('linkaja')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain"></div>';
+            if (m.includes('dompet')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="wallet" class="w-5 h-5 text-white dark:text-black"></i></div>';
+            if (m.includes('sub')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="crown" class="w-5 h-5 text-white dark:text-black"></i></div>';
+            
+            return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-gray-100 dark:bg-gray-800"><i data-lucide="credit-card" class="w-5 h-5 text-gray-500"></i></div>';
         }
 
         async function renderBalance() {
@@ -350,9 +409,17 @@
             }
             emptyState.classList.add('hidden');
             emptyState.classList.remove('flex');
+            
+            var methodDisplayMap = {
+                'qris': 'QRIS', 'gopay': 'GoPay', 'ovo': 'OVO', 'dana': 'DANA', 'shopeepay': 'ShopeePay', 'linkaja': 'LinkAja',
+                'bca': 'BCA VA', 'mandiri': 'Mandiri VA', 'bri': 'BRI VA', 'bni': 'BNI VA'
+            };
+
             container.innerHTML = allTxs.map(function(tx) {
                 var isIn = tx.type === 'in';
                 var logo = getMethodLogo(tx.method);
+                var txMethodRaw = (tx.method || '').toLowerCase();
+                var displayMethodName = methodDisplayMap[txMethodRaw] || tx.method || '';
                 var amountColor = isIn ? 'text-emerald-600' : 'text-gray-900 dark:text-white';
                 var sign = isIn ? '+' : '-';
                 var dateStr = '';
@@ -364,13 +431,12 @@
                 return '<div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">' +
                     '<div class="flex items-center gap-3">' + logo +
                     '<div><p class="text-sm font-semibold text-gray-900 dark:text-white">' + (tx.title || 'Transaksi') + '</p>' +
-                    '<p class="text-xs text-gray-500 mt-0.5">' + (tx.method || '') + (dateStr ? ' - ' + dateStr : '') + '</p></div></div>' +
+                    '<p class="text-xs text-gray-500 mt-0.5">' + displayMethodName + (dateStr ? ' - ' + dateStr : '') + '</p></div></div>' +
                     '<span class="text-sm font-bold ' + amountColor + '">' + sign + ' ' + formatNumberOnly(tx.amount) + '</span></div>';
             }).join('');
             lucide.createIcons();
         }
 
-        // ===== Real-time wallet: saldo & riwayat selalu ter-update tanpa reload =====
         var _lastTxSnapshot = '';
         async function refreshWalletLive() {
             renderBalance();
@@ -388,10 +454,33 @@
             if (!document.hidden) { refreshWalletLive(); }
         });
 
-        function openTopUpPage() { resetKeypad(); document.getElementById('page-topup').classList.remove('hidden'); document.getElementById('page-topup').classList.add('flex'); }
-        function closeTopUpPage() { document.getElementById('page-topup').classList.add('hidden'); document.getElementById('page-topup').classList.remove('flex'); }
+        function openTopUpPage() { 
+            resetKeypad(); 
+            document.getElementById('page-topup').classList.remove('hidden'); 
+            document.getElementById('page-topup').classList.add('flex'); 
+            goToStep1(); 
+        }
+        
+        function closeTopUpPage() { 
+            document.getElementById('page-topup').classList.add('hidden'); 
+            document.getElementById('page-topup').classList.remove('flex'); 
+        }
 
-        // ===== Keyboard custom web — input saldo gaya PIN =====
+        function goToStep1() {
+            var stepMethod = document.getElementById('step-method');
+            var stepAmount = document.getElementById('step-amount');
+            if (stepMethod) { stepMethod.classList.remove('hidden'); stepMethod.classList.add('flex'); }
+            if (stepAmount) { stepAmount.classList.add('hidden'); stepAmount.classList.remove('flex'); }
+        }
+
+        function goToStep2() {
+            var stepMethod = document.getElementById('step-method');
+            var stepAmount = document.getElementById('step-amount');
+            if (stepMethod) { stepMethod.classList.add('hidden'); stepMethod.classList.remove('flex'); }
+            if (stepAmount) { stepAmount.classList.remove('hidden'); stepAmount.classList.add('flex'); }
+            lucide.createIcons();
+        }
+
         var keypadAmount = '';
 
         function pressKey(k) {
@@ -405,6 +494,7 @@
             }
             selectedNominalAmount = parseInt(keypadAmount || '0', 10);
             renderKeypadDisplay();
+            toggleConfirmButton();
         }
 
         function renderKeypadDisplay() {
@@ -416,22 +506,31 @@
             keypadAmount = '';
             selectedNominalAmount = 0;
             renderKeypadDisplay();
+            toggleConfirmButton();
+        }
+
+        function toggleConfirmButton() {
+            var btnContainer = document.getElementById('confirm-action-container');
+            if (btnContainer) {
+                if (selectedNominalAmount > 0) {
+                    btnContainer.classList.remove('hidden');
+                } else {
+                    btnContainer.classList.add('hidden');
+                }
+            }
         }
 
         function selectPaymentMethod(labelEl) {
             document.querySelectorAll('.pay-method-card').forEach(function(card) {
-                card.classList.remove('selected');
-                card.classList.remove('border-2', 'border-gray-900', 'dark:border-white');
-                card.classList.add('border', 'border-gray-200', 'dark:border-gray-800');
+                card.classList.remove('selected', 'border-2', 'border-gray-900', 'dark:border-white', 'bg-gray-50', 'dark:bg-[#1a1a1a]');
+                card.classList.add('border', 'border-gray-200', 'dark:border-gray-800', 'bg-white', 'dark:bg-[#0a0a0a]');
             });
-            labelEl.classList.add('selected');
-            labelEl.classList.remove('border', 'border-gray-200', 'dark:border-gray-800');
-            labelEl.classList.add('border-2', 'border-gray-900', 'dark:border-white');
+            labelEl.classList.add('selected', 'border-2', 'border-gray-900', 'dark:border-white', 'bg-gray-50', 'dark:bg-[#1a1a1a]');
+            labelEl.classList.remove('border', 'border-gray-200', 'dark:border-gray-800', 'bg-white', 'dark:bg-[#0a0a0a]');
             var radio = labelEl.querySelector('input[type="radio"]');
             if (radio) radio.checked = true;
         }
 
-        // ===== Xendit — pembayaran nyata, saldo masuk real-time setelah verifikasi server =====
         var XENDIT_METHOD_MAP = { 'QRIS Instant': 'qris', 'LinkAja': 'linkaja', 'GoPay': 'gopay', 'OVO': 'ovo', 'DANA': 'dana', 'ShopeePay': 'shopeepay', 'BCA Virtual Account': 'bca', 'Mandiri Virtual Account': 'mandiri', 'BRI Virtual Account': 'bri', 'BNI Virtual Account': 'bni' };
         var topupPollTimer = null;
 
@@ -468,7 +567,6 @@
             }
         }
 
-        // Poll status — backend cek live ke Xendit, saldo masuk begitu dibayar
         function pollTopUpStatus(orderId, channel) {
             stopTopUpPoll();
             var attempts = 0;
@@ -502,7 +600,6 @@
             if (topupPollTimer) { clearInterval(topupPollTimer); topupPollTimer = null; }
         }
 
-        // Cadangan seleksi metode: sinkronkan kartu saat radio berubah
         document.addEventListener('change', function(e) {
             if (e.target && e.target.name === 'payment-method') {
                 var card = e.target.closest('.pay-method-card');
@@ -511,6 +608,24 @@
         });
 
         function showModal(title, message) {
+            var iconWrap = document.getElementById('modal-icon-wrap');
+            var iconName = 'check-circle';
+            var bgClass = 'bg-emerald-50 text-emerald-600';
+            
+            var tLower = (title || '').toLowerCase();
+            if (tLower.includes('gagal') || tLower.includes('tidak valid')) {
+                iconName = 'alert-circle';
+                bgClass = 'bg-red-50 text-red-600';
+            } else if (tLower.includes('sandbox')) {
+                iconName = 'info';
+                bgClass = 'bg-amber-50 text-amber-600';
+            }
+            
+            if (iconWrap) {
+                iconWrap.className = 'w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto ' + bgClass;
+                iconWrap.innerHTML = '<i data-lucide="' + iconName + '" class="w-6 h-6"></i>';
+            }
+
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').textContent = message;
             var modal = document.getElementById('system-modal');
@@ -526,5 +641,4 @@
         }
     </script>
 </body>
-<!-- deploy: 2026-09-01T00:54 -->
 </html>
