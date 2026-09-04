@@ -525,7 +525,14 @@
     }
 
     // Real GitHub Import
+    let githubImportAbort = null;
+    function cancelGithubImport() {
+      if (githubImportAbort) githubImportAbort.abort();
+    }
+
     async function importFromGitHub(repoUrl, targetPath, onProgress) {
+      githubImportAbort = new AbortController();
+      const signal = githubImportAbort.signal;
       let importedCount = 0;
       const reportProgress = function(label) {
         importedCount++;
@@ -543,14 +550,15 @@
         }
         addNotification('GitHub', 'Mengimport ' + owner + '/' + repo + '...');
         renderFileList();
-        const r = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents', { headers: githubAuthHeaders() });
+        const r = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents', { headers: githubAuthHeaders(), signal: signal });
         if (!r.ok) throw new Error('Repo tidak ditemukan');
         const items = await r.json();
         projectFilesData[targetPath] = [];
         for (let item of items) {
+          if (signal.aborted) break;
           if (item.type === 'file') {
             try {
-              const fr = await fetch(item.url, { headers: githubAuthHeaders() });
+              const fr = await fetch(item.url, { headers: githubAuthHeaders(), signal: signal });
               const fd = await fr.json();
               const fc = fd.encoding === 'base64' ? atob(fd.content) : '';
               const b = new Blob([fc]).size;
@@ -561,23 +569,31 @@
             const np = targetPath + '/' + item.name;
             projectFilesData[targetPath].push({ type: 'folder', name: item.name, path: np, fileCount: 0, previewText: 'Folder' });
             reportProgress(item.name + '/');
-            await importGitHubFolder(owner, repo, item.path, np, reportProgress);
+            await importGitHubFolder(owner, repo, item.path, np, reportProgress, signal);
           }
         }
         saveData(); renderFileList();
         addNotification('GitHub', 'Berhasil import ' + owner + '/' + repo);
-      } catch(err) { addNotification('GitHub', 'Gagal: ' + err.message); }
+      } catch(err) {
+        if (err && err.name === 'AbortError') {
+          saveData(); renderFileList();
+          addNotification('GitHub', 'Import dibatalkan - file yang sudah terunduh tersimpan');
+          return;
+        }
+        addNotification('GitHub', 'Gagal: ' + err.message);
+      }
       finally { if (onProgress) onProgress(null); }
     }
-    async function importGitHubFolder(owner, repo, ghPath, localPath, reportProgress) {
+    async function importGitHubFolder(owner, repo, ghPath, localPath, reportProgress, signal) {
       try {
-        const r = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + ghPath, { headers: githubAuthHeaders() });
+        const r = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + ghPath, { headers: githubAuthHeaders(), signal: signal });
         const items = await r.json();
         projectFilesData[localPath] = [];
         for (let item of items) {
+          if (signal && signal.aborted) break;
           if (item.type === 'file') {
             try {
-              const fr = await fetch(item.url, { headers: githubAuthHeaders() });
+              const fr = await fetch(item.url, { headers: githubAuthHeaders(), signal: signal });
               const fd = await fr.json();
               const fc = fd.encoding === 'base64' ? atob(fd.content) : '';
               projectFilesData[localPath].push({ type: 'file', name: item.name, size: '0 B', path: localPath+'/'+item.name, content: fc });
@@ -587,7 +603,7 @@
             const cp = localPath + '/' + item.name;
             projectFilesData[localPath].push({ type: 'folder', name: item.name, path: cp, fileCount: 0, previewText: 'Folder' });
             if (reportProgress) reportProgress(item.name + '/');
-            await importGitHubFolder(owner, repo, item.path, cp, reportProgress);
+            await importGitHubFolder(owner, repo, item.path, cp, reportProgress, signal);
           }
         }
       } catch(e) {}
@@ -1094,6 +1110,7 @@
         '<svg class="w-8 h-8 animate-spin text-gray-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>' +
         '<p class="text-sm font-semibold text-gray-800">Mengimpor ' + escapeGithubHtml(repoName) + '</p>' +
         '<p id="github-import-status" class="text-xs text-gray-500">Menyiapkan...</p>' +
+        '<button onclick="cancelGithubImport()" class="mt-1.5 text-xs text-red-500 hover:text-red-600 font-medium px-2 py-1 hover:bg-red-50 rounded-lg transition-colors focus:outline-none">Batal</button>' +
         '</div>';
     }
 
