@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Laporkan Bug</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -106,47 +110,7 @@
         body.dark-mode .text-accent { color: #ffffff !important; }
         body.dark-mode .border-accent { border-color: #ffffff !important; }
         body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
-    /* auto-dark-fix v1 */
-    body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
-    body.dark-mode .bg-gray-200 { background-color: #262626 !important; }
-    body.dark-mode .bg-gray-300 { background-color: #333333 !important; }
-    body.dark-mode .bg-gray-400 { background-color: #444444 !important; }
-    body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
-    body.dark-mode .border-gray-200\/50,
-    body.dark-mode .border-gray-200\/60,
-    body.dark-mode .border-gray-200\/70 { border-color: #222222 !important; }
-    body.dark-mode .border-gray-300 { border-color: #333333 !important; }
-    body.dark-mode .border-gray-400 { border-color: #444444 !important; }
-    body.dark-mode .bg-blue-50,
-    body.dark-mode .bg-blue-50\/50 { background-color: #0d1a26 !important; }
-    body.dark-mode .border-blue-100,
-    body.dark-mode .border-blue-200 { border-color: #1e3a52 !important; }
-    body.dark-mode .bg-red-50,
-    body.dark-mode .bg-red-50\/50 { background-color: #2a1414 !important; }
-    body.dark-mode .bg-red-100 { background-color: #3a1a1a !important; }
-    body.dark-mode .border-red-100,
-    body.dark-mode .border-red-200 { border-color: #4a2020 !important; }
-    body.dark-mode .bg-green-100 { background-color: #14301c !important; }
-    body.dark-mode .bg-white\/95 { background-color: rgba(10,10,10,0.95) !important; }
-    body.dark-mode .hover\:bg-gray-50:hover,
-    body.dark-mode .hover\:bg-gray-50\/50:hover,
-    body.dark-mode .hover\:bg-gray-50\/80:hover { background-color: #1a1a1a !important; }
-    body.dark-mode .hover\:bg-gray-100:hover { background-color: #262626 !important; }
-    body.dark-mode .hover\:bg-gray-200:hover,
-    body.dark-mode .hover\:bg-gray-200\/50:hover { background-color: #333333 !important; }
-    body.dark-mode .hover\:bg-blue-50:hover,
-    body.dark-mode .hover\:bg-blue-100:hover { background-color: #163247 !important; }
-    body.dark-mode .hover\:bg-red-50:hover,
-    body.dark-mode .hover\:bg-red-100:hover { background-color: #3a1a1a !important; }
-    body.dark-mode .hover\:border-gray-300:hover,
-    body.dark-mode .hover\:border-gray-400:hover,
-    body.dark-mode .hover\:border-gray-900:hover { border-color: #555555 !important; }
-    body.dark-mode .focus\:border-gray-400:focus,
-    body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
-    body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
-</style>
-<!-- no-flash-v1 -->
-<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+    </style>
 </head>
 
 <body class="min-h-screen flex flex-col text-gray-900 pt-16 bg-[#ffffff]">
@@ -220,16 +184,16 @@
             </div>
         </div>
 
-        <div id="success-view" class="fixed inset-0 hidden opacity-0 transition-all duration-500 bg-white dark:bg-[#000000] z-50 flex-col">
+        <div id="success-view" class="fixed inset-0 hidden opacity-0 transition-all duration-500 bg-white dark:bg-[#000000] z-50 flex-col overflow-y-auto">
             <!-- CTA Kembali di Pojok Kanan Atas -->
-            <div class="flex justify-end pt-6 pr-6 w-full max-w-3xl mx-auto">
+            <div class="flex justify-end pt-6 pr-6 w-full max-w-3xl mx-auto shrink-0">
                 <button onclick="goBackManually()" class="px-4 py-2 text-sm font-semibold text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors flex items-center gap-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 cursor-pointer">
                     Kembali
                 </button>
             </div>
 
             <!-- Konten Surat Digital -->
-            <div class="max-w-2xl mx-auto px-8 w-full flex-1 pt-12 pb-24">
+            <div class="max-w-2xl mx-auto px-6 sm:px-8 w-full flex-1 pt-6 sm:pt-12 pb-16 sm:pb-24">
                 <div class="relative w-16 h-16 mb-8 flex items-center justify-center">
                     <div class="absolute inset-0 bg-green-100 dark:bg-green-900/30 rounded-full animate-ping opacity-75"></div>
                     <div class="relative w-12 h-12 bg-white dark:bg-[#1a1a1a] border-2 border-green-500 dark:border-green-400 rounded-full flex items-center justify-center shadow-sm">
@@ -434,6 +398,7 @@
                     if(formView) formView.classList.add('hidden');
                     
                     if(successView) {
+                        successView.scrollTop = 0;
                         successView.classList.remove('hidden');
                         successView.classList.add('flex');
                         void successView.offsetWidth;
