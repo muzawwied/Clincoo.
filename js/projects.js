@@ -6,6 +6,25 @@
 const _isGHPages = window.location.pathname.includes('/Clincoo');
 const _BASE = _isGHPages ? '/Clincoo.' : '';
 
+function toggleOption(btn, event) {
+    event.preventDefault();
+    event.stopPropagation();
+    document.querySelectorAll('.option-popup').forEach(popup => {
+        if (popup !== btn.nextElementSibling) {
+            popup.classList.remove('opacity-100', 'visible', 'translate-y-0');
+            popup.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        }
+    });
+    const popup = btn.nextElementSibling;
+    if (popup.classList.contains('opacity-100')) {
+        popup.classList.remove('opacity-100', 'visible', 'translate-y-0');
+        popup.classList.add('opacity-0', 'invisible', 'translate-y-2');
+    } else {
+        popup.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+        popup.classList.add('opacity-100', 'visible', 'translate-y-0');
+    }
+}
+
 function timeAgo(dateStr) {
     const diff = Date.now() - new Date(dateStr).getTime();
     const hours = Math.floor(diff / 3600000);
