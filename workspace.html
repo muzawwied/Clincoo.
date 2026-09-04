@@ -532,6 +532,15 @@
       if (githubImportAbort) githubImportAbort.abort();
     }
 
+    function decodeGithubContent(b64) {
+      try {
+        const bin = atob(String(b64 || '').replace(/\s+/g, ''));
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return new TextDecoder('utf-8').decode(bytes);
+      } catch (e) { return ''; }
+    }
+
     async function importFromGitHub(repoUrl, targetPath, onProgress) {
       githubImportAbort = new AbortController();
       const signal = githubImportAbort.signal;
@@ -565,7 +574,7 @@
             try {
               const fr = await fetch(item.url, { headers: githubAuthHeaders(), signal: signal });
               const fd = await fr.json();
-              const fc = fd.encoding === 'base64' ? atob(fd.content) : '';
+              const fc = decodeGithubContent(fd.encoding === 'base64' ? fd.content : '');
               const b = new Blob([fc]).size;
               targetItems.push({ type: 'file', name: item.name, size: b > 1024 ? (b/1024).toFixed(1)+' KB' : b+' B', path: prefix + item.name, content: fc });
               reportProgress(item.name);
@@ -600,8 +609,9 @@
             try {
               const fr = await fetch(item.url, { headers: githubAuthHeaders(), signal: signal });
               const fd = await fr.json();
-              const fc = fd.encoding === 'base64' ? atob(fd.content) : '';
-              projectFilesData[localPath].push({ type: 'file', name: item.name, size: '0 B', path: localPath+'/'+item.name, content: fc });
+              const fc = decodeGithubContent(fd.encoding === 'base64' ? fd.content : '');
+              const b = new Blob([fc]).size;
+              projectFilesData[localPath].push({ type: 'file', name: item.name, size: b > 1024 ? (b/1024).toFixed(1)+' KB' : b+' B', path: localPath+'/'+item.name, content: fc });
               if (reportProgress) reportProgress(item.name);
             } catch(e) {}
           } else if (item.type === 'dir') {
@@ -638,7 +648,12 @@
     }
 
     function saveData() {
-      localStorage.setItem(STORAGE_KEY_FILES, JSON.stringify(projectFilesData));
+      try {
+        localStorage.setItem(STORAGE_KEY_FILES, JSON.stringify(projectFilesData));
+      } catch (e) {
+        console.error('Gagal menyimpan workspace (penyimpanan browser penuh?):', e);
+        try { addNotification('Workspace', 'Gagal menyimpan workspace — penyimpanan browser penuh, beberapa perubahan bisa hilang saat refresh.'); } catch (e2) {}
+      }
     }
 
     const defaultTemplates = {
