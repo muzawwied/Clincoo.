@@ -940,7 +940,7 @@
         const resp = await fetch('https://clincoo.pages.dev/api/github-oauth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code })
+          body: JSON.stringify({ code, redirect_uri: window.location.origin + window.location.pathname })
         });
         const data = await resp.json();
 
