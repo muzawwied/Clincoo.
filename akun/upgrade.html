@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Clincoo - Upgrade Plan</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -28,22 +31,13 @@
         .border-accent { border-color: var(--accent-color) !important; }
         .hover\:bg-accent-hover:hover { background-color: var(--accent-hover) !important; }
         
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
+        body.dark-mode {
+            background-color: #000000;
+            color: #ffffff;
         }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        body.dark-mode .bg-white {
+            background-color: #0a0a0a !important;
         }
-
-        body.dark-mode { background-color: #000000; color: #e0e0e0; }
-        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #f0f0f0; }
-        body.dark-mode .text-gray-700 { color: #b0b0b0; }
-        body.dark-mode .text-gray-500, body.dark-mode .text-gray-600 { color: #888888; }
-        body.dark-mode .text-gray-400 { color: #666666; }
-        body.dark-mode .text-black { color: #ffffff; }
-        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
-
         body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
         body.dark-mode #sidebar-toggle,
         body.dark-mode button[onclick="toggleSidebar()"],
@@ -73,18 +67,36 @@
             background-color: #1a1a1a !important;
             border-color: rgba(255,255,255,0.7) !important;
         }
-        body.dark-mode .bg-gray-50 { background-color: #222222 !important; }
-        body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
-        body.dark-mode .border-gray-200, body.dark-mode .border-gray-100 { border-color: #222222 !important; }
-        body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
-        body.dark-mode .border-black { border-color: #ffffff !important; }
-        body.dark-mode .hover\:bg-gray-50:hover { background-color: #222222 !important; }
-        body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
-        body.dark-mode .hover\:bg-gray-200:hover { background-color: #222222 !important; }
-        body.dark-mode .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
-        body.dark-mode .shadow-xl { box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important; }
-        body.dark-mode .shadow-2xl { box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important; }
-        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black {
+            color: #ffffff !important;
+        }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 {
+            color: #888888 !important;
+        }
+        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200 {
+            border-color: #222222 !important;
+        }
+        body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover, body.dark-mode .hover\:bg-gray-200:hover {
+            background-color: #222222 !important;
+        }
+        body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 {
+            background-color: #0a0a0a !important;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        body.dark-mode #system-modal .bg-white { background-color: #0a0a0a !important; }
+        body.dark-mode #system-modal .border-gray-100 { border-color: #222222 !important; }
+        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+        body.dark-mode .divide-gray-100 > * { border-color: #222222 !important; }
+        body.dark-mode .text-gray-400 { color: #666666 !important; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #222222; }
 
         body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
         body.dark-mode .bg-black.text-white { color: #000000 !important; }
@@ -93,65 +105,20 @@
         body.dark-mode .bg-accent.text-white { color: #000000 !important; }
         body.dark-mode .text-accent { color: #ffffff !important; }
         body.dark-mode .border-accent { border-color: #ffffff !important; }
-        body.dark-mode header { background-color: #000000 !important; }
         body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
-            background-color: #0a0a0a; color: #f0f0f0; border-color: #222222;
-        }
-
-    /* auto-dark-fix v1 */
-    body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
-    body.dark-mode .bg-gray-200 { background-color: #262626 !important; }
-    body.dark-mode .bg-gray-300 { background-color: #333333 !important; }
-    body.dark-mode .bg-gray-400 { background-color: #444444 !important; }
-    body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
-    body.dark-mode .border-gray-200\/50,
-    body.dark-mode .border-gray-200\/60,
-    body.dark-mode .border-gray-200\/70 { border-color: #222222 !important; }
-    body.dark-mode .border-gray-300 { border-color: #333333 !important; }
-    body.dark-mode .border-gray-400 { border-color: #444444 !important; }
-    body.dark-mode .bg-blue-50,
-    body.dark-mode .bg-blue-50\/50 { background-color: #0d1a26 !important; }
-    body.dark-mode .border-blue-100,
-    body.dark-mode .border-blue-200 { border-color: #1e3a52 !important; }
-    body.dark-mode .bg-red-50,
-    body.dark-mode .bg-red-50\/50 { background-color: #2a1414 !important; }
-    body.dark-mode .bg-red-100 { background-color: #3a1a1a !important; }
-    body.dark-mode .border-red-100,
-    body.dark-mode .border-red-200 { border-color: #4a2020 !important; }
-    body.dark-mode .bg-green-100 { background-color: #14301c !important; }
-    body.dark-mode .bg-white\/95 { background-color: rgba(10,10,10,0.95) !important; }
-    body.dark-mode .hover\:bg-gray-50:hover,
-    body.dark-mode .hover\:bg-gray-50\/50:hover,
-    body.dark-mode .hover\:bg-gray-50\/80:hover { background-color: #1a1a1a !important; }
-    body.dark-mode .hover\:bg-gray-100:hover { background-color: #262626 !important; }
-    body.dark-mode .hover\:bg-gray-200:hover,
-    body.dark-mode .hover\:bg-gray-200\/50:hover { background-color: #333333 !important; }
-    body.dark-mode .hover\:bg-blue-50:hover,
-    body.dark-mode .hover\:bg-blue-100:hover { background-color: #163247 !important; }
-    body.dark-mode .hover\:bg-red-50:hover,
-    body.dark-mode .hover\:bg-red-100:hover { background-color: #3a1a1a !important; }
-    body.dark-mode .hover\:border-gray-300:hover,
-    body.dark-mode .hover\:border-gray-400:hover,
-    body.dark-mode .hover\:border-gray-900:hover { border-color: #555555 !important; }
-    body.dark-mode .focus\:border-gray-400:focus,
-    body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
-    body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
-</style>
-    <script>
-        (function() {
-            var t = localStorage.getItem('clincoo_theme') || 'Sistem (Default)';
-            var isDark = (t === 'Gelap') || (t === 'Sistem (Default)' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            if (isDark) document.documentElement.classList.add('dark-mode');
-        })();
-    </script>
-<!-- no-flash-v1 -->
-<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+        body.dark-mode .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
+        body.dark-mode .shadow-xl { box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important; }
+        body.dark-mode .shadow-2xl { box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important; }
+        body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
+        body.dark-mode .border-black { border-color: #ffffff !important; }
+    </style>
+    
 </head>
 
 <body class="min-h-screen flex flex-col text-gray-900 pt-16">
     <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
-    <header class="bg-[#f7f7f9] flex justify-between items-center px-6 py-4 fixed top-0 w-full z-40 transition-colors">
-        <button onclick="history.back()" class="top-2 left-4 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-50 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
+    <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </button>
         <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Upgrade Plan</h1>
@@ -160,8 +127,8 @@
 
     <main class="flex-1 w-full max-w-6xl mx-auto px-5 py-8 flex flex-col">
         <div class="mb-10 text-center mt-4">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F9FAFB] border border-gray-100 mb-6">
-                <i data-lucide="crown" class="w-8 h-8 text-accent"></i>
+            <div class="inline-flex items-center justify-center mb-6">
+                <i data-lucide="crown" class="w-12 h-12 text-accent"></i>
             </div>
             <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 mb-3" style="font-family: 'Space Grotesk', sans-serif;">
                 Buka Potensi Penuh
@@ -278,74 +245,41 @@
         </div>
     </main>
 
-    <div id="upgrade-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-        <div id="modal-content" class="bg-white rounded-3xl p-6 w-full max-w-sm mx-4 transform scale-95 transition-transform duration-300">
-            
-            <div id="modal-step-1">
-                <h2 class="text-xl font-bold text-gray-900 mb-2 font-[Space Grotesk]">Konfirmasi Upgrade</h2>
-                <p class="text-sm text-gray-500 mb-6">Anda akan beralih ke paket <strong id="modal-plan-name" class="text-gray-900"></strong>. Total tagihan Anda adalah <strong id="modal-plan-price" class="text-gray-900"></strong> per bulan.</p>
-                
-                <div class="flex gap-3">
-                    <button onclick="closeModal()" class="w-1/2 border border-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition-all hover:bg-gray-50">Batal</button>
-                    <button onclick="processUpgrade()" class="w-1/2 bg-accent hover:bg-accent-hover text-white font-medium py-2.5 rounded-xl transition-all">Konfirmasi</button>
-                </div>
-            </div>
 
-            <div id="modal-step-2" class="hidden flex-col items-center justify-center py-4 text-center">
-                <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mb-3"></i>
-                <h2 class="text-lg font-bold text-gray-900 mb-1 font-[Space Grotesk]">Pembayaran Berhasil!</h2>
-                <p class="text-sm text-gray-500 mb-6">Paket Anda telah berhasil diperbarui.</p>
-                <button onclick="finishUpgrade()" class="w-full bg-accent hover:bg-accent-hover text-white font-medium py-2.5 rounded-xl transition-all">Selesai</button>
-            </div>
-
-        </div>
-    </div>
 
     <script>
         lucide.createIcons();
 
+        const SUB_API = 'https://clincoo.pages.dev/api/subscription';
         let currentActivePlan = 'Starter';
         let selectedPlan = '';
+        let subData = null;
 
-        const modal = document.getElementById('upgrade-modal');
-        const modalContent = document.getElementById('modal-content');
-        const step1 = document.getElementById('modal-step-1');
-        const step2 = document.getElementById('modal-step-2');
-        const planNameEl = document.getElementById('modal-plan-name');
-        const planPriceEl = document.getElementById('modal-plan-price');
+
+        // Load current plan from D1
+        async function loadSubscription() {
+            try {
+                const res = await fetch(SUB_API);
+                const data = await res.json();
+                if (data.plan) {
+                    currentActivePlan = data.plan;
+                    updateUI();
+                }
+            } catch(e) { console.error('Failed to load subscription:', e); }
+        }
 
         function openModal(plan, price) {
             selectedPlan = plan;
-            planNameEl.innerText = plan;
-            planPriceEl.innerText = price;
-            
-            step1.classList.remove('hidden');
-            step2.classList.add('hidden');
-            step2.classList.remove('flex');
-
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modalContent.classList.remove('scale-95');
-            }, 10);
+            // Redirect to confirmation page
+            const billing = (subData && subData.billingCycle) ? subData.billingCycle : 'Bulanan';
+            window.location.href = 'konfirmasi-langganan.html?plan=' + encodeURIComponent(plan) + '&billing=' + encodeURIComponent(billing);
         }
 
-        function closeModal() {
-            modal.classList.add('opacity-0');
-            modalContent.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
+        function closeModal() {}
 
-        function processUpgrade() {
-            step1.classList.add('hidden');
-            step2.classList.remove('hidden');
-            step2.classList.add('flex');
-        }
+        function processUpgrade() {}
 
         function finishUpgrade() {
-            closeModal();
             currentActivePlan = selectedPlan;
             updateUI();
         }
@@ -391,6 +325,9 @@
                 btnBisnis.onclick = null;
             }
         }
+
+        // Load on page open
+        loadSubscription();
     </script>
 <script>
 (function(){
@@ -405,5 +342,5 @@
     });
 })();
 </script>
-</body></body>
+</body>
 </html>
