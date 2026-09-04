@@ -32,26 +32,13 @@
         body.dark-mode .border-gray-200, body.dark-mode .border-gray-100, body.dark-mode .border-gray-50 { border-color: #222222 !important; }
         body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
         body.dark-mode input { background-color: #0a0a0a; color: #f0f0f0; border-color: #222222; }
-        
-        body.dark-mode .bg-\[\#f7f7f9\] { background-color: #000000 !important; }
-        body.dark-mode header { 
-            background-color: #000000 !important; 
-            border-color: #222222 !important; 
+        body.dark-mode header, body.dark-mode .bg-\[\#f7f7f9\] { background-color: #000000 !important; border-color: #222222 !important; }
+        body.dark-mode button[onclick="PathRouter.goBack()"], body.dark-mode button[onclick="closeTopUpPage()"] {
+            background-color: #000000 !important; border: 1.5px solid rgba(255,255,255,0.4) !important; color: #ffffff !important;
         }
-        body.dark-mode header button[onclick] {
-            background-color: #000000 !important;
-            border: 1.5px solid rgba(255,255,255,0.4) !important;
-            color: #ffffff !important;
+        body.dark-mode button[onclick="PathRouter.goBack()"]:hover, body.dark-mode button[onclick="closeTopUpPage()"]:hover {
+            background-color: #1a1a1a !important; border-color: rgba(255,255,255,0.7) !important;
         }
-        body.dark-mode header button[onclick] svg {
-            color: #ffffff !important;
-            stroke: #ffffff !important;
-        }
-        body.dark-mode header button[onclick]:hover {
-            background-color: #1a1a1a !important;
-            border-color: rgba(255,255,255,0.7) !important;
-        }
-
         .pay-method-card { transition: all 0.2s ease; }
         .pay-method-card.selected { border-width: 2px !important; border-color: #111827 !important; }
         body.dark-mode .pay-method-card.selected { border-color: #ffffff !important; }
@@ -64,8 +51,8 @@
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
 
     <div id="page-dompet" class="flex flex-col min-h-screen w-full">
-        <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
-            <button onclick="PathRouter.goBack()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+        <header class="bg-[#f7f7f9] flex justify-between items-center px-4 py-3 fixed top-0 w-full z-30 transition-colors border-b border-gray-100">
+            <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </button>
             <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Dompet Saldo</h1>
@@ -101,8 +88,8 @@
     </div>
 
     <div id="page-topup" class="hidden flex-col bg-white min-h-screen w-full fixed inset-0 z-50 overflow-y-auto">
-        <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 sticky top-0 w-full z-40 transition-colors">
-            <button onclick="closeTopUpPage()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+        <header class="bg-[#f7f7f9] flex justify-between items-center px-4 py-3 sticky top-0 w-full z-40 transition-colors border-b border-gray-100">
+            <button onclick="closeTopUpPage()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </button>
             <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Isi Saldo Clincoo</h1>
@@ -262,6 +249,14 @@
                         </div>
                         <input type="radio" name="payment-method" value="LinkAja" class="accent-gray-900 w-4 h-4 ml-2">
                     </label>
+                    <!-- GoPay -->
+                    
+                    <!-- OVO -->
+                    
+                    <!-- BRI -->
+                    
+                    <!-- BNI -->
+                    
                 </div>
             </div>
 
