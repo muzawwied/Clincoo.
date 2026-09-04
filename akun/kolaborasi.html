@@ -284,7 +284,10 @@
         }
     }
 
-    const staticShareLink = "https://muzawwied.github.io/Clincoo./";
+    // Link share dinamis: dihitung dari alamat asli halaman,
+    // jadi jika domain custom dipasang di GitHub Pages, kode tidak perlu diubah.
+    var _p = window.location.pathname.replace(/\.html?$/i, '').replace(/\/[^\/]+\/[^\/]+$/, '');
+    const staticShareLink = window.location.origin + (_p === '' || _p === '/' ? '/' : _p + '/');
 
     function copyDirectLink() {
         const tempInput = document.createElement("input");
@@ -533,7 +536,7 @@
         fetch('https://koda-da05205d.base44.app/functions/sendInviteEmail', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to: email, role: role, project: 'Clincoo' })
+            body: JSON.stringify({ to: email, role: role, project: 'Clincoo', link: staticShareLink })
         })
         .then(r => r.json())
         .then(res => {
@@ -566,10 +569,11 @@
                 errEl.classList.remove('hidden');
             }
         })
-        .catch(() => {
+        .catch(function(err) {
             btn.innerText = originalText;
             btn.disabled = false;
-            errEl.textContent = 'Tidak dapat terhubung ke server email. Periksa koneksi Anda.';
+            var detail = (err && err.message) ? err.message : 'periksa koneksi Anda';
+            errEl.textContent = 'Tidak dapat terhubung ke server email (' + detail + '). Coba lagi.';
             errEl.classList.remove('hidden');
         });
     }
