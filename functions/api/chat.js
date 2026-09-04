@@ -7,6 +7,27 @@ const PREFERRED_MODELS = [
   "gemini-3-flash-preview"
 ];
 
+// --- Rate limiter per-IP (pengganti rate limiting zone Cloudflare untuk pages.dev) ---
+const RATE_LIMIT = { max: 30, windowMs: 60_000 }; // 30 request/menit per IP untuk POST /api/chat
+const rateBuckets = new Map();
+function rateLimitOk(ip) {
+  const now = Date.now();
+  let b = rateBuckets.get(ip);
+  if (!b || now - b.start >= RATE_LIMIT.windowMs) {
+    b = { start: now, count: 0 };
+  }
+  b.count++;
+  rateBuckets.set(ip, b);
+  // bersihkan bucket basi agar map tidak membengkak
+  if (rateBuckets.size > 5000) {
+    for (const [k, v] of rateBuckets) if (now - v.start >= RATE_LIMIT.windowMs) rateBuckets.delete(k);
+  }
+  return b.count <= RATE_LIMIT.max;
+}
+function clientIp(request) {
+  try { return (request && request.headers && request.headers.get('cf-connecting-ip')) || 'unknown'; } catch (e) { return 'unknown'; }
+}
+
 // CORS dibatasi: hanya domain Clincoo, preview deployment, dan localhost
 function corsHeaders(request) {
   let origin = '';
@@ -240,11 +261,25 @@ export async function onRequestGet({ request, env }) {
 
 // POST /api/chat — save user message, call Gemini, save AI response, return it
 export async function onRequestPost({ request, env }) {
+  if (!rateLimitOk(clientIp(request))) {
+    return new Response(JSON.stringify({ error: 'Terlalu banyak permintaan. Coba lagi dalam 1 menit.' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json', 'Retry-After': '60', ...corsHeaders(request) }
+    });
+  }
+
   const db = env.DB;
   if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) } });
 
   try {
-    const body = await request.json();
+    // Batasi ukuran body maksimal 2 MB (anti abuse attachment base64 raksasa)
+    const raw = await request.text();
+    if (raw.length > 2_000_000) {
+      return new Response(JSON.stringify({ error: 'Payload terlalu besar (maks 2MB).' }), {
+        status: 413, headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
+      });
+    }
+    const body = JSON.parse(raw);
     const action = body.action || 'send';
 
     // --- Create new session ---
