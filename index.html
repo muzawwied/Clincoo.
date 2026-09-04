@@ -179,9 +179,6 @@
             var params = new URLSearchParams(window.location.search);
             var path = params.get('path');
             var pageId = 'page-home';
-            if (path === '/profile') pageId = 'page-profile';
-            else if (path === '/notifikasi') pageId = 'page-notif';
-            else if (path === '/proyek') pageId = 'page-projects';
             // Save current page to localStorage as backup
             try { localStorage.setItem('clincoo_current_page', pageId); } catch(e) {}
             document.addEventListener('DOMContentLoaded', function() {
@@ -218,18 +215,18 @@
                 <div id="notif-menu" class="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-50 origin-top-right">
                     <div class="flex justify-between items-center mb-2 px-1">
                         <span class="font-semibold text-sm text-gray-900">Notifikasi</span>
-                        <button onclick="navigateTo('page-notif')" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</button>
+                        <a href="https://muzawwied.github.io/Clincoo/pages/notifikasi.html" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
                     </div>
                     <div class="flex flex-col gap-2 mb-2">
                         <div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div>
                     </div>
                 </div>
             </div>
-            <button onclick="navigateTo('page-profile')" class="flex items-center justify-center p-2 hover:opacity-70 transition-opacity cursor-pointer" aria-label="User Profile">
+            <a href="https://muzawwied.github.io/Clincoo/pages/profil.html" class="flex items-center justify-center p-2 hover:opacity-70 transition-opacity cursor-pointer" aria-label="User Profile">
                 <svg class="w-7 h-7 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
-            </button>
+            </a>
         </div>
     </header>
     <main id="page-home" class="page-view hidden flex-1 w-full max-w-3xl mx-auto px-5 pt-8 pb-10 flex flex-col justify-start">
@@ -288,7 +285,7 @@
         <div class="w-full mt-28">
             <div class="flex items-center justify-between mb-4 px-1">
                 <h2 class="text-lg font-bold text-gray-900 tracking-tight">Proyek terbaru</h2>
-                <button onclick="navigateTo('page-projects')" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</button>
+                <a href="https://muzawwied.github.io/Clincoo/pages/proyek.html" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
             </div>
             <div id="home-projects-list" class="flex items-center gap-4 overflow-x-auto hide-scrollbar pb-2 pt-1 w-full"></div>
         </div>
@@ -378,176 +375,6 @@
             </div>
         </div>
     </main>
-    <main id="page-profile" class="page-view hidden flex-1 w-full max-w-2xl mx-auto pb-12 flex-col justify-start relative">
-        <button onclick="navigateTo('page-home')" class="fixed top-3 left-3 w-10 h-10 flex items-center justify-center rounded-full bg-white backdrop-blur border border-gray-100 shadow-sm hover:bg-gray-50 transition-all cursor-pointer text-gray-700 hover:text-black z-50" aria-label="Kembali">
-            <i data-lucide="arrow-left" class="w-5 h-5"></i>
-        </button>
-        <div class="flex items-center justify-between px-7 pb-8 gap-5 relative">
-            <div class="flex flex-col">
-                <h2 id="profile-display-name" class="text-[24px] font-extrabold text-gray-900 tracking-tight">Muzawwied</h2>
-                <p id="profile-display-email" class="text-[14px] text-gray-500 font-medium mt-0.5">muzawwied@gmail.com</p>
-            </div>
-            <div class="relative z-10 shrink-0 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
-                <div id="profile-pic-display" class="w-24 h-24 bg-accent rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg transition-transform duration-300 group-hover:scale-105 bg-cover bg-center bg-no-repeat overflow-hidden">
-                    MZ
-                </div>
-                <div class="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md border border-gray-100 transition-transform group-hover:scale-110">
-                    <i data-lucide="pencil" class="w-4 h-4 text-gray-900"></i>
-                </div>
-            </div>
-            <input type="file" id="profile-pic-input" class="hidden" accept="image/*">
-        </div>
-        <div class="w-full flex flex-col space-y-6">
-            <div>
-                <h3 class="px-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Akun</h3>
-                <div class="flex flex-col w-full">
-                    <a href="pages/aktivitas.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
-                        <i data-lucide="rotate-ccw-clock" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                        <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Aktivitas</span>
-                    </a>
-                    <a href="pages/personal.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
-                        <i data-lucide="user" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                        <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Personal</span>
-                    </a>
-                    <a href="pages/dompet.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
-                        <i data-lucide="wallet" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                        <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Dompet</span>
-                    </a>
-                </div>
-            
-            <div>
-                <h3 class="px-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Pengaturan</h3>
-                <div class="flex flex-col w-full">
-                    <a href="pages/upgrade.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
-                        <i data-lucide="crown" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                        <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Upgrade plan</span>
-                    </a>
-                    <a href="pages/langganan.html" class="w-full flex items-center px-6 py-3 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
-                        <i data-lucide="gem" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                        <div class="flex flex-col items-start">
-                            <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Langganan</span>
-                            <span class="text-[12px] text-gray-500 mt-0.5">Go</span>
-                        </div>
-                    </a>                  
-                </div>
-            
-            <div>
-                <div class="flex flex-col w-full relative">
-                    <div class="relative w-full">
-                        <button id="theme-dropdown-btn" class="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors active:bg-gray-100 group cursor-pointer">
-                            <div class="flex items-center">
-                                <i data-lucide="sun" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                                <div class="flex flex-col items-start">
-                                    <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Penampilan</span>
-                                    <span id="theme-status-text" class="text-[12px] text-gray-500 mt-0.5"></span>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                        </button>
-                        <div id="theme-dropdown-menu" class="hidden absolute left-6 right-6 top-full mt-1 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-30">
-                            <button onclick="setTheme('Sistem (Default)')" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center justify-between cursor-pointer">
-                                <span>Sistem (Default)</span>
-                            </button>
-                            <button onclick="setTheme('Terang')" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center justify-between cursor-pointer">
-                                <span>Terang</span>
-                            </button>
-                            <button onclick="setTheme('Gelap')" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center justify-between cursor-pointer">
-                                <span>Gelap</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="relative w-full">
-                        <button id="accent-dropdown-btn" class="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors active:bg-gray-100 group cursor-pointer">
-                            <div class="flex items-center">
-                                <i data-lucide="paint-bucket" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                                <div class="flex flex-col items-start">
-                                    <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Warna aksen</span>
-                                    <span id="accent-status-text" class="text-[12px] text-gray-500 mt-0.5 flex items-center gap-1.5"><span id="accent-dot" class="w-2 h-2 rounded-full bg-gray-900"></span> <span id="accent-name"></span></span>
-                                </div>
-                            </div>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                        </button>
-                        <div id="accent-dropdown-menu" class="hidden absolute left-6 right-6 top-full mt-1 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-30">
-                            <button onclick="setAccent('Hitam (Default)', 'bg-gray-900')" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-2 cursor-pointer">
-                                <span class="w-3 h-3 rounded-full bg-gray-900"></span>
-                                <span>Hitam (Default)</span>
-                            </button>
-                            <button onclick="setAccent('Biru', 'bg-blue-600')" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-2 cursor-pointer">
-                                <span class="w-3 h-3 rounded-full bg-blue-600"></span>
-                                <span>Biru</span>
-                            </button>
-                            <button onclick="setAccent('Hijau', 'bg-emerald-600')" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-2 cursor-pointer">
-                                <span class="w-3 h-3 rounded-full bg-emerald-600"></span>
-                                <span>Hijau</span>
-                            </button>
-                            <button onclick="setAccent('Ungu', 'bg-purple-600')" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-2 cursor-pointer">
-                                <span class="w-3 h-3 rounded-full bg-purple-600"></span>
-                                <span>Ungu</span>
-                            </button>
-                            <button onclick="setAccent('Merah', 'bg-red-600')" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-2 cursor-pointer">
-                                <span class="w-3 h-3 rounded-full bg-red-600"></span>
-                                <span>Merah</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-          
-            <div>
-                <div class="flex flex-col w-full">
-                                     
-                    <a href="pages/kolaborasi.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
-                        <i data-lucide="user-plus" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                        <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Kolaborasi</span>
-                    </a>
-                    <a href="pages/kontrol-data.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
-                        <i data-lucide="sliders-horizontal" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                        <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Kontrol data</span>
-                    </a>
-                    
-                    <a href="pages/laporkan-bug.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
-                        <i data-lucide="bug" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                        <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Laporkan bug</span>
-                    </a>
-                    <a href="pages/tentang.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
-                        <i data-lucide="info" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
-                        <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Tentang</span>
-                    </a>
-                </div>
-            </div>
-            <div>
-                <div class="flex flex-col w-full">
-                    <a href="pages/keluar.html" class="w-full flex items-center px-6 py-3.5 hover:bg-red-50 transition-colors active:bg-red-100 group">
-                        <i data-lucide="log-out" class="w-5 h-5 text-red-500 mr-4 group-hover:text-red-600 transition-colors"></i>
-                        <span class="text-[15px] font-medium text-red-500 group-hover:text-red-600">Keluar</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </main>
-    <main id="page-notif" class="page-view hidden flex-1 w-full max-w-3xl mx-auto pb-10 flex-col justify-start relative">
-        <div class="fixed top-0 left-0 right-0 h-14 bg-[#f7f7f9] backdrop-blur-md flex items-center px-4 gap-3 z-50 header-bar transition-colors duration-300">
-            <button onclick="navigateTo('page-home')" class="w-10 h-10 flex items-center justify-center shrink-0 rounded-full hover:bg-gray-50 transition-colors cursor-pointer text-gray-700 hover:text-black" aria-label="Kembali">
-                <i data-lucide="arrow-left" class="w-5 h-5"></i>
-            </button>
-            <h2 class="text-lg font-bold text-gray-900 tracking-tight">Semua notifikasi</h2>
-        </div>
-        <div class="flex flex-col items-center justify-center py-16 text-center text-gray-500">
-            <i data-lucide="bell-off" class="w-12 h-12 text-gray-300 mb-4"></i>
-            <p class="text-[15px]">Belum ada notifikasi baru</p>
-        </div>
-    </main>
-    <main id="page-projects" class="page-view hidden flex-1 w-full max-w-3xl mx-auto pb-10 flex-col justify-start relative">
-        <div class="fixed top-0 left-0 right-0 h-14 bg-[#f7f7f9]/80 backdrop-blur-md flex items-center px-4 gap-3 z-50 header-bar transition-colors duration-300">
-            <button onclick="navigateTo('page-home')" class="w-10 h-10 flex items-center justify-center shrink-0 rounded-full hover:bg-gray-50 transition-colors cursor-pointer text-gray-700 hover:text-black" aria-label="Kembali">
-                <i data-lucide="arrow-left" class="w-5 h-5"></i>
-            </button>
-            <h2 class="text-lg font-bold text-gray-900 tracking-tight">Semua proyek</h2>
-        </div>
-        <div class="px-5 mt-10 mb-3">
-            <p class="text-sm text-gray-500">Kelola dan pantau seluruh proyek yang sedang Anda kerjakan.</p>
-        </div>
-        <div id="all-projects-list" class="px-5 mt-1 flex flex-col gap-4"></div>
-    </main></main>
     <script>
     
     // ============================================
@@ -640,7 +467,7 @@
         if (!parent) return;
 
         if (notifs.length === 0) {
-            parent.innerHTML = '<div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div><button onclick="navigateTo(\'page-notif\')" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</button>';
+            parent.innerHTML = '<div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div><a href="https://muzawwied.github.io/Clincoo/pages/notifikasi.html" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>';
             return;
         }
 
@@ -659,29 +486,6 @@
             listContainer.appendChild(item);
         }
 
-        // All notifications page
-        const notifPage = document.getElementById('page-notif');
-        if (notifPage) {
-            const notifContent = notifPage.querySelector('.text-\[15px\]');
-            if (notifContent && notifs.length > 0) {
-                const notifParent = notifContent.parentElement;
-                notifParent.innerHTML = '<div class="space-y-3 mt-4"></div>';
-                const fullList = notifParent.querySelector('div');
-                for (let n of notifs) {
-                    let timeStr = new Date(n.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-                    const type = n.type || 'info';
-                    const iconPath = notifIcons[type] || notifIcons.info;
-                    const color = notifColors[type] || notifColors.info;
-                    const item = document.createElement('div');
-                    item.className = 'flex items-start gap-3 px-4 py-3 rounded-xl bg-white border border-gray-100 cursor-pointer hover:shadow-sm transition-shadow' + (n.read ? ' opacity-60' : '');
-                    item.onclick = function() { handleNotifClick(n); };
-                    item.innerHTML = '<div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:' + color + '15"><svg class="w-4 h-4" style="color:' + color + '" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">' + iconPath + '</svg></div><div class="flex-1"><div class="flex items-center gap-2"><span class="text-sm font-semibold" style="color:' + color + '">' + (n.source || '') + '</span><span class="text-xs text-gray-400">' + timeStr + '</span></div><p class="text-sm text-gray-600 mt-0.5">' + n.message + '</p>' + (n.link ? '<p class="text-xs text-blue-500 mt-1">Lihat detail →</p>' : '') + '</div>';
-                    fullList.appendChild(item);
-                }
-            } else if (notifContent && notifs.length === 0) {
-                notifContent.textContent = 'Belum ada notifikasi baru';
-            }
-        }
     }
 
 
@@ -975,10 +779,7 @@
             lastScroll = currentScroll;
         });
         const reverseRouteMap = {
-            'page-home': '?session=active&ref=client&path=/home',
-            'page-profile': '?session=active&ref=client&path=/profile',
-            'page-notif': '?session=active&ref=client&path=/notifikasi',
-            'page-projects': '?session=active&ref=client&path=/proyek'
+            'page-home': '?session=active&ref=client&path=/home'
         };
         function navigateTo(pageId, pushState = true) {
             try { localStorage.setItem('clincoo_current_page', pageId); } catch(e) {}
@@ -1020,9 +821,6 @@
                 const params = new URLSearchParams(window.location.search);
                 const path = params.get('path');
                 let pageId = 'page-home';
-                if (path === '/profile') pageId = 'page-profile';
-                else if (path === '/notifikasi') pageId = 'page-notif';
-                else if (path === '/proyek') pageId = 'page-projects';
                 navigateTo(pageId, false);
             }
         });
@@ -1030,9 +828,6 @@
             const params = new URLSearchParams(window.location.search);
             const path = params.get('path');
             let initialPageId = 'page-home';
-            if (path === '/profile') initialPageId = 'page-profile';
-            else if (path === '/notifikasi') initialPageId = 'page-notif';
-            else if (path === '/proyek') initialPageId = 'page-projects';
             // Fallback: check localStorage if no URL path - validate the value exists
             if (!path) {
                 try {
