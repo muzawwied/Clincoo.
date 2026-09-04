@@ -14,7 +14,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
@@ -228,7 +227,7 @@
         body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
         body.dark-mode #sidebar-toggle,
         body.dark-mode button[onclick="toggleSidebar()"],
-        body.dark-mode button[onclick="PathRouter.goBack()"],
+        body.dark-mode button[onclick="history.back()"],
         body.dark-mode button[onclick="navigateTo(\'page-home\')"],
         body.dark-mode .header-glass button[onclick],
         body.dark-mode header button[onclick] {
@@ -238,7 +237,7 @@
         }
         body.dark-mode #sidebar-toggle svg,
         body.dark-mode button[onclick="toggleSidebar()"] svg,
-        body.dark-mode button[onclick="PathRouter.goBack()"] svg,
+        body.dark-mode button[onclick="history.back()"] svg,
         body.dark-mode button[onclick="navigateTo(\'page-home\')"] svg,
         body.dark-mode .header-glass button[onclick] svg,
         body.dark-mode header button[onclick] svg {
@@ -247,7 +246,7 @@
         }
         body.dark-mode #sidebar-toggle:hover,
         body.dark-mode button[onclick="toggleSidebar()"]:hover,
-        body.dark-mode button[onclick="PathRouter.goBack()"]:hover,
+        body.dark-mode button[onclick="history.back()"]:hover,
         body.dark-mode button[onclick="navigateTo(\'page-home\')"]:hover,
         body.dark-mode .header-glass button[onclick]:hover,
         body.dark-mode header button[onclick]:hover {
@@ -291,7 +290,6 @@
         body.dark-mode header { background-color: #000000 !important; }
     </style>
     
-    <script src="../js/path-router.js"></script>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden selection:bg-gray-200">
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
@@ -309,7 +307,7 @@
         </div>
         
         <div class="px-3 py-4 flex flex-col gap-1" id="sidebar-nav">
-            <a href="../" data-page="app" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+            <a href="../index.html" data-page="app" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
                 <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg>
                 <span class="font-medium text-[14px]">Beranda</span>
             </a>
@@ -384,8 +382,6 @@
         const NOTIF_KEY = 'clincoo_notifications';
         function getNotifications() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch(e) { return []; } }
         function saveNotifications(n) { localStorage.setItem(NOTIF_KEY, JSON.stringify(n)); }
-    // Auto-clear read notifications on page load
-    (function(){ var old = getNotifications(); var unread = old.filter(function(n){ return !n.read; }); if(unread.length !== old.length) saveNotifications(unread); })();
         function addNotification(source, message) {
           const n = getNotifications();
           n.unshift({ id: Date.now(), source, message, timestamp: new Date().toISOString(), read: false });
@@ -753,7 +749,7 @@
                 
                 let e2bKey = '';
                 try {
-                    const keyRes = await fetch('https://clincoo-api.clincoo.workers.dev/api/e2b');
+                    const keyRes = await fetch('https://clincoo.pages.dev/api/e2b');
                     if (keyRes.ok) { const kj = await keyRes.json(); e2bKey = kj.apiKey || ''; }
                 } catch(e) {}
                 if (!e2bKey) throw new Error("E2B API key tidak tersedia, beralih ke fallback.");
@@ -1384,7 +1380,8 @@
                 const finishedMsg = messages.find(m => m.id === currentAiMessageId);
                 if (finishedMsg && finishedMsg.text) {
                     try {
-                        const projectId = PathRouter.getProjectIdWithFallback();
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const projectId = urlParams.get('id');
                         if (projectId) {
                             let projects = [];
                             const stored = localStorage.getItem('clincoo_projects');
@@ -1392,16 +1389,11 @@
                             const projIndex = projects.findIndex(p => p.id === projectId);
                             if (projIndex !== -1) {
                                 if (!projects[projIndex].aiName) {
-                                    let cleanTitle = 'Proyek Baru';
-                                    if (finishedMsg.text && !finishedMsg.isError) {
-                                        const cleanLines = finishedMsg.text.split('\n').filter(l => l.trim() && !l.startsWith('#') && !l.startsWith('Maaf') && !l.startsWith('Terjadi'));
-                                        cleanTitle = (cleanLines[0] || finishedMsg.text.substring(0, 40)).replace(/[*#`~_\[\]]/g, '').trim().substring(0, 50);
-                                    }
-                                    projects[projIndex].aiName = cleanTitle;
+                                    const firstLine = finishedMsg.text.split('\n')[0].substring(0, 50);
+                                    projects[projIndex].aiName = firstLine;
                                     projects[projIndex].aiDesc = finishedMsg.text.substring(0, 120);
                                     projects[projIndex].updatedAt = new Date().toISOString();
                                     localStorage.setItem('clincoo_projects', JSON.stringify(projects));
-                                    try { await fetch('https://clincoo-api.clincoo.workers.dev/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_id: projectId, app_name: cleanTitle, app_description: finishedMsg.text.substring(0, 120) }) }); } catch(e) {}
                                 }
                             }
                         }
@@ -1418,7 +1410,7 @@
             renderMessages();
         }
 
-        const GEMINI_PROXY_URL = 'https://clincoo-api.clincoo.workers.dev/api/chat';
+        const GEMINI_PROXY_URL = 'https://clincoo.pages.dev/api/chat';
         const PREFERRED_MODELS = [
             "gemini-3.6-flash",
             "gemini-3-flash-preview",
@@ -1580,7 +1572,7 @@
             } 
             else {
                 let externalContext = "";
-                const JINA_PROXY_URL = 'https://clincoo-api.clincoo.workers.dev/api/jina';
+                const JINA_PROXY_URL = 'https://clincoo.pages.dev/api/jina';
                 
                 if (hasUrl) {
                     try {
@@ -1783,19 +1775,11 @@
             chatInput.value = '';
             adjustInputHeight();
             
-            autoScrollActive = true;
-            
-            // Show loading indicator immediately
-            const loadingMsgId = generateId();
-            messages.push({ id: loadingMsgId, role: 'assistant', text: '<div class="flex items-center gap-1.5 py-1"><span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms"></span><span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms"></span></div>', isTyping: false, isProcessing: true, isLoading: true });
+            autoScrollActive = true; 
             renderMessages();
             scrollToBottom(true);
             
-            fetchAIResponse().then(() => {
-                // Remove the loading indicator once response starts
-                const idx = messages.findIndex(m => m.id === loadingMsgId);
-                if (idx >= 0) messages.splice(idx, 1);
-            });
+            fetchAIResponse();
         }
 
         window.handlePromptClick = function(text) {
@@ -1839,7 +1823,7 @@
         (function() {
             try {
                 var handoffMsg = localStorage.getItem('clincoo_current_chat_msg');
-                var handoffProjectId = PathRouter.getProjectIdWithFallback();
+                var handoffProjectId = localStorage.getItem('clincoo_current_project_id');
                 if (handoffMsg && handoffMsg.trim()) {
                     localStorage.removeItem('clincoo_current_chat_msg');
                     // Always auto-submit the handoff message, don't check existing messages
@@ -1907,7 +1891,5 @@
   });
 })();
 </script>
-<script>if(typeof lucide!=="undefined")lucide.createIcons();</script>
 </body>
-<!-- deploy: 2026-09-01T00:54 -->
 </html>
