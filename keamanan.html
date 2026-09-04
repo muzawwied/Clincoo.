@@ -288,6 +288,7 @@
       if (isHidden) {
         notifDropdown.classList.remove('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
         notifDropdown.classList.add('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+        loadNotifications().then(markAllNotificationsRead);
       } else {
         notifDropdown.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
         notifDropdown.classList.add('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
@@ -296,8 +297,54 @@
 
     // Shared Notification System
     const NOTIF_KEY = 'clincoo_notifications';
+    const NOTIF_API = 'https://clincoo.pages.dev/api/notifications';
     function getNotifications() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch(e) { return []; } }
     function saveNotifications(n) { localStorage.setItem(NOTIF_KEY, JSON.stringify(n)); }
+    function escapeNotifHtml(str) { return String(str || '').replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+    function updateNotifBadge(count) {
+      const btn = document.querySelector('button[aria-label="Notifikasi"]');
+      if (!btn) return;
+      let badge = btn.querySelector('.notif-badge');
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'notif-badge absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center';
+        btn.appendChild(badge);
+      }
+      if (count > 0) { badge.textContent = count > 9 ? '9+' : String(count); badge.style.display = 'flex'; }
+      else badge.style.display = 'none';
+    }
+    async function loadNotifications() {
+      try {
+        const res = await fetch(NOTIF_API);
+        const data = await res.json();
+        if (data && Array.isArray(data.notifications)) {
+          saveNotifications(data.notifications);
+          renderNotifications();
+          updateNotifBadge(data.unreadCount || 0);
+        }
+      } catch(e) {}
+    }
+    function markAllNotificationsRead() {
+      const n = getNotifications();
+      let changed = false;
+      for (let i of n) { if (!i.read) { i.read = 1; changed = true; } }
+      if (changed) saveNotifications(n);
+      updateNotifBadge(0);
+      fetch(NOTIF_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'mark_all_read' }) }).catch(function() {});
+    }
+    function addNotification(source, message, link) {
+      const n = getNotifications();
+      n.unshift({ id: 'local-' + Date.now(), source: source, message: message, link: link || '', read: 0, created_at: new Date().toISOString() });
+      if (n.length > 50) n.length = 50;
+      saveNotifications(n); renderNotifications();
+      fetch(NOTIF_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: source, message: message, link: link || '' }) }).catch(function() {});
+    }
+    function notifTime(ts) {
+      if (!ts) return '';
+      const s = String(ts);
+      const d = new Date(s.indexOf('T') > -1 ? s : s.replace(' ', 'T') + 'Z');
+      return isNaN(d.getTime()) ? '' : d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    }
     function renderNotifications() {
       const notifs = getNotifications();
       const dd = document.getElementById('notif-dropdown');
@@ -314,20 +361,16 @@
       parent.innerHTML = '<div class="space-y-1.5 max-h-48 overflow-y-auto"></div>';
       const listContainer = parent.querySelector('div');
       for (let n of notifs.slice(0, 5)) {
-        let t = new Date(n.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         const item = document.createElement('div');
         item.className = 'flex items-start gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer';
-        item.onclick = function() { n.read = true; saveNotifications(notifs); renderNotifications(); };
-        item.innerHTML = '<span class="text-xs font-semibold text-gray-700 flex-shrink-0">' + n.source + '</span><div class="flex-1 min-w-0"><p class="text-xs text-gray-600">' + n.message + '</p><p class="text-[10px] text-gray-400 mt-0.5">' + t + '</p></div>';
+        if (n.link) item.onclick = function() { window.location.href = n.link; };
+        const isUnread = !n.read;
+        item.innerHTML = '<span class="text-xs font-semibold flex-shrink-0 ' + (isUnread ? 'text-gray-900' : 'text-gray-700') + '">' + escapeNotifHtml(n.source) + '</span><div class="flex-1 min-w-0"><p class="text-xs text-gray-600 ' + (isUnread ? 'font-medium' : '') + '">' + escapeNotifHtml(n.message) + '</p><p class="text-[10px] text-gray-400 mt-0.5">' + notifTime(n.created_at || n.timestamp) + '</p></div>';
         listContainer.appendChild(item);
       }
     }
-    function markNotifRead(id) {
-      const n = getNotifications();
-      const item = n.find(x => x.id === id);
-      if (item) item.read = true;
-      saveNotifications(n); renderNotifications();
-    } // Fixed missing brace here
+    renderNotifications();
+    loadNotifications();
 
         document.addEventListener('click', function(e) {
       const notifDropdown = document.getElementById('notif-dropdown');
