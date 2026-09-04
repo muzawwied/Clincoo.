@@ -319,7 +319,9 @@
     </div>
 
     <script>
-        const WALLET_API_URL = '/api/wallet';
+        // Backend API — di-host di Cloudflare Pages (GitHub Pages tidak bisa menjalankan server)
+        const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev' : '';
+        const WALLET_API_URL = API_BASE + '/api/wallet';
         let currentBalance = 0;
         let selectedNominalAmount = 50000;
 
@@ -462,7 +464,7 @@
             var method = methodEl ? methodEl.value : 'QRIS Instant';
             var channel = XENDIT_METHOD_MAP[method] || 'qris';
             try {
-                var res = await fetch('/api/topup', {
+                var res = await fetch(API_BASE + '/api/topup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'create', amount: selectedNominalAmount, method: channel })
@@ -493,7 +495,7 @@
             topupPollTimer = setInterval(async function() {
                 attempts++;
                 try {
-                    var data = await fetch('/api/topup?action=status&order_id=' + encodeURIComponent(orderId)).then(function(r) { return r.json(); });
+                    var data = await fetch(API_BASE + '/api/topup?action=status&order_id=' + encodeURIComponent(orderId)).then(function(r) { return r.json(); });
                     if (data.status === 'paid') {
                         stopTopUpPoll();
                         await renderBalance();
