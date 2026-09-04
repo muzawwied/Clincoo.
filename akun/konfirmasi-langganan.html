@@ -53,11 +53,7 @@
     body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
     body.dark-mode .border-gray-300 { border-color: #333333 !important; }
     body.dark-mode .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #222222 !important; }
-    body.dark-mode .bg-red-50 { background-color: #1c1212 !important; }
-    body.dark-mode .border-red-100,
-    body.dark-mode .border-red-200 { border-color: #3a2020 !important; }
-    body.dark-mode .text-red-700 { color: #f0a3a3 !important; }
-    body.dark-mode .text-red-600 { color: #f0a3a3 !important; }
+    body.dark-mode .text-red-600, body.dark-mode .text-red-700 { color: #f0a3a3 !important; }
 
     /* --- outline secondary button (kembali / batal) --- */
     .btn-outline {
@@ -239,19 +235,12 @@
             <span id="wallet-after" class="clincoo-shimmer text-sm text-gray-600 dark:text-gray-400">-</span>
           </div>
         </div>
-      </div>
 
-      <div id="pay-error" class="hidden mt-4 bg-red-50 border border-red-100 dark:border-red-100 rounded-2xl p-4 flex items-start gap-3">
-        <div class="w-9 h-9 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
-          <i data-lucide="alert-triangle" class="w-4.5 h-4.5 text-red-600 dark:text-red-600"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-red-700 dark:text-red-700">Saldo Tidak Cukup</p>
-          <p id="pay-error-text" class="text-xs text-red-600 dark:text-red-600 mt-0.5"></p>
-          <button onclick="window.location.href='dompet.html'" class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full text-white" style="background:var(--accent-color)">
-            Isi Saldo Dompet
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-          </button>
+        <div id="pay-error" class="hidden pt-1" style="border-top-width:0">
+          <p class="text-xs text-red-600">
+            <span id="pay-error-text"></span>
+            <button onclick="window.location.href='dompet.html'" class="underline underline-offset-2 font-semibold cursor-pointer">Isi saldo dompet</button>
+          </p>
         </div>
       </div>
 
@@ -344,7 +333,7 @@
       setVal('wallet-after', totalPrice === 0 ? fmtID(balance) : fmtID(balance - totalPrice));
 
       if(totalPrice > 0 && balance < totalPrice){
-        document.getElementById('pay-error-text').textContent = 'Butuh ' + fmtID(totalPrice) + ', saldo Anda ' + fmtID(balance) + '.';
+        document.getElementById('pay-error-text').textContent = 'Saldo dompet tidak cukup. Butuh ' + fmtID(totalPrice) + ', saldo Anda ' + fmtID(balance) + '.';
         document.getElementById('pay-error').classList.remove('hidden');
         setLabel('Saldo Tidak Cukup');
         setSlideEnabled(false);
@@ -378,7 +367,7 @@
           setLabel('Berhasil!');
           setTimeout(function(){ window.location.href = 'langganan.html'; }, 900);
         } else if(res.status === 402){
-          document.getElementById('pay-error-text').textContent = 'Butuh ' + fmtID(data.required || totalPrice) + ', saldo Anda ' + fmtID(data.balance || 0) + '.';
+          document.getElementById('pay-error-text').textContent = 'Saldo dompet tidak cukup. Butuh ' + fmtID(data.required || totalPrice) + ', saldo Anda ' + fmtID(data.balance || 0) + '.';
           document.getElementById('pay-error').classList.remove('hidden');
           resetSlide();
           setLabel('Saldo Tidak Cukup');
