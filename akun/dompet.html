@@ -378,7 +378,20 @@
             }
         }
 
-        // Process Top Up via D1 API
+        // Process Top Up — Pembayaran Nyata via Midtrans Snap (verifikasi server, real-time)
+        let topupPollTimer = null;
+        let snapScriptLoaded = false;
+
+        function loadSnapScript(clientKey, isProduction, cb) {
+            if (snapScriptLoaded && window.snap) { cb(); return; }
+            const s = document.createElement('script');
+            s.src = (isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js');
+            s.setAttribute('data-client-key', clientKey);
+            s.onload = () => { snapScriptLoaded = true; cb(); };
+            s.onerror = () => showModal('Gagal Memuat Pembayaran', 'Tidak dapat memuat Midtrans Snap. Periksa koneksi internet Anda.');
+            document.body.appendChild(s);
+        }
+
         async function processTopUp() {
             if (!selectedNominalAmount || selectedNominalAmount < 10000) {
                 showModal('Nominal Tidak Valid', 'Minimal isi saldo adalah 10.000');
@@ -389,31 +402,62 @@
             const method = methodEl ? methodEl.value : 'QRIS Instant';
 
             try {
-                const res = await fetch(WALLET_API_URL, {
+                const res = await fetch('/api/topup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: `Isi Saldo via ${method}`,
-                        amount: selectedNominalAmount,
-                        type: 'in',
-                        method: method
-                    })
+                    body: JSON.stringify({ action: 'create', amount: selectedNominalAmount, method: method })
                 }).then(r => r.json());
 
-                if (res.success) {
-                    currentBalance = res.balance;
-                    // Re-render views
-                    renderBalance();
-                    renderTransactions();
-
-                    closeTopUpPage();
-                    showModal('Pengisian Saldo Berhasil', `Saldo sebesar ${formatNumberOnly(selectedNominalAmount)} telah ditambahkan ke akun Clincoo Anda via ${method}.`);
-                } else {
-                    showModal('Gagal', res.error || 'Terjadi kesalahan saat mengisi saldo.');
+                if (!res.success) {
+                    const msg = (res.error === 'payment_not_configured')
+                        ? 'Payment gateway belum dikonfigurasi. Hubungi administrator Clincoo.'
+                        : (res.message || res.error || 'Gagal membuat transaksi');
+                    showModal('Top Up Gagal', msg);
+                    return;
                 }
+
+                // Buka popup pembayaran Midtrans Snap
+                loadSnapScript(res.client_key, res.is_production, () => {
+                    window.snap.pay(res.token, {
+                        onSuccess: () => pollTopUpStatus(res.order_id),
+                        onPending: () => pollTopUpStatus(res.order_id),
+                        onError: () => showModal('Pembayaran Gagal', 'Transaksi tidak dapat diproses. Silakan coba lagi.'),
+                        onClose: () => { stopTopUpPoll(); showModal('Pembayaran Dibatalkan', 'Anda menutup halaman pembayaran sebelum menyelesaikan transaksi.'); }
+                    });
+                });
             } catch(e) {
-                showModal('Gagal', 'Tidak dapat terhubung ke server.');
+                showModal('Gagal', 'Tidak dapat terhubung ke server pembayaran.');
             }
+        }
+
+        // Poll status order sampai webhook Midtrans verifikasi pembayaran (real-time)
+        function pollTopUpStatus(orderId) {
+            stopTopUpPoll();
+            let attempts = 0;
+            topupPollTimer = setInterval(async () => {
+                attempts++;
+                try {
+                    const data = await fetch('/api/topup?action=status&order_id=' + encodeURIComponent(orderId)).then(r => r.json());
+                    if (data.status === 'paid') {
+                        stopTopUpPoll();
+                        await renderBalance();
+                        await renderTransactions();
+                        closeTopUpPage();
+                        showModal('Pengisian Saldo Berhasil', 'Pembayaran terverifikasi. Saldo sebesar ' + formatNumberOnly(data.amount) + ' telah ditambahkan ke akun Clincoo Anda.');
+                        return;
+                    }
+                    if (data.status === 'failed') {
+                        stopTopUpPoll();
+                        showModal('Pembayaran Gagal', 'Transaksi tidak selesai atau dibatalkan.');
+                        return;
+                    }
+                } catch(e) { /* lanjut polling */ }
+                if (attempts > 90) stopTopUpPoll(); // maks ~3 menit
+            }, 2000);
+        }
+
+        function stopTopUpPoll() {
+            if (topupPollTimer) { clearInterval(topupPollTimer); topupPollTimer = null; }
         }
 
         // Generic System Modal Functions
