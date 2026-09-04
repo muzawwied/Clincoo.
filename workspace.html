@@ -860,6 +860,12 @@
       let items = projectFilesData[currentFolderPath] || [];
       if (searchTerm) items = items.filter(item => item.name.toLowerCase().includes(searchTerm));
 
+      items = items.slice().sort((a, b) => {
+        if (a.type === 'folder' && b.type !== 'folder') return -1;
+        if (a.type !== 'folder' && b.type === 'folder') return 1;
+        return a.name.localeCompare(b.name, 'id', { sensitivity: 'base' });
+      });
+
       container.innerHTML = '';
 
       if (currentFolderPath !== 'root' && !searchTerm) {
