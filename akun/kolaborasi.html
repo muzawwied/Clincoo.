@@ -229,6 +229,7 @@
             <button id="send-email-btn" onclick="sendEmailInvite()" class="w-full py-2.5 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors focus:outline-none flex justify-center items-center shadow-lg shadow-gray-900/10 dark:shadow-white/5">
                 Kirim Undangan
             </button>
+            <p id="invite-error" class="hidden text-[12px] text-red-500 dark:text-red-400 mt-2 text-center leading-snug"></p>
         </div>
     </div>
 
@@ -511,38 +512,66 @@
 
     function sendEmailInvite() {
         const emailInput = document.getElementById('invite-email');
-        if(!emailInput.value || !emailInput.value.includes('@')) {
+        const errEl = document.getElementById('invite-error');
+        errEl.classList.add('hidden');
+        errEl.textContent = '';
+
+        const email = emailInput.value.trim();
+        if(!email || !email.includes('@')) {
             emailInput.focus();
             return;
         }
 
+        var roleEl = document.getElementById('selected-invite-role'); var role = ((roleEl && roleEl.textContent) || 'Viewer').trim();
         const btn = document.getElementById('send-email-btn');
-        const originalText = "Kirim Undangan"; // Teks asli
-        
-        // State: Mengirim (Tanpa Ikon)
+        const originalText = "Kirim Undangan";
+
+        // State: Mengirim
         btn.innerText = "Mengirim...";
         btn.disabled = true;
-        
-        setTimeout(() => {
-            // State: Terkirim (Tanpa Ikon)
-            btn.innerText = "Terkirim!";
-            btn.classList.replace('bg-gray-900', 'bg-green-600');
-            btn.classList.replace('dark:bg-white', 'dark:bg-green-500');
-            btn.classList.replace('text-white', 'text-white'); 
-            btn.classList.replace('dark:text-gray-900', 'dark:text-white');
-            
-            setTimeout(() => {
-                closeEmailPopup();
-                
-                // Reset setelah popup tertutup
+
+        fetch('https://koda-da05205d.base44.app/functions/sendInviteEmail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to: email, role: role, project: 'Clincoo' })
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                // State: Terkirim
+                btn.innerText = "Terkirim!";
+                btn.classList.replace('bg-gray-900', 'bg-green-600');
+                btn.classList.replace('dark:bg-white', 'dark:bg-green-500');
+                btn.classList.replace('text-white', 'text-white');
+                btn.classList.replace('dark:text-gray-900', 'dark:text-white');
+
                 setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                    btn.className = "w-full py-2.5 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors focus:outline-none flex justify-center items-center shadow-lg shadow-gray-900/10 dark:shadow-white/5";
-                    emailInput.value = '';
-                }, 300);
-            }, 1000);
-        }, 1200);
+                    closeEmailPopup();
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                        btn.className = "w-full py-2.5 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors focus:outline-none flex justify-center items-center shadow-lg shadow-gray-900/10 dark:shadow-white/5";
+                        emailInput.value = '';
+                    }, 300);
+                }, 1000);
+            } else {
+                // Gagal — tampilkan pesan & pulihkan tombol
+                btn.innerText = originalText;
+                btn.disabled = false;
+                let msg = res.message || 'Gagal mengirim undangan. Coba lagi.';
+                if (res.error === 'domain_not_verified') {
+                    msg = 'Email hanya bisa dikirim ke alamat pemilik akun Resend untuk saat ini. Verifikasi domain di resend.com/domains agar undangan bisa dikirim ke siapa pun.';
+                }
+                errEl.textContent = msg;
+                errEl.classList.remove('hidden');
+            }
+        })
+        .catch(() => {
+            btn.innerText = originalText;
+            btn.disabled = false;
+            errEl.textContent = 'Tidak dapat terhubung ke server email. Periksa koneksi Anda.';
+            errEl.classList.remove('hidden');
+        });
     }
 
     /* ==========================================================
