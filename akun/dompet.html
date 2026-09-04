@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Clincoo - Dompet Saldo</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%3Cg%20fill%3D%22%23000000%22%3E%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%3C%2Fsvg%3E" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,62 +29,8 @@
         .bg-accent { background-color: var(--accent-color) !important; }
         .text-accent { color: var(--accent-color) !important; }
         .border-accent { border-color: var(--accent-color) !important; }
+        .hover\:bg-accent-hover:hover { background-color: var(--accent-hover) !important; }
         
-        body.dark-mode {
-            background-color: #000000;
-            color: #ffffff;
-        }
-        body.dark-mode .bg-white {
-            background-color: #0a0a0a !important;
-        }
-        body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
-        body.dark-mode #sidebar-toggle,
-        body.dark-mode button[onclick="toggleSidebar()"],
-        body.dark-mode button[onclick="history.back()"],
-        body.dark-mode button[onclick="closeTopUpPage()"],
-        body.dark-mode button[onclick="navigateTo('page-home')"],
-        body.dark-mode .header-glass button[onclick],
-        body.dark-mode header button[onclick] {
-            background-color: #000000 !important;
-            border: 1.5px solid rgba(255,255,255,0.4) !important;
-            color: #ffffff !important;
-        }
-        body.dark-mode #sidebar-toggle svg,
-        body.dark-mode button[onclick="toggleSidebar()"] svg,
-        body.dark-mode button[onclick="history.back()"] svg,
-        body.dark-mode button[onclick="closeTopUpPage()"] svg,
-        body.dark-mode button[onclick="navigateTo('page-home')"] svg,
-        body.dark-mode .header-glass button[onclick] svg,
-        body.dark-mode header button[onclick] svg {
-            color: #ffffff !important;
-            stroke: #ffffff !important;
-        }
-        body.dark-mode #sidebar-toggle:hover,
-        body.dark-mode button[onclick="toggleSidebar()"]:hover,
-        body.dark-mode button[onclick="history.back()"]:hover,
-        body.dark-mode button[onclick="closeTopUpPage()"]:hover,
-        body.dark-mode button[onclick="navigateTo('page-home')"]:hover,
-        body.dark-mode .header-glass button[onclick]:hover,
-        body.dark-mode header button[onclick]:hover {
-            background-color: #1a1a1a !important;
-            border-color: rgba(255,255,255,0.7) !important;
-        }
-        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black {
-            color: #ffffff !important;
-        }
-        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 {
-            color: #888888 !important;
-        }
-        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200 {
-            border-color: #222222 !important;
-        }
-        body.dark-mode .hover\:bg-gray-50:hover {
-            background-color: #0a0a0a !important;
-        }
-        body.dark-mode .bg-gray-50 {
-            background-color: #0a0a0a !important;
-        }
-
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -89,63 +39,42 @@
             scrollbar-width: none;
         }
 
-        body.dark-mode #system-modal .bg-white,
-        body.dark-mode #page-topup { background-color: #0a0a0a !important; }
-        body.dark-mode #system-modal .border-gray-100 { border-color: #222222 !important; }
-        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
-        body.dark-mode .divide-gray-100 > * { border-color: #222222 !important; }
-        body.dark-mode .bg-gray-50 { background-color: #0a0a0a !important; }
+        /* --- DARK MODE STYLES (Copied from reference) --- */
+        body.dark-mode { background-color: #000000; color: #e0e0e0; }
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black { color: #f0f0f0 !important; }
+        body.dark-mode .text-gray-700 { color: #b0b0b0 !important; }
+        body.dark-mode .text-gray-500, body.dark-mode .text-gray-600 { color: #888888 !important; }
         body.dark-mode .text-gray-400 { color: #666666 !important; }
+        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+        body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
+        body.dark-mode .bg-gray-900 { background-color: #f0f0f0 !important; color: #000000 !important; } /* Invert dark background elements */
+        
+        body.dark-mode .border-gray-200, body.dark-mode .border-gray-100, body.dark-mode .border-gray-50 { border-color: #222222 !important; }
+        body.dark-mode .border-gray-800 { border-color: #333333 !important; }
+        
+        body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover, body.dark-mode .hover\:bg-gray-200:hover { background-color: #222222 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover, body.dark-mode .hover\:bg-gray-900:hover { background-color: #333333 !important; }
+        
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+            background-color: #0a0a0a; color: #f0f0f0; border-color: #222222;
+        }
 
-        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
-        body.dark-mode .bg-black.text-white { color: #000000 !important; }
-        body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
-        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
-        body.dark-mode .bg-accent.text-white { color: #000000 !important; }
-        body.dark-mode .text-accent { color: #ffffff !important; }
-        body.dark-mode .border-accent { border-color: #ffffff !important; }
-        body.dark-mode .bg-\[\#f7f7f9\] { background-color: #000000 !important; }
-    /* auto-dark-fix v1 */
-    body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
-    body.dark-mode .bg-gray-200 { background-color: #262626 !important; }
-    body.dark-mode .bg-gray-300 { background-color: #333333 !important; }
-    body.dark-mode .bg-gray-400 { background-color: #444444 !important; }
-    body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
-    body.dark-mode .border-gray-200\/50,
-    body.dark-mode .border-gray-200\/60,
-    body.dark-mode .border-gray-200\/70 { border-color: #222222 !important; }
-    body.dark-mode .border-gray-300 { border-color: #333333 !important; }
-    body.dark-mode .border-gray-400 { border-color: #444444 !important; }
-    body.dark-mode .bg-blue-50,
-    body.dark-mode .bg-blue-50\/50 { background-color: #0d1a26 !important; }
-    body.dark-mode .border-blue-100,
-    body.dark-mode .border-blue-200 { border-color: #1e3a52 !important; }
-    body.dark-mode .bg-red-50,
-    body.dark-mode .bg-red-50\/50 { background-color: #2a1414 !important; }
-    body.dark-mode .bg-red-100 { background-color: #3a1a1a !important; }
-    body.dark-mode .border-red-100,
-    body.dark-mode .border-red-200 { border-color: #4a2020 !important; }
-    body.dark-mode .bg-green-100 { background-color: #14301c !important; }
-    body.dark-mode .bg-white\/95 { background-color: rgba(10,10,10,0.95) !important; }
-    body.dark-mode .hover\:bg-gray-50:hover,
-    body.dark-mode .hover\:bg-gray-50\/50:hover,
-    body.dark-mode .hover\:bg-gray-50\/80:hover { background-color: #1a1a1a !important; }
-    body.dark-mode .hover\:bg-gray-100:hover { background-color: #262626 !important; }
-    body.dark-mode .hover\:bg-gray-200:hover,
-    body.dark-mode .hover\:bg-gray-200\/50:hover { background-color: #333333 !important; }
-    body.dark-mode .hover\:bg-blue-50:hover,
-    body.dark-mode .hover\:bg-blue-100:hover { background-color: #163247 !important; }
-    body.dark-mode .hover\:bg-red-50:hover,
-    body.dark-mode .hover\:bg-red-100:hover { background-color: #3a1a1a !important; }
-    body.dark-mode .hover\:border-gray-300:hover,
-    body.dark-mode .hover\:border-gray-400:hover,
-    body.dark-mode .hover\:border-gray-900:hover { border-color: #555555 !important; }
-    body.dark-mode .focus\:border-gray-400:focus,
-    body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
-    body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
-</style>
-<!-- no-flash-v1 -->
-<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+        body.dark-mode header, body.dark-mode .bg-\[\#f7f7f9\] { background-color: #000000 !important; border-color: #222222 !important; }
+        
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode button[onclick="closeTopUpPage()"] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode button[onclick="closeTopUpPage()"]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+        /* ------------------------------------------------ */
+
+    </style>
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 bg-white">
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
@@ -168,11 +97,12 @@
                 <div class="py-1 flex flex-col items-center w-full">
                     <!-- Display Saldo & Tombol Plus tanpa ada batas lebar -->
                     <div class="flex items-center justify-center gap-4">
-                        <span class="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white font-['Space_Grotesk']" id="display-balance">
+                        <span class="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 font-['Space_Grotesk']" id="display-balance">
                             0
                         </span>
-                        <button onclick="openTopUpPage()" title="Isi Saldo" class="p-3.5 rounded-full text-white bg-gray-900 hover:bg-black dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all focus:outline-none shadow-md shrink-0">
-                            <i data-lucide="plus" class="w-6 h-6"></i>
+                        <!-- Removed bg-gray-900, changed text color to match text, simplified hover -->
+                        <button onclick="openTopUpPage()" title="Isi Saldo" class="p-2 rounded-full text-gray-900 hover:text-gray-600 transition-all focus:outline-none shrink-0 flex items-center justify-center">
+                            <i data-lucide="plus" class="w-8 h-8"></i>
                         </button>
                     </div>
                     <p class="text-xs text-gray-500 mt-5 text-center max-w-sm leading-relaxed px-4">
@@ -183,23 +113,11 @@
 
             <section class="space-y-4 pt-4 w-full">
                 <div class="px-5">
-                    <h2 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Riwayat Transaksi</h2>
-                </div>
-
-                <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2 px-5">
-                    <button onclick="filterTransactions('all')" id="filter-all" class="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-900 text-white dark:bg-white dark:text-black shadow-sm transition-all shrink-0 whitespace-nowrap">
-                        Semua Transaksi
-                    </button>
-                    <button onclick="filterTransactions('in')" id="filter-in" class="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 text-gray-600 hover:text-gray-900 dark:bg-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shrink-0 whitespace-nowrap">
-                        Pemasukan
-                    </button>
-                    <button onclick="filterTransactions('out')" id="filter-out" class="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 text-gray-600 hover:text-gray-900 dark:bg-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shrink-0 whitespace-nowrap">
-                        Pengeluaran
-                    </button>
+                    <h2 class="text-base font-bold text-gray-900 tracking-tight">Riwayat Transaksi</h2>
                 </div>
 
                 <!-- Container Full Width tanpa batasan border samping -->
-                <div id="transaction-list" class="flex flex-col w-full border-t border-gray-100 dark:border-gray-800">
+                <div id="transaction-list" class="flex flex-col w-full border-t border-gray-100">
                     <!-- Dynamically populated via JS -->
                 </div>
 
@@ -227,11 +145,10 @@
 
         <main class="flex-1 w-full flex flex-col space-y-6 px-5 py-6">
             <div class="pb-2 border-b border-gray-100 dark:border-gray-800 w-full">
-                <h3 class="text-lg font-bold text-gray-900">Pilih Nominal</h3>
+                <h3 class="text-lg font-bold text-black dark:text-white">Pilih Nominal</h3>
                 <p class="text-xs text-gray-500 mt-1">Pilih nominal instan atau masukkan jumlah kustom</p>
             </div>
 
-            <!-- Preset Amounts Chips Full Width -->
             <div class="space-y-3 w-full">
                 <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Fast-Pay</label>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full">
@@ -256,32 +173,37 @@
             <div class="space-y-3 w-full">
                 <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Metode Pembayaran</label>
                 <div class="space-y-3 w-full">
-                    <label class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-400 transition-all w-full">
+                    <!-- Adjusted padding, borders, and icon background to be cleaner -->
+                    <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-900 transition-all w-full bg-white">
                         <div class="flex items-center space-x-4">
-                            <i data-lucide="qr-code" class="w-6 h-6 text-gray-700 dark:text-gray-300"></i>
+                            <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+                                <i data-lucide="qr-code" class="w-5 h-5 text-gray-700"></i>
+                            </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900">QRIS Instant</p>
-                                <p class="text-[11px] text-gray-400 mt-0.5">Gopay, OVO, Dana, BCA Mobile, dll</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5">Gopay, OVO, Dana, BCA Mobile, dll</p>
                             </div>
                         </div>
-                        <input type="radio" name="payment-method" value="QRIS Instant" checked class="accent-gray-900 w-4 h-4">
+                        <input type="radio" name="payment-method" value="QRIS Instant" checked class="accent-gray-900 w-4 h-4 ml-2">
                     </label>
-                    <label class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-400 transition-all w-full">
+                    <label class="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-gray-900 transition-all w-full bg-white">
                         <div class="flex items-center space-x-4">
-                            <i data-lucide="building-2" class="w-6 h-6 text-gray-700 dark:text-gray-300"></i>
+                            <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+                                <i data-lucide="building-2" class="w-5 h-5 text-gray-700"></i>
+                            </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900">Virtual Account Bank</p>
-                                <p class="text-[11px] text-gray-400 mt-0.5">BCA, Mandiri, BRI, BNI</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5">BCA, Mandiri, BRI, BNI</p>
                             </div>
                         </div>
-                        <input type="radio" name="payment-method" value="Virtual Account" class="accent-gray-900 w-4 h-4">
+                        <input type="radio" name="payment-method" value="Virtual Account" class="accent-gray-900 w-4 h-4 ml-2">
                     </label>
                 </div>
             </div>
 
             <!-- Confirm Button Spanning Full Width -->
             <div class="pt-4 pb-8 w-full">
-                <button onclick="processTopUp()" class="w-full py-4 bg-gray-900 text-white dark:bg-white dark:text-black rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-gray-200 transition-all shadow-lg active:scale-[0.98]">
+                <button onclick="processTopUp()" class="w-full py-4 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-all shadow-lg active:scale-[0.98]">
                     Lanjutkan Pembayaran
                 </button>
             </div>
@@ -289,14 +211,15 @@
     </div>
 
     <div id="system-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal()"></div>
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl border border-gray-100">
+        <!-- Made backdrop darker and refined modal styling -->
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl border border-gray-100 transform transition-all">
             <div id="modal-icon-container" class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
                 <i data-lucide="check-circle" class="w-6 h-6"></i>
             </div>
             <h3 id="modal-title" class="text-lg font-bold text-gray-900 mb-2"></h3>
             <p id="modal-message" class="text-sm text-gray-500 mb-6 leading-relaxed"></p>
-            <button onclick="closeModal()" class="w-full py-3 bg-gray-900 text-white dark:bg-white dark:text-black rounded-xl font-medium text-sm hover:bg-black transition-colors">
+            <button onclick="closeModal()" class="w-full py-3.5 bg-gray-900 text-white rounded-xl font-semibold text-sm hover:bg-gray-800 transition-colors shadow-sm active:scale-95">
                 Tutup
             </button>
         </div>
@@ -304,37 +227,38 @@
 
     <script>
         // State Keys
-        const BALANCE_KEY = 'clincoo_wallet_balance';
-        const TRANSACTIONS_KEY = 'clincoo_wallet_transactions';
 
         let selectedNominalAmount = 50000;
         let activeFilter = 'all';
 
         // Initialize Page
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             lucide.createIcons();
-            initSampleDataIfEmpty();
+            await initWalletFromD1();
             renderBalance();
             renderTransactions();
         });
 
-        // Seed initial balance & demo transactions if clean slate
-        function initSampleDataIfEmpty() {
-            if (!localStorage.getItem(BALANCE_KEY)) {
-                localStorage.setItem(BALANCE_KEY, '150000');
-            }
-            if (!localStorage.getItem(TRANSACTIONS_KEY)) {
-                const sampleTransactions = [
-                    {
-                        id: 'TX-' + Math.floor(100000 + Math.random() * 900000),
-                        title: 'Top Up Saldo via QRIS',
-                        amount: 150000,
-                        type: 'in',
-                        date: getFormattedDate(new Date(Date.now() - 3600000 * 2)),
-                        method: 'QRIS Instant'
+        // Initialize: seed D1 with starting balance if empty
+        async function initWalletFromD1() {
+            try {
+                const res = await fetch(WALLET_API_URL).then(r => r.json());
+                currentBalance = res.balance || 0;
+                // If first time (balance is 0 and no transactions), seed demo data
+                if (currentBalance === 0) {
+                    const txRes = await fetch(WALLET_API_URL + '?action=transactions').then(r => r.json());
+                    if (!txRes.transactions || txRes.transactions.length === 0) {
+                        // Seed initial demo data
+                        await fetch(WALLET_API_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title: 'Top Up Saldo via QRIS', amount: 150000, type: 'in', method: 'QRIS Instant' })
+                        });
+                        currentBalance = 150000;
                     }
-                ];
-                localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(sampleTransactions));
+                }
+            } catch(e) {
+                console.error('Wallet init error:', e);
             }
         }
 
@@ -351,61 +275,30 @@
         }
 
         // Render Balance Display
-        function renderBalance() {
-            const balance = parseInt(localStorage.getItem(BALANCE_KEY) || '0', 10);
-            document.getElementById('display-balance').textContent = formatNumberOnly(balance);
+        async function renderBalance() {
+            try {
+                const res = await fetch(WALLET_API_URL).then(r => r.json());
+                currentBalance = res.balance || 0;
+            } catch(e) {}
+            document.getElementById('display-balance').textContent = formatNumberOnly(currentBalance);
         }
 
-        // Get Transactions array safely
-        function getTransactions() {
-            try { 
-                return JSON.parse(localStorage.getItem(TRANSACTIONS_KEY) || '[]'); 
-            } catch(e) { 
-                return []; 
+        // Get transactions from D1
+        async function getTransactions() {
+            try {
+                const res = await fetch(WALLET_API_URL + '?action=transactions').then(r => r.json());
+                return res.transactions || [];
+            } catch(e) {
+                return [];
             }
         }
 
-        // Save Transactions array
-        function saveTransactions(txs) {
-            localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(txs));
-        }
-
-        // Filter Transactions View
-        function filterTransactions(filter) {
-            activeFilter = filter;
-            
-            const filters = [
-                { id: 'filter-all', key: 'all' },
-                { id: 'filter-in', key: 'in' },
-                { id: 'filter-out', key: 'out' }
-            ];
-
-            filters.forEach(item => {
-                const btn = document.getElementById(item.id);
-                if (btn) {
-                    if (item.key === filter) {
-                        btn.className = 'px-4 py-2 text-xs font-semibold rounded-xl bg-gray-900 text-white dark:bg-white dark:text-black shadow-sm transition-all shrink-0 whitespace-nowrap';
-                    } else {
-                        btn.className = 'px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 text-gray-600 hover:text-gray-900 dark:bg-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shrink-0 whitespace-nowrap';
-                    }
-                }
-            });
-
-            renderTransactions();
-        }
-
-        function renderTransactions() {
+        async function renderTransactions() {
             const container = document.getElementById('transaction-list');
             const emptyState = document.getElementById('empty-history');
-            const allTxs = getTransactions();
+            const allTxs = await getTransactions();
 
-            const filtered = allTxs.filter(tx => {
-                if (activeFilter === 'in') return tx.type === 'in';
-                if (activeFilter === 'out') return tx.type === 'out';
-                return true;
-            });
-
-            if (filtered.length === 0) {
+            if (allTxs.length === 0) {
                 container.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 emptyState.classList.add('flex');
@@ -415,16 +308,17 @@
             emptyState.classList.add('hidden');
             emptyState.classList.remove('flex');
 
-            container.innerHTML = filtered.map(tx => {
+            container.innerHTML = allTxs.map(tx => {
                 const isIn = tx.type === 'in';
                 const sign = isIn ? '+' : '-';
-                const amountClass = isIn ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white';
+                const amountClass = isIn ? 'text-emerald-500' : 'text-gray-900';
+                const dateStr = new Date(tx.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + new Date(tx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
 
                 return `
-                    <div class="py-4 px-5 w-full flex items-center justify-between border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors active:bg-gray-100 dark:active:bg-gray-800 cursor-pointer">
+                    <div class="py-4 px-5 w-full flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer">
                         <div class="flex-1 min-w-0 pr-4">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">${tx.title}</p>
-                            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 truncate">${tx.date} • ${tx.method || 'Saldo Clincoo'}</p>
+                            <p class="text-sm font-semibold text-gray-900 truncate">${tx.title}</p>
+                            <p class="text-[11px] text-gray-500 mt-1 truncate">${dateStr} • ${tx.method || 'Saldo Clincoo'}</p>
                         </div>
                         <div class="text-right shrink-0">
                             <p class="text-sm font-extrabold tracking-tight ${amountClass}">${sign} ${formatNumberOnly(tx.amount)}</p>
@@ -467,9 +361,9 @@
             document.querySelectorAll('.nominal-btn').forEach(btn => {
                 const btnAmt = parseInt(btn.getAttribute('data-amount'), 10);
                 if (btnAmt === amt) {
-                    btn.className = 'nominal-btn border-2 border-gray-900 dark:border-white rounded-xl py-3 text-sm font-semibold transition-all text-center bg-gray-50 dark:bg-gray-800';
+                    btn.className = 'nominal-btn border-2 border-gray-900 rounded-xl py-3 text-sm font-semibold transition-all text-center bg-gray-50 text-gray-900';
                 } else {
-                    btn.className = 'nominal-btn border border-gray-200 dark:border-gray-800 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center';
+                    btn.className = 'nominal-btn border border-gray-200 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center text-gray-900';
                 }
             });
         }
@@ -479,26 +373,13 @@
             if (!isNaN(val) && val > 0) {
                 selectedNominalAmount = val;
                 document.querySelectorAll('.nominal-btn').forEach(btn => {
-                    btn.className = 'nominal-btn border border-gray-200 dark:border-gray-800 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center';
+                    btn.className = 'nominal-btn border border-gray-200 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center text-gray-900';
                 });
             }
         }
 
-        // Process Top Up — Real Payment via Midtrans Snap (verified server-side, real-time)
-        let topupPollTimer = null;
-        let snapScriptLoaded = false;
-
-        function loadSnapScript(clientKey, isProduction, cb) {
-            if (snapScriptLoaded && window.snap) { cb(); return; }
-            const s = document.createElement('script');
-            s.src = (isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js');
-            s.setAttribute('data-client-key', clientKey);
-            s.onload = () => { snapScriptLoaded = true; cb(); };
-            s.onerror = () => showModal('Gagal Memuat Pembayaran', 'Tidak dapat memuat Midtrans Snap. Periksa koneksi internet Anda.');
-            document.body.appendChild(s);
-        }
-
-        function processTopUp() {
+        // Process Top Up via D1 API
+        async function processTopUp() {
             if (!selectedNominalAmount || selectedNominalAmount < 10000) {
                 showModal('Nominal Tidak Valid', 'Minimal isi saldo adalah 10.000');
                 return;
@@ -507,83 +388,32 @@
             const methodEl = document.querySelector('input[name="payment-method"]:checked');
             const method = methodEl ? methodEl.value : 'QRIS Instant';
 
-            // 1. Create real payment transaction on backend
-            fetch('/api/topup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'create', amount: selectedNominalAmount, method: method })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success) {
-                    const msg = (data.error === 'payment_not_configured')
-                        ? 'Payment gateway belum dikonfigurasi. Silakan hubungi administrator Clincoo.'
-                        : (data.message || data.error || 'Gagal membuat transaksi');
-                    showModal('Top Up Gagal', msg);
-                    return;
+            try {
+                const res = await fetch(WALLET_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: `Isi Saldo via ${method}`,
+                        amount: selectedNominalAmount,
+                        type: 'in',
+                        method: method
+                    })
+                }).then(r => r.json());
+
+                if (res.success) {
+                    currentBalance = res.balance;
+                    // Re-render views
+                    renderBalance();
+                    renderTransactions();
+
+                    closeTopUpPage();
+                    showModal('Pengisian Saldo Berhasil', `Saldo sebesar ${formatNumberOnly(selectedNominalAmount)} telah ditambahkan ke akun Clincoo Anda via ${method}.`);
+                } else {
+                    showModal('Gagal', res.error || 'Terjadi kesalahan saat mengisi saldo.');
                 }
-
-                // 2. Open Midtrans Snap payment popup
-                loadSnapScript(data.client_key, data.is_production, () => {
-                    window.snap.pay(data.token, {
-                        onSuccess: function() { pollTopUpStatus(data.order_id); },
-                        onPending: function() { pollTopUpStatus(data.order_id); },
-                        onError: function() { showModal('Pembayaran Gagal', 'Transaksi tidak dapat diproses. Silakan coba lagi.'); },
-                        onClose: function() { stopTopUpPoll(); showModal('Pembayaran Dibatalkan', 'Anda menutup halaman pembayaran sebelum menyelesaikan transaksi.'); }
-                    });
-                });
-            })
-            .catch(() => showModal('Koneksi Gagal', 'Tidak dapat terhubung ke server pembayaran. Periksa koneksi internet Anda.'));
-        }
-
-        // Poll backend until payment verified by webhook (real-time)
-        function pollTopUpStatus(orderId) {
-            stopTopUpPoll();
-            let attempts = 0;
-            topupPollTimer = setInterval(async () => {
-                attempts++;
-                try {
-                    const r = await fetch('/api/topup?action=status&order_id=' + encodeURIComponent(orderId));
-                    const data = await r.json();
-                    if (data.status === 'paid') {
-                        stopTopUpPoll();
-                        applyVerifiedTopUp(data.amount, data.method || 'QRIS');
-                        return;
-                    }
-                    if (data.status === 'failed') {
-                        stopTopUpPoll();
-                        showModal('Pembayaran Gagal', 'Transaksi tidak selesai atau dibatalkan.');
-                        return;
-                    }
-                } catch (e) { /* keep polling */ }
-                if (attempts > 90) stopTopUpPoll(); // ~3 min max
-            }, 2000);
-        }
-
-        function stopTopUpPoll() {
-            if (topupPollTimer) { clearInterval(topupPollTimer); topupPollTimer = null; }
-        }
-
-        // Payment verified by server — apply to wallet UI
-        function applyVerifiedTopUp(amount, method) {
-            const currentBalance = parseInt(localStorage.getItem(BALANCE_KEY) || '0', 10);
-            localStorage.setItem(BALANCE_KEY, (currentBalance + amount).toString());
-
-            const txs = getTransactions();
-            txs.unshift({
-                id: 'TX-' + Math.floor(100000 + Math.random() * 900000),
-                title: 'Isi Saldo via ' + method,
-                amount: amount,
-                type: 'in',
-                date: getFormattedDate(),
-                method: method
-            });
-            saveTransactions(txs);
-
-            renderBalance();
-            renderTransactions();
-            closeTopUpPage();
-            showModal('Pengisian Saldo Berhasil', 'Pembayaran terverifikasi. Saldo sebesar ' + formatNumberOnly(amount) + ' telah ditambahkan ke akun Clincoo Anda via ' + method + '.');
+            } catch(e) {
+                showModal('Gagal', 'Tidak dapat terhubung ke server.');
+            }
         }
 
         // Generic System Modal Functions
