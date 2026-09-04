@@ -250,53 +250,13 @@
                         <input type="radio" name="payment-method" value="LinkAja" class="accent-gray-900 w-4 h-4 ml-2">
                     </label>
                     <!-- GoPay -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="GoPay" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/GoPay%20logo.svg?width=200" alt="GoPay" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">GoPay</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Scan QRIS via aplikasi Gojek</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="GoPay" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
+                    
                     <!-- OVO -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="OVO" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white p-1.5">
-                                <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Logo%20ovo%20purple.svg?width=200" alt="OVO" class="w-full h-full object-contain">
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">OVO</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Bayar langsung dari saldo OVO</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="OVO" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
+                    
                     <!-- BRI -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="BRI Virtual Account" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Bank-Rakyat-Indonesia-Logo.svg?width=200" alt="BRI" class="w-full h-full object-contain"></div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">BRI Virtual Account</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Bank Rakyat Indonesia</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="BRI Virtual Account" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
+                    
                     <!-- BNI -->
-                    <label class="pay-method-card flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-900 dark:hover:border-white transition-all w-full bg-white dark:bg-[#0a0a0a]" data-method="BNI Virtual Account" onclick="selectPaymentMethod(this)">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 dark:border-0 shadow-sm p-2"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Bank%20Negara%20Indonesia%20logo%20%282004%29.svg?width=200" alt="BNI" class="w-full h-full object-contain"></div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">BNI Virtual Account</p>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Bank Negara Indonesia</p>
-                            </div>
-                        </div>
-                        <input type="radio" name="payment-method" value="BNI Virtual Account" class="accent-gray-900 w-4 h-4 ml-2">
-                    </label>
+                    
                 </div>
             </div>
 
@@ -472,7 +432,7 @@
         }
 
         // ===== Xendit — pembayaran nyata, saldo masuk real-time setelah verifikasi server =====
-        var XENDIT_METHOD_MAP = { 'QRIS Instant': 'qris', 'LinkAja': 'qris', 'GoPay': 'gopay', 'OVO': 'ovo', 'BCA Virtual Account': 'bca', 'Mandiri Virtual Account': 'mandiri', 'BRI Virtual Account': 'bri', 'BNI Virtual Account': 'bni' };
+        var XENDIT_METHOD_MAP = { 'QRIS Instant': 'qris', 'LinkAja': 'linkaja', 'GoPay': 'gopay', 'OVO': 'ovo', 'DANA': 'dana', 'ShopeePay': 'shopeepay', 'BCA Virtual Account': 'bca', 'Mandiri Virtual Account': 'mandiri', 'BRI Virtual Account': 'bri', 'BNI Virtual Account': 'bni' };
         var topupPollTimer = null;
 
         async function processTopUp() {
