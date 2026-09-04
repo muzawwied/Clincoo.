@@ -26,6 +26,12 @@ async function getSecret(env, key) {
   return null;
 }
 
+// Deteksi mode: test key (xnd_development_) = SANDBOX, production key = LIVE
+function xenditMode(secretKey) {
+  if (!secretKey) return null;
+  return secretKey.startsWith('xnd_development_') ? 'sandbox' : 'live';
+}
+
 // Saluran pembayaran realistis + logo resmi dari Wikimedia Commons
 const CHANNELS = [
   { id: 'qris', label: 'QRIS', note: 'Semua e-wallet & m-banking (DANA, ShopeePay, dll)', category: 'qris', methods: ['QRIS'], logo: 'https://commons.wikimedia.org/wiki/Special:FilePath/QRIS%20Logo.svg?width=200' },
@@ -46,7 +52,7 @@ export async function onRequestGet({ request, env }) {
 
     if (action === 'channels') {
       const secretKey = await getSecret(env, 'XENDIT_SECRET_KEY');
-      return json({ channels: CHANNELS, configured: !!secretKey });
+      return json({ channels: CHANNELS, configured: !!secretKey, mode: xenditMode(secretKey) });
     }
 
     if (action === 'status') {
@@ -122,6 +128,29 @@ export async function onRequestPost({ request, env }) {
   let body = {};
   try { body = await request.json(); } catch { return json({ error: 'invalid body' }, 400); }
 
+  // ---- Simulasi pembayaran (hanya mode sandbox / test key) ----
+  if (body.action === 'simulate') {
+    const secretKey = await getSecret(env, 'XENDIT_SECRET_KEY');
+    if (xenditMode(secretKey) !== 'sandbox') {
+      return json({ error: 'simulate hanya tersedia pada mode sandbox (XENDIT_SECRET_KEY test)' }, 403);
+    }
+    const order = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(body.order_id).first();
+    if (!order) return json({ error: 'order not found' }, 404);
+    if (order.status === 'paid') return json({ success: true, status: 'paid' });
+
+    // Endpoint simulator Xendit: POST /v2/invoices/{external_id}/simulate_payment
+    const sim = await xenditPost('/v2/invoices/' + body.order_id + '/simulate_payment', secretKey, {});
+    if (!sim || sim.error) {
+      return json({ error: 'simulate_failed', message: (sim && sim.message) || 'Gagal simulasi' }, 502);
+    }
+    // Live check -> kredit saldo jika PAID
+    if (sim.status === 'PAID' || sim.status === 'SETTLED') {
+      await creditTopup(db, order);
+      return json({ success: true, status: 'paid' });
+    }
+    return json({ success: true, status: sim.status || 'PENDING' });
+  }
+
   if (body.action !== 'create') return json({ error: 'unknown action' }, 400);
 
   const secretKey = await getSecret(env, 'XENDIT_SECRET_KEY');
@@ -168,7 +197,8 @@ export async function onRequestPost({ request, env }) {
     invoice_url: invoice.invoice_url,
     expires_at: invoice.expiry_date || null,
     channel: channel.id,
-    label: channel.label
+    label: channel.label,
+    mode: xenditMode(secretKey)
   });
 }
 
