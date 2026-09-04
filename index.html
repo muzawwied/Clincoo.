@@ -1015,7 +1015,7 @@
             try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
             const proj = projects.find(p => p.id === id);
             if (proj) {
-                localStorage.setItem('clincoo_current_chat_msg', proj.prompt || '');
+                // Riwayat dimuat dari D1 di halaman chat, prompt lama tidak di-replay
                 localStorage.setItem('clincoo_current_project_id', id);
                 window.location.href = 'pages/chat.html?id=' + id;
             }

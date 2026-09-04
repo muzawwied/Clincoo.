@@ -445,6 +445,8 @@
         let imageGenerationTimeout = null;
         
         let messages = [];
+        let currentSessionId = null;
+        let currentProjectId = null;
 
         const welcomeGreetings = [
             "Ada rencana apa hari ini, Clincoo?",
@@ -457,6 +459,16 @@
 
         function clearChat() {
             if (isGenerating) stopGeneration();
+            if (currentSessionId) {
+                try {
+                    fetch(GEMINI_PROXY_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'delete_session', session_id: currentSessionId })
+                    }).catch(function(e) {});
+                } catch(e) {}
+                currentSessionId = null;
+            }
             messages = [];
             currentGreeting = welcomeGreetings[Math.floor(Math.random() * welcomeGreetings.length)];
             renderMessages();
@@ -1690,7 +1702,7 @@
                         response = await fetch(GEMINI_PROXY_URL, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ messages: apiMessages }),
+                            body: JSON.stringify({ messages: apiMessages, session_id: currentSessionId || undefined, project_id: currentProjectId || undefined }),
                             signal: abortController.signal
                         });
                     } catch (err) {
@@ -1717,6 +1729,7 @@
                     }
 
                     const resultJson = await response.json();
+                    if (resultJson.session_id) currentSessionId = resultJson.session_id;
                     streamingBuffer += (resultJson.text || "");
                     isFetchComplete = true;
                 } catch (e) {
@@ -1819,14 +1832,18 @@
         if (currentStatusInterval) { clearInterval(currentStatusInterval); currentStatusInterval = null; }
         if (currentAiMessageId) { currentAiMessageId = null; }
 
-        // Handoff: read prompt from index.html via localStorage
+        // Handoff & riwayat chat: load dari D1, replay prompt hanya untuk percakapan baru
         (function() {
             try {
                 var handoffMsg = localStorage.getItem('clincoo_current_chat_msg');
                 var handoffProjectId = localStorage.getItem('clincoo_current_project_id');
-                if (handoffMsg && handoffMsg.trim()) {
+                var urlProjectId = new URLSearchParams(window.location.search).get('id');
+                if (urlProjectId || handoffProjectId) {
+                    currentProjectId = urlProjectId || handoffProjectId;
+                }
+
+                var submitHandoff = function() {
                     localStorage.removeItem('clincoo_current_chat_msg');
-                    // Always auto-submit the handoff message, don't check existing messages
                     setTimeout(function() {
                         try {
                             chatInput.value = handoffMsg;
@@ -1834,10 +1851,45 @@
                             handleSubmit();
                         } catch(e) { console.error('Handoff submit error:', e); }
                     }, 500);
-                }
+                };
+
+                var historyUrl = currentProjectId
+                    ? GEMINI_PROXY_URL + '?project_id=' + encodeURIComponent(currentProjectId)
+                    : GEMINI_PROXY_URL;
+
+                fetch(historyUrl, { method: 'GET' })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        var sessions = (data && data.sessions) || [];
+                        if (!sessions.length) {
+                            if (handoffMsg && handoffMsg.trim()) submitHandoff();
+                            return;
+                        }
+                        return fetch(GEMINI_PROXY_URL + '?session_id=' + encodeURIComponent(sessions[0].id), { method: 'GET' })
+                            .then(function(res) { return res.json(); })
+                            .then(function(d) {
+                                var dbMsgs = (d && d.messages) || [];
+                                if (!dbMsgs.length) {
+                                    if (handoffMsg && handoffMsg.trim()) submitHandoff();
+                                    return;
+                                }
+                                currentSessionId = sessions[0].id;
+                                localStorage.removeItem('clincoo_current_chat_msg');
+                                localStorage.removeItem('clincoo_current_project_id');
+                                dbMsgs.forEach(function(m) {
+                                    messages.push({ id: 'db_' + m.id, role: m.role === 'assistant' ? 'ai' : 'user', text: m.content });
+                                });
+                                renderMessages();
+                                autoScrollActive = true;
+                                scrollToBottom(true);
+                            });
+                    })
+                    .catch(function(e) {
+                        console.error('History load error:', e);
+                        if (handoffMsg && handoffMsg.trim()) submitHandoff();
+                    });
             } catch(e) { console.error('Handoff error:', e); }
         })();
-        
         setTimeout(() => {
             chatInput.focus();
             autoScrollActive = true;
