@@ -195,6 +195,7 @@
             </div>
             <h3 id="modal-title" class="text-lg font-bold text-gray-900 mb-2"></h3>
             <p id="modal-message" class="text-sm text-gray-500 mb-6 leading-relaxed"></p>
+            <button id="modal-action" onclick="runModalAction()" class="hidden w-full py-3.5 mb-2 bg-gray-900 text-white rounded-xl font-semibold text-sm hover:bg-gray-800 transition-colors shadow-sm active:scale-95"></button>
             <button onclick="closeModal()" class="w-full py-3.5 bg-gray-900 text-white rounded-xl font-semibold text-sm hover:bg-gray-800 transition-colors shadow-sm active:scale-95">
                 Tutup
             </button>
@@ -436,13 +437,32 @@
 
                 pollTopUpStatus(res.order_id);
 
-                if (win) {
+                if (res.mode === 'sandbox') {
+                    showModal('Mode Sandbox', 'Halaman pembayaran Xendit (TEST MODE) telah dibuka di tab baru. Untuk menguji alur top-up tanpa uang nyata, klik tombol simulasi di bawah — saldo akan masuk otomatis seperti pembayaran sungguhan.', 'Simulasikan Pembayaran', () => simulatePayment(res.order_id));
+                } else if (win) {
                     showModal('Selesaikan Pembayaran', 'Halaman pembayaran telah dibuka di tab baru. Saldo akan otomatis masuk ke dompet Clincoo Anda setelah pembayaran terverifikasi.');
                 } else {
                     showModal('Popup Diblokir', 'Izinkan popup pada browser Anda, lalu klik tautan pembayaran pada riwayat transaksi.');
                 }
             } catch(e) {
                 showModal('Gagal', 'Tidak dapat terhubung ke server pembayaran.');
+            }
+        }
+
+        // Simulasi pembayaran — hanya tersedia di mode sandbox Xendit (test key)
+        async function simulatePayment(orderId) {
+            try {
+                const res = await fetch('/api/topup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'simulate', order_id: orderId })
+                }).then(r => r.json());
+                if (!res.success) {
+                    showModal('Simulasi Gagal', res.message || res.error || 'Tidak dapat mensimulasikan pembayaran.');
+                }
+                // Jika sukses: polling yang berjalan akan mendeteksi status paid dalam beberapa detik
+            } catch(e) {
+                showModal('Simulasi Gagal', 'Tidak dapat terhubung ke server.');
             }
         }
 
@@ -477,13 +497,29 @@
         }
 
         // Generic System Modal Functions
-        function showModal(title, message) {
+        function showModal(title, message, actionLabel, actionFn) {
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').textContent = message;
+            const actionBtn = document.getElementById('modal-action');
+            if (actionLabel && typeof actionFn === 'function') {
+                actionBtn.textContent = actionLabel;
+                actionBtn.classList.remove('hidden');
+                window._modalAction = actionFn;
+            } else {
+                actionBtn.classList.add('hidden');
+                window._modalAction = null;
+            }
             const modal = document.getElementById('system-modal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             lucide.createIcons();
+        }
+
+        function runModalAction() {
+            const fn = window._modalAction;
+            window._modalAction = null;
+            closeModal();
+            if (fn) fn();
         }
 
         function closeModal() {
