@@ -449,6 +449,28 @@
         let imageGenerationTimeout = null;
         
         let messages = [];
+
+        // ===== MODE LOCALSTORAGE: riwayat chat per-proyek disimpan di browser =====
+        const LS_CHAT_PREFIX = 'clincoo_ls_chat_';
+        function lsChatKey() {
+            let pid = (typeof currentProjectId !== 'undefined' && currentProjectId) ? String(currentProjectId) : 'global';
+            return LS_CHAT_PREFIX + pid;
+        }
+        function saveChatLog() {
+            try {
+                const log = messages.filter(m => m && !m.isHidden && m.text).map(m => ({ id: m.id, role: m.role, text: m.text, time: m.time || null }));
+                localStorage.setItem(lsChatKey(), JSON.stringify(log));
+            } catch(e) {}
+        }
+        function loadChatLog() {
+            try {
+                const raw = localStorage.getItem(lsChatKey());
+                if (!raw) return false;
+                const log = JSON.parse(raw);
+                if (Array.isArray(log) && log.length > 0) { messages = log; return true; }
+            } catch(e) {}
+            return false;
+        }
         let currentSessionId = null;
         let currentProjectId = null;
 
@@ -474,6 +496,7 @@
                 currentSessionId = null;
             }
             messages = [];
+            try { localStorage.removeItem(lsChatKey()); } catch(e) {}
             currentGreeting = welcomeGreetings[Math.floor(Math.random() * welcomeGreetings.length)];
             renderMessages();
             
@@ -1097,6 +1120,7 @@
         });
 
         function renderMessages() {
+            try { saveChatLog(); } catch(e) {}
             chatContainer.innerHTML = '';
             const visibleMessages = messages.filter(m => !m.isHidden);
             
@@ -2182,6 +2206,11 @@
                 if (urlProjectId || handoffProjectId) {
                     currentProjectId = urlProjectId || handoffProjectId;
                 }
+                // FIX: handoff basi milik proyek lain — buang, jangan di-submit di chat ini
+                if (handoffMsg && handoffMsg.trim() && urlProjectId && handoffProjectId && urlProjectId !== handoffProjectId) {
+                    localStorage.removeItem('clincoo_current_chat_msg');
+                    handoffMsg = null;
+                }
 
                 var submitHandoff = function() {
                     localStorage.removeItem('clincoo_current_chat_msg');
@@ -2194,63 +2223,15 @@
                     }, 500);
                 };
 
-                // render cache lokal dulu biar chat muncul instan
-                var cachedData = null;
-                try { cachedData = JSON.parse(localStorage.getItem('clincoo_chat_cache') || 'null'); } catch(e) {}
-                var cacheSig = '';
-                if (cachedData && cachedData.msgs && cachedData.msgs.length) {
-                    currentSessionId = cachedData.sessionId || null;
-                    cachedData.msgs.forEach(function(m) { messages.push({ id: 'cache_' + messages.length, role: m.role, text: m.text }); });
-                    renderMessages();
-                    autoScrollActive = true;
-                    scrollToBottom(true);
-                    cacheSig = (cachedData.sessionId || '') + '|' + cachedData.msgs.length + '|' + (cachedData.msgs[cachedData.msgs.length - 1].text || '').slice(0, 200);
-                }
-
-                var historyUrl = currentProjectId
-                    ? GEMINI_PROXY_URL + '?project_id=' + encodeURIComponent(currentProjectId)
-                    : GEMINI_PROXY_URL;
-
-                fetch(historyUrl, { method: 'GET' })
-                    .then(function(res) { return res.json(); })
-                    .then(function(data) {
-                        var sessions = (data && data.sessions) || [];
-                        if (!sessions.length) {
-                            if (handoffMsg && handoffMsg.trim()) submitHandoff();
-                            return;
-                        }
-                        return fetch(GEMINI_PROXY_URL + '?session_id=' + encodeURIComponent(sessions[0].id), { method: 'GET' })
-                            .then(function(res) { return res.json(); })
-                            .then(function(d) {
-                                var dbMsgs = (d && d.messages) || [];
-                                if (!dbMsgs.length) {
-                                    if (handoffMsg && handoffMsg.trim()) submitHandoff();
-                                    return;
-                                }
-                                var freshSig = sessions[0].id + '|' + dbMsgs.length + '|' + ((dbMsgs[dbMsgs.length - 1] && dbMsgs[dbMsgs.length - 1].content) || '').slice(0, 200);
-                                if (freshSig === cacheSig) {
-                                    if (handoffMsg && handoffMsg.trim()) submitHandoff();
-                                    return;
-                                }
-                                currentSessionId = sessions[0].id;
-                                localStorage.removeItem('clincoo_current_chat_msg');
-                                // FIX: JANGAN hapus clincoo_current_project_id di sini.
-                                // Konteks proyek harus tetap tersimpan supaya halaman tab lain
-                                // (environment, keamanan, dst.) membaca data proyek yang benar,
-                                // bukan data global.
-                                messages.length = 0;
-                                dbMsgs.forEach(function(m) {
-                                    messages.push({ id: 'db_' + m.id, role: m.role === 'assistant' ? 'ai' : 'user', text: m.content });
-                                });
-                                renderMessages();
-                                autoScrollActive = true;
-                                scrollToBottom(true);
-                            });
-                    })
-                    .catch(function(e) {
-                        console.error('History load error:', e);
-                        if (handoffMsg && handoffMsg.trim()) submitHandoff();
-                    });
+                // MODE LOCALSTORAGE: riwayat chat dimuat dari browser (per proyek),
+// TIDAK lagi ditarik dari server — mencegah chat dari data/proyek lain muncul.
+if (loadChatLog()) {
+    renderMessages();
+    autoScrollActive = true;
+    scrollToBottom(true);
+} else if (handoffMsg && handoffMsg.trim()) {
+    submitHandoff();
+}
             } catch(e) { console.error('Handoff error:', e); }
         })();
         setTimeout(() => {
