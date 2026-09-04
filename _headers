@@ -6,7 +6,7 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   X-XSS-Protection: 1; mode=block
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://generativelanguage.googleapis.com https://api.github.com https://github.com https://r.jina.ai https://s.jina.ai https://emkc.org https://image.pollinations.ai; object-src 'none'; base-uri 'self'; frame-ancestors 'none';
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.midtrans.com https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://app.sandbox.midtrans.com https://app.midtrans.com https://generativelanguage.googleapis.com https://api.github.com https://github.com https://r.jina.ai https://s.jina.ai https://emkc.org https://image.pollinations.ai; frame-src https://app.sandbox.midtrans.com https://app.midtrans.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none';
 
 # Cache static assets
 /*.css
