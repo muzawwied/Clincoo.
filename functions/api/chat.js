@@ -44,6 +44,12 @@ function partsFromContent(content) {
         const inline = dataUrlToInlineData(block.image_url.url);
         if (inline) parts.push(inline);
       }
+      else if (block.type === 'function_call' && block.name) {
+        parts.push({ functionCall: { name: block.name, args: block.args || {} } });
+      }
+      else if (block.type === 'function_response' && block.name) {
+        parts.push({ functionResponse: { name: block.name, response: { result: block.result } } });
+      }
     }
     return parts.length > 0 ? parts : [{ text: '.' }];
   }
@@ -67,7 +73,7 @@ function buildServerSystemInstruction() {
   ].join('\n');
 }
 
-function toGeminiPayload(messages) {
+function toGeminiPayload(messages, useWorkspaceTools) {
   let systemInstruction = null;
   const contents = [];
   for (const m of messages) {
@@ -82,20 +88,58 @@ function toGeminiPayload(messages) {
       parts: partsFromContent(m.content)
     });
   }
-  const serverSys = buildServerSystemInstruction();
+  let serverSys = buildServerSystemInstruction();
+  if (useWorkspaceTools) serverSys += '\n\n' + buildWorkspaceSystemInstruction();
   systemInstruction = systemInstruction ? serverSys + '\n\n' + systemInstruction : serverSys;
   // Lindungi dari konteks kepanjangan: simpan 30 pesan terakhir
   if (contents.length > 30) contents.splice(0, contents.length - 30);
   return { systemInstruction, contents };
 }
 
-async function callGemini(apiKey, messages) {
-  const { systemInstruction, contents } = toGeminiPayload(messages);
+const WORKSPACE_FUNCTION_DECLARATIONS = [
+  { name: 'list_items',
+    description: 'Lihat daftar file & folder di dalam sebuah folder workspace Clincoo milik user. Gunakan ini untuk melihat isi workspace atau folder sebelum melakukan operasi lain.',
+    parameters: { type: 'OBJECT', properties: { path: { type: 'STRING', description: 'Path folder. Contoh: "root" (folder utama), "js", "root/css/style". Default: root.' } } } },
+  { name: 'read_file',
+    description: 'Baca isi lengkap sebuah file di workspace. WAJIB dipakai sebelum mengedit file agar konten terbaru dan akurat.',
+    parameters: { type: 'OBJECT', properties: { path: { type: 'STRING', description: 'Path file. Contoh: "index.html", "js/app.js", "root/style.css".' } }, required: ['path'] } },
+  { name: 'write_file',
+    description: 'Buat file baru di workspace atau timpa seluruh isi file yang sudah ada dengan konten baru. Folder induk dibuat otomatis jika belum ada.',
+    parameters: { type: 'OBJECT', properties: { path: { type: 'STRING', description: 'Path file tujuan, contoh: "pages/about.html".' }, content: { type: 'STRING', description: 'Isi lengkap file yang akan ditulis (overwrite penuh).' } }, required: ['path', 'content'] } },
+  { name: 'create_folder',
+    description: 'Buat folder baru (beserta folder induknya) di workspace.',
+    parameters: { type: 'OBJECT', properties: { path: { type: 'STRING', description: 'Path folder, contoh: "assets/img".' } }, required: ['path'] } },
+  { name: 'rename_item',
+    description: 'Ubah nama file atau folder di workspace.',
+    parameters: { type: 'OBJECT', properties: { path: { type: 'STRING', description: 'Path item yang di-rename, contoh: "old-name.html".' }, new_name: { type: 'STRING', description: 'Nama baru (tanpa path), contoh: "new-name.html".' } }, required: ['path', 'new_name'] } },
+  { name: 'delete_item',
+    description: 'Hapus file atau folder (beserta seluruh isinya) dari workspace. PERMANEN — konfirmasi dulu ke user kecuali user sudah jelas meminta penghapusan.',
+    parameters: { type: 'OBJECT', properties: { path: { type: 'STRING', description: 'Path item yang akan dihapus.' } }, required: ['path'] } },
+  { name: 'search_items',
+    description: 'Cari file atau folder di seluruh workspace berdasarkan nama.',
+    parameters: { type: 'OBJECT', properties: { query: { type: 'STRING', description: 'Kata kunci nama file/folder.' } }, required: ['query'] } }
+];
+
+function buildWorkspaceSystemInstruction() {
+  return [
+    'Kamu terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder:',
+    'list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items.',
+    'Gunakan tools ini SETIAP KALI user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder, atau saat user minta menyimpan kode ke workspace.',
+    'Format path: file di folder utama = "index.html"; file dalam folder = "js/app.js" (awalan "root/" opsional dan diabaikan).',
+    'Sebelum mengedit file, WAJIB read_file dulu untuk melihat isi aslinya. Sebelum menghapus, minta konfirmasi kecuali user sudah jelas meminta hapus.',
+    'Setelah operasi berhasil, jelaskan singkat dan jelas apa yang kamu lakukan (file/folder apa yang dibuat/diubah/dihapus).',
+    'Jangan pernah mengarang isi file — kalau ragu, panggil read_file atau list_items.'
+  ].join(' ');
+}
+
+async function callGemini(apiKey, messages, useWorkspaceTools) {
+  const { systemInstruction, contents } = toGeminiPayload(messages, useWorkspaceTools);
   let lastError = null;
 
   for (const model of PREFERRED_MODELS) {
     try {
       const payload = { contents, tools: [{ google_search: {} }] };
+      if (useWorkspaceTools) payload.tools.push({ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS });
       if (systemInstruction) payload.systemInstruction = { parts: [{ text: systemInstruction }] };
 
       let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
@@ -127,7 +171,10 @@ async function callGemini(apiKey, messages) {
       }
 
       const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+      const parts = data?.candidates?.[0]?.content?.parts || [];
+      const text = parts.map(p => p.text || '').join('') || '';
+      const toolCalls = parts.filter(p => p.functionCall).map(p => ({ name: p.functionCall.name, args: p.functionCall.args || {} }));
+      if (toolCalls.length > 0) return { tool_calls: toolCalls, text, model };
       if (!text) { lastError = `Model ${model} returned empty response`; continue; }
 
       return { text, model };
@@ -227,7 +274,8 @@ export async function onRequestPost({ request, env }) {
       const projectId = body.project_id || '';
       try { await db.prepare('INSERT INTO chat_sessions (id, title, project_id) VALUES (?, ?, ?)').bind(sessionId, userText ? userText.substring(0, 50) : 'Percakapan Baru', projectId).run(); } catch(e) {}
     }
-    if (userText) {
+    const saveUserMessage = body.save_user_message !== false;
+    if (userText && saveUserMessage) {
       await db.prepare('INSERT INTO chat_messages (session_id, role, content) VALUES (?, ?, ?)').bind(sessionId, 'user', userText).run();
     }
 
@@ -248,12 +296,21 @@ export async function onRequestPost({ request, env }) {
     }
 
     // Call Gemini using client-provided messages (preserves system instructions + external context)
-    const result = await callGemini(apiKey, apiMessages.length > 0 ? apiMessages : [{ role: 'user', content: userText }]);
+    const useWorkspaceTools = body.workspace_tools === true;
+    const result = await callGemini(apiKey, apiMessages.length > 0 ? apiMessages : [{ role: 'user', content: userText }], useWorkspaceTools);
 
     if (result.error) {
       await db.prepare('INSERT INTO chat_messages (session_id, role, content) VALUES (?, ?, ?)').bind(sessionId, 'assistant', '[Error: ' + result.error + ']').run();
       return new Response(JSON.stringify({ error: result.error }), {
         status: 502, headers: { 'Content-Type': 'application/json', ...CORS }
+      });
+    }
+
+    // Tool-call turn: client will execute workspace CRUD locally and re-post with function responses.
+    // Don't persist intermediate assistant turns; only the final text is saved below.
+    if (result.tool_calls) {
+      return new Response(JSON.stringify({ tool_calls: result.tool_calls, session_id: sessionId, model: result.model }), {
+        headers: { 'Content-Type': 'application/json', ...CORS }
       });
     }
 

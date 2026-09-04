@@ -1430,6 +1430,258 @@
         }
 
         const GEMINI_PROXY_URL = 'https://clincoo.pages.dev/api/chat';
+
+        // ===== WORKSPACE FILE/FOLDER CRUD (shared store with workspace.html) =====
+        const WS_STORAGE_KEY = 'clincoo_workspace_files';
+
+        function wsLoad() {
+            try {
+                const d = JSON.parse(localStorage.getItem(WS_STORAGE_KEY));
+                if (d && typeof d === 'object' && Array.isArray(d.root)) return d;
+            } catch (e) {}
+            return { 'root': [] };
+        }
+
+        function wsSave(data) {
+            try {
+                localStorage.setItem(WS_STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                return { success: false, error: 'Gagal menyimpan workspace: penyimpanan browser penuh.' };
+            }
+            return null;
+        }
+
+        function wsNormalize(p) {
+            let s = String(p || '').trim().replace(/^\/+/, '').replace(/\/+$/, '');
+            if (!s || s === 'root') return '';
+            if (s.toLowerCase().startsWith('root/')) s = s.substring(5);
+            return s.replace(/\/{2,}/g, '/');
+        }
+
+        function wsParentInfo(p) {
+            const s = wsNormalize(p);
+            if (!s) return null;
+            const parts = s.split('/').filter(Boolean);
+            const name = parts.pop();
+            if (!name) return null;
+            const folderKey = parts.length > 0 ? parts.join('/') : 'root';
+            const itemPath = parts.length > 0 ? folderKey + '/' + name : name;
+            return { name, folderKey, itemPath };
+        }
+
+        function wsFindItem(data, p) {
+            const info = wsParentInfo(p);
+            if (!info) return null;
+            for (const key of Object.keys(data)) {
+                const arr = data[key];
+                if (!Array.isArray(arr)) continue;
+                for (let i = 0; i < arr.length; i++) {
+                    const it = arr[i];
+                    if (it && it.path && it.path.toLowerCase() === info.itemPath.toLowerCase()) {
+                        return { item: it, index: i, folderKey: key };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function wsEnsureFolderChain(data, folderKey) {
+            if (!Array.isArray(data.root)) data.root = [];
+            if (folderKey === 'root') return;
+            const parts = folderKey.split('/').filter(Boolean);
+            let parent = 'root', cum = '';
+            parts.forEach(function(part) {
+                cum = cum ? cum + '/' + part : part;
+                if (!Array.isArray(data[parent])) data[parent] = [];
+                const exists = data[parent].some(function(i) {
+                    return i && i.type === 'folder' && i.name.toLowerCase() === part.toLowerCase();
+                });
+                if (!exists) {
+                    data[parent].push({ type: 'folder', name: part, path: cum, fileCount: 0, previewText: 'Folder' });
+                }
+                if (!Array.isArray(data[cum])) data[cum] = [];
+                parent = cum;
+            });
+        }
+
+        function wsSizeStr(content) {
+            const bytes = new Blob([content || '']).size;
+            if (bytes > 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            if (bytes > 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return bytes + ' B';
+        }
+
+        function wsListItems(args) {
+            const data = wsLoad();
+            const key = args && args.path ? wsNormalize(args.path) : '';
+            const folderKey = key === '' ? 'root' : key;
+            const items = data[folderKey];
+            if (!Array.isArray(items)) {
+                return { success: false, error: 'Folder "' + folderKey + '" tidak ditemukan di workspace.' };
+            }
+            return {
+                success: true,
+                folder: folderKey,
+                total: items.length,
+                items: items.map(function(i) {
+                    return { name: i.name, type: i.type, path: i.path, size: i.type === 'file' ? (i.size || '') : (i.previewText || 'Folder') };
+                })
+            };
+        }
+
+        function wsReadFile(args) {
+            const path = args && args.path;
+            if (!path) return { success: false, error: 'Parameter path wajib.' };
+            const data = wsLoad();
+            const found = wsFindItem(data, path);
+            if (!found) return { success: false, error: 'File "' + path + '" tidak ditemukan.' };
+            if (found.item.type !== 'file') return { success: false, error: '"' + path + '" adalah folder, bukan file.' };
+            let content = found.item.content || '';
+            let truncated = false;
+            if (content.length > 60000) { content = content.substring(0, 60000); truncated = true; }
+            return {
+                success: true,
+                name: found.item.name,
+                path: found.item.path,
+                size: found.item.size || '',
+                truncated: truncated,
+                content: content,
+                note: truncated ? 'Isi file dipotong 60.000 karakter pertama.' : undefined
+            };
+        }
+
+        function wsWriteFile(args) {
+            const path = args && args.path;
+            const content = args && typeof args.content === 'string' ? args.content : '';
+            if (!path) return { success: false, error: 'Parameter path wajib.' };
+            const data = wsLoad();
+            const info = wsParentInfo(path);
+            if (!info) return { success: false, error: 'Path file tidak valid: ' + path };
+            if (info.name.includes('/')) return { success: false, error: 'Nama file tidak boleh mengandung "/".' };
+            wsEnsureFolderChain(data, info.folderKey);
+            if (!Array.isArray(data[info.folderKey])) data[info.folderKey] = [];
+            const sizeStr = wsSizeStr(content);
+            const existingIdx = data[info.folderKey].findIndex(function(i) {
+                return i && i.type === 'file' && i.name.toLowerCase() === info.name.toLowerCase();
+            });
+            let created;
+            if (existingIdx !== -1) {
+                data[info.folderKey][existingIdx].content = content;
+                data[info.folderKey][existingIdx].size = sizeStr;
+                created = false;
+            } else {
+                data[info.folderKey].push({ type: 'file', name: info.name, size: sizeStr, path: info.itemPath, content: content });
+                created = true;
+            }
+            const err = wsSave(data);
+            if (err) return err;
+            return { success: true, action: created ? 'created' : 'overwritten', path: info.itemPath, size: sizeStr };
+        }
+
+        function wsCreateFolder(args) {
+            const path = args && args.path;
+            if (!path) return { success: false, error: 'Parameter path wajib.' };
+            const data = wsLoad();
+            const norm = wsNormalize(path);
+            if (!norm) return { success: false, error: 'Path folder tidak valid.' };
+            wsEnsureFolderChain(data, norm);
+            if (!Array.isArray(data[norm])) data[norm] = [];
+            const err = wsSave(data);
+            if (err) return err;
+            return { success: true, action: 'created', path: norm };
+        }
+
+        function wsRenameItem(args) {
+            const path = args && args.path;
+            const newName = args && args.new_name ? String(args.new_name).trim() : '';
+            if (!path || !newName) return { success: false, error: 'Parameter path dan new_name wajib.' };
+            if (newName.includes('/')) return { success: false, error: 'Nama baru tidak boleh mengandung "/".' };
+            const data = wsLoad();
+            const found = wsFindItem(data, path);
+            if (!found) return { success: false, error: 'Item "' + path + '" tidak ditemukan.' };
+            const items = data[found.folderKey] || [];
+            const dupe = items.some(function(i) { return i !== found.item && i.name.toLowerCase() === newName.toLowerCase(); });
+            if (dupe) return { success: false, error: 'Nama "' + newName + '" sudah digunakan di folder yang sama.' };
+            const item = found.item;
+            const oldPath = item.path;
+            const parentKey = found.folderKey;
+            const newPath = parentKey === 'root' ? newName : parentKey + '/' + newName;
+            if (item.type === 'folder') {
+                Object.keys(data).forEach(function(key) {
+                    if (key === oldPath || key.startsWith(oldPath + '/')) {
+                        const newKey = newPath + key.substring(oldPath.length);
+                        data[newKey] = data[key];
+                        delete data[key];
+                        if (Array.isArray(data[newKey])) {
+                            data[newKey].forEach(function(child) {
+                                if (child.path && child.path.startsWith(oldPath + '/')) {
+                                    child.path = newPath + child.path.substring(oldPath.length);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+            item.name = newName;
+            item.path = newPath;
+            const err = wsSave(data);
+            if (err) return err;
+            return { success: true, action: 'renamed', old_path: oldPath, new_path: newPath };
+        }
+
+        function wsDeleteItem(args) {
+            const path = args && args.path;
+            if (!path) return { success: false, error: 'Parameter path wajib.' };
+            const data = wsLoad();
+            const found = wsFindItem(data, path);
+            if (!found) return { success: false, error: 'Item "' + path + '" tidak ditemukan.' };
+            const item = found.item;
+            const items = data[found.folderKey] || [];
+            if (item.type === 'folder') {
+                Object.keys(data).forEach(function(key) {
+                    if (key === item.path || key.startsWith(item.path + '/')) {
+                        delete data[key];
+                    }
+                });
+            }
+            items.splice(found.index, 1);
+            const err = wsSave(data);
+            if (err) return err;
+            return { success: true, action: 'deleted', path: item.path, type: item.type };
+        }
+
+        function wsSearchItems(args) {
+            const query = args && args.query ? String(args.query).toLowerCase().trim() : '';
+            if (!query) return { success: false, error: 'Parameter query wajib.' };
+            const data = wsLoad();
+            const matches = [];
+            Object.keys(data).forEach(function(key) {
+                (data[key] || []).forEach(function(i) {
+                    if (i && i.name && i.name.toLowerCase().includes(query)) {
+                        matches.push({ name: i.name, type: i.type, path: i.path, size: i.type === 'file' ? (i.size || '') : '' });
+                    }
+                });
+            });
+            return { success: true, query: query, total: matches.length, items: matches.slice(0, 100) };
+        }
+
+        function executeWorkspaceTool(name, args) {
+            try {
+                switch (name) {
+                    case 'list_items': return wsListItems(args);
+                    case 'read_file': return wsReadFile(args);
+                    case 'write_file': return wsWriteFile(args);
+                    case 'create_folder': return wsCreateFolder(args);
+                    case 'rename_item': return wsRenameItem(args);
+                    case 'delete_item': return wsDeleteItem(args);
+                    case 'search_items': return wsSearchItems(args);
+                    default: return { success: false, error: 'Tool tidak dikenal: ' + name };
+                }
+            } catch (e) {
+                return { success: false, error: 'Gagal menjalankan tool: ' + (e && e.message ? e.message : String(e)) };
+            }
+        }
+        // ===== END WORKSPACE CRUD =====
         const PREFERRED_MODELS = [
             "gemini-3.6-flash",
             "gemini-3-flash-preview",
@@ -1677,7 +1929,7 @@
                 const formattedDate = now.toLocaleDateString('id-ID', options);
                 const timeContext = `\n\n[INFO SISTEM (REAL-TIME)]: Saat ini adalah ${formattedDate}. Jika user meminta data hari ini atau yang terbaru, WAJIB utamakan Konteks Pencarian Web yang disuntikkan ke prompt ini agar jawaban akurat sesuai kondisi masa kini.`;
                 
-                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date.';
+                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.';
                 
                 try {
                     const apiMessages = [
@@ -1704,26 +1956,63 @@
                         apiMessages.push({ role: m.role === 'ai' ? 'assistant' : 'user', content: finalContent });
                     });
 
+                    // Loop function-calling: AI bisa memanggil tools workspace CRUD beberapa kali
+                    // sebelum menghasilkan jawaban final.
                     let response = null;
-                    try {
-                        response = await fetch(GEMINI_PROXY_URL, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ messages: apiMessages, session_id: currentSessionId || undefined, project_id: currentProjectId || undefined }),
-                            signal: abortController.signal
+                    let resultJson = null;
+                    let hopError = null;
+                    const apiMessagesWithTools = apiMessages.slice();
+                    const MAX_TOOL_HOPS = 6;
+
+                    for (let hop = 0; hop < MAX_TOOL_HOPS; hop++) {
+                        if (!isGenerating) throw new DOMException('Aborted', 'AbortError');
+                        try {
+                            response = await fetch(GEMINI_PROXY_URL, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    messages: apiMessagesWithTools,
+                                    session_id: currentSessionId || undefined,
+                                    project_id: currentProjectId || undefined,
+                                    workspace_tools: true,
+                                    save_user_message: hop === 0
+                                }),
+                                signal: abortController.signal
+                            });
+                        } catch (err) {
+                            if (err.name === 'AbortError') throw err;
+                            response = null;
+                        }
+
+                        if (!response || !response.ok) {
+                            let errDetail = '';
+                            if (response) {
+                                try { const errJson = await response.json(); errDetail = errJson.error || ''; } catch(e) {}
+                            }
+                            hopError = new Error(errDetail || `Proxy AI HTTP error! status: ${response ? response.status : 'No response'}`);
+                            break;
+                        }
+
+                        resultJson = await response.json();
+                        if (resultJson.session_id) currentSessionId = resultJson.session_id;
+
+                        // Tidak ada tool call → jawaban final, keluar dari loop
+                        if (!resultJson.tool_calls || resultJson.tool_calls.length === 0) break;
+
+                        // Eksekusi tool workspace secara lokal (localStorage browser)
+                        const assistantToolParts = resultJson.tool_calls.map(function(tc) {
+                            return { type: 'function_call', name: tc.name, args: tc.args || {} };
                         });
-                    } catch (err) {
-                        if (err.name === 'AbortError') throw err;
-                        response = null;
+                        apiMessagesWithTools.push({ role: 'assistant', content: assistantToolParts });
+
+                        const functionResponses = resultJson.tool_calls.map(function(tc) {
+                            const result = executeWorkspaceTool(tc.name, tc.args || {});
+                            return { type: 'function_response', name: tc.name, result: result };
+                        });
+                        apiMessagesWithTools.push({ role: 'user', content: functionResponses });
                     }
 
-                    if (!response || !response.ok) {
-                        let errDetail = '';
-                        if (response) {
-                            try { const errJson = await response.json(); errDetail = errJson.error || ''; } catch(e) {}
-                        }
-                        throw new Error(errDetail || `Proxy AI HTTP error! status: ${response ? response.status : 'No response'}`);
-                    }
+                    if (hopError) throw hopError;
 
                     hasReceivedData = true;
                     clearTimeout(apiTimeout);
@@ -1735,9 +2024,8 @@
                         messages[msgIndex].isTyping = true;
                     }
 
-                    const resultJson = await response.json();
-                    if (resultJson.session_id) currentSessionId = resultJson.session_id;
-                    streamingBuffer += (resultJson.text || "");
+                    if (resultJson && resultJson.session_id) currentSessionId = resultJson.session_id;
+                    streamingBuffer += (resultJson && resultJson.text ? resultJson.text : "");
                     isFetchComplete = true;
                 } catch (e) {
                     if (e.name !== 'AbortError') {
