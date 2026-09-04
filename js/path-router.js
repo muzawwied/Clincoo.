@@ -5,8 +5,8 @@
  */
 
 // Detect if we're on GitHub Pages (subpath) vs Cloudflare Pages (root)
-const _isGitHubPages = window.location.pathname.includes('/Clincoo/');
-const _BASE = _isGitHubPages ? '/Clincoo' : '';
+const _BASE = (window.location.pathname.match(/^(\/Clincoo[.]?)/) || [''])[0] || '';
+const _isGitHubPages = _BASE.length > 0;
 
 const PathRouter = {
     getSegments() {
@@ -57,9 +57,9 @@ const PathRouter = {
         if (_isGitHubPages) {
             // GitHub Pages: use pages/xxx.html?id=projectId
             if (subpath) {
-                return _BASE + '/pages/' + subpath + '.html?id=' + encodeURIComponent(projectId);
+                return _BASE + '/proyek/' + subpath + '.html?id=' + encodeURIComponent(projectId);
             }
-            return _BASE + '/pages/workspace.html?id=' + encodeURIComponent(projectId);
+            return _BASE + '/proyek/workspace.html?id=' + encodeURIComponent(projectId);
         }
         // Cloudflare Pages: clean URLs
         return _BASE + '/workspace/' + projectId + (subpath ? '/' + subpath : '');
@@ -75,14 +75,14 @@ const PathRouter = {
             if (segments.length >= 4) {
                 if (_isGitHubPages) {
                     const pid = this.getProjectId();
-                    window.location.href = _BASE + '/pages/' + segments[2] + '.html?id=' + encodeURIComponent(pid);
+                    window.location.href = _BASE + '/proyek/' + segments[2] + '.html?id=' + encodeURIComponent(pid);
                 } else {
                     window.location.href = _BASE + '/' + segments.slice(0, 3).join('/');
                 }
             } else if (segments.length >= 3) {
                 if (_isGitHubPages) {
                     const pid = this.getProjectId();
-                    window.location.href = _BASE + '/pages/workspace.html?id=' + encodeURIComponent(pid);
+                    window.location.href = _BASE + '/proyek/workspace.html?id=' + encodeURIComponent(pid);
                 } else {
                     window.location.href = _BASE + '/' + segments.slice(0, 2).join('/');
                 }
@@ -94,7 +94,7 @@ const PathRouter = {
         } else if (segments[0] === 'profil') {
             if (segments.length >= 2) {
                 if (_isGitHubPages) {
-                    window.location.href = _BASE + '/pages/profil.html';
+                    window.location.href = _BASE + '/akun/Profile.html';
                 } else {
                     window.location.href = _BASE + '/profil';
                 }
@@ -131,11 +131,11 @@ const PathRouter = {
         let linkMap;
         if (_isGitHubPages) {
             linkMap = {
-                'workspace': _BASE + '/pages/workspace.html?id=' + encodeURIComponent(projectId),
-                'chat': _BASE + '/pages/chat.html?id=' + encodeURIComponent(projectId),
-                'pengaturan': _BASE + '/pages/pengaturan.html?id=' + encodeURIComponent(projectId),
-                'environment': _BASE + '/pages/environment.html?id=' + encodeURIComponent(projectId),
-                'keamanan': _BASE + '/pages/keamanan.html?id=' + encodeURIComponent(projectId),
+                'workspace': _BASE + '/proyek/workspace.html?id=' + encodeURIComponent(projectId),
+                'chat': _BASE + '/proyek/chat.html?id=' + encodeURIComponent(projectId),
+                'pengaturan': _BASE + '/proyek/pengaturan.html?id=' + encodeURIComponent(projectId),
+                'environment': _BASE + '/proyek/environment.html?id=' + encodeURIComponent(projectId),
+                'keamanan': _BASE + '/proyek/keamanan.html?id=' + encodeURIComponent(projectId),
             };
         } else {
             linkMap = {

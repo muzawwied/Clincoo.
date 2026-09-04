@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="h-full w-full overflow-hidden">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ruang Kerja - Pengaturan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ruang Kerja - Environment</title>
   
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E">
   
@@ -11,28 +11,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
-    body {
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
       font-family: 'Inter', sans-serif;
-      background-color: #ffffff;
+      background-color: #f7f7f9;
     }
     
     ::-webkit-scrollbar {
-      display: none;
-      width: 0;
-      height: 0;
-      background: transparent;
-    }
-    * {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
     }
 
-    .hide-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
     .hide-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+      -ms-overflow-style: none !important;
+      scrollbar-width: none !important;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
     }
 
     @keyframes fadeIn {
@@ -42,7 +46,7 @@
     .animate-fade-in {
       animation: fadeIn 0.2s ease-out forwards;
     }
-    
+
     body.dark-mode { background-color: #000000; color: #e0e0e0; }
     body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #f0f0f0; }
     body.dark-mode .text-gray-700 { color: #b0b0b0; }
@@ -51,61 +55,62 @@
     body.dark-mode .text-black { color: #ffffff; }
     body.dark-mode .bg-white { background-color: #0a0a0a !important; }
 
-    body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
-    body.dark-mode #sidebar-toggle,
-    body.dark-mode button[onclick="toggleSidebar()"],
-    body.dark-mode button[onclick="history.back()"],
-    body.dark-mode button[onclick="navigateTo('page-home')"],
-    body.dark-mode .header-glass button[onclick],
-    body.dark-mode header button[onclick] {
-        background-color: #000000 !important;
-        border: 1.5px solid rgba(255,255,255,0.4) !important;
-        color: #ffffff !important;
-    }
-    body.dark-mode #sidebar-toggle svg,
-    body.dark-mode button[onclick="toggleSidebar()"] svg,
-    body.dark-mode button[onclick="history.back()"] svg,
-    body.dark-mode button[onclick="navigateTo('page-home')"] svg,
-    body.dark-mode .header-glass button[onclick] svg,
-    body.dark-mode header button[onclick] svg {
-        color: #ffffff !important;
-        stroke: #ffffff !important;
-    }
-    body.dark-mode #sidebar-toggle:hover,
-    body.dark-mode button[onclick="toggleSidebar()"]:hover,
-    body.dark-mode button[onclick="history.back()"]:hover,
-    body.dark-mode button[onclick="navigateTo('page-home')"]:hover,
-    body.dark-mode .header-glass button[onclick]:hover,
-    body.dark-mode header button[onclick]:hover {
-        background-color: #1a1a1a !important;
-        border-color: rgba(255,255,255,0.7) !important;
-    }
+        body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
+        body.dark-mode #sidebar-toggle,
+        body.dark-mode button[onclick="toggleSidebar()"],
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"],
+        body.dark-mode .header-glass button[onclick],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle svg,
+        body.dark-mode button[onclick="toggleSidebar()"] svg,
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"] svg,
+        body.dark-mode .header-glass button[onclick] svg,
+        body.dark-mode header button[onclick] svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle:hover,
+        body.dark-mode button[onclick="toggleSidebar()"]:hover,
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"]:hover,
+        body.dark-mode .header-glass button[onclick]:hover,
+        body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
     body.dark-mode .bg-gray-50 { background-color: #222222 !important; }
     body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
-    body.dark-mode .border-gray-200, body.dark-mode .border-gray-50 { border-color: #222222 !important; }
-    body.dark-mode .border-gray-100 { border-color: #0a0a0a !important; }
+    body.dark-mode .border-gray-200, body.dark-mode .border-gray-100 { border-color: #222222 !important; }
+    body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
     body.dark-mode .border-black { border-color: #ffffff !important; }
+    body.dark-mode .hover\:bg-gray-50:hover { background-color: #222222 !important; }
+    body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
+    body.dark-mode .hover\:bg-gray-200:hover { background-color: #222222 !important; }
     body.dark-mode .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
     body.dark-mode .shadow-xl { box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important; }
-    body.dark-mode #notif-dropdown { background-color: #0a0a0a; border-color: #222222; }
     body.dark-mode #sidebar-popup { background-color: #0a0a0a; }
-    body.dark-mode .hover\:bg-gray-50:hover { background-color: #222222 !important; }
-    body.dark-mode .hover\:text-black:hover { color: #ffffff !important; }
+    body.dark-mode #notif-dropdown { background-color: #0a0a0a; border-color: #222222; }
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+      background-color: #0a0a0a; color: #f0f0f0; border-color: #222222;
+    }
     body.dark-mode ::-webkit-scrollbar-thumb { background: #222222; }
 
-    body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
-    body.dark-mode .bg-black.text-white { color: #000000 !important; }
-    body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
-    body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
-    body.dark-mode .bg-accent.text-white { color: #000000 !important; }
-    body.dark-mode .text-accent { color: #ffffff !important; }
-    body.dark-mode .border-accent { border-color: #ffffff !important; }
-    body.dark-mode header { background-color: #000000 !important; }
-    body.dark-mode .bg-\[\#f7f7f9\] { background-color: #000000 !important; }
-    
-    .toggle-checkbox:checked { right: 0; border-color: #3b82f6; }
-    .toggle-checkbox:checked + .toggle-label { background-color: #3b82f6; }
-    .toggle-checkbox:checked + .toggle-label:after { transform: translateX(100%); border-color: white; }
+        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-black.text-white { color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
+        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-accent.text-white { color: #000000 !important; }
+        body.dark-mode .text-accent { color: #ffffff !important; }
+        body.dark-mode .border-accent { border-color: #ffffff !important; }
+        body.dark-mode header { background-color: #000000 !important; }
+        body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
+
   /* auto-dark-fix v1 */
     body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
     body.dark-mode .bg-gray-200 { background-color: #262626 !important; }
@@ -155,13 +160,13 @@
 <!-- no-flash-v1 -->
 <script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
-<body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-[#f7f7f9]">
+<body class="text-gray-900 antialiased fixed inset-0 w-full h-full overflow-hidden flex flex-col bg-[#f7f7f9]">
   <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
 
-  <div class="w-full h-full overflow-y-auto hide-scrollbar flex flex-col items-center">
-    
-    <header class="w-full max-w-5xl z-30 p-3 sm:px-6 flex justify-between items-center flex-shrink-0">
-      <div class="flex items-center gap-2">
+  <div class="w-full h-full overflow-y-auto hide-scrollbar flex flex-col relative min-w-0">
+
+    <header class="w-full flex-shrink-0 bg-[#f7f7f9] z-30 p-3 flex justify-between items-center border-b border-gray-100">
+      <div class="flex items-center gap-2 pointer-events-auto">
         <button onclick="toggleSidebar()" class="flex-shrink-0 flex items-center justify-center text-[#222222] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:text-black hover:bg-gray-50 transition-all rounded-full w-10 h-10" aria-label="Buka Menu">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 10h14M5 15h8" />
@@ -172,183 +177,86 @@
         </div>
       </div>
       
-      <div class="flex items-center justify-center gap-1.5 sm:gap-2">
+      <div class="flex items-center justify-center gap-1.5 sm:gap-2 pointer-events-auto">
         <button onclick="toggleNotifications(event)" class="relative p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors focus:outline-none" aria-label="Notifikasi">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
         </button>
         <a href="#" class="flex items-center justify-center">
-          <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="App Logo" class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm hover:scale-105 transition-transform cursor-pointer">
+          <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="App Logo" class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm hover:scale-105 transition-transform cursor-pointer">
         </a>
       </div>
     </header>
 
-    <div class="w-full max-w-5xl px-4 pt-2 pb-20">
-      <div class="w-full border-b border-gray-200 mb-6" id="project-nav-tabs">
-        <nav class="-mb-px flex space-x-6 overflow-x-auto hide-scrollbar" aria-label="Tabs">
-          <a href="workspace.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
-            Kode
-          </a> 
-          <a href="keamanan.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
-            Keamanan
-          </a>
-          <a href="environment.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
-            Environment
-          </a>
-          <button class="tab-btn border-black text-black whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none" aria-current="page">
-            Pengaturan
-          </button>
-        </nav>
-      </div>
-
-      <div class="w-full mt-2 relative pb-20">
-        <div class="w-full flex flex-col divide-y divide-gray-200 dark:divide-slate-700/60">
-          
-          <!-- 1. Umum -->
-          <a href="umum.html" class="py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer transition-colors group">
-            <div class="flex items-start sm:items-center gap-4 min-w-0">
-              <div class="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors flex-shrink-0">
-                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h4 class="text-base font-semibold text-gray-900 dark:text-white transition-colors">
-                  Umum
-                </h4>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                  Pengaturan nama, deskripsi, dan identitas proyek
-                </p>
-              </div>
-            </div>
-          </a>
-
-          <!-- 2. Build & Deployment -->
-          <a href="build-deployment.html" class="py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer transition-colors group">
-            <div class="flex items-start sm:items-center gap-4 min-w-0">
-              <div class="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors flex-shrink-0">
-                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                </svg>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h4 class="text-base font-semibold text-gray-900 dark:text-white transition-colors">
-                  Build & Deployment
-                </h4>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                  Konfigurasi sumber branch dan pengaturan deployment
-                </p>
-              </div>
-            </div>
-          </a>
-
-          <!-- 3. Domain Kustom -->
-          <a href="domain-kustom.html" class="py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer transition-colors group">
-            <div class="flex items-start sm:items-center gap-4 min-w-0">
-              <div class="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors flex-shrink-0">
-                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                </svg>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h4 class="text-base font-semibold text-gray-900 dark:text-white transition-colors">
-                  Domain Kustom
-                </h4>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                  Tambahkan domain khusus untuk situs Anda
-                </p>
-              </div>
-            </div>
-          </a>
-
-          <!-- 4. Keamanan & HTTPS -->
-          <a href="keamanan-https.html" class="py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer transition-colors group">
-            <div class="flex items-start sm:items-center gap-4 min-w-0">
-              <div class="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors flex-shrink-0">
-                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h4 class="text-base font-semibold text-gray-900 dark:text-white transition-colors">
-                  Keamanan & HTTPS
-                </h4>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                  Pengaturan sertifikat SSL dan penegakan HTTPS
-                </p>
-              </div>
-            </div>
-          </a>
-
-          <!-- 5. Visibilitas Akses -->
-          <a href="visibilitas-akses.html" class="py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer transition-colors group">
-            <div class="flex items-start sm:items-center gap-4 min-w-0">
-              <div class="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors flex-shrink-0">
-                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h4 class="text-base font-semibold text-gray-900 dark:text-white transition-colors">
-                  Visibilitas Akses
-                </h4>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                  Kontrol siapa saja yang dapat melihat halaman ini
-                </p>
-              </div>
-            </div>
-          </a>         
-
-          <!-- 7. Integrasi & Webhook -->
-          <a href="integrasi-webhook.html" class="py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer transition-colors group">
-            <div class="flex items-start sm:items-center gap-4 min-w-0">
-              <div class="text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors flex-shrink-0">
-                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h4 class="text-base font-semibold text-gray-900 dark:text-white transition-colors">
-                  Integrasi & Webhook
-                </h4>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                  Hubungkan dengan layanan pihak ketiga dan webhooks
-                </p>
-              </div>
-            </div>
-          </a>
-
-          <!-- 8. Zona Bahaya -->
-          <a href="zona-bahaya.html" class="py-4 sm:py-5 flex items-center justify-between gap-4 cursor-pointer transition-colors group">
-            <div class="flex items-start sm:items-center gap-4 min-w-0">
-              <div class="text-gray-400 dark:text-gray-500 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors flex-shrink-0">
-                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h4 class="text-base font-semibold text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
-                  Zona Bahaya
-                </h4>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                  Hapus situs, ubah visibilitas, atau transfer kepemilikan
-                </p>
-              </div>
-            </div>
-          </a>
-
+    <div class="main-container w-full flex-1 flex flex-col items-center px-4 pb-12 pt-2 min-w-0">
+      <div class="content-area hide-scrollbar w-full max-w-5xl flex flex-col min-w-0">
+        
+        <div class="w-full border-b border-gray-200 mb-6" id="project-nav-tabs">
+          <nav class="-mb-px flex space-x-6 overflow-x-auto hide-scrollbar" aria-label="Tabs">
+            <a href="workspace.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+              Kode
+            </a> 
+            <a href="keamanan.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+              Keamanan
+            </a>
+            <button class="tab-btn border-black text-black whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none" aria-current="page">
+              Environment
+            </button>
+            <a href="pengaturan.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+              Pengaturan
+            </a>
+          </nav>
         </div>
+
+        <div class="w-full mt-2 relative min-w-0">
+          <div class="w-full mt-4 min-w-0">
+            
+            <div class="flex gap-2 mb-4 w-full min-w-0">
+              <div class="flex-1 min-w-0">
+                <input type="text" id="env-key" placeholder="Kunci" class="w-full px-4 py-2.5 bg-[#f7f7f9] border border-gray-200 rounded-full text-gray-700 placeholder-gray-400 focus:outline-none transition-colors text-[14px]">
+              </div>
+              <div class="flex-1 min-w-0">
+                <input type="text" id="env-value" placeholder="Nilai" class="w-full px-4 py-2.5 bg-[#f7f7f9] border border-gray-200 rounded-full text-gray-700 placeholder-gray-400 focus:outline-none transition-colors text-[14px]">
+              </div>
+            </div>
+            
+            <div class="flex justify-end mb-8">
+              <button onclick="saveEnvVar()" class="px-6 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-[14px] font-medium hover:bg-gray-50 focus:outline-none transition-colors shadow-sm">
+                Simpan
+              </button>
+            </div>
+
+            <h3 class="text-[14px] font-semibold text-gray-800 mb-4">Environment variabel</h3>
+            
+            <div id="env-list" class="w-full flex flex-col gap-2 min-w-0"></div>
+
+            <div id="empty-state" class="flex flex-col items-center justify-center text-center mt-8 py-4">
+              <div class="mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b0b0b0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                  <path d="m21 2-9.6 9.6"></path>
+                  <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+                </svg>
+              </div>
+              <h4 class="text-[16px] font-semibold text-gray-800 mb-1">Belum ada variabel</h4>
+              <p class="text-[14px] text-gray-500 max-w-sm leading-relaxed">
+                Tambahkan environment variable pertama<br>Anda menggunakan form di atas.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
+
   </div>
 
-  <div id="notif-dropdown" class="fixed top-16 right-4 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-[90] origin-top-right">
+    <div id="notif-dropdown" class="fixed top-16 right-4 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-[90] origin-top-right">
     <div class="flex justify-between items-center mb-2 px-1">
       <span class="font-semibold text-sm text-gray-900">Notifikasi</span>
-      <a href="pages/notifikasi.html" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
+      <a href="../akun/notifikasi.html" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
     </div>
     <div class="flex flex-col gap-2 mb-2">
       <div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div>
@@ -368,7 +276,7 @@
       </div>
       
       <div class="px-3 py-4 flex flex-col gap-1" id="sidebar-nav">
-          <a href="index.html" data-page="app" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+          <a href="../index.html" data-page="app" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
               <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg>
               <span class="font-medium text-[14px]">Beranda</span>
           </a>
@@ -383,7 +291,8 @@
       </div>
   </aside>
 
-  <script>
+  <script src="../js/api.js"></script>
+<script>
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     const sidebarPopup = document.getElementById('sidebar-popup');
     let isSidebarOpen = false;
@@ -405,8 +314,7 @@
       }
     }
 
-    /* Mempertahankan fungsi toggleNotifications dengan sangat presisi */
-    function toggleNotifications(e) {
+        function toggleNotifications(e) {
       e.stopPropagation();
       const notifDropdown = document.getElementById('notif-dropdown');
       const isHidden = notifDropdown.classList.contains('invisible');
@@ -496,8 +404,7 @@
     renderNotifications();
     loadNotifications();
 
-    /* Mempertahankan event click luar untuk notifikasi dengan sangat presisi */
-    document.addEventListener('click', function(e) {
+        document.addEventListener('click', function(e) {
       const notifDropdown = document.getElementById('notif-dropdown');
       const notifBtn = e.target.closest('[onclick*="toggleNotifications"]');
       if (notifDropdown && !notifDropdown.contains(e.target) && !notifBtn) {
@@ -506,76 +413,84 @@
       }
     });
 
-    // Toggle switch general logic
-    function toggleSwitch(idPrefix) {
-      const bg = document.getElementById(idPrefix + '-bg');
-      const knob = document.getElementById(idPrefix + '-knob');
-      
-      if (bg.classList.contains('bg-blue-500')) {
-        bg.classList.replace('bg-blue-500', 'bg-gray-200');
-        knob.classList.remove('translate-x-5');
-      } else {
-        bg.classList.replace('bg-gray-200', 'bg-blue-500');
-        knob.classList.add('translate-x-5');
+    let envVars = [];
+
+    async function loadEnvVars() {
+      try {
+        const data = await ClincooAPI.getEnvVars();
+        envVars = data.env_vars || [];
+        renderEnvVars();
+      } catch (e) {
+        console.error('Failed to load env vars:', e);
       }
     }
 
-    // Toggle Mode Gelap spesifik
-    function toggleDarkModeUI() {
-      const isDark = document.body.classList.contains('dark-mode');
-      const bg = document.getElementById('dark-mode-toggle-bg');
-      const knob = document.getElementById('dark-mode-knob');
-      
-      if (isDark) {
-        document.body.classList.remove('dark-mode');
-        localStorage.setItem('clincoo_theme', 'Terang');
-        bg.classList.replace('bg-blue-500', 'bg-gray-200');
-        knob.classList.remove('translate-x-5');
-      } else {
-        document.body.classList.add('dark-mode');
-        localStorage.setItem('clincoo_theme', 'Gelap');
-        bg.classList.replace('bg-gray-200', 'bg-blue-500');
-        knob.classList.add('translate-x-5');
+    async function saveEnvVar() {
+      const keyInput = document.getElementById('env-key');
+      const valueInput = document.getElementById('env-value');
+      const key = keyInput.value.trim();
+      const value = valueInput.value.trim();
+
+      if (key && value) {
+        await ClincooAPI.addEnvVar(key, value, true);
+        keyInput.value = '';
+        valueInput.value = '';
+        await loadEnvVars();
       }
     }
 
-    // Set initial state of Dark Mode toggle on load
-    window.addEventListener('DOMContentLoaded', () => {
-      const isDark = document.body.classList.contains('dark-mode');
-      if (isDark) {
-        const bg = document.getElementById('dark-mode-toggle-bg');
-        const knob = document.getElementById('dark-mode-knob');
-        if (bg && knob) {
-          bg.classList.replace('bg-gray-200', 'bg-blue-500');
-          knob.classList.add('translate-x-5');
-        }
-      }
-    });
-  </script>
+    async function deleteEnvVar(id) {
+      await ClincooAPI.deleteEnvVar(id);
+      await loadEnvVars();
+    }
 
-  <script>
-    (function(){
-      var path=window.location.pathname.split('/').pop()||'pengaturan.html';
-      var links=document.querySelectorAll('.sidebar-nav-link');
-      links.forEach(function(link){
-        var href=link.getAttribute('href');
-        if(href===path){
-          link.classList.add('bg-gray-50','text-gray-900');
-          link.classList.remove('hover:bg-gray-50','text-gray-700');
-          var icon=link.querySelector('i');
-          if(icon){
-            icon.className=icon.className.replace('ph ph-','ph-fill ph-');
-            icon.classList.remove('text-gray-500');
-            icon.classList.add('text-gray-900');
-          }
-          var svg=link.querySelector('svg');
-          if(svg){
-            svg.classList.remove('text-gray-500');
-            svg.classList.add('text-gray-900');
-          }
-        }
-      });
-    })();
+    function renderEnvVars() {
+      const emptyState = document.getElementById('empty-state');
+      const envList = document.getElementById('env-list');
+      
+      if (envVars.length === 0) {
+        emptyState.style.display = 'flex';
+        envList.innerHTML = '';
+      } else {
+        emptyState.style.display = 'none';
+        envList.innerHTML = '';
+        envVars.forEach((env) => {
+          const row = document.createElement('div');
+          row.className = 'flex items-center gap-3 animate-fade-in mb-3 min-w-0 w-full';
+          
+          row.innerHTML = `
+            <div class="flex-1 min-w-0 px-4 py-2.5 bg-[#f7f7f9] border border-gray-200 rounded-full text-gray-700 text-[14px] font-mono overflow-hidden text-ellipsis whitespace-nowrap">
+              ${env.key}
+            </div>
+            <div class="flex-1 min-w-0 px-4 py-2.5 bg-[#f7f7f9] border border-gray-200 rounded-full text-gray-700 text-[14px] font-mono overflow-hidden text-ellipsis whitespace-nowrap">
+              ${env.value}
+            </div>
+            <button onclick="deleteEnvVar(${env.id})" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors focus:outline-none flex-shrink-0" aria-label="Hapus">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          `;
+          envList.appendChild(row);
+        });
+      }
+    }
+
+    // Load env vars on page load
+    loadEnvVars();
   </script>
-</body>
+<script>
+(function(){
+  var path=window.location.pathname.split('/').pop()||'environment.html';
+  var links=document.querySelectorAll('.sidebar-nav-link');
+  links.forEach(function(link){
+    var href=link.getAttribute('href');
+    if(href===path){
+      link.classList.add('bg-gray-50','text-gray-900');
+      link.classList.remove('hover:bg-gray-50','text-gray-700');
+    }
+  });
+})();
+</script>
+</body></body>
 </html>

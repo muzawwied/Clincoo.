@@ -235,7 +235,7 @@
 <body class="min-h-screen flex flex-col text-gray-900 pt-20">
     <script>try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||(t==='Sistem (Default)'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.body.classList.add('dark-mode');var a=localStorage.getItem('clincoo_accent')||'Hitam (Default)';var am={'Hitam (Default)':{m:'#000000',h:'#1f2937'},'Biru':{m:'#2563eb',h:'#1d4ed8'},'Hijau':{m:'#059669',h:'#047857'},'Ungu':{m:'#9333ea',h:'#7e22ce'},'Merah':{m:'#dc2626',h:'#b91c1c'}};var c=am[a]||am['Hitam (Default)'];document.documentElement.style.setProperty('--accent-color',c.m);document.documentElement.style.setProperty('--accent-hover',c.h);}catch(e){}</script>
     <main id="page-profile" class="page-view hidden flex-1 w-full max-w-2xl mx-auto pb-12 flex-col justify-start relative">
-        <button onclick="window.location.href='index.html'" class="fixed top-3 left-3 w-10 h-10 flex items-center justify-center rounded-full bg-white backdrop-blur border border-gray-100 shadow-sm hover:bg-gray-50 transition-all cursor-pointer text-gray-700 hover:text-black z-50" aria-label="Kembali">
+        <button onclick="window.location.href='../index.html'" class="fixed top-3 left-3 w-10 h-10 flex items-center justify-center rounded-full bg-white backdrop-blur border border-gray-100 shadow-sm hover:bg-gray-50 transition-all cursor-pointer text-gray-700 hover:text-black z-50" aria-label="Kembali">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </button>
         <div class="flex items-center justify-between px-7 pb-8 gap-5 relative">
@@ -257,15 +257,15 @@
             <div>
                 <h3 class="px-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Akun</h3>
                 <div class="flex flex-col w-full">
-                    <a href="pages/aktivitas.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="aktivitas.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="rotate-ccw-clock" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Aktivitas</span>
                     </a>
-                    <a href="pages/personal.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="personal.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="user" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Personal</span>
                     </a>
-                    <a href="pages/dompet.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="dompet.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="wallet" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Dompet</span>
                     </a>
@@ -274,11 +274,11 @@
             <div>
                 <h3 class="px-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Pengaturan</h3>
                 <div class="flex flex-col w-full">
-                    <a href="pages/upgrade.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="upgrade.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="crown" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Upgrade plan</span>
                     </a>
-                    <a href="pages/langganan.html" class="w-full flex items-center px-6 py-3 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="langganan.html" class="w-full flex items-center px-6 py-3 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="gem" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <div class="flex flex-col items-start">
                             <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Langganan</span>
@@ -351,20 +351,20 @@
             <div>
                 <div class="flex flex-col w-full">
                                      
-                    <a href="pages/kolaborasi.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="kolaborasi.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="user-plus" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Kolaborasi</span>
                     </a>
-                    <a href="pages/kontrol-data.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="kontrol-data.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="sliders-horizontal" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Kontrol data</span>
                     </a>
                     
-                    <a href="pages/laporkan-bug.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="laporkan-bug.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="bug" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Laporkan bug</span>
                     </a>
-                    <a href="pages/tentang.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="tentang.html" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="info" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Tentang</span>
                     </a>
@@ -372,7 +372,7 @@
             </div>
             <div>
                 <div class="flex flex-col w-full">
-                    <a href="pages/keluar.html" class="w-full flex items-center px-6 py-3.5 hover:bg-red-50 transition-colors active:bg-red-100 group">
+                    <a href="keluar.html" class="w-full flex items-center px-6 py-3.5 hover:bg-red-50 transition-colors active:bg-red-100 group">
                         <i data-lucide="log-out" class="w-5 h-5 text-red-500 mr-4 group-hover:text-red-600 transition-colors"></i>
                         <span class="text-[15px] font-medium text-red-500 group-hover:text-red-600">Keluar</span>
                     </a>

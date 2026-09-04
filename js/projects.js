@@ -107,7 +107,7 @@ function openProject(id) {
         localStorage.setItem('clincoo_current_chat_msg', proj.prompt || '');
         localStorage.setItem('clincoo_current_project_id', id);
         if (_isGHPages) {
-            window.location.href = _BASE + '/pages/workspace.html?id=' + encodeURIComponent(id);
+            window.location.href = _BASE + '/proyek/workspace.html?id=' + encodeURIComponent(id);
         } else {
             window.location.href = _BASE + '/workspace/' + id;
         }
@@ -185,7 +185,7 @@ function processPromptSubmission() {
         }
     } catch(e) {}
     if (_isGHPages) {
-        window.location.href = _BASE + '/pages/chat.html?id=' + encodeURIComponent(projectId);
+        window.location.href = _BASE + '/proyek/chat.html?id=' + encodeURIComponent(projectId);
     } else {
         window.location.href = _BASE + '/workspace/' + projectId + '/chat';
     }
