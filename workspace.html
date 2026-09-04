@@ -553,21 +553,24 @@
         const r = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents', { headers: githubAuthHeaders(), signal: signal });
         if (!r.ok) throw new Error('Repo tidak ditemukan');
         const items = await r.json();
-        projectFilesData[targetPath] = [];
+        if (!projectFilesData[targetPath]) projectFilesData[targetPath] = [];
+        const targetItems = projectFilesData[targetPath];
+        const prefix = targetPath === 'root' ? '' : targetPath + '/';
         for (let item of items) {
           if (signal.aborted) break;
+          if (targetItems.some(function(i) { return i.name.toLowerCase() === item.name.toLowerCase(); })) continue;
           if (item.type === 'file') {
             try {
               const fr = await fetch(item.url, { headers: githubAuthHeaders(), signal: signal });
               const fd = await fr.json();
               const fc = fd.encoding === 'base64' ? atob(fd.content) : '';
               const b = new Blob([fc]).size;
-              projectFilesData[targetPath].push({ type: 'file', name: item.name, size: b > 1024 ? (b/1024).toFixed(1)+' KB' : b+' B', path: targetPath+'/'+item.name, content: fc });
+              targetItems.push({ type: 'file', name: item.name, size: b > 1024 ? (b/1024).toFixed(1)+' KB' : b+' B', path: prefix + item.name, content: fc });
               reportProgress(item.name);
             } catch(e) {}
           } else if (item.type === 'dir') {
-            const np = targetPath + '/' + item.name;
-            projectFilesData[targetPath].push({ type: 'folder', name: item.name, path: np, fileCount: 0, previewText: 'Folder' });
+            const np = prefix + item.name;
+            targetItems.push({ type: 'folder', name: item.name, path: np, fileCount: 0, previewText: 'Folder' });
             reportProgress(item.name + '/');
             await importGitHubFolder(owner, repo, item.path, np, reportProgress, signal);
           }
@@ -1115,20 +1118,9 @@
     }
 
     function startGithubImport(fullName) {
-      const errEl = document.getElementById('input-modal-github-error');
       const repoName = (fullName.split('/').filter(Boolean).pop() || 'github-repo').replace('.git', '');
-      const items = projectFilesData[currentFolderPath] || [];
-      if (items.some(function(i) { return i.name.toLowerCase() === repoName.toLowerCase(); })) {
-        if (errEl) { errEl.textContent = 'Folder repository sudah ada di direktori ini.'; errEl.classList.remove('hidden'); }
-        return;
-      }
-      if (!projectFilesData[currentFolderPath]) projectFilesData[currentFolderPath] = [];
-      const newPath = currentFolderPath === 'root' ? repoName : currentFolderPath + '/' + repoName;
-      projectFilesData[currentFolderPath].push({ type: 'folder', name: repoName, path: newPath, fileCount: 0, previewText: 'Folder' });
-      saveData();
-      renderFileList();
       showGithubImportingUI(repoName);
-      importFromGitHub(fullName, newPath, function(status) {
+      importFromGitHub(fullName, currentFolderPath, function(status) {
         if (status === null) {
           closeInputModal();
           return;
