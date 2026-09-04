@@ -113,6 +113,13 @@
         body.dark-mode .border-black { border-color: #ffffff !important; }
     </style>
     
+<style>
+.clincoo-shimmer{position:relative;overflow:hidden;display:inline-block;min-width:4.5rem;min-height:1.4em;color:transparent!important;background:#e5e7eb;border-radius:8px;-webkit-user-select:none;user-select:none;vertical-align:middle}
+.clincoo-shimmer::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);animation:clincoo-shimmer 1.3s infinite}
+@keyframes clincoo-shimmer{100%{transform:translateX(100%)}}
+.dark-mode .clincoo-shimmer{background:#1e293b}
+.dark-mode .clincoo-shimmer::after{background:linear-gradient(90deg,transparent,rgba(148,163,184,.3),transparent)}
+</style>
 </head>
 
 <body class="min-h-screen flex flex-col text-gray-900 pt-16">
@@ -257,15 +264,28 @@
 
 
         // Load current plan from D1
+        function showButtonShimmer() {
+            ['btn-starter', 'btn-pro', 'btn-bisnis'].forEach(function(id) {
+                const b = document.getElementById(id);
+                if (b) {
+                    b.classList.add('clincoo-shimmer');
+                    b.disabled = true;
+                    b.onclick = null;
+                    b.innerText = 'Memuat...';
+                }
+            });
+        }
+
         async function loadSubscription() {
             try {
                 const res = await fetch(SUB_API);
                 const data = await res.json();
-                if (data.plan) {
+                subData = data || null;
+                if (data && data.plan) {
                     currentActivePlan = data.plan;
-                    updateUI();
                 }
             } catch(e) { console.error('Failed to load subscription:', e); }
+            updateUI();
         }
 
         function openModal(plan, price) {
@@ -326,7 +346,8 @@
             }
         }
 
-        // Load on page open
+        // Load on page open (shimmer dulu, data nyusul dari D1)
+        showButtonShimmer();
         loadSubscription();
     </script>
 <script>

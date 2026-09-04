@@ -93,6 +93,13 @@
   </script>
 <!-- no-flash-v1 -->
 <script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+<style>
+.clincoo-shimmer{position:relative;overflow:hidden;display:inline-block;min-width:4.5rem;min-height:1.4em;color:transparent!important;background:#e5e7eb;border-radius:8px;-webkit-user-select:none;user-select:none;vertical-align:middle}
+.clincoo-shimmer::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);animation:clincoo-shimmer 1.3s infinite}
+@keyframes clincoo-shimmer{100%{transform:translateX(100%)}}
+.dark-mode .clincoo-shimmer{background:#1e293b}
+.dark-mode .clincoo-shimmer::after{background:linear-gradient(90deg,transparent,rgba(148,163,184,.3),transparent)}
+</style>
 </head>
 <body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-[#f7f7f9]">
   <script>
@@ -123,24 +130,24 @@
               <h4 class="text-base font-semibold text-gray-900 dark:text-white">Paket Saat Ini</h4>
               <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Paket langganan yang aktif</p>
             </div>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Pro</span>
+            <span id="plan-badge" class="clincoo-shimmer inline-flex items-center px-3 py-1 rounded-full text-xs font-medium">Pro</span>
           </div>
           <div class="grid grid-cols-2 gap-3 mt-4">
             <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
               <p class="text-xs text-gray-500 dark:text-gray-400">Proyek Aktif</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-white">3 / 10</p>
+              <p id="stat-proyek" class="clincoo-shimmer text-lg font-bold text-gray-900 dark:text-white">3 / 10</p>
             </div>
             <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
               <p class="text-xs text-gray-500 dark:text-gray-400">Storage</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-white">2.4 / 50 GB</p>
+              <p id="stat-storage" class="clincoo-shimmer text-lg font-bold text-gray-900 dark:text-white">2.4 / 50 GB</p>
             </div>
             <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
               <p class="text-xs text-gray-500 dark:text-gray-400">Bandwidth</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-white">18 / 100 GB</p>
+              <p id="stat-bandwidth" class="clincoo-shimmer text-lg font-bold text-gray-900 dark:text-white">18 / 100 GB</p>
             </div>
             <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
               <p class="text-xs text-gray-500 dark:text-gray-400">Kolaborator</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-white">2 / 5</p>
+              <p id="stat-kolaborator" class="clincoo-shimmer text-lg font-bold text-gray-900 dark:text-white">2 / 5</p>
             </div>
           </div>
         </div>
@@ -152,15 +159,12 @@
           </div>
           <div class="w-full sm:w-80 relative">
             <button id="billing-btn" type="button" onclick="toggleBillingPopover(event)" class="w-full flex items-center justify-between px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none cursor-pointer bg-transparent hover:bg-gray-200/50 dark:hover:bg-slate-800 text-gray-900 dark:text-white transition-colors">
-              <span id="billing-text">Bulanan - Rp 149.000/bulan</span>
+              <span id="billing-text" class="clincoo-shimmer">Bulanan</span>
               <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
             </button>
             
             <div id="billing-popover" class="hidden absolute right-0 left-0 top-full mt-1.5 z-50 bg-white border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg overflow-hidden">
-                <div class="py-1 flex flex-col">
-                    <button type="button" onclick="selectBilling('Bulanan - Rp 149.000/bulan')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Bulanan - Rp 149.000/bulan</button>
-                    <button type="button" onclick="selectBilling('Tahunan - Rp 1.490.000/tahun')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-t border-gray-100 dark:border-slate-700/60">Tahunan - Rp 1.490.000/tahun</button>
-                </div>
+                <div id="billing-options" class="py-1 flex flex-col"></div>
             </div>
           </div>
         </div>
@@ -171,8 +175,7 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Kartu kredit yang terhubung</p>
           </div>
           <div class="w-full sm:w-80 flex items-center gap-2">
-            <span class="text-sm font-mono text-gray-600 dark:text-gray-400">•••• 4242</span>
-            <span class="text-xs text-gray-400">Visa</span>
+            <span id="payment-method" class="clincoo-shimmer text-sm font-mono text-gray-600 dark:text-gray-400">••••</span>
           </div>
         </div>
         
@@ -182,12 +185,12 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Tanggal perpanjangan otomatis</p>
           </div>
           <div class="w-full sm:w-80">
-            <span class="text-sm text-gray-600 dark:text-gray-400">27 September 2026</span>
+            <span id="next-billing" class="clincoo-shimmer text-sm text-gray-600 dark:text-gray-400">Memuat...</span>
           </div>
         </div>
         
         <div class="py-5">
-          <button class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">Ubah Paket</button>
+          <button onclick="window.location.href='upgrade.html'" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">Ubah Paket</button>
         </div>
       </div>
     </main>
@@ -242,10 +245,71 @@
     
     function selectBilling(text){
         document.getElementById('billing-text').innerText = text;
+        document.getElementById('billing-text').classList.remove('clincoo-shimmer');
         document.getElementById('billing-popover').classList.add('hidden');
-        showActionButtons();
+        const cycle = text.indexOf('Tahunan') === 0 ? 'Tahunan' : 'Bulanan';
+        fetch(SUB_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ billingCycle: cycle }) }).catch(function(){});
     }
     
+    // === Data langganan dari D1 (nyambung sama halaman upgrade) ===
+    const SUB_API = 'https://clincoo.pages.dev/api/subscription';
+    let subData = null;
+    const fmtID = function(n){ return Number(n).toLocaleString('id-ID'); };
+
+    function planBadgeClass(plan){
+        if(plan === 'Pro') return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+        if(plan === 'Bisnis') return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+        return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+    }
+
+    function setVal(id, text){
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.textContent = text;
+        el.classList.remove('clincoo-shimmer');
+    }
+
+    function fillSubscription(d){
+        const plan = d.plan || 'Starter';
+        const badge = document.getElementById('plan-badge');
+        if(badge){
+            badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ' + planBadgeClass(plan);
+            setVal('plan-badge', plan);
+        }
+        setVal('stat-proyek', (d.projectCount || 0) + ' / ' + (d.projectLimit || 0));
+        setVal('stat-storage', fmtID(d.storageUsed || 0) + ' / ' + fmtID(d.storageLimit || 0) + ' GB');
+        setVal('stat-bandwidth', fmtID(d.bandwidthUsed || 0) + ' / ' + fmtID(d.bandwidthLimit || 0) + ' GB');
+        setVal('stat-kolaborator', (d.collaboratorCount || 0) + ' / ' + (d.collaboratorLimit || 0));
+
+        const price = d.price || 0;
+        const bulanan = price > 0 ? 'Bulanan - Rp ' + fmtID(price) + '/bulan' : 'Bulanan - Gratis';
+        const tahunan = price > 0 ? 'Tahunan - Rp ' + fmtID(price * 12) + '/tahun' : 'Tahunan - Gratis';
+        const opts = document.getElementById('billing-options');
+        if(opts){
+            opts.innerHTML =
+                '<button type="button" onclick="selectBilling(\'' + bulanan + '\')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">' + bulanan + '</button>' +
+                '<button type="button" onclick="selectBilling(\'' + tahunan + '\')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-t border-gray-100 dark:border-slate-700/60">' + tahunan + '</button>';
+        }
+        setVal('billing-text', (d.billingCycle === 'Tahunan') ? tahunan : bulanan);
+        setVal('payment-method', d.paymentMethod || 'Saldo Dompet');
+        let nbText = '-';
+        try { nbText = new Date(d.nextBillingDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); } catch(e){}
+        setVal('next-billing', nbText);
+    }
+
+    async function loadSubscription(){
+        try {
+            const res = await fetch(SUB_API);
+            subData = await res.json();
+            if(!subData || subData.error) throw new Error(subData ? subData.error : 'no data');
+            fillSubscription(subData);
+        } catch(e) {
+            console.error('Gagal memuat langganan:', e);
+            fillSubscription({ plan: 'Starter', projectCount: 0, projectLimit: 3, storageUsed: 0, storageLimit: 5, bandwidthUsed: 0, bandwidthLimit: 10, collaboratorCount: 0, collaboratorLimit: 1, price: 0, billingCycle: 'Bulanan', nextBillingDate: new Date(Date.now() + 30 * 86400000).toISOString(), paymentMethod: 'Saldo Dompet' });
+        }
+    }
+    loadSubscription();
+
     // Menutup popover ketika area di luar popover diklik
     document.addEventListener('click', (e) => {
         const popover = document.getElementById('billing-popover');
