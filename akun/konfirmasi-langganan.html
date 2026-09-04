@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Konfirmasi Langganan</title>
   <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
@@ -14,6 +17,12 @@
     * { -ms-overflow-style: none; scrollbar-width: none; }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    :root {
+      --accent-color: #000000;
+      --accent-hover: #1f2937;
+      --accent-text: #ffffff;
+    }
 
     body.dark-mode { background-color: #000000; color: #e0e0e0; }
     body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #f0f0f0; }
@@ -44,18 +53,93 @@
     body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
     body.dark-mode .border-gray-300 { border-color: #333333 !important; }
     body.dark-mode .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #222222 !important; }
-    body.dark-mode .bg-emerald-50 { background-color: #0d2618 !important; }
-    body.dark-mode .text-emerald-700 { color: #34d399 !important; }
-    body.dark-mode .bg-red-50 { background-color: #2a1414 !important; }
+    body.dark-mode .bg-red-50 { background-color: #1c1212 !important; }
     body.dark-mode .border-red-100,
-    body.dark-mode .border-red-200 { border-color: #4a2020 !important; }
-    body.dark-mode .text-red-700 { color: #f87171 !important; }
+    body.dark-mode .border-red-200 { border-color: #3a2020 !important; }
+    body.dark-mode .text-red-700 { color: #f0a3a3 !important; }
+    body.dark-mode .text-red-600 { color: #f0a3a3 !important; }
+
+    /* --- outline secondary button (kembali / batal) --- */
+    .btn-outline {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-align: center;
+      background: transparent;
+      border: 1.5px solid #d1d5db;
+      color: #111827;
+      transition: background-color .15s ease;
+      cursor: pointer;
+    }
+    .btn-outline:hover { background: #f3f4f6; }
+    body.dark-mode .btn-outline { border-color: #333333; color: #f0f0f0; }
+    body.dark-mode .btn-outline:hover { background: #1a1a1a; }
+
+    /* --- slide to pay --- */
+    .slide-track {
+      position: relative;
+      width: 100%;
+      height: 56px;
+      border-radius: 9999px;
+      background: var(--accent-color);
+      overflow: hidden;
+      user-select: none;
+      transition: opacity .2s ease;
+    }
+    .slide-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-text);
+      font-weight: 600;
+      font-size: 0.875rem;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+    .slide-handle {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      cursor: grab;
+      touch-action: none;
+      will-change: transform;
+    }
+    .slide-handle:active { cursor: grabbing; }
+    .slide-handle i { color: var(--accent-color); width: 20px; height: 20px; }
+
+    body.dark-mode .slide-handle { background: #000000; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+    body.dark-mode .slide-handle i { color: #ffffff; }
+
+    .slide-track.disabled { background: #e5e7eb; cursor: not-allowed; }
+    body.dark-mode .slide-track.disabled { background: #262626; }
+    .slide-track.disabled .slide-label { color: #9ca3af; }
+    .slide-track.disabled .slide-handle { background: #ffffff; box-shadow: none; cursor: not-allowed; }
+    .slide-track.disabled .slide-handle i { color: #9ca3af; }
+    body.dark-mode .slide-track.disabled .slide-handle { background: #3a3a3a; }
+    body.dark-mode .slide-track.disabled .slide-handle i { color: #6b7280; }
   </style>
   <script>
     (function(){
       var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';
       var isDark=(t==='Gelap')||(t==='Sistem (Default)'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
       if(isDark) document.documentElement.classList.add('dark-mode');
+      var a=localStorage.getItem('clincoo_accent')||'Hitam (Default)';
+      var am={'Hitam (Default)':{m:'#000000',h:'#1f2937'},'Biru':{m:'#2563eb',h:'#1d4ed8'},'Hijau':{m:'#059669',h:'#047857'},'Ungu':{m:'#9333ea',h:'#7e22ce'},'Merah':{m:'#dc2626',h:'#b91c1c'}};
+      var c=am[a]||am['Hitam (Default)'];
+      document.documentElement.style.setProperty('--accent-color',c.m);
+      document.documentElement.style.setProperty('--accent-hover',c.h);
     })();
   </script>
 <!-- no-flash-v1 -->
@@ -89,7 +173,7 @@
       <p class="text-xs text-gray-500 dark:text-gray-400">Periksa pesanan Anda sebelum melanjutkan</p>
     </div>
 
-    <main class="w-full max-w-5xl px-4 sm:px-6 py-2 pb-24">
+    <main class="w-full max-w-5xl px-4 sm:px-6 py-2 pb-28">
       <div class="w-full flex flex-col divide-y divide-gray-200 dark:divide-slate-700/60">
 
         <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -157,16 +241,31 @@
         </div>
       </div>
 
-      <div id="pay-error" class="hidden mt-4 bg-red-50 border border-red-100 dark:border-red-100 rounded-xl px-4 py-3 text-xs text-red-700 dark:text-red-700 flex flex-col gap-1">
-        <span id="pay-error-text"></span>
-        <button onclick="window.location.href='dompet.html'" class="self-start font-semibold underline underline-offset-2 cursor-pointer">Isi saldo dompet</button>
+      <div id="pay-error" class="hidden mt-4 bg-red-50 border border-red-100 dark:border-red-100 rounded-2xl p-4 flex items-start gap-3">
+        <div class="w-9 h-9 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
+          <i data-lucide="alert-triangle" class="w-4.5 h-4.5 text-red-600 dark:text-red-600"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-red-700 dark:text-red-700">Saldo Tidak Cukup</p>
+          <p id="pay-error-text" class="text-xs text-red-600 dark:text-red-600 mt-0.5"></p>
+          <button onclick="window.location.href='dompet.html'" class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full text-white" style="background:var(--accent-color)">
+            Isi Saldo Dompet
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
       </div>
 
-      <div id="pay-success" class="hidden mt-4 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-xs text-emerald-700 dark:text-emerald-700 font-medium"></div>
+      <div id="pay-success" class="hidden mt-4 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 text-xs text-emerald-700 font-medium"></div>
 
-      <div class="flex flex-col gap-2 mt-6">
-        <button id="btn-pay" onclick="pay()" class="w-full py-3.5 bg-accent text-white hover:bg-accent-hover rounded-xl font-semibold text-sm transition-all shadow-md active:scale-95 cursor-pointer">Bayar &amp; Aktifkan Sekarang</button>
-        <button onclick="history.back()" class="w-full py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">Batal</button>
+      <div class="flex flex-col gap-2.5 mt-6">
+        <div id="slide-track" class="slide-track disabled">
+          <span id="slide-label" class="slide-label">Memuat...</span>
+          <div id="slide-handle" class="slide-handle">
+            <i data-lucide="arrow-right"></i>
+          </div>
+        </div>
+        <button id="btn-fallback" class="btn-outline hidden"></button>
+        <button onclick="history.back()" class="w-full py-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">Batal</button>
       </div>
     </main>
   </div>
@@ -185,6 +284,19 @@
 
     let totalPrice = 0;
     let alreadyActive = false;
+    let slideEnabled = false;
+    let slideCompleted = false;
+
+    const track = document.getElementById('slide-track');
+    const handle = document.getElementById('slide-handle');
+    const label = document.getElementById('slide-label');
+    const fallbackBtn = document.getElementById('btn-fallback');
+
+    function setSlideEnabled(on){
+      slideEnabled = on;
+      track.classList.toggle('disabled', !on);
+    }
+    function setLabel(text){ label.textContent = text; }
 
     function planBadgeClass(plan){
       if(plan === 'Pro') return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
@@ -199,12 +311,19 @@
       el.classList.remove('clincoo-shimmer');
     }
 
+    function showFallback(text, onClick){
+      track.classList.add('hidden');
+      fallbackBtn.classList.remove('hidden');
+      fallbackBtn.textContent = text;
+      fallbackBtn.onclick = onClick;
+    }
+
     async function load(){
       if(!PRICES.hasOwnProperty(PLAN)){
         document.getElementById('order-plan-badge').textContent = PLAN + ' tidak dikenal';
-        const payBtn0 = document.getElementById('btn-pay');
-        payBtn0.innerText = 'Paket tidak valid';
-        payBtn0.disabled = true;
+        showFallback('Paket Tidak Valid', null);
+        fallbackBtn.disabled = true;
+        fallbackBtn.classList.add('opacity-60','cursor-not-allowed');
         return;
       }
       totalPrice = BILLING === 'Tahunan' ? PRICES[PLAN] * 12 : PRICES[PLAN];
@@ -224,14 +343,11 @@
       setVal('wallet-balance', fmtID(balance));
       setVal('wallet-after', totalPrice === 0 ? fmtID(balance) : fmtID(balance - totalPrice));
 
-      const payBtn = document.getElementById('btn-pay');
-
       if(totalPrice > 0 && balance < totalPrice){
-        document.getElementById('pay-error-text').textContent = 'Saldo dompet tidak cukup. Butuh ' + fmtID(totalPrice) + ', saldo Anda ' + fmtID(balance) + '.';
+        document.getElementById('pay-error-text').textContent = 'Butuh ' + fmtID(totalPrice) + ', saldo Anda ' + fmtID(balance) + '.';
         document.getElementById('pay-error').classList.remove('hidden');
-        payBtn.innerText = 'Saldo Tidak Cukup';
-        payBtn.disabled = true;
-        payBtn.classList.add('opacity-60','cursor-not-allowed');
+        setLabel('Saldo Tidak Cukup');
+        setSlideEnabled(false);
         return;
       }
 
@@ -239,20 +355,15 @@
         alreadyActive = true;
         document.getElementById('pay-success').textContent = 'Paket ' + PLAN + ' sudah aktif di akun Anda.';
         document.getElementById('pay-success').classList.remove('hidden');
-        payBtn.innerText = 'Kembali ke Langganan';
-        payBtn.onclick = function(){ window.location.href = 'langganan.html'; };
+        showFallback('Kembali ke Langganan', function(){ window.location.href = 'langganan.html'; });
         return;
       }
 
-      payBtn.innerText = totalPrice === 0 ? 'Aktifkan Paket Gratis' : 'Bayar & Aktifkan Sekarang';
+      setLabel(totalPrice === 0 ? 'Geser untuk Aktifkan' : 'Geser untuk Bayar');
+      setSlideEnabled(true);
     }
 
-    async function pay(){
-      if(alreadyActive){ window.location.href = 'langganan.html'; return; }
-      const btn = document.getElementById('btn-pay');
-      btn.disabled = true;
-      btn.classList.add('opacity-80','cursor-not-allowed');
-      btn.innerText = 'Memproses...';
+    async function doPay(){
       try {
         const res = await fetch(SUB_API, {
           method: 'POST',
@@ -264,27 +375,109 @@
           document.getElementById('pay-success').textContent = 'Berhasil! Paket ' + PLAN + ' (' + BILLING + ') sekarang aktif.';
           document.getElementById('pay-success').classList.remove('hidden');
           document.getElementById('pay-error').classList.add('hidden');
-          btn.innerText = 'Berhasil';
+          setLabel('Berhasil!');
           setTimeout(function(){ window.location.href = 'langganan.html'; }, 900);
         } else if(res.status === 402){
-          document.getElementById('pay-error-text').textContent = 'Saldo dompet tidak cukup. Butuh ' + fmtID(data.required || totalPrice) + ', saldo Anda ' + fmtID(data.balance || 0) + '.';
+          document.getElementById('pay-error-text').textContent = 'Butuh ' + fmtID(data.required || totalPrice) + ', saldo Anda ' + fmtID(data.balance || 0) + '.';
           document.getElementById('pay-error').classList.remove('hidden');
-          btn.innerText = 'Saldo Tidak Cukup';
+          resetSlide();
+          setLabel('Saldo Tidak Cukup');
+          setSlideEnabled(false);
         } else {
           document.getElementById('pay-error-text').textContent = 'Gagal memproses: ' + ((data && data.error) || 'coba lagi nanti');
           document.getElementById('pay-error').classList.remove('hidden');
-          btn.innerText = 'Coba Lagi';
-          btn.disabled = false;
-          btn.classList.remove('opacity-80','cursor-not-allowed');
+          resetSlide();
+          setLabel(totalPrice === 0 ? 'Geser untuk Aktifkan' : 'Geser untuk Bayar');
+          setSlideEnabled(true);
         }
       } catch(e) {
         document.getElementById('pay-error-text').textContent = 'Koneksi bermasalah, coba lagi.';
         document.getElementById('pay-error').classList.remove('hidden');
-        btn.innerText = 'Coba Lagi';
-        btn.disabled = false;
-        btn.classList.remove('opacity-80','cursor-not-allowed');
+        resetSlide();
+        setLabel(totalPrice === 0 ? 'Geser untuk Aktifkan' : 'Geser untuk Bayar');
+        setSlideEnabled(true);
       }
     }
+
+    // ---- slide-to-pay drag logic ----
+    let maxX = 0, baseX = 0, dragging = false, startClientX = 0, totalMoved = 0;
+
+    function computeMaxX(){
+      maxX = track.clientWidth - handle.clientWidth - 8;
+      if(maxX < 0) maxX = 0;
+    }
+    window.addEventListener('resize', computeMaxX);
+    computeMaxX();
+
+    function setHandleX(x, animate){
+      handle.style.transition = animate ? 'transform .25s cubic-bezier(.22,1,.36,1)' : 'none';
+      handle.style.transform = 'translateX(' + x + 'px)';
+      const progress = maxX > 0 ? x / maxX : 0;
+      label.style.opacity = String(Math.max(0, 1 - progress * 1.3));
+    }
+
+    function resetSlide(){
+      slideCompleted = false;
+      setHandleX(0, true);
+      label.style.opacity = '1';
+    }
+
+    function completeSlide(){
+      if(slideCompleted) return;
+      slideCompleted = true;
+      setSlideEnabled(false);
+      setHandleX(maxX, true);
+      setLabel('Memproses...');
+      label.style.opacity = '1';
+      doPay();
+    }
+
+    handle.addEventListener('pointerdown', function(e){
+      if(!slideEnabled || slideCompleted) return;
+      dragging = true;
+      totalMoved = 0;
+      startClientX = e.clientX;
+      baseX = 0;
+      try { handle.setPointerCapture(e.pointerId); } catch(err) {}
+      handle.style.transition = 'none';
+    });
+
+    handle.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      const dx = e.clientX - startClientX;
+      totalMoved = Math.abs(dx);
+      const x = Math.min(Math.max(0, baseX + dx), maxX);
+      setHandleX(x, false);
+    });
+
+    function endDrag(e){
+      if(!dragging) return;
+      dragging = false;
+      if(totalMoved < 6){
+        // treated as a tap -> handled by click listener below
+        return;
+      }
+      const dx = e.clientX - startClientX;
+      const x = Math.min(Math.max(0, baseX + dx), maxX);
+      if(maxX > 0 && x >= maxX * 0.7){
+        completeSlide();
+      } else {
+        resetSlide();
+      }
+    }
+    handle.addEventListener('pointerup', endDrag);
+    handle.addEventListener('pointercancel', endDrag);
+
+    handle.addEventListener('click', function(){
+      if(!slideEnabled || slideCompleted) return;
+      if(totalMoved >= 6) return;
+      completeSlide();
+    });
+    track.addEventListener('click', function(e){
+      if(e.target.closest('#slide-handle')) return;
+      if(!slideEnabled || slideCompleted) return;
+      completeSlide();
+    });
 
     load();
   </script>
