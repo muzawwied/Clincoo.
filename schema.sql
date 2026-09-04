@@ -86,3 +86,14 @@ CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
 CREATE INDEX IF NOT EXISTS idx_activity_log_created ON activity_log(created_at);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_created ON chat_messages(created_at);
+
+CREATE TABLE IF NOT EXISTS topup_orders (
+  id TEXT PRIMARY KEY,
+  amount REAL NOT NULL,
+  method TEXT,
+  status TEXT DEFAULT 'pending',
+  snap_token TEXT,
+  transaction_status TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  paid_at TEXT
+);
