@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+  <title>Domain Kustom</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/api.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    
+    /* Menyembunyikan scrollbar di seluruh browser */
+    ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Dark mode styling sinkron & borderless */
+    body.dark-mode { background-color: #000000; color: #e0e0e0; }
+    body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #f0f0f0; }
+    body.dark-mode .text-gray-700 { color: #b0b0b0; }
+    body.dark-mode .text-gray-500, body.dark-mode .text-gray-600 { color: #888888; }
+    body.dark-mode .text-gray-400 { color: #666666; }
+    body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+    
+    /* Header Buttons Dark Mode sesuai preferensi */
+    body.dark-mode button[onclick="PathRouter.goBack()"],
+    body.dark-mode header button[onclick] {
+        background-color: #000000 !important;
+        border: 1.5px solid rgba(255,255,255,0.4) !important;
+        color: #ffffff !important;
+    }
+    body.dark-mode button[onclick="PathRouter.goBack()"] svg,
+    body.dark-mode header button[onclick] svg { stroke: #ffffff !important; }
+    body.dark-mode button[onclick="PathRouter.goBack()"]:hover,
+    body.dark-mode header button[onclick]:hover { 
+        background-color: #1a1a1a !important; 
+        border-color: rgba(255,255,255,0.7) !important; 
+    }
+    
+    body.dark-mode .bg-gray-50 { background-color: #222222 !important; }
+    body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
+    body.dark-mode .border-gray-200, body.dark-mode .border-gray-100 { border-color: #222222 !important; }
+    body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
+    body.dark-mode .hover\:bg-gray-200:hover { background-color: #222222 !important; }
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+      background-color: #0a0a0a; color: #ffffff; border-color: #222222;
+    }
+    body.dark-mode input:focus, body.dark-mode select:focus, body.dark-mode textarea:focus {
+      border-color: #333333; outline: none;
+    }
+    body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+    body.dark-mode .bg-black.text-white { color: #000000 !important; }
+    body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
+    body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+    body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
+  </style>
+  
+  <script>
+    (function() {
+      var t = localStorage.getItem('clincoo_theme') || 'Sistem (Default)';
+      var isDark = (t === 'Gelap') || (t === 'Sistem (Default)' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) document.documentElement.classList.add('dark-mode');
+    })();
+  </script>
+    <script src="../js/path-router.js"></script>
+<script>const _isGHPages = window.location.pathname.includes("/Clincoo/");</script>
+</head>
+<body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-[#f7f7f9]">
+  <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+
+  <!-- Container utama dengan penanganan scroll konsisten -->
+  <div class="w-full h-full overflow-y-auto hide-scrollbar flex flex-col items-center">
+    
+    <!-- Header: Disesuaikan dengan preferensi layout fixed, tombol kembali melingkar, dan judul di tengah -->
+    <header class="bg-[#f7f7f9] flex justify-between items-center px-4 py-3 fixed top-0 w-full z-40 transition-colors">
+      <button onclick="PathRouter.goBack()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black" aria-label="Kembali">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+      </button>
+      <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Domain Kustom</h1>
+      <div class="w-10"></div>
+    </header>
+
+    <!-- Area Konten Fitur (Diberi padding atas pt-16 agar tidak tertutup fixed header) -->
+    <main class="w-full max-w-5xl px-4 sm:px-6 pt-16 pb-24">
+      <div class="w-full flex flex-col divide-y divide-gray-200 dark:divide-slate-700/60">
+        
+        <!-- 1. Domain Utama -->
+        <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white">Domain Utama</h4>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Domain kustom yang digunakan untuk situs produksi</p>
+          </div>
+          <div class="w-full sm:w-80">
+            <input type="text" value="" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none" placeholder="contohdomain.com">
+          </div>
+        </div>
+
+        <!-- 2. Subdomain Redirect (Menggunakan Popover Kustom sesuai preferensi) -->
+        <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white">Subdomain Redirect</h4>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Atur pengalihan (redirect) trafik ke domain utama</p>
+          </div>
+          <div class="w-full sm:w-80 relative" id="redirect-popover-container">
+            <!-- Popover Trigger Button -->
+            <button type="button" id="redirect-popover-btn" onclick="togglePopover('redirect-popover')" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white flex items-center justify-between focus:outline-none hover:border-gray-400 dark:hover:border-slate-500 transition-colors cursor-pointer select-none">
+              <span id="redirect-selected-text" class="truncate">Redirect ke domain utama</span>
+              <svg id="redirect-arrow" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 transition-transform duration-200 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <input type="hidden" id="redirect-value" value="redirect">
+
+            <!-- Popover Menu Panel -->
+            <div id="redirect-popover" class="hidden absolute left-0 right-0 mt-1.5 w-full bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl z-50 py-1 transition-all duration-150 transform opacity-0 scale-95 origin-top">
+              <button type="button" onclick="selectPopoverOption('redirect', 'redirect', 'Redirect ke domain utama')" class="popover-item w-full px-3.5 py-2.5 text-xs sm:text-sm text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-900 dark:text-white transition-colors cursor-pointer" data-value="redirect">
+                <span>Redirect ke domain utama</span>
+                <svg class="h-4 w-4 text-blue-600 dark:text-blue-400 popover-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              </button>
+              <button type="button" onclick="selectPopoverOption('redirect', 'none', 'Tidak ada redirect')" class="popover-item w-full px-3.5 py-2.5 text-xs sm:text-sm text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-900 dark:text-white transition-colors cursor-pointer" data-value="none">
+                <span>Tidak ada redirect</span>
+                <svg class="h-4 w-4 text-blue-600 dark:text-blue-400 popover-check hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. SSL Otomatis -->
+        <div class="py-5 flex items-center justify-between gap-4">
+          <div class="min-w-0 flex-1">
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white">SSL Otomatis</h4>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Provisioning sertifikat SSL secara otomatis</p>
+          </div>
+          <button type="button" onclick="toggleSwitch('sslAuto')" class="relative flex-shrink-0 cursor-pointer focus:outline-none">
+            <div id="sslAuto-bg" class="w-11 h-6 bg-blue-500 rounded-full transition-colors duration-200 ease-in-out"></div>
+            <div id="sslAuto-knob" class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out translate-x-5"></div>
+          </button>
+        </div>
+
+        <!-- 4. Konfigurasi DNS -->
+        <div class="py-5">
+          <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Konfigurasi DNS</h4>
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4">Tambahkan record DNS berikut di provider domain Anda</p>
+          <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-700">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 dark:bg-slate-800">
+                <tr class="border-b border-gray-200 dark:border-slate-700">
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Tipe</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nama</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nilai</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-[#0a0a0a]">
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">A</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-name">@</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-value">76.76.21.21</td>
+                </tr>
+                <tr class="bg-white dark:bg-[#0a0a0a]">
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">CNAME</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-name">www</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-value">clincoo.pages.dev</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // --- Fungsi Popover Dropdown Kustom ---
+    function togglePopover(popoverId) {
+      const popover = document.getElementById(popoverId);
+      const arrow = document.getElementById(popoverId.replace('-popover', '-arrow'));
+      
+      const isOpen = !popover.classList.contains('hidden');
+
+      if (isOpen) {
+        closePopover(popoverId);
+      } else {
+        // Tutup popover lain jika ada
+        document.querySelectorAll('[id$="-popover"]').forEach(p => {
+          if (p.id !== popoverId) closePopover(p.id);
+        });
+
+        popover.classList.remove('hidden');
+        setTimeout(() => {
+          popover.classList.remove('opacity-0', 'scale-95');
+          popover.classList.add('opacity-100', 'scale-100');
+        }, 10);
+        if (arrow) arrow.classList.add('rotate-180');
+      }
+    }
+
+    function closePopover(popoverId) {
+      const popover = document.getElementById(popoverId);
+      const arrow = document.getElementById(popoverId.replace('-popover', '-arrow'));
+      
+      if (!popover || popover.classList.contains('hidden')) return;
+
+      popover.classList.remove('opacity-100', 'scale-100');
+      popover.classList.add('opacity-0', 'scale-95');
+      if (arrow) arrow.classList.remove('rotate-180');
+
+      setTimeout(() => {
+        popover.classList.add('hidden');
+      }, 150);
+    }
+
+    // Fungsi Pilih Opsi pada Popover
+    function selectPopoverOption(prefix, value, label) {
+      const selectedText = document.getElementById(`${prefix}-selected-text`);
+      const hiddenInput = document.getElementById(`${prefix}-value`);
+      const container = document.getElementById(`${prefix}-popover`);
+
+      if (selectedText) selectedText.textContent = label;
+      
+      if (hiddenInput && hiddenInput.value !== value) {
+          hiddenInput.value = value;
+      }
+
+      // Update icon centang aktif
+      if (container) {
+        container.querySelectorAll('.popover-item').forEach(item => {
+          const checkIcon = item.querySelector('.popover-check');
+          if (item.getAttribute('data-value') === value) {
+            if (checkIcon) checkIcon.classList.remove('hidden');
+          } else {
+            if (checkIcon) checkIcon.classList.add('hidden');
+          }
+        });
+      }
+
+      closePopover(`${prefix}-popover`);
+    }
+
+    // Close Popover saat klik di luar areanya
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('[id$="-popover-container"]')) {
+        document.querySelectorAll('[id$="-popover"]').forEach(p => closePopover(p.id));
+      }
+    });
+
+    // --- Fungsi Toggle Switch ---
+    function toggleSwitch(idPrefix) {
+      const bg = document.getElementById(idPrefix + '-bg');
+      const knob = document.getElementById(idPrefix + '-knob');
+      
+      if (bg.classList.contains('bg-blue-500')) {
+        bg.classList.replace('bg-blue-500', 'bg-gray-200');
+        bg.classList.add('dark:bg-slate-700');
+        knob.classList.remove('translate-x-5');
+      } else {
+        bg.classList.remove('bg-gray-200', 'dark:bg-slate-700');
+        bg.classList.add('bg-blue-500');
+        knob.classList.add('translate-x-5');
+      }
+    }
+  
+    // Load domain settings from D1
+    async function loadDomainSettings() {
+        try {
+            const pid = localStorage.getItem('clincoo_current_project_id') || '';
+            const res = await fetch((_isGHPages ? '/Clincoo' : '') + '/api/project-settings?project_id=' + encodeURIComponent(pid));
+            const data = await res.json();
+            const settings = data.domain_settings ? JSON.parse(data.domain_settings) : {};
+            const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
+            if (domainInput && settings.domain) domainInput.value = settings.domain;
+            if (settings.redirect) {
+                selectPopoverOption('redirect', settings.redirect, settings.redirectLabel || 'Redirect ke domain utama');
+            }
+            updateDNSRecords(settings.domain || '');
+        } catch(e) {}
+    }
+
+    function updateDNSRecords(domain) {
+        const aName = document.getElementById('dns-a-name');
+        const aValue = document.getElementById('dns-a-value');
+        const cnameName = document.getElementById('dns-cname-name');
+        const cnameValue = document.getElementById('dns-cname-value');
+        if (domain) {
+            if (aName) aName.textContent = '@';
+            if (aValue) aValue.textContent = '76.76.21.21';
+            if (cnameName) cnameName.textContent = 'www';
+            if (cnameValue) cnameValue.textContent = domain + ' -> clincoo.pages.dev';
+        } else {
+            if (aName) aName.textContent = '@';
+            if (aValue) aValue.textContent = '76.76.21.21';
+            if (cnameName) cnameName.textContent = 'www';
+            if (cnameValue) cnameValue.textContent = 'clincoo.pages.dev';
+        }
+    }
+
+    // Save domain settings to D1
+    async function saveDomainSettings() {
+        const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
+        const redirectLabel = document.getElementById('redirect-selected-text');
+        const redirectHidden = document.getElementById('redirect-value');
+        const settings = {
+            domain: domainInput ? domainInput.value : '',
+            redirect: redirectHidden ? redirectHidden.value : 'redirect',
+            redirectLabel: redirectLabel ? redirectLabel.textContent.trim() : 'Redirect ke domain utama'
+        };
+        try {
+            const pid = localStorage.getItem('clincoo_current_project_id') || '';
+            await fetch((_isGHPages ? '/Clincoo' : '') + '/api/project-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_id: pid, domain_settings: JSON.stringify(settings) })
+            });
+            await ClincooAPI.logActivity('domain_updated', 'Domain: ' + settings.domain);
+            updateDNSRecords(settings.domain);
+        } catch(e) {}
+    }
+
+    // Override selectPopoverOption to also save
+    const originalSelectPopover = selectPopoverOption;
+    selectPopoverOption = function(type, value, label) {
+        originalSelectPopover(type, value, label);
+        if (type === 'redirect') saveDomainSettings();
+    };
+
+    // Save on domain input blur
+    document.addEventListener('DOMContentLoaded', function() {
+        const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
+        if (domainInput) domainInput.addEventListener('blur', saveDomainSettings);
+        loadDomainSettings();
+    });
+
+</script>
+<script>if(typeof lucide!=="undefined")lucide.createIcons();</script>
+</body>
+<!-- deploy: 2026-09-01T00:54 -->
+</html>
