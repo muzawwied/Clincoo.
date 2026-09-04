@@ -269,6 +269,61 @@
             window.location.reload();
         }
 
+
+        // ===== SINKRONISASI D1: data profile & personal terhubung ke backend =====
+        const PROFILE_API = 'https://clincoo.pages.dev/api/account-profile';
+        function syncProfileToD1() {
+            try {
+                const payload = {};
+                const name = localStorage.getItem('clincoo_fullname');
+                const email = localStorage.getItem('clincoo_email');
+                const pic = localStorage.getItem('clincoo_profile_pic');
+                if (name) payload.name = name;
+                if (email) payload.email = email;
+                if (pic && pic.length < 700000) payload.avatar = pic;
+                const lang = document.getElementById('lang-text');
+                const tz = document.getElementById('tz-text');
+                if (lang && lang.textContent) payload.language = lang.textContent.trim();
+                if (tz && tz.textContent) payload.timezone = tz.textContent.trim();
+                if (Object.keys(payload).length > 0) {
+                    fetch(PROFILE_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(function(){});
+                }
+            } catch(e) {}
+        }
+        function syncProfileFromD1() {
+            try {
+                fetch(PROFILE_API).then(function(r){ return r.json(); }).then(function(d) {
+                    if (!d || d.error) return;
+                    let changed = false;
+                    if (d.name && !localStorage.getItem('clincoo_fullname')) { localStorage.setItem('clincoo_fullname', d.name); changed = true; }
+                    if (d.email && !localStorage.getItem('clincoo_email')) { localStorage.setItem('clincoo_email', d.email); changed = true; }
+                    if (d.avatar && !localStorage.getItem('clincoo_profile_pic')) {
+                        try { localStorage.setItem('clincoo_profile_pic', d.avatar); changed = true; } catch(e) {}
+                    }
+                    if (!changed) return;
+                    const nameInput = document.getElementById('input-fullname');
+                    const emailInput = document.getElementById('input-email');
+                    const displayName = document.getElementById('user-display-name');
+                    const displayEmail = document.getElementById('user-display-email');
+                    const avatarContainer = document.getElementById('avatar-container');
+                    const avatarInitial = document.getElementById('avatar-initial');
+                    const nm = localStorage.getItem('clincoo_fullname');
+                    const em = localStorage.getItem('clincoo_email');
+                    const pc = localStorage.getItem('clincoo_profile_pic');
+                    if (nm && nameInput) nameInput.value = nm;
+                    if (nm && displayName) displayName.innerText = nm;
+                    if (nm && avatarInitial && !pc) avatarInitial.innerText = nm.charAt(0).toUpperCase();
+                    if (em && emailInput) emailInput.value = em;
+                    if (em && displayEmail) displayEmail.innerText = em;
+                    if (pc && avatarContainer) {
+                        avatarContainer.style.backgroundImage = 'url(' + pc + ')';
+                        avatarContainer.classList.remove('bg-gradient-to-br', 'from-blue-500', 'to-purple-600');
+                        if (avatarInitial) avatarInitial.style.display = 'none';
+                    }
+                }).catch(function(){});
+            } catch(e) {}
+        }
+
         function saveChanges() {
             const btn = document.querySelector('#action-buttons button.bg-black');
             if (!btn) return;
@@ -284,6 +339,7 @@
                 displayName.innerText = nameInput.value;
                 try { localStorage.setItem('clincoo_fullname', nameInput.value); } catch(e) {}
             }
+            syncProfileToD1(); // sinkron ke D1
 
             setTimeout(() => {
                 btn.innerText = 'Tersimpan!';
@@ -313,6 +369,7 @@
                     
                     try { localStorage.setItem('clincoo_profile_pic', base64); } catch(err) {}
                     
+                    syncProfileToD1(); // sinkron avatar ke D1
                     showActionButtons();
                 };
                 reader.readAsDataURL(file);
@@ -400,6 +457,7 @@
 
         // Event listener for inputs to show action buttons
         document.addEventListener('DOMContentLoaded', () => {
+            syncProfileFromD1();
             // Load Data from LocalStorage
             try {
                 const savedName = localStorage.getItem('clincoo_fullname');
