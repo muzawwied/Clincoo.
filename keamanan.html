@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruang Kerja - Keamanan</title>
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #ffffff;
+    }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+    /* Dark mode */
+    body.dark-mode { background-color: #000000; color: #e0e0e0; }
+    body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #f0f0f0; }
+    body.dark-mode .text-gray-700 { color: #b0b0b0; }
+    body.dark-mode .text-gray-500 { color: #888888; }
+    body.dark-mode .text-gray-400 { color: #666666; }
+    body.dark-mode .text-black { color: #ffffff; }
+    body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+
+        body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
+        body.dark-mode #sidebar-toggle,
+        body.dark-mode button[onclick="toggleSidebar()"],
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"],
+        body.dark-mode .header-glass button[onclick],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle svg,
+        body.dark-mode button[onclick="toggleSidebar()"] svg,
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"] svg,
+        body.dark-mode .header-glass button[onclick] svg,
+        body.dark-mode header button[onclick] svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle:hover,
+        body.dark-mode button[onclick="toggleSidebar()"]:hover,
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"]:hover,
+        body.dark-mode .header-glass button[onclick]:hover,
+        body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+    body.dark-mode .bg-gray-50 { background-color: #0a0a0a !important; }
+    body.dark-mode .sidebar-nav-link.bg-gray-50 { background-color: #222222 !important; }
+    body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
+    body.dark-mode .border-gray-200 { border-color: #222222 !important; }
+    body.dark-mode .border-gray-100 { border-color: #0a0a0a !important; }
+    body.dark-mode .border-black { border-color: #ffffff !important; }
+    body.dark-mode .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
+    body.dark-mode .shadow-xl { box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important; }
+    body.dark-mode #notif-dropdown { background-color: #0a0a0a; border-color: #222222; }
+    body.dark-mode #sidebar-popup { background-color: #0a0a0a; }
+    body.dark-mode .hover\:bg-gray-50:hover { background-color: #222222 !important; }
+    body.dark-mode .hover\:text-black:hover { color: #ffffff !important; }
+    body.dark-mode ::-webkit-scrollbar-thumb { background: #222222; }
+
+        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-black.text-white { color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
+        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-accent.text-white { color: #000000 !important; }
+        body.dark-mode .text-accent { color: #ffffff !important; }
+        body.dark-mode .border-accent { border-color: #ffffff !important; }
+        body.dark-mode header { background-color: #000000 !important; }
+        body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
+  </style>
+  <script>
+    (function() {
+      var t = localStorage.getItem('clincoo_theme') || 'Sistem (Default)';
+      var isDark = (t === 'Gelap') || (t === 'Sistem (Default)' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) document.documentElement.classList.add('dark-mode');
+    })();
+  </script>
+</head>
+<body class="text-gray-900 antialiased h-screen h-[100dvh] overflow-hidden relative bg-[#f7f7f9]">
+  <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+
+  <div class="w-full h-full overflow-y-auto hide-scrollbar flex flex-col items-center">
+    <header class="w-full max-w-5xl z-30 p-3 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <button onclick="toggleSidebar()" class="flex-shrink-0 flex items-center justify-center text-[#222222] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:text-black hover:bg-gray-50 transition-all rounded-full w-10 h-10" aria-label="Buka Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10h14M5 15h8" />
+          </svg>
+        </button>
+        <div class="flex items-center gap-1.5 sm:gap-2 relative min-w-0">
+          <h2 class="text-xl font-bold text-gray-800 tracking-tight whitespace-nowrap">Ruang Kerja</h2>
+        </div>
+      </div>
+      
+      <div class="flex items-center justify-center gap-1.5 sm:gap-2">
+        <button onclick="toggleNotifications(event)" class="relative p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors focus:outline-none" aria-label="Notifikasi">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </button>
+        <a href="#" class="flex items-center justify-center">
+          <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="App Logo" class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm hover:scale-105 transition-transform cursor-pointer">
+        </a>
+      </div>
+    </header>
+
+    <div class="w-full max-w-5xl px-4 pt-2 pb-20 flex flex-col items-center">
+      <div class="w-full border-b border-gray-200 mb-6" id="project-nav-tabs">
+        <nav class="-mb-px flex space-x-6 overflow-x-auto hide-scrollbar" aria-label="Tabs">
+          <a href="workspace.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+            Kode
+          </a> 
+          <button class="tab-btn border-black text-black whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none" aria-current="page">
+            Keamanan
+          </button>
+          <a href="environment.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+            Environment
+          </a>
+          <a href="pengaturan.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+            Pengaturan
+          </a>
+        </nav>
+      </div>
+
+      <div class="w-full mt-2 relative pb-20 min-h-[300px]">
+        <div class="px-2">
+          <h3 class="text-base font-semibold text-gray-900 mb-6 uppercase tracking-wider">Notifikasi Keamanan</h3>
+          
+          <ul class="space-y-0 text-sm">
+            <li class="py-4 border-b border-gray-200 flex items-start gap-4">
+              <div>
+                <span class="font-medium text-gray-900 block">Pembaruan sistem keamanan berhasil diterapkan</span>
+                <span class="text-gray-500">Kebijakan rotasi kata sandi telah diaktifkan ke siklus 90 hari.</span>
+                <div class="text-xs text-gray-400 mt-1.5">Kemarin, 14:20 WIB</div>
+              </div>
+            </li>
+            
+            <li class="py-4 flex items-start gap-4">
+              <div>
+                <span class="font-medium text-gray-900 block">Upaya akses tidak sah diblokir</span>
+                <span class="text-gray-500">Gagal memverifikasi Autentikasi 2-Faktor dari IP yang tidak dikenal (Rusia).</span>
+                <div class="text-xs text-gray-400 mt-1.5">20 Agustus 2026, 02:15 WIB</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Dropdown -->
+    <div id="notif-dropdown" class="fixed top-16 right-4 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-[90] origin-top-right">
+    <div class="flex justify-between items-center mb-2 px-1">
+      <span class="font-semibold text-sm text-gray-900">Notifikasi</span>
+      <a href="index.html?session=active&ref=client&path=/notifikasi" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
+    </div>
+    <div class="flex flex-col gap-2 mb-2">
+      <div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div>
+    </div>
+  </div>
+
+  <!-- Sidebar Overlay -->
+  <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/20 z-40 transition-opacity duration-300 opacity-0 pointer-events-auto" onclick="toggleSidebar()"></div>
+    
+  <aside id="sidebar-popup" class="fixed inset-y-0 left-0 w-[260px] bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 flex flex-col pointer-events-auto">
+      <div class="h-16 border-b border-gray-100 flex items-center px-4 justify-between flex-shrink-0">
+          <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                  <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="Logo" class="w-full h-full object-cover">
+              </div>
+              <span class="font-bold text-lg text-gray-800" style="font-family: 'Montserrat', sans-serif;">Clincoo</span>
+          </div>
+      </div>
+      
+      <div class="px-3 py-4 flex flex-col gap-1" id="sidebar-nav">
+          <a href="app.html" data-page="app" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+              <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg>
+              <span class="font-medium text-[14px]">Beranda</span>
+          </a>
+          <a href="chat.html" data-page="chat" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+              <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="8" rx="2"/><path d="M12 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 5v3"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M10 18h4"/></svg>
+              <span class="font-medium text-[14px]">Agent</span>
+          </a>
+          <!-- Marked as active: bg-gray-50 text-gray-800 and icon text-gray-700 -->
+          <a href="workspace.html" data-page="workspace" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50 text-gray-800 transition-colors">
+              <svg class="w-5 h-5 text-gray-700 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
+              <span class="font-medium text-[14px]">Workspace</span>
+          </a>
+      </div>
+  </aside>
+
+  <script>
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const sidebarPopup = document.getElementById('sidebar-popup');
+    let isSidebarOpen = false;
+
+    function toggleSidebar() {
+      isSidebarOpen = !isSidebarOpen;
+      if (isSidebarOpen) {
+        sidebarOverlay.classList.remove('hidden');
+        setTimeout(() => {
+          sidebarOverlay.classList.remove('opacity-0');
+          sidebarPopup.classList.remove('-translate-x-full');
+        }, 10);
+      } else {
+        sidebarOverlay.classList.add('opacity-0');
+        sidebarPopup.classList.add('-translate-x-full');
+        setTimeout(() => {
+          sidebarOverlay.classList.add('hidden');
+        }, 300);
+      }
+    }
+
+        function toggleNotifications(e) {
+      e.stopPropagation();
+      const notifDropdown = document.getElementById('notif-dropdown');
+      const isHidden = notifDropdown.classList.contains('invisible');
+      if (isHidden) {
+        notifDropdown.classList.remove('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+        notifDropdown.classList.add('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+      } else {
+        notifDropdown.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+        notifDropdown.classList.add('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+      }
+    }
+
+    // Shared Notification System
+    const NOTIF_KEY = 'clincoo_notifications';
+    function getNotifications() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch(e) { return []; } }
+    function saveNotifications(n) { localStorage.setItem(NOTIF_KEY, JSON.stringify(n)); }
+    function renderNotifications() {
+      const notifs = getNotifications();
+      const dd = document.getElementById('notif-dropdown');
+      if (!dd) return;
+      const contentArea = dd.querySelector('.text-xs.text-gray-500.text-center');
+      if (!contentArea) return;
+      const parent = contentArea.parentElement;
+      if (notifs.length === 0) {
+        contentArea.textContent = 'Belum ada notifikasi baru';
+        contentArea.className = 'text-xs text-gray-500 text-center py-5';
+        parent.innerHTML = '<div class="flex flex-col gap-2 mb-2"><div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div></div>';
+        return;
+      }
+      parent.innerHTML = '<div class="space-y-1.5 max-h-48 overflow-y-auto"></div>';
+      const listContainer = parent.querySelector('div');
+      for (let n of notifs.slice(0, 5)) {
+        let t = new Date(n.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        const item = document.createElement('div');
+        item.className = 'flex items-start gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer';
+        item.onclick = function() { n.read = true; saveNotifications(notifs); renderNotifications(); };
+        item.innerHTML = '<span class="text-xs font-semibold text-gray-700 flex-shrink-0">' + n.source + '</span><div class="flex-1 min-w-0"><p class="text-xs text-gray-600">' + n.message + '</p><p class="text-[10px] text-gray-400 mt-0.5">' + t + '</p></div>';
+        listContainer.appendChild(item);
+      }
+    }
+    function markNotifRead(id) {
+      const n = getNotifications();
+      const item = n.find(x => x.id === id);
+      if (item) item.read = true;
+      saveNotifications(n); renderNotifications();
+    } // Fixed missing brace here
+
+        document.addEventListener('click', function(e) {
+      const notifDropdown = document.getElementById('notif-dropdown');
+      const notifBtn = e.target.closest('[onclick*="toggleNotifications"]');
+      if (notifDropdown && !notifDropdown.contains(e.target) && !notifBtn) {
+        notifDropdown.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+        notifDropdown.classList.add('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+      }
+    });
+    renderNotifications();
+  </script>
+<script>
+(function(){
+  var path=window.location.pathname.split('/').pop()||'keamanan.html';
+  var links=document.querySelectorAll('.sidebar-nav-link');
+  links.forEach(function(link){
+    var href=link.getAttribute('href');
+    if(href===path){
+      link.classList.add('bg-gray-50','text-gray-900');
+      link.classList.remove('hover:bg-gray-50','text-gray-700');
+      var icon=link.querySelector('i');
+      if(icon){
+        icon.className=icon.className.replace('ph ph-','ph-fill ph-');
+        icon.classList.remove('text-gray-500');
+        icon.classList.add('text-gray-900');
+      }
+      var svg=link.querySelector('svg');
+      if(svg){
+        svg.classList.remove('text-gray-500');
+        svg.classList.add('text-gray-900');
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

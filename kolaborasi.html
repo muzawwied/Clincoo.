@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clincoo - Kolaborasi</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        :root {
+            --accent-color: #000000;
+            --accent-hover: #1f2937;
+            --accent-text: #ffffff;
+        }
+
+        .bg-accent { background-color: var(--accent-color) !important; }
+        .text-accent { color: var(--accent-color) !important; }
+        .border-accent { border-color: var(--accent-color) !important; }
+
+        body.dark-mode {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        body.dark-mode .bg-white {
+            background-color: #0a0a0a !important;
+        }
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black {
+            color: #ffffff !important;
+        }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 {
+            color: #888888 !important;
+        }
+        body.dark-mode .text-gray-400 {
+            color: #666666 !important;
+        }
+        body.dark-mode #sidebar-toggle,
+        body.dark-mode button[onclick="toggleSidebar()"],
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode button[onclick="navigateTo('page-home')"],
+        body.dark-mode .header-glass button[onclick],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle svg,
+        body.dark-mode button[onclick="toggleSidebar()"] svg,
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode button[onclick="navigateTo('page-home')"] svg,
+        body.dark-mode .header-glass button[onclick] svg,
+        body.dark-mode header button[onclick] svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle:hover,
+        body.dark-mode button[onclick="toggleSidebar()"]:hover,
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode button[onclick="navigateTo('page-home')"]:hover,
+        body.dark-mode .header-glass button[onclick]:hover,
+        body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+        body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 {
+            background-color: #0a0a0a !important;
+        }
+        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200 {
+            border-color: #222222 !important;
+        }
+        body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover {
+            background-color: #0a0a0a !important;
+        }
+        body.dark-mode .hover\:bg-gray-200:hover {
+            background-color: #222222 !important;
+        }
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+            background-color: #0a0a0a; color: #ffffff; border-color: #222222;
+        }
+        body.dark-mode input:focus, body.dark-mode select:focus, body.dark-mode textarea:focus {
+            border-color: #444444; outline: none;
+        }
+        body.dark-mode .divide-gray-200 > * { border-color: #222222 !important; }
+        body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
+        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #222222; }
+        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .text-accent { color: #ffffff !important; }
+        body.dark-mode .bg-blue-50 { background-color: #0a2a4a !important; }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-900 pt-16">
+    <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+    
+    <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Kolaborasi</h1>
+        <div class="w-10"></div>
+    </header>
+
+    <main class="flex-1 w-full max-w-2xl mx-auto px-5 sm:px-6 pb-10 pt-4 flex flex-col">
+      
+      <div class="mb-5 flex items-start gap-3 p-3.5 rounded-xl bg-gray-50 border border-gray-100 transition-colors">
+        <i data-lucide="shield-check" class="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5"></i>
+        <div>
+          <h3 class="text-sm font-semibold text-gray-900">Akses Terbatas</h3>
+          <p class="text-[13px] text-gray-500 mt-0.5 leading-relaxed">Hanya kolega yang ada dalam daftar di bawah ini yang memiliki izin untuk mengakses ruang lingkup proyek.</p>
+        </div>
+      </div>
+
+      <div class="w-full flex flex-col">
+        <div class="pb-4">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h4 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                <i data-lucide="users" class="w-5 h-5 text-blue-500"></i>
+                Anggota Tim
+              </h4>
+              <p class="text-[13px] text-gray-500 mt-1">Kelola akses dan daftar kolaborator proyek.</p>
+            </div>
+            <button onclick="document.getElementById('invite-row').classList.remove('hidden')" class="px-3 py-1.5 text-sm font-semibold text-blue-600 bg-blue-50/50 border border-blue-100 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 focus:outline-none">
+              <i data-lucide="user-plus" class="h-4 w-4"></i>
+              <span class="hidden sm:inline">Undang</span>
+            </button>
+          </div>
+          
+          <div id="invite-row" class="hidden mb-5 p-1">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <div class="relative flex-1">
+                <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                <input type="email" class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all bg-white shadow-sm" placeholder="Alamat email kolega...">
+              </div>
+              <div class="flex gap-2">
+                <div class="relative">
+                    <button onclick="toggleRoleDropdown('invite-role-dropdown', this, 'invite')" class="px-3 py-2 h-full text-sm rounded-lg border border-gray-200 hover:border-gray-300 bg-white flex items-center gap-2 shadow-sm focus:outline-none transition-colors">
+                        <span id="invite-role-text">Editor</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                    </button>
+                </div>
+                <button onclick="document.getElementById('invite-row').classList.add('hidden'); showActionButtons();" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-black rounded-lg transition-colors cursor-pointer whitespace-nowrap shadow-sm focus:outline-none">
+                  Kirim
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <!-- Owner -->
+            <div class="flex items-center gap-3 p-2.5 rounded-xl border border-transparent hover:bg-gray-50/80 transition-colors">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center text-white text-sm font-bold shadow-sm">CU</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900 truncate">Clincoo User</p>
+                <p class="text-[13px] text-gray-500 truncate">user@clincoo.com</p>
+              </div>
+              <span class="text-[11px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-600 uppercase tracking-wider">Owner</span>
+            </div>
+            
+            <!-- Other Member 1 -->
+            <div class="flex items-center gap-3 p-2.5 rounded-xl border border-transparent hover:border-gray-100 hover:bg-gray-50/50 transition-colors group relative">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">DA</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">Dr. Aisha</p>
+                <p class="text-[13px] text-gray-500 truncate">aisha@clinic.com</p>
+              </div>
+              <button onclick="toggleRoleDropdown('member1-role-dropdown', this, 'member')" class="text-sm font-medium px-2.5 py-1.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-1 focus:outline-none">
+                <span id="member1-role-text">Editor</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-50"></i>
+              </button>
+            </div>
+            
+            <!-- Other Member 2 -->
+            <div class="flex items-center gap-3 p-2.5 rounded-xl border border-transparent hover:border-gray-100 hover:bg-gray-50/50 transition-colors group relative">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-sm font-bold shadow-sm">BK</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">Budi Karya</p>
+                <p class="text-[13px] text-gray-500 truncate">budi@clinic.com</p>
+              </div>
+              <button onclick="toggleRoleDropdown('member2-role-dropdown', this, 'member')" class="text-sm font-medium px-2.5 py-1.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center gap-1 focus:outline-none">
+                <span id="member2-role-text">Viewer</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-50"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 mt-2 border-t border-gray-100">
+          <h4 class="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4">
+            <i data-lucide="history" class="w-4 h-4 text-gray-500"></i>
+            Riwayat Aktivitas
+          </h4>
+          <div class="space-y-4">
+            <div class="flex gap-3">
+              <div class="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-600 flex-shrink-0 mt-0.5">
+                <i data-lucide="file-edit" class="w-3.5 h-3.5"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-900"><span class="font-semibold">Dr. Aisha</span> memperbarui dokumen proyek</p>
+                <p class="text-[12px] text-gray-500 mt-0.5">2 jam yang lalu</p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <div class="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-600 flex-shrink-0 mt-0.5">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-900"><span class="font-semibold">Anda</span> mengundang <span class="font-medium">Budi Karya</span></p>
+                <p class="text-[12px] text-gray-500 mt-0.5">Kemarin, 14:30</p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <div class="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-600 flex-shrink-0 mt-0.5">
+                <i data-lucide="rocket" class="w-3.5 h-3.5"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-900">Ruang kolaborasi berhasil dibuat</p>
+                <p class="text-[12px] text-gray-500 mt-0.5">3 hari yang lalu</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="action-buttons" class="mt-8 pt-5 hidden justify-end gap-3 opacity-0 transition-all duration-300 transform translate-y-2 border-t border-gray-100">
+        <button type="button" onclick="cancelChanges()" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none">Batal</button>
+        <button id="btn-simpan" type="button" onclick="saveChanges()" class="px-5 py-2 text-sm font-semibold text-white bg-gray-900 hover:bg-black rounded-lg shadow-sm transition-colors focus:outline-none flex items-center gap-2">
+          Simpan
+        </button>
+      </div>
+    </main>
+
+    <div id="role-popover" class="hidden fixed z-50 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 transition-opacity duration-200 opacity-0 transform scale-95" style="transform-origin: top right;">
+        <button onclick="selectRole('Editor')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between group focus:outline-none">
+            Editor
+            <i data-lucide="check" class="w-4 h-4 text-blue-600 hidden check-icon" data-role="Editor"></i>
+        </button>
+        <button onclick="selectRole('Viewer')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between group focus:outline-none">
+            Viewer
+            <i data-lucide="check" class="w-4 h-4 text-blue-600 hidden check-icon" data-role="Viewer"></i>
+        </button>
+        <div id="delete-role-divider" class="h-px bg-gray-100 my-1"></div>
+        <button id="delete-role-btn" onclick="selectRole('Hapus Akses', true)" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 focus:outline-none">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Hapus Akses
+        </button>
+    </div>
+
+  <script>
+    let isEdited = false;
+    let activePopoverId = null;
+    let activePopoverButton = null;
+    let activeTextTarget = null;
+    
+    function toggleRoleDropdown(id, buttonEl, type = 'member') {
+        const popover = document.getElementById('role-popover');
+        const deleteBtn = document.getElementById('delete-role-btn');
+        const deleteDivider = document.getElementById('delete-role-divider');
+        
+        // Sembunyikan opsi hapus saat mode mengundang
+        if (type === 'invite') {
+            deleteBtn.style.display = 'none';
+            deleteDivider.style.display = 'none';
+        } else {
+            deleteBtn.style.display = 'flex';
+            deleteDivider.style.display = 'block';
+        }
+
+        // Jika klik tombol yang sama, tutup
+        if (activePopoverButton === buttonEl && !popover.classList.contains('hidden')) {
+            closePopover();
+            return;
+        }
+
+        activePopoverId = id;
+        activePopoverButton = buttonEl;
+        
+        // Tentukan di mana text akan diupdate
+        activeTextTarget = buttonEl.querySelector('span');
+
+        // Kalkulasi Posisi
+        const rect = buttonEl.getBoundingClientRect();
+        
+        popover.classList.remove('hidden');
+        
+        // Set posisi popover
+        popover.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        const popoverWidth = 160; 
+        let leftPos = rect.right + window.scrollX - popoverWidth;
+        
+        // Rata kiri jika mepet layar
+        if (leftPos < 10) leftPos = rect.left + window.scrollX;
+        popover.style.left = `${leftPos}px`;
+
+        // Tandai role yang aktif
+        const currentRole = activeTextTarget ? activeTextTarget.innerText : '';
+        document.querySelectorAll('#role-popover .check-icon').forEach(icon => {
+            if (icon.dataset.role === currentRole) {
+                icon.classList.remove('hidden');
+            } else {
+                icon.classList.add('hidden');
+            }
+        });
+
+        // Animasi popover
+        setTimeout(() => {
+            popover.classList.remove('opacity-0', 'scale-95');
+            popover.classList.add('opacity-100', 'scale-100');
+        }, 10);
+    }
+
+    function selectRole(role, isRemove = false) {
+        if (isRemove) {
+            if(confirm("Yakin ingin menghapus akses anggota ini?")) {
+               if(activePopoverButton) {
+                   const row = activePopoverButton.closest('.group');
+                   if(row) row.style.display = 'none';
+                   showActionButtons();
+               }
+            }
+        } else if (activeTextTarget) {
+            activeTextTarget.innerText = role;
+            showActionButtons();
+        }
+        closePopover();
+    }
+
+    function closePopover() {
+        const popover = document.getElementById('role-popover');
+        popover.classList.remove('opacity-100', 'scale-100');
+        popover.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+            popover.classList.add('hidden');
+        }, 200);
+        activePopoverButton = null;
+    }
+
+    // Klik di luar popover untuk menutup
+    document.addEventListener('click', (e) => {
+        const popover = document.getElementById('role-popover');
+        if (!popover.classList.contains('hidden') && 
+            activePopoverButton && 
+            !activePopoverButton.contains(e.target) && 
+            !popover.contains(e.target)) {
+            closePopover();
+        }
+    });
+
+    function showActionButtons() {
+        if (!isEdited) {
+            isEdited = true;
+            const c = document.getElementById('action-buttons');
+            c.classList.remove('hidden');
+            c.classList.add('flex');
+            // Memicu reflow
+            void c.offsetWidth;
+            c.classList.remove('opacity-0', 'translate-y-2');
+            c.classList.add('opacity-100', 'translate-y-0');
+        }
+    }
+
+    function cancelChanges() {
+        window.location.reload();
+    }
+
+    function saveChanges() {
+        // Menggunakan ID agar penargetan tombol selalu tepat meskipun warnanya diubah
+        const btn = document.getElementById('btn-simpan');
+        if (!btn) return;
+        
+        // Status sedang memproses
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...`;
+        lucide.createIcons();
+        btn.disabled = true;
+        btn.classList.add('opacity-80', 'cursor-not-allowed');
+        
+        // Simulasi pengiriman data
+        setTimeout(() => {
+            btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Tersimpan!`;
+            lucide.createIcons();
+            
+            // Ubah tombol jadi hijau sebagai indikasi berhasil
+            btn.classList.remove('bg-gray-900', 'hover:bg-black');
+            btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+            
+            setTimeout(() => window.location.reload(), 1000);
+        }, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input, textarea, select').forEach(input => {
+            input.addEventListener('input', showActionButtons);
+            input.addEventListener('change', showActionButtons);
+        });
+    });
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>

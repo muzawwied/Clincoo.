@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Langganan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    body.dark-mode { background-color: #000000; color: #e0e0e0; }
+    body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #f0f0f0; }
+    body.dark-mode .text-gray-700 { color: #b0b0b0; }
+    body.dark-mode .text-gray-500, body.dark-mode .text-gray-600 { color: #888888; }
+    body.dark-mode .text-gray-400 { color: #666666; }
+    body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+    
+    body.dark-mode header button[onclick="history.back()"] { 
+        background-color: #000000 !important; 
+        border: 1.5px solid rgba(255,255,255,0.4) !important; 
+        color: #ffffff !important; 
+    }
+    body.dark-mode header button[onclick="history.back()"] svg { 
+        color: #ffffff !important; 
+        stroke: #ffffff !important; 
+    }
+    body.dark-mode header button[onclick="history.back()"]:hover { 
+        background-color: #1a1a1a !important; 
+        border-color: rgba(255,255,255,0.7) !important; 
+    }
+    
+    body.dark-mode .bg-gray-50 { background-color: #222222 !important; }
+    body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
+    body.dark-mode .border-gray-200, body.dark-mode .border-gray-100 { border-color: #222222 !important; }
+    body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
+    body.dark-mode .hover\:bg-gray-200:hover { background-color: #222222 !important; }
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background-color: #0a0a0a; color: #ffffff; border-color: #222222; }
+    body.dark-mode input:focus, body.dark-mode select:focus, body.dark-mode textarea:focus { border-color: #222222; outline: none; }
+    body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
+    body.dark-mode header { background-color: #000000 !important; }
+  </style>
+  <script>
+    (function(){
+      var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';
+      var isDark=(t==='Gelap')||(t==='Sistem (Default)'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if(isDark) document.documentElement.classList.add('dark-mode');
+    })();
+  </script>
+</head>
+<body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-[#f7f7f9]">
+  <script>
+    if(document.documentElement.classList.contains('dark-mode')) {
+        document.body.classList.add("dark-mode");
+    }
+  </script>
+  
+  <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors border-b border-gray-200/60 dark:border-slate-800">
+    <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+    </button>
+    <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Langganan</h1>
+    <div class="w-10"></div>
+  </header>
+
+  <div class="w-full h-full overflow-y-auto hide-scrollbar flex flex-col items-center pt-16">
+    
+    <div class="w-full max-w-5xl px-4 sm:px-6 pt-2">
+      <p class="text-xs text-gray-500 dark:text-gray-400">Kelola paket dan tagihan langganan Anda</p>
+    </div>
+
+    <main class="w-full max-w-5xl px-4 sm:px-6 py-2 pb-24">
+      <div class="w-full flex flex-col divide-y divide-gray-200 dark:divide-slate-700/60">
+        <div class="py-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h4 class="text-base font-semibold text-gray-900 dark:text-white">Paket Saat Ini</h4>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Paket langganan yang aktif</p>
+            </div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Pro</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Proyek Aktif</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-white">3 / 10</p>
+            </div>
+            <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Storage</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-white">2.4 / 50 GB</p>
+            </div>
+            <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Bandwidth</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-white">18 / 100 GB</p>
+            </div>
+            <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Kolaborator</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-white">2 / 5</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white">Siklus Tagihan</h4>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Periode pembayaran langganan</p>
+          </div>
+          <div class="w-full sm:w-80 relative">
+            <button id="billing-btn" type="button" onclick="toggleBillingPopover(event)" class="w-full flex items-center justify-between px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none cursor-pointer bg-transparent hover:bg-gray-200/50 dark:hover:bg-slate-800 text-gray-900 dark:text-white transition-colors">
+              <span id="billing-text">Bulanan - Rp 149.000/bulan</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+            </button>
+            
+            <div id="billing-popover" class="hidden absolute right-0 left-0 top-full mt-1.5 z-50 bg-white border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg overflow-hidden">
+                <div class="py-1 flex flex-col">
+                    <button type="button" onclick="selectBilling('Bulanan - Rp 149.000/bulan')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Bulanan - Rp 149.000/bulan</button>
+                    <button type="button" onclick="selectBilling('Tahunan - Rp 1.490.000/tahun')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border-t border-gray-100 dark:border-slate-700/60">Tahunan - Rp 1.490.000/tahun</button>
+                </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white">Metode Pembayaran</h4>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Kartu kredit yang terhubung</p>
+          </div>
+          <div class="w-full sm:w-80 flex items-center gap-2">
+            <span class="text-sm font-mono text-gray-600 dark:text-gray-400">•••• 4242</span>
+            <span class="text-xs text-gray-400">Visa</span>
+          </div>
+        </div>
+        
+        <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white">Periode Berikutnya</h4>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Tanggal perpanjangan otomatis</p>
+          </div>
+          <div class="w-full sm:w-80">
+            <span class="text-sm text-gray-600 dark:text-gray-400">27 September 2026</span>
+          </div>
+        </div>
+        
+        <div class="py-5">
+          <button class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">Ubah Paket</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons(); // Menginisiasi icon
+
+    let isEdited=false;
+    function showActionButtons(){
+        if(!isEdited){
+            isEdited=true;
+            const c=document.getElementById('action-buttons');
+            if (c) {
+                c.classList.remove('hidden');
+                c.classList.add('flex');
+                void c.offsetWidth;
+                c.classList.remove('opacity-0');
+                c.classList.add('opacity-100');
+            }
+        }
+    }
+    
+    function cancelChanges(){window.location.reload();}
+    
+    function saveChanges(){
+        const btn=document.querySelector('#action-buttons button.bg-blue-600');
+        if(!btn)return;
+        btn.innerText='Menyimpan...';
+        btn.disabled=true;
+        btn.classList.add('opacity-80','cursor-not-allowed');
+        setTimeout(()=>{
+            btn.innerText='Tersimpan!';
+            btn.classList.replace('bg-blue-600','bg-emerald-500');
+            btn.classList.replace('hover:bg-blue-700','hover:bg-emerald-600');
+            setTimeout(()=>window.location.reload(),800);
+        },800);
+    }
+    
+    document.addEventListener('DOMContentLoaded',()=>{
+        document.querySelectorAll('input,textarea,select').forEach(input=>{
+            input.addEventListener('input',showActionButtons);
+            input.addEventListener('change',showActionButtons);
+        });
+    });
+    
+    function toggleBillingPopover(e){
+        if(e) e.stopPropagation();
+        const popover = document.getElementById('billing-popover');
+        popover.classList.toggle('hidden');
+    }
+    
+    function selectBilling(text){
+        document.getElementById('billing-text').innerText = text;
+        document.getElementById('billing-popover').classList.add('hidden');
+        showActionButtons();
+    }
+    
+    // Menutup popover ketika area di luar popover diklik
+    document.addEventListener('click', (e) => {
+        const popover = document.getElementById('billing-popover');
+        const btn = document.getElementById('billing-btn');
+        if (popover && !popover.classList.contains('hidden') && !btn.contains(e.target) && !popover.contains(e.target)) {
+            popover.classList.add('hidden');
+        }
+    });
+    
+    function toggleSwitch(idPrefix){
+        showActionButtons();
+        const bg=document.getElementById(idPrefix+'-bg');
+        const knob=document.getElementById(idPrefix+'-knob');
+        if(bg && knob) {
+            if(bg.classList.contains('bg-blue-500')){
+                bg.classList.replace('bg-blue-500','bg-gray-200');
+                bg.classList.add('dark:bg-slate-700');
+                knob.classList.remove('translate-x-5');
+            }else{
+                bg.classList.remove('bg-gray-200','dark:bg-slate-700');
+                bg.classList.add('bg-blue-500');
+                knob.classList.add('translate-x-5');
+            }
+        }
+    }
+  </script>
+</body>
+</html>

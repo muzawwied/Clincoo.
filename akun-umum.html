@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Akun</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f9;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.dark-mode { background-color: #000000; color: #ffffff; }
+        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+        
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode header button[onclick] svg { stroke: #ffffff !important; }
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode header button[onclick]:hover { background-color: #1a1a1a !important; border-color: rgba(255,255,255,0.7) !important; }
+        
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black { color: #ffffff !important; }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 { color: #888888 !important; }
+        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200, body.dark-mode .border-gray-300 { border-color: #222222 !important; }
+        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+        body.dark-mode .bg-\[#f7f7f9\], body.dark-mode .bg-gray-50 { background-color: #000000 !important; }
+        body.dark-mode .bg-gray-100 { background-color: #111111 !important; }
+        body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #1a1a1a !important; }
+        
+        body.dark-mode input[type="text"], 
+        body.dark-mode input[type="email"],
+        body.dark-mode textarea, 
+        body.dark-mode .custom-select-trigger, 
+        body.dark-mode .dropdown-menu { 
+            background-color: #0a0a0a; 
+            color: #ffffff; 
+            border-color: #222222; 
+        }
+        body.dark-mode input[type="text"]:focus, body.dark-mode input[type="email"]:focus, body.dark-mode textarea:focus { border-color: #555555; }
+        body.dark-mode .bg-black.text-white { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #dddddd !important; }
+
+        .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-900 pt-14 relative hide-scrollbar">
+    <script>
+        (function(){
+            var t=localStorage.getItem("clincoo_theme");
+            var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+            if(isDark){document.body.classList.add("dark-mode");}
+        })();
+    </script>
+    
+    <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors border-b border-gray-200/50 dark:border-gray-800">
+        <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black" aria-label="Kembali">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Pengaturan Akun</h1>
+        <div class="w-10"></div>
+    </header>
+
+    <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-4 pb-20 relative">
+        <!-- Profile avatar section -->
+        <div class="flex items-center gap-4 py-6">
+            <div class="relative">
+                <div class="w-20 h-20 rounded-full bg-black dark:bg-white flex items-center justify-center text-white dark:text-black text-2xl font-bold">M</div>
+                <button class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-white dark:bg-[#222] border border-gray-200 dark:border-gray-700 flex items-center justify-center shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <i data-lucide="camera" class="w-3.5 h-3.5 text-gray-600 dark:text-gray-300"></i>
+                </button>
+            </div>
+            <div>
+                <h3 class="font-bold text-lg text-gray-900">Muza</h3>
+                <p class="text-sm text-gray-500">muza@clincoo.com</p>
+            </div>
+        </div>
+
+        <div class="w-full flex flex-col divide-y divide-gray-200 dark:divide-gray-800">
+            
+            <!-- 1. Nama Tampilan -->
+            <div class="py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-base font-bold text-gray-900 tracking-tight">Nama Tampilan</h4>
+                    <p class="text-sm text-gray-500 mt-1">Nama yang ditampilkan di profil dan komentar</p>
+                </div>
+                <div class="w-full sm:w-80">
+                    <input type="text" value="Muza" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors" placeholder="Nama tampilan">
+                </div>
+            </div>
+
+            <!-- 2. Username -->
+            <div class="py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-base font-bold text-gray-900 tracking-tight">Username</h4>
+                    <p class="text-sm text-gray-500 mt-1">Identitas unik untuk akun Anda</p>
+                </div>
+                <div class="w-full sm:w-80">
+                    <input type="text" value="@muza" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors" placeholder="@username">
+                </div>
+            </div>
+
+            <!-- 3. Email -->
+            <div class="py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-base font-bold text-gray-900 tracking-tight">Email</h4>
+                    <p class="text-sm text-gray-500 mt-1">Alamat email untuk login dan notifikasi</p>
+                </div>
+                <div class="w-full sm:w-80">
+                    <input type="email" value="muza@clincoo.com" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors" placeholder="email@contoh.com">
+                </div>
+            </div>
+
+            <!-- 4. Bio -->
+            <div class="py-4 sm:py-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-base font-bold text-gray-900 tracking-tight">Bio</h4>
+                    <p class="text-sm text-gray-500 mt-1">Deskripsi singkat tentang Anda</p>
+                </div>
+                <div class="w-full sm:w-80">
+                    <textarea rows="3" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors resize-none" placeholder="Ceritakan sedikit tentang diri Anda..."></textarea>
+                </div>
+            </div>
+
+            <!-- 5. Zona Waktu -->
+            <div class="py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-base font-bold text-gray-900 tracking-tight">Zona Waktu</h4>
+                    <p class="text-sm text-gray-500 mt-1">Digunakan untuk jadwal dan notifikasi</p>
+                </div>
+                <div class="w-full sm:w-80 relative">
+                    <div class="custom-select-trigger flex items-center justify-between w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'timezone', ['WIB (UTC+7)', 'WITA (UTC+8)', 'WIT (UTC+9)', 'GMT (UTC+0)', 'EST (UTC-5)', 'PST (UTC-8)'])">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <i data-lucide="globe" class="w-4 h-4 text-gray-500 shrink-0"></i>
+                            <span id="label-timezone" class="font-medium truncate">WIB (UTC+7)</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none shrink-0"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Bahasa -->
+            <div class="py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-base font-bold text-gray-900 tracking-tight">Bahasa</h4>
+                    <p class="text-sm text-gray-500 mt-1">Bahasa antarmuka akun</p>
+                </div>
+                <div class="w-full sm:w-80 relative">
+                    <div class="custom-select-trigger flex items-center justify-between w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'language', ['Indonesia', 'English', '日本語', '中文', 'Español'])">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <i data-lucide="languages" class="w-4 h-4 text-gray-500 shrink-0"></i>
+                            <span id="label-language" class="font-medium truncate">Indonesia</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none shrink-0"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Notifikasi Email -->
+            <div class="py-4 sm:py-5 flex items-center justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-base font-bold text-gray-900 tracking-tight">Notifikasi Email</h4>
+                    <p class="text-sm text-gray-500 mt-1">Terima email untuk aktivitas dan pembaruan akun</p>
+                </div>
+                <button type="button" onclick="toggleSwitch('email-notif')" class="relative flex-shrink-0 cursor-pointer focus:outline-none">
+                    <div id="email-notif-bg" class="w-11 h-6 bg-black dark:bg-white rounded-full transition-colors duration-200 ease-in-out"></div>
+                    <div id="email-notif-knob" class="absolute left-0.5 top-0.5 bg-white dark:bg-black w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out translate-x-5"></div>
+                </button>
+            </div>
+
+            <!-- 8. Mode Tampilan -->
+            <div class="py-4 sm:py-5 flex items-center justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-base font-bold text-gray-900 tracking-tight">Mode Tampilan</h4>
+                    <p class="text-sm text-gray-500 mt-1">Preferensi tema untuk akun Anda</p>
+                </div>
+                <div class="w-full sm:w-80 relative">
+                    <div class="custom-select-trigger flex items-center justify-between w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'theme', ['Sistem (Default)', 'Terang', 'Gelap'])">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <i data-lucide="palette" class="w-4 h-4 text-gray-500 shrink-0"></i>
+                            <span id="label-theme" class="font-medium truncate">Sistem (Default)</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none shrink-0"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Save button -->
+        <div class="mt-6">
+            <button onclick="showModal('Berhasil', 'Pengaturan akun telah disimpan.')" class="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black rounded-xl font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+                Simpan Perubahan
+            </button>
+        </div>
+    </main>
+
+    <div id="system-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="bg-white dark:bg-[#0a0a0a] rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl border border-gray-100 dark:border-gray-800">
+            <h3 id="modal-title" class="text-lg font-bold text-gray-900 dark:text-white mb-2"></h3>
+            <p id="modal-message" class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleDropdown(element, targetId, optionsArray) {
+            const wrapper = element.parentElement;
+            const existingDropdown = wrapper.querySelector('.custom-dropdown-menu');
+            closeAllDropdowns();
+            if (existingDropdown) return;
+            const labelEl = document.getElementById('label-' + targetId);
+            const currentValue = labelEl ? labelEl.textContent.trim() : '';
+            const dropdown = document.createElement('div');
+            dropdown.className = 'custom-dropdown-menu absolute top-full left-0 w-full mt-1 z-50 bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl overflow-hidden flex flex-col fade-in';
+            let optionsHtml = '';
+            optionsArray.forEach(option => {
+                const isActive = option === currentValue;
+                optionsHtml += '<div class="w-full px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer flex items-center justify-between ' + (isActive ? 'bg-gray-50 text-black dark:bg-gray-800 dark:text-white' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800') + '" onclick="selectOption(event, \'' + targetId + '\', \'' + option + '\')"><span>' + option + '</span>' + (isActive ? '<i data-lucide="check" class="w-4 h-4"></i>' : '') + '</div>';
+            });
+            dropdown.innerHTML = optionsHtml;
+            wrapper.appendChild(dropdown);
+            const chevron = element.querySelector('[data-lucide="chevron-down"]');
+            if(chevron) chevron.classList.add('rotate-180');
+            lucide.createIcons();
+            setTimeout(() => { document.addEventListener('click', outsideClickListener); }, 10);
+        }
+
+        function closeAllDropdowns() {
+            const openDropdowns = document.querySelectorAll('.custom-dropdown-menu');
+            openDropdowns.forEach(dropdown => {
+                const chevron = dropdown.parentElement.querySelector('.rotate-180');
+                if(chevron) chevron.classList.remove('rotate-180');
+                dropdown.remove();
+            });
+            document.removeEventListener('click', outsideClickListener);
+        }
+
+        function outsideClickListener(e) {
+            if (!e.target.closest('.custom-select-trigger') && !e.target.closest('.custom-dropdown-menu')) {
+                closeAllDropdowns();
+            }
+        }
+
+        function selectOption(event, targetId, value) {
+            event.stopPropagation();
+            const label = document.getElementById('label-' + targetId);
+            if (label) label.textContent = value;
+            if (targetId === 'theme') {
+                localStorage.setItem('clincoo_theme', value === 'Sistem (Default)' ? '' : value);
+            }
+            closeAllDropdowns();
+        }
+
+        function toggleSwitch(idPrefix) {
+            const bg = document.getElementById(idPrefix + '-bg');
+            const knob = document.getElementById(idPrefix + '-knob');
+            if (bg.classList.contains('bg-black') || bg.classList.contains('bg-emerald-500')) {
+                bg.className = 'w-11 h-6 bg-gray-200 dark:bg-gray-800 rounded-full transition-colors duration-200 ease-in-out';
+                knob.classList.remove('translate-x-5');
+            } else {
+                bg.className = 'w-11 h-6 bg-black dark:bg-white rounded-full transition-colors duration-200 ease-in-out';
+                knob.classList.add('translate-x-5');
+            }
+        }
+
+        function showModal(title, message) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            const modal = document.getElementById('system-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('system-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
+</body>
+</html>

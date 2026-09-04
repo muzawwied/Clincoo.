@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clincoo - Dompet Saldo</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%3Cg%20fill%3D%22%23000000%22%3E%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%3C%2Fsvg%3E" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        :root {
+            --accent-color: #000000;
+            --accent-hover: #1f2937;
+            --accent-text: #ffffff;
+        }
+
+        .bg-accent { background-color: var(--accent-color) !important; }
+        .text-accent { color: var(--accent-color) !important; }
+        .border-accent { border-color: var(--accent-color) !important; }
+        
+        body.dark-mode {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        body.dark-mode .bg-white {
+            background-color: #0a0a0a !important;
+        }
+        body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
+        body.dark-mode #sidebar-toggle,
+        body.dark-mode button[onclick="toggleSidebar()"],
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode button[onclick="closeTopUpPage()"],
+        body.dark-mode button[onclick="navigateTo('page-home')"],
+        body.dark-mode .header-glass button[onclick],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle svg,
+        body.dark-mode button[onclick="toggleSidebar()"] svg,
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode button[onclick="closeTopUpPage()"] svg,
+        body.dark-mode button[onclick="navigateTo('page-home')"] svg,
+        body.dark-mode .header-glass button[onclick] svg,
+        body.dark-mode header button[onclick] svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle:hover,
+        body.dark-mode button[onclick="toggleSidebar()"]:hover,
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode button[onclick="closeTopUpPage()"]:hover,
+        body.dark-mode button[onclick="navigateTo('page-home')"]:hover,
+        body.dark-mode .header-glass button[onclick]:hover,
+        body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black {
+            color: #ffffff !important;
+        }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 {
+            color: #888888 !important;
+        }
+        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200 {
+            border-color: #222222 !important;
+        }
+        body.dark-mode .hover\:bg-gray-50:hover {
+            background-color: #0a0a0a !important;
+        }
+        body.dark-mode .bg-gray-50 {
+            background-color: #0a0a0a !important;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        body.dark-mode #system-modal .bg-white,
+        body.dark-mode #page-topup { background-color: #0a0a0a !important; }
+        body.dark-mode #system-modal .border-gray-100 { border-color: #222222 !important; }
+        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+        body.dark-mode .divide-gray-100 > * { border-color: #222222 !important; }
+        body.dark-mode .bg-gray-50 { background-color: #0a0a0a !important; }
+        body.dark-mode .text-gray-400 { color: #666666 !important; }
+
+        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-black.text-white { color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
+        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-accent.text-white { color: #000000 !important; }
+        body.dark-mode .text-accent { color: #ffffff !important; }
+        body.dark-mode .border-accent { border-color: #ffffff !important; }
+        body.dark-mode .bg-\[\#f7f7f9\] { background-color: #000000 !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-900 bg-white">
+    <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+
+    <!-- HALAMAN UTAMA DOMPET -->
+    <div id="page-dompet" class="flex flex-col min-h-screen w-full">
+        <header class="bg-[#f7f7f9] flex justify-between items-center px-4 py-3 fixed top-0 w-full z-30 transition-colors border-b border-gray-100">
+            <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+            <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Dompet Saldo</h1>
+            <div class="w-10"></div>
+        </header>
+
+        <main class="flex-1 w-full flex flex-col space-y-8 pt-20 pb-8">
+
+            <section class="flex flex-col items-center justify-center space-y-4 pt-6 pb-2 px-4 w-full">
+                <span class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Saldo Clincoo</span>
+
+                <div class="py-1 flex flex-col items-center w-full">
+                    <!-- Display Saldo & Tombol Plus tanpa ada batas lebar -->
+                    <div class="flex items-center justify-center gap-4">
+                        <span class="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white font-['Space_Grotesk']" id="display-balance">
+                            0
+                        </span>
+                        <button onclick="openTopUpPage()" title="Isi Saldo" class="p-3.5 rounded-full text-white bg-gray-900 hover:bg-black dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all focus:outline-none shadow-md shrink-0">
+                            <i data-lucide="plus" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-5 text-center max-w-sm leading-relaxed px-4">
+                        Dapat digunakan untuk semua pembayaran instan layanan Clincoo tanpa biaya admin.
+                    </p>
+                </div>
+            </section>
+
+            <section class="space-y-4 pt-4 w-full">
+                <div class="px-5">
+                    <h2 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Riwayat Transaksi</h2>
+                </div>
+
+                <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-2 px-5">
+                    <button onclick="filterTransactions('all')" id="filter-all" class="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-900 text-white dark:bg-white dark:text-black shadow-sm transition-all shrink-0 whitespace-nowrap">
+                        Semua Transaksi
+                    </button>
+                    <button onclick="filterTransactions('in')" id="filter-in" class="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 text-gray-600 hover:text-gray-900 dark:bg-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shrink-0 whitespace-nowrap">
+                        Pemasukan
+                    </button>
+                    <button onclick="filterTransactions('out')" id="filter-out" class="px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 text-gray-600 hover:text-gray-900 dark:bg-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shrink-0 whitespace-nowrap">
+                        Pengeluaran
+                    </button>
+                </div>
+
+                <!-- Container Full Width tanpa batasan border samping -->
+                <div id="transaction-list" class="flex flex-col w-full border-t border-gray-100 dark:border-gray-800">
+                    <!-- Dynamically populated via JS -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-history" class="hidden flex-col items-center justify-center py-12 text-center w-full">
+                    <div class="w-14 h-14 rounded-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center mb-3">
+                        <i data-lucide="receipt" class="w-7 h-7 text-gray-400"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Belum ada transaksi</h3>
+                    <p class="text-xs text-gray-500 mt-1 max-w-[220px]">Riwayat pengisian dan penggunaan saldo akan muncul di sini.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div id="page-topup" class="hidden flex-col bg-white min-h-screen w-full fixed inset-0 z-50 overflow-y-auto">
+        <header class="bg-[#f7f7f9] flex justify-between items-center px-4 py-3 sticky top-0 w-full z-40 transition-colors border-b border-gray-100">
+            <button onclick="closeTopUpPage()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+            <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Isi Saldo Clincoo</h1>
+            <div class="w-10"></div>
+        </header>
+
+        <main class="flex-1 w-full flex flex-col space-y-6 px-5 py-6">
+            <div class="pb-2 border-b border-gray-100 dark:border-gray-800 w-full">
+                <h3 class="text-lg font-bold text-gray-900">Pilih Nominal</h3>
+                <p class="text-xs text-gray-500 mt-1">Pilih nominal instan atau masukkan jumlah kustom</p>
+            </div>
+
+            <!-- Preset Amounts Chips Full Width -->
+            <div class="space-y-3 w-full">
+                <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Fast-Pay</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full">
+                    <button onclick="selectNominal(20000)" class="nominal-btn border border-gray-200 dark:border-gray-800 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center" data-amount="20000">20.000</button>
+                    <button onclick="selectNominal(50000)" class="nominal-btn border-2 border-gray-900 dark:border-white rounded-xl py-3 text-sm font-semibold transition-all text-center bg-gray-50 dark:bg-gray-800" data-amount="50000">50.000</button>
+                    <button onclick="selectNominal(100000)" class="nominal-btn border border-gray-200 dark:border-gray-800 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center" data-amount="100000">100.000</button>
+                    <button onclick="selectNominal(250000)" class="nominal-btn border border-gray-200 dark:border-gray-800 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center" data-amount="250000">250.000</button>
+                    <button onclick="selectNominal(500000)" class="nominal-btn border border-gray-200 dark:border-gray-800 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center" data-amount="500000">500.000</button>
+                    <button onclick="selectNominal(1000000)" class="nominal-btn border border-gray-200 dark:border-gray-800 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center" data-amount="1000000">1.000.000</button>
+                </div>
+            </div>
+
+            <!-- Custom Amount Input -->
+            <div class="space-y-2 w-full">
+                <label for="custom-nominal" class="text-xs font-bold text-gray-500 uppercase tracking-wider">Atau Nominal Lain</label>
+                <div class="relative flex items-center w-full">
+                    <input type="number" id="custom-nominal" min="10000" step="10000" placeholder="Contoh: 50000" oninput="onCustomNominalChange(this)" class="w-full px-4 py-3.5 border border-gray-200 dark:border-gray-800 rounded-xl text-sm font-semibold focus:outline-none focus:border-gray-900 dark:bg-transparent">
+                </div>
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="space-y-3 w-full">
+                <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Metode Pembayaran</label>
+                <div class="space-y-3 w-full">
+                    <label class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-400 transition-all w-full">
+                        <div class="flex items-center space-x-4">
+                            <i data-lucide="qr-code" class="w-6 h-6 text-gray-700 dark:text-gray-300"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">QRIS Instant</p>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Gopay, OVO, Dana, BCA Mobile, dll</p>
+                            </div>
+                        </div>
+                        <input type="radio" name="payment-method" value="QRIS Instant" checked class="accent-gray-900 w-4 h-4">
+                    </label>
+                    <label class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-800 rounded-xl cursor-pointer hover:border-gray-400 transition-all w-full">
+                        <div class="flex items-center space-x-4">
+                            <i data-lucide="building-2" class="w-6 h-6 text-gray-700 dark:text-gray-300"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">Virtual Account Bank</p>
+                                <p class="text-[11px] text-gray-400 mt-0.5">BCA, Mandiri, BRI, BNI</p>
+                            </div>
+                        </div>
+                        <input type="radio" name="payment-method" value="Virtual Account" class="accent-gray-900 w-4 h-4">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Confirm Button Spanning Full Width -->
+            <div class="pt-4 pb-8 w-full">
+                <button onclick="processTopUp()" class="w-full py-4 bg-gray-900 text-white dark:bg-white dark:text-black rounded-xl font-bold text-sm hover:bg-black dark:hover:bg-gray-200 transition-all shadow-lg active:scale-[0.98]">
+                    Lanjutkan Pembayaran
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <div id="system-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl border border-gray-100">
+            <div id="modal-icon-container" class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+            <h3 id="modal-title" class="text-lg font-bold text-gray-900 mb-2"></h3>
+            <p id="modal-message" class="text-sm text-gray-500 mb-6 leading-relaxed"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-gray-900 text-white dark:bg-white dark:text-black rounded-xl font-medium text-sm hover:bg-black transition-colors">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // State Keys
+        const BALANCE_KEY = 'clincoo_wallet_balance';
+        const TRANSACTIONS_KEY = 'clincoo_wallet_transactions';
+
+        let selectedNominalAmount = 50000;
+        let activeFilter = 'all';
+
+        // Initialize Page
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initSampleDataIfEmpty();
+            renderBalance();
+            renderTransactions();
+        });
+
+        // Seed initial balance & demo transactions if clean slate
+        function initSampleDataIfEmpty() {
+            if (!localStorage.getItem(BALANCE_KEY)) {
+                localStorage.setItem(BALANCE_KEY, '150000');
+            }
+            if (!localStorage.getItem(TRANSACTIONS_KEY)) {
+                const sampleTransactions = [
+                    {
+                        id: 'TX-' + Math.floor(100000 + Math.random() * 900000),
+                        title: 'Top Up Saldo via QRIS',
+                        amount: 150000,
+                        type: 'in',
+                        date: getFormattedDate(new Date(Date.now() - 3600000 * 2)),
+                        method: 'QRIS Instant'
+                    }
+                ];
+                localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(sampleTransactions));
+            }
+        }
+
+        // Helper: Format Number without "Rp"
+        function formatNumberOnly(num) {
+            return Number(num).toLocaleString('id-ID');
+        }
+
+        // Helper: Get Formatted Date
+        function getFormattedDate(d = new Date()) {
+            const time = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const date = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            return `${date}, ${time} WIB`;
+        }
+
+        // Render Balance Display
+        function renderBalance() {
+            const balance = parseInt(localStorage.getItem(BALANCE_KEY) || '0', 10);
+            document.getElementById('display-balance').textContent = formatNumberOnly(balance);
+        }
+
+        // Get Transactions array safely
+        function getTransactions() {
+            try { 
+                return JSON.parse(localStorage.getItem(TRANSACTIONS_KEY) || '[]'); 
+            } catch(e) { 
+                return []; 
+            }
+        }
+
+        // Save Transactions array
+        function saveTransactions(txs) {
+            localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(txs));
+        }
+
+        // Filter Transactions View
+        function filterTransactions(filter) {
+            activeFilter = filter;
+            
+            const filters = [
+                { id: 'filter-all', key: 'all' },
+                { id: 'filter-in', key: 'in' },
+                { id: 'filter-out', key: 'out' }
+            ];
+
+            filters.forEach(item => {
+                const btn = document.getElementById(item.id);
+                if (btn) {
+                    if (item.key === filter) {
+                        btn.className = 'px-4 py-2 text-xs font-semibold rounded-xl bg-gray-900 text-white dark:bg-white dark:text-black shadow-sm transition-all shrink-0 whitespace-nowrap';
+                    } else {
+                        btn.className = 'px-4 py-2 text-xs font-semibold rounded-xl bg-gray-100 text-gray-600 hover:text-gray-900 dark:bg-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shrink-0 whitespace-nowrap';
+                    }
+                }
+            });
+
+            renderTransactions();
+        }
+
+        function renderTransactions() {
+            const container = document.getElementById('transaction-list');
+            const emptyState = document.getElementById('empty-history');
+            const allTxs = getTransactions();
+
+            const filtered = allTxs.filter(tx => {
+                if (activeFilter === 'in') return tx.type === 'in';
+                if (activeFilter === 'out') return tx.type === 'out';
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            container.innerHTML = filtered.map(tx => {
+                const isIn = tx.type === 'in';
+                const sign = isIn ? '+' : '-';
+                const amountClass = isIn ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white';
+
+                return `
+                    <div class="py-4 px-5 w-full flex items-center justify-between border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors active:bg-gray-100 dark:active:bg-gray-800 cursor-pointer">
+                        <div class="flex-1 min-w-0 pr-4">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">${tx.title}</p>
+                            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 truncate">${tx.date} • ${tx.method || 'Saldo Clincoo'}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-sm font-extrabold tracking-tight ${amountClass}">${sign} ${formatNumberOnly(tx.amount)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Halaman TopUp & Navigation
+        function openTopUpPage() {
+            const pageDompet = document.getElementById('page-dompet');
+            const pageTopup = document.getElementById('page-topup');
+            
+            pageDompet.classList.add('hidden');
+            pageDompet.classList.remove('flex');
+            
+            pageTopup.classList.remove('hidden');
+            pageTopup.classList.add('flex');
+            
+            // Scroll to top of topup page
+            pageTopup.scrollTop = 0;
+        }
+
+        function closeTopUpPage() {
+            const pageDompet = document.getElementById('page-dompet');
+            const pageTopup = document.getElementById('page-topup');
+            
+            pageTopup.classList.add('hidden');
+            pageTopup.classList.remove('flex');
+            
+            pageDompet.classList.remove('hidden');
+            pageDompet.classList.add('flex');
+        }
+
+        function selectNominal(amt) {
+            selectedNominalAmount = amt;
+            document.getElementById('custom-nominal').value = '';
+            
+            document.querySelectorAll('.nominal-btn').forEach(btn => {
+                const btnAmt = parseInt(btn.getAttribute('data-amount'), 10);
+                if (btnAmt === amt) {
+                    btn.className = 'nominal-btn border-2 border-gray-900 dark:border-white rounded-xl py-3 text-sm font-semibold transition-all text-center bg-gray-50 dark:bg-gray-800';
+                } else {
+                    btn.className = 'nominal-btn border border-gray-200 dark:border-gray-800 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center';
+                }
+            });
+        }
+
+        function onCustomNominalChange(input) {
+            const val = parseInt(input.value, 10);
+            if (!isNaN(val) && val > 0) {
+                selectedNominalAmount = val;
+                document.querySelectorAll('.nominal-btn').forEach(btn => {
+                    btn.className = 'nominal-btn border border-gray-200 dark:border-gray-800 rounded-xl py-3 text-sm font-semibold hover:border-gray-900 transition-all text-center';
+                });
+            }
+        }
+
+        // Process Top Up
+        function processTopUp() {
+            if (!selectedNominalAmount || selectedNominalAmount < 10000) {
+                showModal('Nominal Tidak Valid', 'Minimal isi saldo adalah 10.000');
+                return;
+            }
+
+            const methodEl = document.querySelector('input[name="payment-method"]:checked');
+            const method = methodEl ? methodEl.value : 'QRIS Instant';
+
+            // Update balance
+            const currentBalance = parseInt(localStorage.getItem(BALANCE_KEY) || '0', 10);
+            const newBalance = currentBalance + selectedNominalAmount;
+            localStorage.setItem(BALANCE_KEY, newBalance.toString());
+
+            // Add transaction
+            const txs = getTransactions();
+            const newTx = {
+                id: 'TX-' + Math.floor(100000 + Math.random() * 900000),
+                title: `Isi Saldo via ${method}`,
+                amount: selectedNominalAmount,
+                type: 'in',
+                date: getFormattedDate(),
+                method: method
+            };
+            txs.unshift(newTx);
+            saveTransactions(txs);
+
+            // Re-render views
+            renderBalance();
+            renderTransactions();
+
+            closeTopUpPage();
+            showModal('Pengisian Saldo Berhasil', `Saldo sebesar ${formatNumberOnly(selectedNominalAmount)} telah ditambahkan ke akun Clincoo Anda via ${method}.`);
+        }
+
+        // Generic System Modal Functions
+        function showModal(title, message) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            const modal = document.getElementById('system-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('system-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
+</body>
+</html>

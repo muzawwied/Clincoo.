@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clincoo - Upgrade Plan</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        :root {
+            --accent-color: #000000;
+            --accent-hover: #1f2937;
+            --accent-text: #ffffff;
+        }
+
+        .bg-accent { background-color: var(--accent-color) !important; }
+        .text-accent { color: var(--accent-color) !important; }
+        .border-accent { border-color: var(--accent-color) !important; }
+        .hover\:bg-accent-hover:hover { background-color: var(--accent-hover) !important; }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        body.dark-mode { background-color: #000000; color: #e0e0e0; }
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #f0f0f0; }
+        body.dark-mode .text-gray-700 { color: #b0b0b0; }
+        body.dark-mode .text-gray-500, body.dark-mode .text-gray-600 { color: #888888; }
+        body.dark-mode .text-gray-400 { color: #666666; }
+        body.dark-mode .text-black { color: #ffffff; }
+        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+
+        body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
+        body.dark-mode #sidebar-toggle,
+        body.dark-mode button[onclick="toggleSidebar()"],
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"],
+        body.dark-mode .header-glass button[onclick],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle svg,
+        body.dark-mode button[onclick="toggleSidebar()"] svg,
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"] svg,
+        body.dark-mode .header-glass button[onclick] svg,
+        body.dark-mode header button[onclick] svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle:hover,
+        body.dark-mode button[onclick="toggleSidebar()"]:hover,
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"]:hover,
+        body.dark-mode .header-glass button[onclick]:hover,
+        body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+        body.dark-mode .bg-gray-50 { background-color: #222222 !important; }
+        body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
+        body.dark-mode .border-gray-200, body.dark-mode .border-gray-100 { border-color: #222222 !important; }
+        body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
+        body.dark-mode .border-black { border-color: #ffffff !important; }
+        body.dark-mode .hover\:bg-gray-50:hover { background-color: #222222 !important; }
+        body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
+        body.dark-mode .hover\:bg-gray-200:hover { background-color: #222222 !important; }
+        body.dark-mode .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
+        body.dark-mode .shadow-xl { box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important; }
+        body.dark-mode .shadow-2xl { box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important; }
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+
+        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-black.text-white { color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
+        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-accent.text-white { color: #000000 !important; }
+        body.dark-mode .text-accent { color: #ffffff !important; }
+        body.dark-mode .border-accent { border-color: #ffffff !important; }
+        body.dark-mode header { background-color: #000000 !important; }
+        body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
+            background-color: #0a0a0a; color: #f0f0f0; border-color: #222222;
+        }
+
+    </style>
+    <script>
+        (function() {
+            var t = localStorage.getItem('clincoo_theme') || 'Sistem (Default)';
+            var isDark = (t === 'Gelap') || (t === 'Sistem (Default)' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) document.documentElement.classList.add('dark-mode');
+        })();
+    </script>
+</head>
+
+<body class="min-h-screen flex flex-col text-gray-900 pt-16">
+    <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+    <header class="bg-[#f7f7f9] flex justify-between items-center px-6 py-4 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-4 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-50 transition-all cursor-pointer text-gray-700 hover:text-black shadow-sm">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Upgrade Plan</h1>
+        <div class="w-10"></div>
+    </header>
+
+    <main class="flex-1 w-full max-w-6xl mx-auto px-5 py-8 flex flex-col">
+        <div class="mb-10 text-center mt-4">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#F9FAFB] border border-gray-100 mb-6">
+                <i data-lucide="crown" class="w-8 h-8 text-accent"></i>
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 mb-3" style="font-family: 'Space Grotesk', sans-serif;">
+                Buka Potensi Penuh
+            </h2>
+            <p class="text-gray-500 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
+                Tingkatkan produktivitas Anda dengan akses tak terbatas ke semua fitur premium, template eksklusif, dan generasi AI prioritas.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full mx-auto">
+            
+            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 flex flex-col transition-all hover:shadow-md">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-gray-900">Starter</h3>
+                    <p class="text-xs text-gray-500 mt-1">Untuk individu yang baru memulai.</p>
+                </div>
+                <div class="mb-6 flex items-baseline">
+                    <span class="text-3xl font-extrabold tracking-tight text-gray-900">Gratis</span>
+                </div>
+                <ul class="flex flex-col gap-4 mb-8 flex-1">
+                    <li class="flex items-start gap-3 text-sm text-gray-700">
+                        <i data-lucide="check" class="w-5 h-5 text-gray-900 shrink-0"></i>
+                        <span>Limit 3 proyek aktif</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-gray-700">
+                        <i data-lucide="check" class="w-5 h-5 text-gray-900 shrink-0"></i>
+                        <span>Akses template dasar</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-gray-700">
+                        <i data-lucide="check" class="w-5 h-5 text-gray-900 shrink-0"></i>
+                        <span>Kecepatan generasi standar</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-gray-400 opacity-70">
+                        <i data-lucide="minus" class="w-5 h-5 shrink-0"></i>
+                        <span>Dukungan prioritas</span>
+                    </li>
+                </ul>
+                <button id="btn-starter" disabled class="w-full py-3.5 bg-gray-50 text-gray-500 border border-gray-200 rounded-xl font-semibold text-sm cursor-not-allowed">
+                    Paket Saat Ini
+                </button>
+            </div>
+
+            <div class="bg-white border-2 border-accent rounded-3xl p-6 md:p-8 flex flex-col relative shadow-xl transform md:-translate-y-2 transition-transform">
+                <div class="absolute top-0 right-0 bg-accent text-white text-[10px] font-bold px-4 py-1.5 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">
+                    Paling Populer
+                </div>
+                <div class="mb-6 mt-1">
+                    <h3 class="text-lg font-bold text-accent">Pro</h3>
+                    <p class="text-xs text-gray-500 mt-1">Untuk profesional dan kreator aktif.</p>
+                </div>
+                <div class="mb-6 flex items-baseline">
+                    <span class="text-3xl font-extrabold tracking-tight text-gray-900">Rp 49K</span>
+                    <span class="text-sm font-medium text-gray-500 ml-1">/bln</span>
+                </div>
+                <ul class="flex flex-col gap-4 mb-8 flex-1">
+                    <li class="flex items-start gap-3 text-sm text-gray-900 font-medium">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-accent shrink-0"></i>
+                        <span>Proyek tanpa batas</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-gray-900 font-medium">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-accent shrink-0"></i>
+                        <span>Akses semua template premium</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-gray-900 font-medium">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-accent shrink-0"></i>
+                        <span>Model AI tercepat (Prioritas)</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-gray-900 font-medium">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-accent shrink-0"></i>
+                        <span>Dukungan email 24/7</span>
+                    </li>
+                </ul>
+                <button id="btn-pro" onclick="openModal('Pro', 'Rp 49.000')" class="w-full py-3.5 bg-accent text-white hover:bg-accent-hover rounded-xl font-semibold text-sm transition-all shadow-md active:scale-95 cursor-pointer">
+                    Upgrade ke Pro
+                </button>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 flex flex-col transition-all hover:shadow-md">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-gray-900">Bisnis</h3>
+                    <p class="text-xs text-gray-500 mt-1">Untuk tim dan operasi skala besar.</p>
+                </div>
+                <div class="mb-6 flex items-baseline">
+                    <span class="text-3xl font-extrabold tracking-tight text-gray-900">Rp 129K</span>
+                    <span class="text-sm font-medium text-gray-500 ml-1">/bln</span>
+                </div>
+                <ul class="flex flex-col gap-4 mb-8 flex-1">
+                    <li class="flex items-start gap-3 text-sm text-gray-700">
+                        <i data-lucide="check" class="w-5 h-5 text-gray-900 shrink-0"></i>
+                        <span>Semua fitur Pro</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-gray-700">
+                        <i data-lucide="check" class="w-5 h-5 text-gray-900 shrink-0"></i>
+                        <span>Kolaborasi tim (5+ Pengguna)</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-gray-700">
+                        <i data-lucide="check" class="w-5 h-5 text-gray-900 shrink-0"></i>
+                        <span>Keamanan & kontrol admin</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-gray-700">
+                        <i data-lucide="check" class="w-5 h-5 text-gray-900 shrink-0"></i>
+                        <span>Manajer akun prioritas</span>
+                    </li>
+                </ul>
+                <button id="btn-bisnis" onclick="openModal('Bisnis', 'Rp 129.000')" class="w-full py-3.5 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm transition-all cursor-pointer">
+                    Mulai Bisnis
+                </button>
+            </div>
+
+        </div>
+
+        <div class="mt-12 text-center text-xs text-gray-400">
+            <p>Pembayaran aman. Anda dapat membatalkan langganan kapan saja.</p>
+        </div>
+    </main>
+
+    <div id="upgrade-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="bg-white rounded-3xl p-6 w-full max-w-sm mx-4 transform scale-95 transition-transform duration-300">
+            
+            <div id="modal-step-1">
+                <h2 class="text-xl font-bold text-gray-900 mb-2 font-[Space Grotesk]">Konfirmasi Upgrade</h2>
+                <p class="text-sm text-gray-500 mb-6">Anda akan beralih ke paket <strong id="modal-plan-name" class="text-gray-900"></strong>. Total tagihan Anda adalah <strong id="modal-plan-price" class="text-gray-900"></strong> per bulan.</p>
+                
+                <div class="flex gap-3">
+                    <button onclick="closeModal()" class="w-1/2 border border-gray-200 text-gray-700 font-medium py-2.5 rounded-xl transition-all hover:bg-gray-50">Batal</button>
+                    <button onclick="processUpgrade()" class="w-1/2 bg-accent hover:bg-accent-hover text-white font-medium py-2.5 rounded-xl transition-all">Konfirmasi</button>
+                </div>
+            </div>
+
+            <div id="modal-step-2" class="hidden flex-col items-center justify-center py-4 text-center">
+                <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mb-3"></i>
+                <h2 class="text-lg font-bold text-gray-900 mb-1 font-[Space Grotesk]">Pembayaran Berhasil!</h2>
+                <p class="text-sm text-gray-500 mb-6">Paket Anda telah berhasil diperbarui.</p>
+                <button onclick="finishUpgrade()" class="w-full bg-accent hover:bg-accent-hover text-white font-medium py-2.5 rounded-xl transition-all">Selesai</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentActivePlan = 'Starter';
+        let selectedPlan = '';
+
+        const modal = document.getElementById('upgrade-modal');
+        const modalContent = document.getElementById('modal-content');
+        const step1 = document.getElementById('modal-step-1');
+        const step2 = document.getElementById('modal-step-2');
+        const planNameEl = document.getElementById('modal-plan-name');
+        const planPriceEl = document.getElementById('modal-plan-price');
+
+        function openModal(plan, price) {
+            selectedPlan = plan;
+            planNameEl.innerText = plan;
+            planPriceEl.innerText = price;
+            
+            step1.classList.remove('hidden');
+            step2.classList.add('hidden');
+            step2.classList.remove('flex');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function processUpgrade() {
+            step1.classList.add('hidden');
+            step2.classList.remove('hidden');
+            step2.classList.add('flex');
+        }
+
+        function finishUpgrade() {
+            closeModal();
+            currentActivePlan = selectedPlan;
+            updateUI();
+        }
+
+        function updateUI() {
+            const btnStarter = document.getElementById('btn-starter');
+            const btnPro = document.getElementById('btn-pro');
+            const btnBisnis = document.getElementById('btn-bisnis');
+
+            const btnActiveClasses = 'w-full py-3.5 bg-gray-50 text-gray-500 border border-gray-200 rounded-xl font-semibold text-sm cursor-not-allowed';
+            const btnDefaultClasses = 'w-full py-3.5 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm transition-all cursor-pointer';
+            const btnProClasses = 'w-full py-3.5 bg-accent text-white hover:bg-accent-hover rounded-xl font-semibold text-sm transition-all shadow-md active:scale-95 cursor-pointer';
+
+            btnStarter.innerText = 'Turunkan Paket';
+            btnStarter.className = btnDefaultClasses;
+            btnStarter.disabled = false;
+            btnStarter.onclick = () => openModal('Starter', 'Gratis');
+
+            btnPro.innerText = 'Upgrade ke Pro';
+            btnPro.className = btnProClasses;
+            btnPro.disabled = false;
+            btnPro.onclick = () => openModal('Pro', 'Rp 49.000');
+
+            btnBisnis.innerText = 'Mulai Bisnis';
+            btnBisnis.className = btnDefaultClasses;
+            btnBisnis.disabled = false;
+            btnBisnis.onclick = () => openModal('Bisnis', 'Rp 129.000');
+
+            if (currentActivePlan === 'Starter') {
+                btnStarter.innerText = 'Paket Saat Ini';
+                btnStarter.className = btnActiveClasses;
+                btnStarter.disabled = true;
+                btnStarter.onclick = null;
+            } else if (currentActivePlan === 'Pro') {
+                btnPro.innerText = 'Paket Saat Ini';
+                btnPro.className = btnActiveClasses;
+                btnPro.disabled = true;
+                btnPro.onclick = null;
+            } else if (currentActivePlan === 'Bisnis') {
+                btnBisnis.innerText = 'Paket Saat Ini';
+                btnBisnis.className = btnActiveClasses;
+                btnBisnis.disabled = true;
+                btnBisnis.onclick = null;
+            }
+        }
+    </script>
+<script>
+(function(){
+    var path = window.location.pathname.split('/').pop() || 'upgrade.html';
+    var links = document.querySelectorAll('.sidebar-nav-link');
+    links.forEach(function(link){
+        var href = link.getAttribute('href');
+        if(href === path){
+            link.classList.add('bg-gray-50','text-gray-900');
+            link.classList.remove('hover:bg-gray-50','text-gray-700');
+        }
+    });
+})();
+</script>
+</body></body>
+</html>

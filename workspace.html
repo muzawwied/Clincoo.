@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://unpkg.com; img-src 'self' https: data: blob:; connect-src 'self' https: blob:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruang Kerja</title>
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #ffffff;
+    }
+    .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+    .page-view {
+      transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+    }
+    .page-enter {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    .page-active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+    
+    .dark-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+    .dark-scrollbar::-webkit-scrollbar-track { background: #1e1e1e; }
+    .dark-scrollbar::-webkit-scrollbar-thumb { background: #333333; border-radius: 4px; }
+    .dark-scrollbar::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
+
+    .custom-input {
+      background-color: #f3f4f6;
+      border-color: #e5e7eb;
+      color: #111827;
+    }
+    .custom-input:focus {
+      background-color: #ffffff;
+      border-color: #9ca3af;
+      box-shadow: 0 0 0 1px #9ca3af;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+
+    .CodeMirror {
+      width: 100% !important;
+      height: 100% !important;
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      background-color: transparent !important;
+    }
+    .cm-s-dracula.CodeMirror {
+      background-color: #12151c !important;
+      color: #f8f8f2 !important;
+    }
+    .cm-s-dracula .CodeMirror-gutters {
+      background-color: #151821 !important;
+      border-right: 1px solid #212733 !important;
+    }
+    .cm-s-dracula .CodeMirror-linenumber {
+      color: #4d5668 !important;
+    }
+    /* Dark mode */
+    body.dark-mode { background-color: #000000; color: #e0e0e0; }
+    body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #f0f0f0; }
+    body.dark-mode .text-gray-700 { color: #b0b0b0; }
+    body.dark-mode .text-gray-500 { color: #888888; }
+    body.dark-mode .text-gray-400 { color: #666666; }
+    body.dark-mode .text-black { color: #ffffff; }
+    body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+
+        body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
+        body.dark-mode #sidebar-toggle,
+        body.dark-mode button[onclick="toggleSidebar()"],
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"],
+        body.dark-mode .header-glass button[onclick],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle svg,
+        body.dark-mode button[onclick="toggleSidebar()"] svg,
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"] svg,
+        body.dark-mode .header-glass button[onclick] svg,
+        body.dark-mode header button[onclick] svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle:hover,
+        body.dark-mode button[onclick="toggleSidebar()"]:hover,
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"]:hover,
+        body.dark-mode .header-glass button[onclick]:hover,
+        body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+    body.dark-mode .bg-gray-50 { background-color: #0a0a0a !important; }
+    body.dark-mode .sidebar-nav-link.bg-gray-50 { background-color: #222222 !important; }
+    body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
+    body.dark-mode .border-gray-200 { border-color: #222222 !important; }
+    body.dark-mode .border-gray-100 { border-color: #0a0a0a !important; }
+    body.dark-mode .border-black { border-color: #ffffff !important; }
+    body.dark-mode .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
+    body.dark-mode .shadow-xl { box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important; }
+    body.dark-mode .shadow-2xl { box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important; }
+    body.dark-mode #notif-dropdown { background-color: #0a0a0a; border-color: #222222; }
+    body.dark-mode #add-menu-dropdown { background-color: #0a0a0a; border-color: #222222; }
+    body.dark-mode #item-action-menu { background-color: #0a0a0a; border-color: #222222; }
+    body.dark-mode #sidebar-popup { background-color: #0a0a0a; }
+    body.dark-mode ::-webkit-scrollbar-thumb { background: #222222; }
+
+        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-black.text-white { color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
+        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-accent.text-white { color: #000000 !important; }
+        body.dark-mode .text-accent { color: #ffffff !important; }
+        body.dark-mode .border-accent { border-color: #ffffff !important; }
+        body.dark-mode header { background-color: #000000 !important; }
+        body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
+  </style>
+  <script>
+    (function() {
+      var t = localStorage.getItem('clincoo_theme') || 'Sistem (Default)';
+      var isDark = (t === 'Gelap') || (t === 'Sistem (Default)' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) document.documentElement.classList.add('dark-mode');
+    })();
+  </script>
+</head>
+<body class="text-gray-900 antialiased min-h-screen relative bg-[#f7f7f9]">
+  <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+
+  <header class="fixed top-0 left-0 right-0 z-30 p-3 pointer-events-none flex justify-between items-center">
+        <div class="flex items-center gap-2 pointer-events-auto">
+          <button onclick="toggleSidebar()" class="flex-shrink-0 flex items-center justify-center text-[#222222] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:text-black hover:bg-gray-50 transition-all rounded-full w-10 h-10" aria-label="Buka Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 10h14M5 15h8" />
+            </svg>
+          </button>
+         <div class="flex items-center gap-1.5 sm:gap-2 relative min-w-0">
+            <h2 class="text-xl font-bold text-gray-800 tracking-tight whitespace-nowrap">Ruang Kerja</h2>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-center gap-1.5 sm:gap-2 pointer-events-auto">
+            <button onclick="toggleNotifications(event)" class="relative p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors focus:outline-none" aria-label="Notifikasi">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+            </button>
+            <a href="#" class="flex items-center justify-center">
+              <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="App Logo" class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white shadow-sm hover:scale-105 transition-transform cursor-pointer">
+            </a>
+        </div>
+  </header>
+
+  <div id="page-project-detail" class="page-view w-full min-h-screen flex flex-col items-center pt-20 px-4 pb-20">
+    <div class="w-full max-w-5xl">
+     <div class="w-full border-b border-gray-200 mb-6" id="project-nav-tabs">
+        <nav class="-mb-px flex space-x-6 overflow-x-auto hide-scrollbar" aria-label="Tabs">
+          <button class="tab-btn border-black text-black whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none" aria-current="page">
+            Kode
+          </button> 
+          <a href="keamanan.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+            Keamanan
+          </a>
+          <a href="environment.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+            Environment
+          </a>
+          <a href="pengaturan.html" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+            Pengaturan
+          </a>
+        </nav>
+      </div>
+
+      <div class="w-full mt-2 relative pb-20">
+        <div id="tab-content-kode" class="block transition-opacity">
+          <div class="flex gap-2 w-full mb-4">
+            <div class="relative flex-1 group bg-white rounded-full shadow-sm border border-gray-200/70 px-4 py-1.5 focus-within:shadow-md focus-within:border-gray-300 transition-all duration-300 flex items-center">
+              <div class="text-gray-400 group-focus-within:text-gray transition-colors mr-3 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <input type="text" id="file-search-input" placeholder="Cari file..."
+                     class="block w-full py-1 bg-transparent text-sm sm:text-base placeholder-gray-400 focus:outline-none text-gray-900 font-medium">
+              <div class="hidden sm:flex items-center justify-center px-3 py-1 bg-gray-50 border-gray-100 rounded-full text-xs font-semibold text-gray-400 ml-2 shadow-inner">
+                File
+              </div>
+            </div>
+            
+            <div class="relative flex items-center justify-end">
+              <button onclick="toggleAddMenu(event)" class="w-10 h-10 flex items-center justify-center bg-[#273849] text-white rounded-full shadow-sm hover:bg-[#1a2530] transition-all focus:outline-none active:scale-95 flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+              </button>
+              <div id="add-menu-dropdown" class="hidden absolute top-full mt-2 right-0 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden transition-all z-50">
+                <div class="p-1">
+                  <button onclick="openCreateModal('folder')" class="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 text-[#a0aec0]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                    Buat Folder
+                  </button>
+                  <button onclick="openCreateModal('file')" class="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 text-[#718096]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    Buat File
+                  </button>
+                  <div class="h-px bg-gray-100 my-1"></div>
+                  <button onclick="triggerImport('file')" class="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                    Import File
+                  </button>
+                  <button onclick="triggerImport('zip')" class="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                    Import ZIP
+                  </button>
+                  <button onclick="triggerImport('github')" class="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 text-gray-900" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    Import dari GitHub
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="file-breadcrumb" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-gray-500 overflow-x-auto pb-1"></div>
+          <div id="file-list-container" class="flex flex-col"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-file-editor" class="page-view hidden w-full min-h-screen flex flex-col bg-[#141820] text-gray-200 font-sans fixed inset-0 z-50 overflow-hidden">
+    <div class="bg-[#1b202b] border-b border-[#2a303f] flex items-center px-4 h-12 flex-shrink-0 select-none justify-between">
+      <div class="flex items-center gap-3 min-w-0">
+        <button onclick="navigateBackFromEditor()" class="p-1.5 text-gray-400 hover:text-white rounded-lg transition-colors flex items-center gap-1.5 focus:outline-none" title="Kembali & Simpan Otomatis">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span class="text-xs font-medium text-gray-300 hidden sm:inline">Kembali</span>
+        </button>
+        <div class="h-4 w-px bg-[#2a303f]"></div>
+        <div class="flex items-center gap-2 min-w-0">
+          <span id="editor-file-icon" class="flex-shrink-0"></span>
+          <span id="editor-filename-label" class="text-sm font-semibold text-gray-100 truncate">index.html</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="relative flex-1 flex overflow-hidden bg-[#12151c]">
+      <div id="editor-code-container" class="w-full h-full flex flex-1 overflow-hidden">
+        <textarea id="editor-code-textarea" class="hidden"></textarea>
+      </div>
+      <div id="editor-audio-container" class="hidden w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#12151c]">
+        <div class="w-full flex-1 flex flex-col items-center justify-center max-w-md">
+          <div class="w-28 h-28 rounded-full bg-[#1b202b] border-2 border-[#2d3547] flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+            <svg viewBox="0 0 24 24" class="w-14 h-14 text-red-500 ml-1" fill="currentColor">
+              <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/>
+            </svg>
+          </div>
+          <audio id="audio-player" controls class="w-full rounded-full shadow-lg focus:outline-none"></audio>
+        </div>
+      </div>
+      <div id="editor-video-container" class="hidden w-full h-full flex flex-col items-center justify-center p-6 text-center bg-black">
+        <div class="w-full flex-1 flex items-center justify-center max-w-4xl">
+          <video id="video-player" controls class="w-full max-h-[80vh] rounded-lg shadow-2xl focus:outline-none bg-black object-contain"></video>
+        </div>
+      </div>
+      <div id="editor-image-container" class="hidden w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#0d1017]">
+        <div class="w-full flex-1 flex items-center justify-center max-w-4xl">
+          <div class="p-2 bg-[#1b202b]/50 border border-[#2d3547]/50 rounded-xl shadow-2xl overflow-hidden flex items-center justify-center max-h-full">
+            <img id="image-preview" src="" alt="Preview" class="max-w-full max-h-[75vh] object-contain rounded-lg">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="notif-dropdown" class="fixed top-16 right-4 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-[90] origin-top-right">
+    <div class="flex justify-between items-center mb-2 px-1">
+      <span class="font-semibold text-sm text-gray-900">Notifikasi</span>
+      <a href="index.html?session=active&ref=client&path=/notifikasi" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
+    </div>
+    <div class="flex flex-col gap-2 mb-2">
+      <div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div>
+    </div>
+  </div>
+
+  <input type="file" id="import-file-input" class="hidden" multiple onchange="handleImportFiles(event)">
+  <input type="file" id="import-zip-input" class="hidden" accept=".zip" onchange="handleImportZip(event)">
+
+  <div id="item-action-menu" class="hidden fixed w-44 bg-white rounded-xl shadow-xl overflow-hidden transition-all z-[100] py-1">
+    <button onclick="triggerRename()" class="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+      Edit Nama
+    </button>
+    <button onclick="triggerDownload()" class="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+      Unduh Berkas
+    </button>
+    <button onclick="triggerZip()" class="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+      Kompres ZIP
+    </button>
+    <div class="h-px bg-gray-100 my-1"></div>
+    <button onclick="confirmItemDelete()" class="flex items-center w-full px-4 py-2.5 text-sm text-red-600 font-medium hover:bg-red-50 transition-colors">
+      Hapus
+    </button>
+  </div>
+
+  <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/20 z-40 transition-opacity duration-300 opacity-0 pointer-events-auto" onclick="toggleSidebar()"></div>
+    
+  <aside id="sidebar-popup" class="fixed inset-y-0 left-0 w-[260px] bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 flex flex-col pointer-events-auto">
+      <div class="h-16 border-b border-gray-100 flex items-center px-4 justify-between flex-shrink-0">
+          <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                  <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="Logo" class="w-full h-full object-cover">
+              </div>
+              <span class="font-bold text-lg text-gray-800" style="font-family: 'Montserrat', sans-serif;">Clincoo</span>
+          </div>
+      </div>
+      
+       <div class="px-3 py-4 flex flex-col gap-1" id="sidebar-nav">
+            <a href="app.html" data-page="app" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+                <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg>
+                <span class="font-medium text-[14px]">Beranda</span>
+            </a>
+            <a href="chat.html" data-page="chat" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+                <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="8" rx="2"/><path d="M12 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 5v3"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M10 18h4"/></svg>
+                <span class="font-medium text-[14px]">Agent</span>
+            </a>
+            <a href="workspace.html" data-page="workspace" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+                <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
+                <span class="font-medium text-[14px]">Workspace</span>
+            </a>
+        </div>
+  </aside>
+
+  <div id="input-modal-overlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden z-[100] flex items-center justify-center transition-opacity duration-300 opacity-0">
+    <div id="input-modal" class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform scale-95 transition-all duration-300 opacity-0">
+      <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+        <h3 id="input-modal-title" class="text-lg font-bold text-gray-900">Buat File Baru</h3>
+        <button onclick="closeInputModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none p-1.5 rounded-full hover:bg-gray-100 transition-colors">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div id="modal-standard-body" class="p-6">
+        <div id="input-modal-type-container" class="mb-4 hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipe File</label>
+          <select id="modal-file-type" onchange="handleModalFileTypeChange(event)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#273849] focus:border-transparent transition-all cursor-pointer">
+              <option value="">Otomatis dari ekstensi...</option>
+              <option value="html">HTML</option>
+              <option value="css">CSS</option>
+              <option value="js">JavaScript</option>
+              <option value="py">Python</option>
+              <option value="json">JSON</option>
+              <option value="txt">Teks</option>
+              <option value="md">Markdown</option>
+              <option value="xml">XML</option>
+              <option value="sql">SQL</option>
+              <option value="sh">Shell</option>
+          </select>
+        </div>
+        <div>
+          <label id="input-modal-label" class="block text-sm font-medium text-gray-700 mb-1.5">Nama File</label>
+          <input type="text" id="modal-input-name" onkeydown="handleModalInputKeydown(event)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#273849] focus:border-transparent transition-all" placeholder="Misal: index.html" autocomplete="off">
+          <p id="input-modal-error" class="text-xs text-red-500 mt-2 hidden">Nama tidak boleh kosong atau sudah ada.</p>
+        </div>
+      </div>
+      
+      <div id="modal-github-body" class="p-6 hidden">
+          <!-- Step 1: Connect -->
+          <div id="github-step-connect" class="flex flex-col items-center justify-center py-4 text-center">
+            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-200 shadow-sm">
+               <svg class="w-8 h-8 text-gray-900" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            </div>
+            <h4 class="text-base font-semibold text-gray-900 mb-1.5">Hubungkan ke GitHub</h4>
+            <p class="text-sm text-gray-500 mb-6 px-2 leading-relaxed">Tautkan akun Anda untuk mengimpor repository secara langsung ke dalam workspace.</p>
+            <button onclick="connectGitHub()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#24292e] rounded-xl hover:bg-[#1b1f23] shadow-sm transition-colors focus:outline-none">
+              Hubungkan Sekarang
+            </button>
+          </div>
+
+          <!-- Step 2: Loading (Hidden by default) -->
+          <div id="github-step-loading" class="hidden flex-col items-center justify-center py-8 text-center">
+             <svg class="animate-spin h-8 w-8 text-gray-900 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+             <p class="text-sm text-gray-600 font-medium">Menghubungkan ke GitHub...</p>
+          </div>
+
+          <!-- Step 3: Input Repo (Hidden by default) -->
+          <div id="github-step-import" class="hidden flex-col">
+            <div class="flex items-center gap-3 mb-5 p-3 bg-gray-50/80 rounded-xl border border-gray-100">
+               <div class="w-9 h-9 rounded-full bg-gray-200 overflow-hidden flex-shrink-0 shadow-sm border border-gray-200">
+                  <img id="github-avatar-img" src="https://avatars.githubusercontent.com/u/9919?v=4" alt="Avatar" class="w-full h-full object-cover">
+               </div>
+               <div class="min-w-0 flex-1">
+                 <p class="text-[11px] text-gray-500 font-medium uppercase tracking-wider mb-0.5">Terhubung sebagai</p>
+                 <p id="github-username" class="text-sm font-semibold text-gray-900 truncate">-</p>
+               </div>
+               <button onclick="disconnectGitHub()" class="ml-2 text-xs text-red-500 hover:text-red-600 font-medium px-2 py-1 hover:bg-red-50 rounded-lg transition-colors">Putuskan</button>
+            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Pilih / Masukkan Repository</label>
+            <input type="text" id="modal-input-github-repo" onkeydown="handleModalInputKeydown(event)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#273849] focus:border-transparent transition-all" placeholder="mis. akun/nama-repo" autocomplete="off">
+            <p id="input-modal-github-error" class="text-xs text-red-500 mt-2 hidden">Repository tidak boleh kosong atau sudah ada.</p>
+          </div>
+      </div>     
+        
+        <button id="modal-btn-submit" onclick="submitInputModal()" class="px-4 py-2 text-sm font-medium text-white bg-[#273849] rounded-xl hover:bg-[#1a2530] shadow-sm transition-colors focus:outline-none">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+    // Shared Notification System
+    const NOTIF_KEY = 'clincoo_notifications';
+    function getNotifications() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch(e) { return []; } }
+    function saveNotifications(n) { localStorage.setItem(NOTIF_KEY, JSON.stringify(n)); }
+    function addNotification(source, message) {
+      const n = getNotifications();
+      n.unshift({ id: Date.now(), source, message, timestamp: new Date().toISOString(), read: false });
+      if (n.length > 50) n.length = 50;
+      saveNotifications(n); renderNotifications();
+    }
+    function renderNotifications() {
+      const notifs = getNotifications();
+      const dd = document.getElementById('notif-dropdown');
+      if (!dd) return;
+      const contentArea = dd.querySelector('.text-xs.text-gray-500.text-center');
+      if (!contentArea) return;
+      const parent = contentArea.parentElement;
+      if (notifs.length === 0) {
+        contentArea.textContent = 'Belum ada notifikasi baru';
+        contentArea.className = 'text-xs text-gray-500 text-center py-5';
+        parent.innerHTML = '<div class="flex flex-col gap-2 mb-2"><div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div></div>';
+        return;
+      }
+      parent.innerHTML = '<div class="space-y-1.5 max-h-48 overflow-y-auto"></div>';
+      const listContainer = parent.querySelector('div');
+      for (let n of notifs.slice(0, 5)) {
+        let t = new Date(n.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        const item = document.createElement('div');
+        item.className = 'flex items-start gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer';
+        item.onclick = function() { n.read = true; saveNotifications(notifs); renderNotifications(); };
+        item.innerHTML = '<span class="text-xs font-semibold text-gray-700 flex-shrink-0">' + n.source + '</span><div class="flex-1 min-w-0"><p class="text-xs text-gray-600">' + n.message + '</p><p class="text-[10px] text-gray-400 mt-0.5">' + t + '</p></div>';
+        listContainer.appendChild(item);
+      }
+    }
+    function markNotifRead(id) {
+      const n = getNotifications();
+      const item = n.find(x => x.id === id);
+      if (item) item.read = true;
+      saveNotifications(n); renderNotifications();
+    }
+
+    // Real GitHub Import
+    async function importFromGitHub(repoUrl, targetPath) {
+      try {
+        let owner, repo;
+        if (repoUrl.includes('github.com')) {
+          const m = repoUrl.match(/github\.com\/([^/]+)\/([^/\s?#]+)/);
+          if (!m) throw new Error('URL tidak valid');
+          owner = m[1]; repo = m[2].replace('.git', '');
+        } else {
+          const p = repoUrl.split('/');
+          owner = p[0]; repo = p[1] ? p[1].replace('.git', '') : p[0];
+        }
+        addNotification('GitHub', 'Mengimport ' + owner + '/' + repo + '...');
+        renderFileList();
+        const r = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents', { headers: githubAuthHeaders() });
+        if (!r.ok) throw new Error('Repo tidak ditemukan');
+        const items = await r.json();
+        projectFilesData[targetPath] = [];
+        for (let item of items) {
+          if (item.type === 'file') {
+            try {
+              const fr = await fetch(item.url, { headers: githubAuthHeaders() });
+              const fd = await fr.json();
+              const fc = fd.encoding === 'base64' ? atob(fd.content) : '';
+              const b = new Blob([fc]).size;
+              projectFilesData[targetPath].push({ type: 'file', name: item.name, size: b > 1024 ? (b/1024).toFixed(1)+' KB' : b+' B', path: targetPath+'/'+item.name, content: fc });
+            } catch(e) {}
+          } else if (item.type === 'dir') {
+            const np = targetPath + '/' + item.name;
+            projectFilesData[targetPath].push({ type: 'folder', name: item.name, path: np, fileCount: 0, previewText: 'Folder' });
+            await importGitHubFolder(owner, repo, item.path, np);
+          }
+        }
+        saveData(); renderFileList();
+        addNotification('GitHub', 'Berhasil import ' + owner + '/' + repo);
+      } catch(err) { addNotification('GitHub', 'Gagal: ' + err.message); }
+    }
+    async function importGitHubFolder(owner, repo, ghPath, localPath) {
+      try {
+        const r = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + ghPath, { headers: githubAuthHeaders() });
+        const items = await r.json();
+        projectFilesData[localPath] = [];
+        for (let item of items) {
+          if (item.type === 'file') {
+            try {
+              const fr = await fetch(item.url, { headers: githubAuthHeaders() });
+              const fd = await fr.json();
+              const fc = fd.encoding === 'base64' ? atob(fd.content) : '';
+              projectFilesData[localPath].push({ type: 'file', name: item.name, size: '0 B', path: localPath+'/'+item.name, content: fc });
+            } catch(e) {}
+          } else if (item.type === 'dir') {
+            const cp = localPath + '/' + item.name;
+            projectFilesData[localPath].push({ type: 'folder', name: item.name, path: cp, fileCount: 0, previewText: 'Folder' });
+            await importGitHubFolder(owner, repo, item.path, cp);
+          }
+        }
+      } catch(e) {}
+    }
+
+
+    let currentFolderPath = 'root';
+    let editingFileName = null;
+    let projectFilesData = { 'root': [] };
+    let modalAction = null;
+    let itemBeingRenamed = null;
+    let activeItemName = null;
+    const GITHUB_CLIENT_ID = 'Ov23ctIBGjQBolR5PS2C';
+    const GITHUB_TOKEN_KEY = 'clincoo_github_token';
+    const GITHUB_USER_KEY = 'clincoo_github_user';
+    let isGithubConnected = !!localStorage.getItem(GITHUB_TOKEN_KEY);
+
+    const STORAGE_KEY_FILES = 'clincoo_workspace_files';
+
+    function loadWorkspaceFiles() {
+      const savedFiles = localStorage.getItem(STORAGE_KEY_FILES);
+      if (savedFiles) {
+        try { projectFilesData = JSON.parse(savedFiles); } catch (e) { projectFilesData = { 'root': [] }; }
+      } else {
+        projectFilesData = { 'root': [] };
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY_FILES, JSON.stringify(projectFilesData));
+    }
+
+    const defaultTemplates = {
+      'html': '<!DOCTYPE html>\n<html lang="id">\n<head>\n  <meta charset="UTF-8">\n  <title>File Baru</title>\n</head>\n<body>\n  <h1>Halo Dunia!</h1>\n</body>\n</html>',
+      'css': 'body {\n  margin: 0;\n  padding: 0;\n  font-family: sans-serif;\n}',
+      'js': 'console.log("Hello from Clincoo Workspace!");',
+      'py': 'def main():\n  print("Hello, World!")\n\nif __name__ == "__main__":\n  main()',
+      'json': '{\n  "name": "workspace",\n  "version": "1.0.0"\n}',
+      'txt': 'Ini adalah berkas teks catatan baru.'
+    };
+
+    function getFileType(filename) {
+      if (!filename) return 'code';
+      let ext = getFileExtension(filename);
+      const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'];
+      const videoExts = ['mp4', 'avi', 'mkv', 'mov', 'webm'];
+      const imageExts = ['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp', 'bmp', 'ico'];
+      if (audioExts.includes(ext)) return 'audio';
+      if (videoExts.includes(ext)) return 'video';
+      if (imageExts.includes(ext)) return 'image';
+      return 'code';
+    }
+
+    function getFileExtension(filename) {
+      let name = filename ? filename.trim() : '';
+      if (!name) return 'html';
+      if (name.startsWith('.') && !name.includes('.', 1)) return name.substring(1).toLowerCase();
+      if (name.includes('.')) return name.split('.').pop().toLowerCase();
+      return name.toLowerCase();
+    }
+
+    let codeEditor = null;
+    function initCodeEditor() {
+      if (codeEditor) return;
+      const textarea = document.getElementById('editor-code-textarea');
+      if (textarea) {
+        codeEditor = CodeMirror.fromTextArea(textarea, {
+          lineNumbers: true,
+          theme: 'dracula',
+          mode: 'htmlmixed',
+          indentUnit: 4,
+          lineWrapping: true,
+          scrollbarStyle: 'native'
+        });
+      }
+    }
+
+    const pageProjectDetail = document.getElementById('page-project-detail');
+    const pageFileEditor = document.getElementById('page-file-editor');
+    const fileSearchInput = document.getElementById('file-search-input');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const sidebarPopup = document.getElementById('sidebar-popup');
+    let isSidebarOpen = false;
+
+    function toggleSidebar() {
+      isSidebarOpen = !isSidebarOpen;
+      if (isSidebarOpen) {
+        sidebarOverlay.classList.remove('hidden');
+        setTimeout(() => {
+          sidebarOverlay.classList.remove('opacity-0');
+          sidebarPopup.classList.remove('-translate-x-full');
+        }, 10);
+      } else {
+        sidebarOverlay.classList.add('opacity-0');
+        sidebarPopup.classList.add('-translate-x-full');
+        setTimeout(() => {
+          sidebarOverlay.classList.add('hidden');
+        }, 300);
+      }
+    }
+
+    function toggleNotifications(e) {
+      e.stopPropagation();
+      const notifDropdown = document.getElementById('notif-dropdown');
+      const isHidden = notifDropdown.classList.contains('invisible');
+      if (isHidden) {
+        notifDropdown.classList.remove('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+        notifDropdown.classList.add('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+      } else {
+        notifDropdown.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+        notifDropdown.classList.add('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+      }
+    }
+
+    function toggleAddMenu(e) {
+      e.stopPropagation();
+      const addMenuDropdown = document.getElementById('add-menu-dropdown');
+      addMenuDropdown.classList.toggle('hidden');
+      const notifDropdown = document.getElementById('notif-dropdown');
+      if (notifDropdown) {
+        notifDropdown.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+        notifDropdown.classList.add('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+      }
+    }
+    document.addEventListener('click', function(e) {
+      const notifDropdown = document.getElementById('notif-dropdown');
+      const notifBtn = e.target.closest('[onclick*="toggleNotifications"]');
+      if (notifDropdown && !notifDropdown.contains(e.target) && !notifBtn) {
+        notifDropdown.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+        notifDropdown.classList.add('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+      }
+    });
+    
+    function openItemActionMenu(e, itemName) {
+      e.stopPropagation();
+      activeItemName = itemName;
+      const menu = document.getElementById('item-action-menu');
+      menu.classList.remove('hidden');
+      
+      const rect = e.currentTarget.getBoundingClientRect();
+      let top = rect.bottom + window.scrollY;
+      let left = rect.left + window.scrollX - 140;
+      
+      if (left < 10) left = 10;
+      if (top + menu.offsetHeight > window.innerHeight + window.scrollY) {
+          top = rect.top + window.scrollY - menu.offsetHeight;
+      }
+      
+      menu.style.top = top + 'px';
+      menu.style.left = left + 'px';
+    }
+
+    document.addEventListener('click', function(event) {
+      const notifDropdown = document.getElementById('notif-dropdown');
+      const addMenuDropdown = document.getElementById('add-menu-dropdown');
+      const itemActionMenu = document.getElementById('item-action-menu');
+
+      if (notifDropdown && !notifDropdown.contains(event.target) && !event.target.closest('[aria-label="Notifikasi"]')) {
+        notifDropdown.classList.add('hidden');
+      }
+      if (addMenuDropdown && !addMenuDropdown.contains(event.target) && !event.target.closest('button[onclick="toggleAddMenu(event)"]')) {
+        addMenuDropdown.classList.add('hidden');
+      }
+      if (itemActionMenu && !itemActionMenu.contains(event.target)) {
+        itemActionMenu.classList.add('hidden');
+      }
+    });
+
+    function showWorkspace() {
+      pageFileEditor.classList.add('hidden');
+      pageProjectDetail.classList.remove('hidden');
+      setTimeout(() => pageProjectDetail.classList.add('page-active'), 10);
+      renderFileList();
+    }
+    
+    function showEditor() {
+      pageProjectDetail.classList.add('hidden');
+      pageProjectDetail.classList.remove('page-active');
+      pageFileEditor.classList.remove('hidden');
+    }
+
+    function openFolder(folderPath) {
+      currentFolderPath = folderPath;
+      modalAction = null;
+      itemBeingRenamed = null;
+      if (fileSearchInput) fileSearchInput.value = '';
+      renderFileList();
+    }
+
+    function navigateFolderUp() {
+      if (currentFolderPath === 'root') return;
+      const parts = currentFolderPath.split('/');
+      parts.pop();
+      currentFolderPath = parts.length === 0 ? 'root' : parts.join('/');
+      renderFileList();
+    }
+
+    function getFileIcon(filename) {
+      let ext = getFileExtension(filename);
+      switch(ext) {
+        case 'mp3': case 'wav': case 'ogg': case 'flac': case 'm4a':
+          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="#E04A3A"><path d="M20 3h-7v10.55A3.98 3.98 0 0 0 11 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h5v6.55A3.98 3.98 0 0 0 14 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V3z"/></svg></div>`;
+        case 'mp4': case 'avi': case 'mkv': case 'mov': case 'webm':
+          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none"><rect x="2" y="4" width="20" height="16" rx="3.5" fill="#5B51DC"/><polygon points="10,8.5 15,12 10,15.5" fill="#FFFFFF"/></svg></div>`;
+        case 'png': case 'jpg': case 'jpeg': case 'svg': case 'gif': case 'webp':
+          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="8.5" cy="8.5" r="1.5" fill="#0D9488" stroke="none" /><path d="M21 15l-5-5L5 21" /></svg></div>`;
+        case 'py': case 'python':
+          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4"><path fill="#3776AB" d="M11.898 2c-3.15 0-5.068.322-5.068 2.373v1.89h10.136v.945H6.83c-2.453 0-4.33 1.488-4.33 4.33 0 2.843 1.877 4.33 4.33 4.33h1.892v-2.373c0-2.316 1.83-4.254 4.148-4.254h5.068c1.94 0 2.453-.562 2.453-2.373 0-2.115-1.913-4.868-8.523-4.868zm-2.58 1.418a.945.945 0 1 1 0 1.89.945.945 0 0 1 0-1.89z"/><path fill="#FFD43B" d="M12.102 22c3.15 0 5.068-.322 5.068-2.373v-1.89H7.034v-.945h10.136c2.453 0 4.33-1.488 4.33-4.33 0-2.843-1.877-4.33-4.33-4.33h-1.892v2.373c0 2.316-1.83 4.254-4.148 4.254H6.062c-1.94 0-2.453.562-2.453 2.373 0 2.115 1.913 4.868 8.493 4.868zm2.58-1.418a.945.945 0 1 1 0-1.89.945.945 0 0 1 0 1.89z"/></svg></div>`;
+        case 'txt':
+          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#546E7A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`;
+        case 'html': case 'htm':
+          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#E34F26" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div>`;
+        case 'js': case 'ts': case 'jsx':
+          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#F7DF1E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4" fill="#F7DF1E"/><text x="12" y="16" font-size="8" font-weight="800" fill="#000" stroke="none" text-anchor="middle">JS</text></svg></div>`;
+        case 'css':
+          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#16A34A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><text x="12" y="15.5" font-size="7" font-weight="800" fill="#16A34A" stroke="none" text-anchor="middle">css</text></svg></div>`;
+        default:
+          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center text-[#718096]"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`;
+      }
+    }
+
+    function renderFileList() {
+      const container = document.getElementById('file-list-container');
+      const breadcrumb = document.getElementById('file-breadcrumb');
+      if (!container) return;
+
+      const searchTerm = fileSearchInput ? fileSearchInput.value.toLowerCase().trim() : '';
+
+      if (breadcrumb) {
+        if (currentFolderPath === 'root') {
+          breadcrumb.innerHTML = '';
+        } else {
+          const parts = currentFolderPath.split('/');
+          let bcHtml = `<button onclick="openFolder('root')" class="text-gray-500 hover:text-black flex items-center gap-1 font-medium transition-colors"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Utama</button>`;
+          let accumulatedPath = '';
+          parts.forEach((p, index) => {
+            accumulatedPath += (index === 0 ? '' : '/') + p;
+            const isLast = index === parts.length - 1;
+            bcHtml += `<span class="text-gray-300">/</span>`;
+            if (isLast) { bcHtml += `<span class="text-black font-semibold">${p}</span>`; } 
+            else { bcHtml += `<button onclick="openFolder('${accumulatedPath}')" class="text-gray-500 hover:text-black transition-colors">${p}</button>`; }
+          });
+          breadcrumb.innerHTML = bcHtml;
+        }
+      }
+
+      let items = projectFilesData[currentFolderPath] || [];
+      if (searchTerm) items = items.filter(item => item.name.toLowerCase().includes(searchTerm));
+
+      container.innerHTML = '';
+
+      if (currentFolderPath !== 'root' && !searchTerm) {
+        const backRow = document.createElement('div');
+        backRow.className = 'flex items-center gap-3 py-2.5 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors rounded-lg px-2 -mx-2';
+        backRow.onclick = navigateFolderUp;
+        backRow.innerHTML = `<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path></svg><span class="text-sm font-medium text-gray-600">Kembali</span>`;
+        container.appendChild(backRow);
+      }
+
+      if (items.length === 0) {
+        container.innerHTML += `<div class="py-12 text-center text-gray-400 text-sm">Tidak ada berkas atau folder di sini.</div>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-4 py-3 border-b border-gray-200 cursor-pointer hover:bg-gray-50/80 transition-colors px-1 group';
+
+        const safeName = item.name.replace(/'/g, "\\'");
+        const actionBtnHTML = `<button onclick="event.stopPropagation(); openItemActionMenu(event, '${safeName}')" class="p-1.5 text-gray-400 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-colors focus:outline-none opacity-0 group-hover:opacity-100 sm:opacity-100 item-action-btn"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg></button>`;
+
+        if (item.type === 'folder') {
+          const subItems = projectFilesData[item.path] || [];
+          row.onclick = () => openFolder(item.path);
+          row.innerHTML = `<div class="flex-shrink-0 w-6 h-6 flex items-center justify-center text-[#a0aec0]"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg></div><div class="flex-1 min-w-0"><h3 class="text-[#222222] font-medium text-[15px] leading-tight hover:text-black transition-colors truncate">${item.name}</h3><p class="text-gray-500 text-[12px] mt-0.5">Berkas (${subItems.length}) - <span class="text-[#16a34a]">Folder</span></p></div>${actionBtnHTML}`;
+        } else {
+          row.onclick = () => openFileInEditor(item.name);
+          row.innerHTML = `${getFileIcon(item.name)}<div class="flex-1 min-w-0"><h3 class="text-[#222222] font-medium text-[15px] leading-tight hover:text-black transition-colors truncate">${item.name}</h3><p class="text-gray-500 text-[12px] mt-0.5">${item.size || '0,00 B'}</p></div>${actionBtnHTML}`;
+        }
+        container.appendChild(row);
+      });
+    }
+
+    if (fileSearchInput) fileSearchInput.addEventListener('input', renderFileList);
+
+    function openCreateModal(type) {
+      const menu = document.getElementById('add-menu-dropdown');
+      if(menu) menu.classList.add('hidden');
+      
+      modalAction = type === 'folder' ? 'create_folder' : (type === 'github' ? 'import_github' : 'create_file');
+      
+      const title = document.getElementById('input-modal-title');
+      const label = document.getElementById('input-modal-label');
+      const input = document.getElementById('modal-input-name');
+      const typeContainer = document.getElementById('input-modal-type-container');
+      const typeSelect = document.getElementById('modal-file-type');
+      const errorEl = document.getElementById('input-modal-error');
+      const githubErrorEl = document.getElementById('input-modal-github-error');
+      
+      const standardBody = document.getElementById('modal-standard-body');
+      const githubBody = document.getElementById('modal-github-body');
+      const btnSubmit = document.getElementById('modal-btn-submit');
+      
+      if (errorEl) errorEl.classList.add('hidden');
+      if (githubErrorEl) githubErrorEl.classList.add('hidden');
+      input.value = '';
+      const githubInput = document.getElementById('modal-input-github-repo');
+      if (githubInput) githubInput.value = '';
+      
+      if (type === 'github') {
+        title.textContent = 'Import dari GitHub';
+        standardBody.classList.add('hidden');
+        githubBody.classList.remove('hidden');
+        
+        updateGithubModalUI();
+      } else {
+        standardBody.classList.remove('hidden');
+        githubBody.classList.add('hidden');
+        btnSubmit.classList.remove('hidden');
+        btnSubmit.textContent = 'Simpan';
+        
+        if (type === 'folder') {
+          title.textContent = 'Buat Folder Baru';
+          label.textContent = 'Nama Folder';
+          input.placeholder = 'Misal: assets';
+          typeContainer.classList.add('hidden');
+        } else {
+          title.textContent = 'Buat File Baru';
+          label.textContent = 'Nama File';
+          input.placeholder = 'Misal: index.html';
+          typeContainer.classList.remove('hidden');
+          typeSelect.value = '';
+        }
+      }
+      
+      showInputModal();
+    }
+
+    function updateGithubModalUI() {
+      const stepConnect = document.getElementById('github-step-connect');
+      const stepLoading = document.getElementById('github-step-loading');
+      const stepImport = document.getElementById('github-step-import');
+      const btnSubmit = document.getElementById('modal-btn-submit');
+      
+      stepLoading.classList.add('hidden');
+      stepLoading.classList.remove('flex');
+      
+      if (!isGithubConnected) {
+        stepConnect.classList.remove('hidden');
+        stepConnect.classList.add('flex');
+        stepImport.classList.add('hidden');
+        stepImport.classList.remove('flex');
+        btnSubmit.classList.add('hidden');
+      } else {
+        stepConnect.classList.add('hidden');
+        stepConnect.classList.remove('flex');
+        stepImport.classList.remove('hidden');
+        stepImport.classList.add('flex');
+        btnSubmit.classList.remove('hidden');
+        btnSubmit.textContent = 'Import Repository';
+
+        try {
+          const savedUser = JSON.parse(localStorage.getItem(GITHUB_USER_KEY) || 'null');
+          if (savedUser) {
+            const avatarImg = document.getElementById('github-avatar-img');
+            const usernameEl = document.getElementById('github-username');
+            if (avatarImg && savedUser.avatar_url) avatarImg.src = savedUser.avatar_url;
+            if (usernameEl && savedUser.login) usernameEl.textContent = savedUser.login;
+          }
+        } catch(e) {}
+
+        setTimeout(() => document.getElementById('modal-input-github-repo').focus(), 100);
+      }
+    }
+
+    function connectGitHub() {
+      const stepConnect = document.getElementById('github-step-connect');
+      const stepLoading = document.getElementById('github-step-loading');
+
+      stepConnect.classList.add('hidden');
+      stepConnect.classList.remove('flex');
+      stepLoading.classList.remove('hidden');
+      stepLoading.classList.add('flex');
+
+      // Remember that the import modal was open so we can reopen it after the OAuth redirect
+      localStorage.setItem('clincoo_github_modal_open', '1');
+
+      const redirectUri = window.location.origin + window.location.pathname;
+      const authUrl = 'https://github.com/login/oauth/authorize?client_id=' + GITHUB_CLIENT_ID +
+        '&scope=repo&redirect_uri=' + encodeURIComponent(redirectUri);
+
+      window.location.href = authUrl;
+    }
+
+    async function handleGitHubOAuthCallback(code) {
+      addNotification('GitHub', 'Menyelesaikan koneksi GitHub...');
+      try {
+        const resp = await fetch('/api/github-oauth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        const data = await resp.json();
+
+        if (!resp.ok || !data.access_token) {
+          throw new Error(data.error || 'Gagal mendapatkan access token');
+        }
+
+        localStorage.setItem(GITHUB_TOKEN_KEY, data.access_token);
+
+        // Fetch the connected user's profile
+        const userResp = await fetch('https://api.github.com/user', {
+          headers: { Authorization: 'Bearer ' + data.access_token }
+        });
+        const user = await userResp.json();
+        localStorage.setItem(GITHUB_USER_KEY, JSON.stringify({ login: user.login, avatar_url: user.avatar_url }));
+
+        isGithubConnected = true;
+        addNotification('GitHub', 'Terhubung sebagai ' + (user.login || 'GitHub user'));
+      } catch (err) {
+        isGithubConnected = false;
+        localStorage.removeItem(GITHUB_TOKEN_KEY);
+        addNotification('GitHub', 'Gagal menghubungkan: ' + err.message);
+      }
+
+      // Clean the ?code=&state= params out of the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      // Reopen the import modal at the correct step if it was open before the redirect
+      if (localStorage.getItem('clincoo_github_modal_open')) {
+        localStorage.removeItem('clincoo_github_modal_open');
+        triggerImport('github');
+      }
+    }
+
+    function disconnectGitHub() {
+      isGithubConnected = false;
+      localStorage.removeItem(GITHUB_TOKEN_KEY);
+      localStorage.removeItem(GITHUB_USER_KEY);
+      addNotification('GitHub', 'Koneksi GitHub diputuskan.');
+      updateGithubModalUI();
+    }
+
+    function getGitHubToken() {
+      return localStorage.getItem(GITHUB_TOKEN_KEY);
+    }
+
+    function githubAuthHeaders() {
+      const token = getGitHubToken();
+      return token ? { Authorization: 'Bearer ' + token } : {};
+    }
+
+    function triggerRename() {
+      const menu = document.getElementById('item-action-menu');
+      if (menu) menu.classList.add('hidden');
+      
+      modalAction = 'rename';
+      itemBeingRenamed = activeItemName;
+      
+      const title = document.getElementById('input-modal-title');
+      const label = document.getElementById('input-modal-label');
+      const input = document.getElementById('modal-input-name');
+      const typeContainer = document.getElementById('input-modal-type-container');
+      const errorEl = document.getElementById('input-modal-error');
+      
+      const standardBody = document.getElementById('modal-standard-body');
+      const githubBody = document.getElementById('modal-github-body');
+      const btnSubmit = document.getElementById('modal-btn-submit');
+      
+      standardBody.classList.remove('hidden');
+      githubBody.classList.add('hidden');
+      btnSubmit.classList.remove('hidden');
+      btnSubmit.textContent = 'Simpan';
+      
+      if (errorEl) errorEl.classList.add('hidden');
+      title.textContent = 'Ganti Nama';
+      label.textContent = 'Nama Baru';
+      input.value = itemBeingRenamed;
+      typeContainer.classList.add('hidden');
+      
+      showInputModal();
+    }
+
+    function showInputModal() {
+      const overlay = document.getElementById('input-modal-overlay');
+      const modal = document.getElementById('input-modal');
+      overlay.classList.remove('hidden');
+      setTimeout(() => {
+        overlay.classList.remove('opacity-0');
+        modal.classList.remove('opacity-0', 'scale-95');
+        modal.classList.add('opacity-100', 'scale-100');
+        
+        const input = document.getElementById('modal-input-name');
+        const githubInput = document.getElementById('modal-input-github-repo');
+        
+        if (modalAction === 'import_github') {
+           if (isGithubConnected) {
+              githubInput.focus();
+           }
+        } else {
+           input.focus();
+           if (modalAction === 'rename') {
+              const item = (projectFilesData[currentFolderPath] || []).find(i => i.name === itemBeingRenamed);
+              if(item && item.type === 'file' && input.value.includes('.')) {
+                 input.setSelectionRange(0, input.value.lastIndexOf('.'));
+              } else {
+                 input.select();
+              }
+           }
+        }
+      }, 10);
+    }
+
+    function closeInputModal() {
+      const overlay = document.getElementById('input-modal-overlay');
+      const modal = document.getElementById('input-modal');
+      
+      overlay.classList.add('opacity-0');
+      modal.classList.remove('opacity-100', 'scale-100');
+      modal.classList.add('opacity-0', 'scale-95');
+      
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        modalAction = null;
+        itemBeingRenamed = null;
+      }, 300);
+    }
+
+    function handleModalFileTypeChange(e) {
+      const input = document.getElementById('modal-input-name');
+      const ext = e.target.value;
+      const baseName = input.value.replace(/\.[^.]+$/, '');
+      input.value = baseName;
+      input.placeholder = ext ? 'Nama file (akan jadi .' + ext + ')' : 'Nama file (tanpa ekstensi)';
+    }
+
+    function handleModalInputKeydown(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitInputModal();
+      }
+      if (e.key === 'Escape') closeInputModal();
+    }
+
+    function submitInputModal() {
+      const input = document.getElementById('modal-input-name');
+      const githubInput = document.getElementById('modal-input-github-repo');
+      const errorEl = document.getElementById('input-modal-error');
+      const githubErrorEl = document.getElementById('input-modal-github-error');
+      
+      let name = '';
+      let currentErrorEl = errorEl;
+      
+      if (modalAction === 'import_github') {
+         name = githubInput.value.trim();
+         currentErrorEl = githubErrorEl;
+      } else {
+         name = input.value.trim();
+      }
+      
+      if(!name) { 
+         currentErrorEl.textContent = modalAction === 'import_github' ? "URL/Nama repository tidak boleh kosong." : "Nama tidak boleh kosong.";
+         currentErrorEl.classList.remove('hidden');
+         return; 
+      }
+      
+      const items = projectFilesData[currentFolderPath] || [];
+
+      if (modalAction === 'create_file' || modalAction === 'create_folder' || modalAction === 'import_github') {
+          let finalName = name;
+          
+          if (modalAction === 'create_file') {
+            const typeSelect = document.getElementById('modal-file-type');
+            const selectedType = typeSelect ? typeSelect.value : '';
+            if (selectedType) {
+              let baseName = finalName;
+              if(finalName.includes('.')) {
+                 baseName = finalName.substring(0, finalName.lastIndexOf('.'));
+              }
+              finalName = baseName + '.' + selectedType;
+            } else if (!finalName.includes('.')) {
+              finalName = finalName + '.txt';
+            }
+          } else if (modalAction === 'import_github') {
+            finalName = finalName.split('/').filter(Boolean).pop().replace('.git', '') || 'github-repo';
+          }
+          
+          const exists = items.some(item => item.name.toLowerCase() === finalName.toLowerCase());
+          if (exists) {
+             currentErrorEl.textContent = modalAction === 'import_github' ? "Folder repository sudah ada di direktori ini." : "Nama sudah ada di direktori ini.";
+             currentErrorEl.classList.remove('hidden');
+             return;
+          }
+          
+          if (!projectFilesData[currentFolderPath]) projectFilesData[currentFolderPath] = [];
+
+          if(modalAction === 'create_folder') {
+            const newPath = currentFolderPath === 'root' ? finalName : currentFolderPath + '/' + finalName;
+            projectFilesData[currentFolderPath].push({ type: 'folder', name: finalName, path: newPath, fileCount: 0, previewText: 'Folder' });
+          } else if (modalAction === 'import_github') {
+            const newPath = currentFolderPath === 'root' ? finalName : currentFolderPath + '/' + finalName;
+            projectFilesData[currentFolderPath].push({ type: 'folder', name: finalName, path: newPath, fileCount: 0, previewText: 'Folder' });
+            
+            saveData();
+            renderFileList();
+            closeInputModal();
+            importFromGitHub(name, newPath);
+            return;
+          } else {
+            const ext = getFileExtension(finalName);
+            const content = defaultTemplates[ext] || '';
+            const bytes = new Blob([content]).size;
+            let sizeStr = '0,00 B';
+            if (bytes > 1024 * 1024) sizeStr = (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            else if (bytes > 1024) sizeStr = (bytes / 1024).toFixed(1) + ' KB';
+            else if (bytes > 0) sizeStr = bytes + ' B';
+
+            const filePath = currentFolderPath === 'root' ? finalName : currentFolderPath + '/' + finalName;
+            projectFilesData[currentFolderPath].push({ type: 'file', name: finalName, size: sizeStr, path: filePath, content: content });
+          }
+      } else if (modalAction === 'rename') {
+          if (name === itemBeingRenamed) {
+             closeInputModal();
+             return;
+          }
+          if(items.find(i => i.name.toLowerCase() === name.toLowerCase())) {
+             currentErrorEl.textContent = "Nama sudah digunakan.";
+             currentErrorEl.classList.remove('hidden');
+             return;
+          }
+          
+          const itemIndex = items.findIndex(i => i.name === itemBeingRenamed);
+          if(itemIndex !== -1) {
+            const item = items[itemIndex];
+            if(item.type === 'folder') {
+              const oldPath = item.path;
+              const newPath = currentFolderPath === 'root' ? name : currentFolderPath + '/' + name;
+              item.name = name;
+              item.path = newPath;
+              
+              const keysToUpdate = Object.keys(projectFilesData).filter(k => k === oldPath || k.startsWith(oldPath + '/'));
+              keysToUpdate.forEach(key => {
+                const newKey = newPath + key.substring(oldPath.length);
+                projectFilesData[newKey] = projectFilesData[key];
+                delete projectFilesData[key];
+                projectFilesData[newKey].forEach(child => {
+                  if (child.path.startsWith(oldPath + '/')) {
+                    child.path = newPath + child.path.substring(oldPath.length);
+                  }
+                });
+              });
+            } else {
+              item.name = name;
+              item.path = currentFolderPath === 'root' ? name : currentFolderPath + '/' + name;
+            }
+          }
+      }
+      
+      saveData();
+      if (fileSearchInput) fileSearchInput.value = '';
+      renderFileList();
+      closeInputModal();
+    }
+
+    function confirmItemDelete() {
+      const menu = document.getElementById('item-action-menu');
+      if (menu) menu.classList.add('hidden');
+      if(!activeItemName) return;
+
+      const items = projectFilesData[currentFolderPath] || [];
+      const itemIndex = items.findIndex(i => i.name === activeItemName);
+      
+      if(itemIndex !== -1) {
+        const item = items[itemIndex];
+        if(item.type === 'folder') {
+          const prefix = item.path;
+          Object.keys(projectFilesData).forEach(key => {
+            if (key === prefix || key.startsWith(prefix + '/')) {
+              delete projectFilesData[key];
+            }
+          });
+        }
+        items.splice(itemIndex, 1);
+      }
+      saveData();
+      renderFileList();
+    }
+
+    function triggerImport(type) {
+      const menu = document.getElementById('add-menu-dropdown');
+      if(menu) menu.classList.add('hidden');
+      if (type === 'file') {
+        const input = document.getElementById('import-file-input');
+        if (input) input.click();
+      } else if (type === 'zip') {
+        const input = document.getElementById('import-zip-input');
+        if (input) input.click();
+      } else if (type === 'github') {
+        openCreateModal('github');
+      }
+    }
+
+    function handleImportFiles(e) {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+      Array.from(files).forEach(file => importSingleFile(file, currentFolderPath));
+      e.target.value = '';
+    }
+
+    function importSingleFile(file, targetPath) {
+      if (!projectFilesData[targetPath]) projectFilesData[targetPath] = [];
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const content = event.target.result;
+        let sizeStr = '0,00 B';
+        if (file.size > 1024 * 1024) sizeStr = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        else if (file.size > 1024) sizeStr = (file.size / 1024).toFixed(1) + ' KB';
+        else if (file.size > 0) sizeStr = file.size + ' B';
+
+        const filePath = targetPath === 'root' ? file.name : targetPath + '/' + file.name;
+        const existingIndex = projectFilesData[targetPath].findIndex(i => i.name === file.name && i.type === 'file');
+        
+        if (existingIndex !== -1) {
+          projectFilesData[targetPath][existingIndex].content = content;
+          projectFilesData[targetPath][existingIndex].size = sizeStr;
+        } else {
+          projectFilesData[targetPath].push({ type: 'file', name: file.name, size: sizeStr, path: filePath, content: content });
+        }
+        saveData();
+        if (targetPath === currentFolderPath || targetPath.startsWith(currentFolderPath)) renderFileList();
+      };
+      const type = getFileType(file.name);
+      if (type === 'code') reader.readAsText(file);
+      else reader.readAsDataURL(file);
+    }
+
+    async function handleImportZip(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (typeof JSZip === 'undefined') return;
+      try {
+        const zip = await JSZip.loadAsync(file);
+        let folderName = file.name.replace('.zip', '');
+        let basePath = currentFolderPath === 'root' ? folderName : currentFolderPath + '/' + folderName;
+        
+        if (!projectFilesData[currentFolderPath]) projectFilesData[currentFolderPath] = [];
+        
+        let counter = 1;
+        let finalFolderName = folderName;
+        while(projectFilesData[currentFolderPath].find(i => i.type === 'folder' && i.name === finalFolderName)) {
+          finalFolderName = folderName + '_' + counter;
+          counter++;
+        }
+        folderName = finalFolderName;
+        basePath = currentFolderPath === 'root' ? folderName : currentFolderPath + '/' + folderName;
+
+        projectFilesData[currentFolderPath].push({ type: 'folder', name: folderName, path: basePath, fileCount: 0, previewText: 'Folder' });
+        
+        for (let relativePath of Object.keys(zip.files)) {
+          const zipEntry = zip.files[relativePath];
+          const pathParts = relativePath.split('/').filter(p => p);
+          
+          if (pathParts.length === 0) continue;
+          
+          let currentIterPath = basePath;
+          
+          for (let i = 0; i < pathParts.length - 1; i++) {
+            const part = pathParts[i];
+            if (!projectFilesData[currentIterPath]) projectFilesData[currentIterPath] = [];
+            const newPath = currentIterPath + '/' + part;
+            if (!projectFilesData[currentIterPath].find(item => item.type === 'folder' && item.name === part)) {
+               projectFilesData[currentIterPath].push({ type: 'folder', name: part, path: newPath, fileCount: 0, previewText: 'Folder' });
+            }
+            currentIterPath = newPath;
+          }
+          
+          if (!zipEntry.dir) {
+             const fileName = pathParts[pathParts.length - 1];
+             const ext = getFileExtension(fileName);
+             const type = getFileType(fileName);
+             
+             let fileContent, sizeStr;
+             if (type === 'code') {
+               fileContent = await zipEntry.async("string");
+               const bytes = new Blob([fileContent]).size;
+               sizeStr = formatBytes(bytes);
+             } else {
+               const base64 = await zipEntry.async("base64");
+               const mimeType = getMimeType(ext);
+               fileContent = `data:${mimeType};base64,${base64}`;
+               const bytes = atob(base64).length;
+               sizeStr = formatBytes(bytes);
+             }
+             
+             if (!projectFilesData[currentIterPath]) projectFilesData[currentIterPath] = [];
+             const filePath = currentIterPath + '/' + fileName;
+             projectFilesData[currentIterPath].push({ type: 'file', name: fileName, size: sizeStr, path: filePath, content: fileContent });
+          } else {
+             const dirName = pathParts[pathParts.length - 1];
+             if (!projectFilesData[currentIterPath]) projectFilesData[currentIterPath] = [];
+             const newPath = currentIterPath + '/' + dirName;
+             if (!projectFilesData[currentIterPath].find(item => item.type === 'folder' && item.name === dirName)) {
+                projectFilesData[currentIterPath].push({ type: 'folder', name: dirName, path: newPath, fileCount: 0, previewText: 'Folder' });
+             }
+          }
+        }
+        saveData();
+        renderFileList();
+      } catch (err) {}
+      e.target.value = '';
+    }
+
+    function formatBytes(bytes) {
+       if (bytes > 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+       if (bytes > 1024) return (bytes / 1024).toFixed(1) + ' KB';
+       return bytes + ' B';
+    }
+
+    function getMimeType(ext) {
+       const mimeTypes = {
+          'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'gif': 'image/gif', 'svg': 'image/svg+xml',
+          'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'mp4': 'video/mp4'
+       };
+       return mimeTypes[ext] || 'application/octet-stream';
+    }
+
+    function triggerDownload() {
+      const menu = document.getElementById('item-action-menu');
+      if (menu) menu.classList.add('hidden');
+      const item = (projectFilesData[currentFolderPath] || []).find(i => i.name === activeItemName);
+      if(!item || item.type !== 'file') return;
+      const a = document.createElement('a');
+      if (item.content.startsWith('http') || item.content.startsWith('data:') || item.content.startsWith('blob:')) {
+        a.href = item.content;
+      } else {
+        const blob = new Blob([item.content], { type: 'text/plain' });
+        a.href = URL.createObjectURL(blob);
+      }
+      a.download = item.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    async function triggerZip() {
+      const menu = document.getElementById('item-action-menu');
+      if (menu) menu.classList.add('hidden');
+      const item = (projectFilesData[currentFolderPath] || []).find(i => i.name === activeItemName);
+      if(!item || typeof JSZip === 'undefined') return;
+
+      const zip = new JSZip();
+      if (item.type === 'file') {
+        let contentData = item.content;
+        if (contentData.startsWith('http') || contentData.startsWith('blob:') || contentData.startsWith('data:')) {
+          try { const response = await fetch(contentData); contentData = await response.blob(); } catch (e) {}
+        }
+        zip.file(item.name, contentData);
+      } else if (item.type === 'folder') {
+        await addFolderToZipAsync(zip.folder(item.name), item.path);
+      }
+
+      zip.generateAsync({type:"blob"}).then(function(content) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = item.name + '.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+    }
+
+    async function addFolderToZipAsync(zipFolder, folderPath) {
+      const items = projectFilesData[folderPath] || [];
+      for (let child of items) {
+        if (child.type === 'file') {
+          let contentData = child.content;
+          if (contentData.startsWith('http') || contentData.startsWith('blob:') || contentData.startsWith('data:')) {
+            try { const response = await fetch(contentData); contentData = await response.blob(); } catch(e){}
+          }
+          zipFolder.file(child.name, contentData);
+        } else if (child.type === 'folder') {
+          await addFolderToZipAsync(zipFolder.folder(child.name), child.path);
+        }
+      }
+    }
+
+    function openFileInEditor(filename) {
+      editingFileName = filename;
+      const items = projectFilesData[currentFolderPath] || [];
+      const fileObj = items.find(i => i.type === 'file' && i.name === filename);
+      const fileType = getFileType(filename);
+      const ext = getFileExtension(filename);
+
+      const labelEl = document.getElementById('editor-filename-label');
+      const iconEl = document.getElementById('editor-file-icon');
+      if (labelEl) labelEl.textContent = filename;
+      if (iconEl) iconEl.innerHTML = getFileIcon(filename);
+
+      const codeContainer = document.getElementById('editor-code-container');
+      const audioContainer = document.getElementById('editor-audio-container');
+      const videoContainer = document.getElementById('editor-video-container');
+      const imageContainer = document.getElementById('editor-image-container');
+
+      codeContainer.classList.add('hidden'); audioContainer.classList.add('hidden');
+      videoContainer.classList.add('hidden'); imageContainer.classList.add('hidden');
+
+      const audioPlayer = document.getElementById('audio-player');
+      const videoPlayer = document.getElementById('video-player');
+      if (audioPlayer) audioPlayer.pause();
+      if (videoPlayer) videoPlayer.pause();
+
+      if (fileType === 'audio') {
+        audioContainer.classList.remove('hidden');
+        if (audioPlayer) { audioPlayer.src = fileObj && fileObj.content ? fileObj.content : ''; audioPlayer.load(); }
+      } else if (fileType === 'video') {
+        videoContainer.classList.remove('hidden');
+        if (videoPlayer) { videoPlayer.src = fileObj && fileObj.content ? fileObj.content : ''; videoPlayer.load(); }
+      } else if (fileType === 'image') {
+        imageContainer.classList.remove('hidden');
+        const img = document.getElementById('image-preview');
+        if (img) img.src = fileObj && fileObj.content ? fileObj.content : '';
+      } else {
+        codeContainer.classList.remove('hidden');
+        initCodeEditor();
+        let mode = 'htmlmixed';
+        if (ext === 'js' || ext === 'json' || ext === 'ts' || ext === 'jsx') mode = 'javascript';
+        else if (ext === 'css') mode = 'css';
+        else if (ext === 'py' || ext === 'python') mode = 'python';
+        if (codeEditor) {
+          codeEditor.setOption('mode', mode);
+          codeEditor.setValue(fileObj ? (fileObj.content || '') : '');
+          setTimeout(() => codeEditor.refresh(), 50);
+        }
+      }
+      showEditor();
+    }
+
+    function navigateBackFromEditor() {
+      if (editingFileName) {
+        const fileType = getFileType(editingFileName);
+        if (fileType === 'code' && codeEditor) {
+          const codeContent = codeEditor.getValue();
+          const bytes = new Blob([codeContent]).size;
+          let sizeStr = '0,00 B';
+          if (bytes > 1024 * 1024) sizeStr = (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+          else if (bytes > 1024) sizeStr = (bytes / 1024).toFixed(1) + ' KB';
+          else if (bytes > 0) sizeStr = bytes + ' B';
+
+          if (!projectFilesData[currentFolderPath]) projectFilesData[currentFolderPath] = [];
+          const itemIndex = projectFilesData[currentFolderPath].findIndex(i => i.type === 'file' && i.name === editingFileName);
+          if (itemIndex !== -1) {
+            projectFilesData[currentFolderPath][itemIndex].content = codeContent;
+            projectFilesData[currentFolderPath][itemIndex].size = sizeStr;
+            saveData();
+          }
+        }
+        const audioPlayer = document.getElementById('audio-player');
+        if (audioPlayer) { audioPlayer.pause(); audioPlayer.src = ''; }
+        const videoPlayer = document.getElementById('video-player');
+        if (videoPlayer) { videoPlayer.pause(); videoPlayer.src = ''; }
+      }
+      editingFileName = null;
+      showWorkspace();
+    }
+
+    // Initialize application
+    window.onload = function() {
+      loadWorkspaceFiles();
+      showWorkspace();
+      renderNotifications();
+
+      // Handle GitHub OAuth redirect callback (?code=...)
+      const urlParams = new URLSearchParams(window.location.search);
+      const oauthCode = urlParams.get('code');
+      if (oauthCode) {
+        handleGitHubOAuthCallback(oauthCode);
+      }
+    };
+
+  </script>
+<script>
+(function(){
+  var path=window.location.pathname.split('/').pop()||'workspace.html';
+  var links=document.querySelectorAll('.sidebar-nav-link');
+  links.forEach(function(link){
+    var href=link.getAttribute('href');
+    if(href===path){
+      link.classList.add('bg-gray-50','text-gray-900');
+      link.classList.remove('hover:bg-gray-50','text-gray-700');
+      var icon=link.querySelector('i');
+      if(icon){
+        icon.className=icon.className.replace('ph ph-','ph-fill ph-');
+        icon.classList.remove('text-gray-500');
+        icon.classList.add('text-gray-900');
+      }
+      var svg=link.querySelector('svg');
+      if(svg){
+        svg.classList.remove('text-gray-500');
+        svg.classList.add('text-gray-900');
+      }
+    }
+  });
+})();
+</script>
+<script>
+(function(){
+  var path=window.location.pathname.split('/').pop()||'workspace.html';
+  var links=document.querySelectorAll('.sidebar-nav-link');
+  links.forEach(function(link){
+    var href=link.getAttribute('href');
+    if(href===path){
+      link.classList.add('bg-gray-50','text-gray-900');
+      link.classList.remove('hover:bg-gray-50','text-gray-700');
+      var icon=link.querySelector('i');
+      if(icon){
+        icon.className=icon.className.replace('ph ph-','ph-fill ph-');
+        icon.classList.remove('text-gray-500');
+        icon.classList.add('text-gray-900');
+      }
+      var svg=link.querySelector('svg');
+      if(svg){
+        svg.classList.remove('text-gray-500');
+        svg.classList.add('text-gray-900');
+      }
+    }
+  });
+})();
+</script>
+</body></body>
+</html>

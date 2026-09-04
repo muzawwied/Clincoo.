@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clincoo - Deploy</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    
+    <!-- Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f9;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Dark Mode Configuration */
+        body.dark-mode { background-color: #000000; color: #ffffff; }
+        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+        
+        /* Header Buttons Dark Mode */
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode header button[onclick] svg { stroke: #ffffff !important; }
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode header button[onclick]:hover { background-color: #1a1a1a !important; border-color: rgba(255,255,255,0.7) !important; }
+        
+        /* Typography & Borders Dark Mode */
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black { color: #ffffff !important; }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 { color: #888888 !important; }
+        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200, body.dark-mode .border-gray-300 { border-color: #222222 !important; }
+        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+        body.dark-mode .bg-\[#f7f7f9\], body.dark-mode .bg-gray-50 { background-color: #000000 !important; }
+        body.dark-mode .bg-gray-100 { background-color: #111111 !important; }
+        body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #1a1a1a !important; }
+        
+        /* Inputs & Buttons Custom Dark Mode */
+        body.dark-mode input[type="text"], body.dark-mode .custom-select-trigger, body.dark-mode .dropdown-menu { background-color: #0a0a0a; color: #ffffff; border-color: #222222; }
+        body.dark-mode input[type="text"]:focus { border-color: #555555; }
+        body.dark-mode .bg-black.text-white { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #dddddd !important; }
+
+        /* Animation Utilities */
+        .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Hide scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-900 pt-16 relative">
+    <script>
+        (function(){
+            var t=localStorage.getItem("clincoo_theme");
+            var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+            if(isDark){document.body.classList.add("dark-mode");}
+        })();
+    </script>
+    
+    <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Deploy</h1>
+        <div class="w-10"></div>
+    </header>
+
+    <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 relative overflow-x-hidden">
+        
+        <!-- VIEW 1: CTA Awal (Flat, tanpa card) -->
+        <div id="view-cta" class="flex flex-col items-center justify-center min-h-[70vh] fade-in">
+            <div class="text-center w-full max-w-sm mx-auto">
+                <div class="w-20 h-20 bg-gray-100 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="rocket" class="w-10 h-10 text-gray-900"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">Siap untuk Rilis?</h2>
+                <p class="text-sm text-gray-500 mb-8 leading-relaxed">
+                    Mulai proses konfigurasi untuk mempublikasikan pembaruan terbaru aplikasi Anda ke server publik.
+                </p>
+                <button onclick="switchView('view-config')" class="w-full py-4 bg-black text-white rounded-2xl font-bold text-sm sm:text-base hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group">
+                    Mulai Konfigurasi
+                    <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 2: Halaman Konfigurasi (Flat) -->
+        <div id="view-config" class="hidden flex-col gap-8 fade-in max-w-xl mx-auto w-full pt-4">
+            <div class="mb-2">
+                <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Pengaturan Deploy</h2>
+                <p class="text-sm text-gray-500 mt-2">Tentukan sumber dan lingkungan tujuan untuk rilis ini.</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Dropdown: Branch -->
+                <div class="relative w-full">
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Pilih Branch</label>
+                    <div class="custom-select-trigger flex items-center justify-between w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'branch', ['main', 'staging', 'development'])">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="git-branch" class="w-4 h-4 text-gray-500"></i>
+                            <span id="label-branch" class="font-medium">main</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Dropdown: Environment -->
+                <div class="relative w-full">
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Lingkungan Tujuan</label>
+                    <div class="custom-select-trigger flex items-center justify-between w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'env', ['Production Server', 'Preview / Staging'])">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="server" class="w-4 h-4 text-gray-500"></i>
+                            <span id="label-env" class="font-medium">Production Server</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-4 pt-6 border-t border-gray-200">
+                <button onclick="switchView('view-cta')" class="flex-1 py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-colors">
+                    Batal
+                </button>
+                <button id="btn-process-deploy" onclick="processDeploy()" class="flex-[2] py-4 bg-black text-white rounded-2xl font-bold text-sm hover:bg-gray-800 transition-all shadow-lg flex items-center justify-center gap-2">
+                    Jalankan Deploy
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 3: Dashboard Hasil (Flat, tanpa card) -->
+        <div id="view-dashboard" class="hidden flex-col gap-10 fade-in w-full pb-10 pt-2">
+            
+            <!-- Banner Status Live (Flat) -->
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <h3 class="text-sm font-medium text-gray-900">Situs Anda telah aktif di</h3>
+                    </div>
+                    <a href="#" class="text-blue-600 dark:text-blue-400 font-semibold text-base hover:underline break-all">https://muzawwied.github.io/Clincoo/</a>
+                    <p class="text-xs text-gray-500 mt-2 flex items-center gap-1.5">
+                        Terakhir dideploy oleh 
+                        <span class="inline-flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-full text-gray-700 font-medium">
+                            <i data-lucide="user" class="w-3 h-3"></i> muzawwied
+                        </span>
+                        10 jam yang lalu
+                    </p>
+                </div>
+                <div class="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
+                    <button class="flex-1 md:flex-none px-4 py-2 border border-gray-300 bg-white rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="external-link" class="w-4 h-4"></i> Visit site
+                    </button>
+                    <button class="flex-1 md:flex-none px-4 py-2 border border-red-200 bg-red-50 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors dark:bg-red-900/20 dark:border-red-900/50 dark:hover:bg-red-900/40">
+                        Unpublish site
+                    </button>
+                </div>
+            </div>
+
+            <hr class="border-gray-200">
+
+            <!-- Bagian: Build and deployment (Flat) -->
+            <section class="space-y-6">
+                <h2 class="text-xl font-bold text-gray-900">Build and deployment</h2>
+                
+                <div class="space-y-6">
+                    <!-- Dropdown: Source -->
+                    <div class="relative w-full sm:w-64">
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">Source</label>
+                        <div class="custom-select-trigger inline-flex items-center justify-between w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'source', ['Deploy from a branch', 'GitHub Actions'])">
+                            <span id="label-source" class="font-medium">Deploy from a branch</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="block text-sm font-semibold text-gray-900 mb-1">Branch</label>
+                        <p class="text-sm text-gray-500 mb-3">Your Clincoo site is currently being built from the main branch. <a href="#" class="text-blue-600 hover:underline">Learn more about configuring the publishing source for your site.</a></p>
+                        
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Dropdown: Dash Branch (Lebar menyesuaikan isi) -->
+                            <div class="relative min-w-[130px]">
+                                <div class="custom-select-trigger inline-flex items-center justify-between w-full gap-3 px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'dash-branch', ['main', 'master', 'gh-pages'])">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="git-branch" class="w-4 h-4 text-gray-500"></i>
+                                        <span id="label-dash-branch" class="font-medium">main</span>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500 transition-transform duration-200 pointer-events-none"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Dropdown: Dash Folder (Lebar menyesuaikan isi) -->
+                            <div class="relative min-w-[140px]">
+                                <div class="custom-select-trigger inline-flex items-center justify-between w-full gap-3 px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'dash-folder', ['/ (root)', '/docs', '/build'])">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="folder" class="w-4 h-4 text-gray-500"></i>
+                                        <span id="label-dash-folder" class="font-medium">/ (root)</span>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500 transition-transform duration-200 pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <button class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-semibold cursor-not-allowed dark:bg-gray-800 dark:text-gray-600">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                         <p class="text-sm text-gray-500">Learn how to <a href="#" class="text-blue-600 hover:underline">add a Jekyll theme</a> to your site.</p>
+                    </div>
+
+                    <div class="pt-2 text-sm text-gray-500 leading-relaxed">
+                        Your site was last deployed to the <a href="#" class="text-blue-600 hover:underline font-semibold">clincoo-pages</a> environment by the <a href="#" class="text-blue-600 hover:underline font-semibold">pages build and deployment</a> workflow.<br>
+                        <a href="#" class="text-blue-600 hover:underline">Learn more about deploying to Clincoo Pages using custom workflows</a>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="border-gray-200">
+
+            <!-- Bagian: Custom Domain (Flat) -->
+            <section class="space-y-5">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">Custom domain</h2>
+                    <p class="text-sm text-gray-500 mt-1">Custom domains allow you to serve your site from a domain other than muzawwied.github.io. <a href="#" class="text-blue-600 hover:underline">Learn more about configuring custom domains.</a></p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <input type="text" placeholder="" class="w-full sm:w-72 px-4 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-colors">
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button class="flex-1 sm:flex-none px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-semibold cursor-not-allowed dark:bg-gray-800 dark:text-gray-600">Save</button>
+                        <button class="flex-1 sm:flex-none px-4 py-2 border border-gray-300 bg-white text-red-600 hover:bg-gray-50 rounded-lg text-sm font-semibold transition-colors">Remove</button>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex items-start gap-3">
+                    <div class="mt-0.5">
+                        <input type="checkbox" checked disabled class="w-4 h-4 rounded border-gray-300 text-black focus:ring-black opacity-50 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-900">Enforce HTTPS</label>
+                        <p class="text-sm text-gray-500 mt-0.5">— Required for your site because you are using the default domain (muzawwied.github.io)</p>
+                        <p class="text-sm text-gray-500 mt-4 leading-relaxed max-w-3xl">
+                            HTTPS provides a layer of encryption that prevents others from snooping on or tampering with traffic to your site. When HTTPS is enforced, your site will only be served over HTTPS. <a href="#" class="text-blue-600 hover:underline">Learn more about securing your Clincoo Pages site with HTTPS.</a>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // Render Icons Awal
+        lucide.createIcons();
+
+        // Fungsi berpindah antar tampilan/halaman
+        function switchView(viewId) {
+            ['view-cta', 'view-config', 'view-dashboard'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            });
+
+            const target = document.getElementById(viewId);
+            target.classList.remove('hidden');
+            target.classList.add('flex');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Simulasi Proses Deploy
+        function processDeploy() {
+            const btn = document.getElementById('btn-process-deploy');
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Memproses...`;
+            btn.classList.replace('bg-black', 'bg-gray-600');
+            btn.classList.add('cursor-not-allowed');
+            lucide.createIcons();
+
+            setTimeout(() => {
+                btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> Berhasil Deploy!`;
+                btn.classList.replace('bg-gray-600', 'bg-emerald-600');
+                lucide.createIcons();
+                
+                setTimeout(() => {
+                    switchView('view-dashboard');
+                }, 800);
+            }, 2000);
+        }
+
+        // --- Logika Inline Dropdown (Popover Kustom sesuai CTA trigger) ---
+        
+        function toggleDropdown(element, targetId, optionsArray) {
+            // Cek apakah dropdown ini sudah terbuka
+            const wrapper = element.parentElement;
+            const existingDropdown = wrapper.querySelector('.custom-dropdown-menu');
+            
+            // Tutup semua dropdown yang terbuka
+            closeAllDropdowns();
+
+            // Jika yang diklik tadi sudah terbuka, biarkan tertutup lalu hentikan.
+            if (existingDropdown) {
+                return; 
+            }
+
+            // Dapatkan nilai saat ini
+            const labelEl = document.getElementById('label-' + targetId);
+            const currentValue = labelEl ? labelEl.textContent.trim() : '';
+            
+            // Buat elemen Dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'custom-dropdown-menu absolute top-full left-0 w-full mt-1 z-50 bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl overflow-hidden flex flex-col fade-in';
+            
+            let optionsHtml = '';
+            optionsArray.forEach(option => {
+                const isActive = option === currentValue;
+                optionsHtml += `
+                    <div class="w-full px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer flex items-center justify-between ${isActive ? 'bg-gray-50 text-black dark:bg-gray-800 dark:text-white' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'}" onclick="selectOption(event, '${targetId}', '${option}')">
+                        <span>${option}</span>
+                        ${isActive ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
+                    </div>
+                `;
+            });
+            
+            dropdown.innerHTML = optionsHtml;
+            wrapper.appendChild(dropdown);
+            
+            // Putar icon panah
+            const chevron = element.querySelector('[data-lucide="chevron-down"]');
+            if(chevron) chevron.classList.add('rotate-180');
+            
+            lucide.createIcons();
+
+            // Tambahkan event listener global untuk klik di luar dropdown
+            setTimeout(() => {
+                document.addEventListener('click', outsideClickListener);
+            }, 10);
+        }
+
+        function closeAllDropdowns() {
+            const openDropdowns = document.querySelectorAll('.custom-dropdown-menu');
+            openDropdowns.forEach(dropdown => {
+                const chevron = dropdown.parentElement.querySelector('.rotate-180');
+                if(chevron) chevron.classList.remove('rotate-180');
+                dropdown.remove();
+            });
+            document.removeEventListener('click', outsideClickListener);
+        }
+
+        function outsideClickListener(e) {
+            // Jika klik terjadi di luar trigger dan di luar dropdown, tutup
+            if (!e.target.closest('.custom-select-trigger') && !e.target.closest('.custom-dropdown-menu')) {
+                closeAllDropdowns();
+            }
+        }
+
+        function selectOption(event, targetId, value) {
+            // Cegah event bubbling agar tidak mentrigger parent
+            event.stopPropagation();
+            
+            const label = document.getElementById('label-' + targetId);
+            if (label) {
+                label.textContent = value;
+            }
+            closeAllDropdowns();
+        }
+    </script>
+</body>
+</html>
