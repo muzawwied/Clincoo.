@@ -290,6 +290,8 @@
         body.dark-mode header { background-color: #000000 !important; }
     </style>
     
+<!-- no-flash-v1 -->
+<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden selection:bg-gray-200">
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
@@ -1242,7 +1244,12 @@
             });
             attachBubbleClickListeners();
             scrollToBottom(false);
-        }
+        
+            try {
+                var keepMsgs = messages.filter(function(m){ return !m.isHidden; }).slice(-100).map(function(m){ return { role: m.role, text: m.text }; });
+                localStorage.setItem('clincoo_chat_cache', JSON.stringify({ sessionId: currentSessionId, savedAt: Date.now(), msgs: keepMsgs }));
+            } catch(e) {}
+}
 
         function attachBubbleClickListeners() {
             const bubbles = document.querySelectorAll('.user-bubble');
@@ -1853,6 +1860,19 @@
                     }, 500);
                 };
 
+                // render cache lokal dulu biar chat muncul instan
+                var cachedData = null;
+                try { cachedData = JSON.parse(localStorage.getItem('clincoo_chat_cache') || 'null'); } catch(e) {}
+                var cacheSig = '';
+                if (cachedData && cachedData.msgs && cachedData.msgs.length) {
+                    currentSessionId = cachedData.sessionId || null;
+                    cachedData.msgs.forEach(function(m) { messages.push({ id: 'cache_' + messages.length, role: m.role, text: m.text }); });
+                    renderMessages();
+                    autoScrollActive = true;
+                    scrollToBottom(true);
+                    cacheSig = (cachedData.sessionId || '') + '|' + cachedData.msgs.length + '|' + (cachedData.msgs[cachedData.msgs.length - 1].text || '').slice(0, 200);
+                }
+
                 var historyUrl = currentProjectId
                     ? GEMINI_PROXY_URL + '?project_id=' + encodeURIComponent(currentProjectId)
                     : GEMINI_PROXY_URL;
@@ -1873,9 +1893,15 @@
                                     if (handoffMsg && handoffMsg.trim()) submitHandoff();
                                     return;
                                 }
+                                var freshSig = sessions[0].id + '|' + dbMsgs.length + '|' + ((dbMsgs[dbMsgs.length - 1] && dbMsgs[dbMsgs.length - 1].content) || '').slice(0, 200);
+                                if (freshSig === cacheSig) {
+                                    if (handoffMsg && handoffMsg.trim()) submitHandoff();
+                                    return;
+                                }
                                 currentSessionId = sessions[0].id;
                                 localStorage.removeItem('clincoo_current_chat_msg');
                                 localStorage.removeItem('clincoo_current_project_id');
+                                messages.length = 0;
                                 dbMsgs.forEach(function(m) {
                                     messages.push({ id: 'db_' + m.id, role: m.role === 'assistant' ? 'ai' : 'user', text: m.content });
                                 });
