@@ -1,3 +1,4 @@
+import { currentUser, scopedKey, getUserById } from './user-scope.js';
 // Cloudflare Pages Functions - Top Up via Xendit Invoice (real-time)
 // Flow: pilih metode -> buat Invoice Xendit -> bayar -> webhook/poll verifikasi -> saldo masuk D1
 // Env: XENDIT_SECRET_KEY (wajib) & XENDIT_CALLBACK_TOKEN (opsional, utk verifikasi webhook)
@@ -79,7 +80,9 @@ export async function onRequestGet({ request, env }) {
         }
       }
 
-      const balRow = await env.DB.prepare("SELECT value FROM wallet_balance WHERE key = 'balance'").first();
+      const stUser = await currentUser(env, request);
+      const stBalKey = await scopedKey(env.DB, 'wallet_balance', stUser, 'balance');
+      const balRow = await env.DB.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(stBalKey).first();
       return json({
         order_id: order.id,
         amount: order.amount,
@@ -143,6 +146,9 @@ export async function onRequestPost({ request, env }) {
 
   const channel = CHANNELS.find(c => c.id === body.method) || CHANNELS[0];
   const orderId = 'TOPUP-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+  const tpUser = await currentUser(env, request);
+  const tpUid = tpUser ? tpUser.id : null;
+  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN user_id INTEGER').run(); } catch (e) {}
 
   // Buat Invoice Xendit — hanya metode yang dipilih user
   const invoice = await xenditPost('/v2/invoices', secretKey, {
@@ -160,8 +166,8 @@ export async function onRequestPost({ request, env }) {
 
   // Simpan order pending
   await db.prepare(
-    'INSERT INTO topup_orders (id, amount, method, status, xendit_id, invoice_url) VALUES (?, ?, ?, ?, ?, ?)'
-  ).bind(orderId, amount, channel.label, 'pending', invoice.id, invoice.invoice_url).run();
+    'INSERT INTO topup_orders (id, amount, method, status, xendit_id, invoice_url, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).bind(orderId, amount, channel.label, 'pending', invoice.id, invoice.invoice_url, tpUid).run();
 
   try {
     await db.prepare('INSERT INTO activity_log (action, details) VALUES (?, ?)')
@@ -181,20 +187,24 @@ export async function onRequestPost({ request, env }) {
 
 // Kredit saldo D1 — dipakai webhook & live status (idempotent via status order)
 async function creditTopup(db, order) {
+  const owner = await getUserById(db, order.user_id);
+  const balKey = await scopedKey(db, 'wallet_balance', owner, 'balance');
   const txId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
-  await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method) VALUES (?, ?, ?, ?, ?)')
-    .bind(txId, 'Isi Saldo via ' + (order.method || 'Xendit'), order.amount, 'in', order.method || 'Xendit').run();
+  try { await db.prepare('ALTER TABLE wallet_transactions ADD COLUMN user_id INTEGER').run(); } catch (e) {}
+  await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
+    .bind(txId, 'Isi Saldo via ' + (order.method || 'Xendit'), order.amount, 'in', order.method || 'Xendit', order.user_id || null).run();
 
-  const balRow = await db.prepare("SELECT value FROM wallet_balance WHERE key = 'balance'").first();
+  const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
   const balance = parseFloat(balRow?.value || '0') + parseFloat(order.amount);
-  await db.prepare("INSERT INTO wallet_balance (key, value) VALUES ('balance', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value")
-    .bind(String(balance)).run();
+  await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+    .bind(balKey, String(balance)).run();
 
   await db.prepare("UPDATE topup_orders SET status = 'paid', paid_at = datetime('now') WHERE id = ?").bind(order.id).run();
 
   try {
-    await db.prepare('INSERT INTO activity_log (action, details) VALUES (?, ?)')
-      .bind('topup_paid', order.id + ' (+' + order.amount + ')').run();
+    try { await db.prepare('ALTER TABLE activity_log ADD COLUMN user_id INTEGER').run(); } catch (e) {}
+    await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
+      .bind('topup_paid', order.id + ' (+' + order.amount + ')', order.user_id || null).run();
   } catch {}
 }
 

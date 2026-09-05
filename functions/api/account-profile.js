@@ -1,10 +1,12 @@
+import { currentUser, scopedKey, rowScope } from './user-scope.js';
+
 // Cloudflare Pages Functions - Account Profile Backend
 // Stores per-account profile data (name, email, avatar) in D1
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type'
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
 export async function onRequestOptions() {
@@ -19,20 +21,21 @@ export async function onRequestGet({ request, env }) {
   try {
     await db.prepare('CREATE TABLE IF NOT EXISTS account_profile (key TEXT PRIMARY KEY, value TEXT)').run();
     
-    const url = new URL(request.url);
-    const key = url.searchParams.get('key');
+    const user = await currentUser(env, request);
 
     if (key) {
-      const row = await db.prepare('SELECT value FROM account_profile WHERE key = ?').bind(key).first();
+      const row = await db.prepare('SELECT value FROM account_profile WHERE key = ?').bind(await scopedKey(db, 'account_profile', user, key)).first();
       return new Response(JSON.stringify({ key, value: row?.value || null }), {
         headers: { 'Content-Type': 'application/json', ...CORS }
       });
     }
 
+    await scopedKey(db, 'account_profile', user, 'name'); // klaim data legacy sekali
     const rows = await db.prepare('SELECT key, value FROM account_profile').all();
+    const pfx = user ? 'u' + user.id + ':' : '';
     const data = {};
     for (const row of rows.results || []) {
-      data[row.key] = row.value;
+      if (user ? row.key.startsWith(pfx) : !row.key.includes(':')) data[row.key.slice(pfx.length)] = row.value;
     }
     
 
@@ -55,18 +58,22 @@ export async function onRequestPost({ request, env }) {
     await db.prepare('CREATE TABLE IF NOT EXISTS account_profile (key TEXT PRIMARY KEY, value TEXT)').run();
     
     const body = await request.json();
+    const user = await currentUser(env, request);
     const updates = {};
     
     for (const [key, value] of Object.entries(body)) {
       if (key === 'key' || key === 'value') continue;
       updates[key] = String(value);
-      await db.prepare("INSERT INTO account_profile (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(key, String(value)).run();
+      const sk = await scopedKey(db, 'account_profile', user, key);
+      await db.prepare("INSERT INTO account_profile (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(sk, String(value)).run();
     }
 
     const changedKeys = Object.keys(updates);
     if (changedKeys.length > 0) {
       try {
-        await db.prepare("INSERT INTO activity_log (action, details) VALUES (?, ?)").bind('profile_updated', JSON.stringify(updates)).run();
+        const puUser = await currentUser(env, request);
+        const puUid = await rowScope(db, 'activity_log', puUser);
+        await db.prepare("INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)").bind('profile_updated', JSON.stringify(updates), puUid).run();
       } catch(e) {}
     }
 

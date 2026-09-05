@@ -1,10 +1,12 @@
+import { currentUser, scopedKey, rowScope } from './user-scope.js';
+
 // Cloudflare Pages Functions - Subscription Backend
 // Stores subscription plan data in D1 (real-time, interconnected between pages)
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type'
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
 export async function onRequestOptions() {
@@ -36,10 +38,13 @@ export async function onRequestGet({ request, env }) {
       });
     }
 
+    const user = await currentUser(env, request);
+    await scopedKey(db, 'subscription', user, 'plan'); // klaim data legacy sekali
     const rows = await db.prepare('SELECT key, value FROM subscription').all();
+    const pfx = user ? 'u' + user.id + ':' : '';
     const data = {};
     for (const row of rows.results || []) {
-      data[row.key] = row.value;
+      if (user ? row.key.startsWith(pfx) : !row.key.includes(':')) data[row.key.slice(pfx.length)] = row.value;
     }
 
     const plan = data.plan || 'Starter';
@@ -98,6 +103,8 @@ export async function onRequestPost({ request, env }) {
   try {
     const body = await request.json();
     const { plan, billingCycle, paymentMethod, projects: projectList } = body;
+    const user = await currentUser(env, request);
+    const subPfx = user ? 'u' + user.id + ':' : '';
 
     // Sync projects from frontend to D1 (real-time per-project data)
     if (projectList && Array.isArray(projectList)) {
@@ -127,7 +134,8 @@ export async function onRequestPost({ request, env }) {
       // Check wallet balance for paid plans
       if (planPrice > 0) {
         try {
-          const balRow = await db.prepare("SELECT value FROM wallet_balance WHERE key = 'balance'").first();
+          const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
+          const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
           const balance = parseFloat(balRow?.value || '0');
           if (balance < totalPrice) {
             return new Response(JSON.stringify({ 
@@ -138,11 +146,12 @@ export async function onRequestPost({ request, env }) {
             }), { status: 402, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
           // Deduct from wallet
-          await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method) VALUES (?, ?, ?, ?, ?)')
-            .bind('TX-' + Math.floor(100000 + Math.random() * 900000), 'Langganan ' + validPlan + ' (' + billing + ')', totalPrice, 'out', 'Saldo Dompet').run();
+          const subUid = await rowScope(db, 'wallet_transactions', user);
+          await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
+            .bind('TX-' + Math.floor(100000 + Math.random() * 900000), 'Langganan ' + validPlan + ' (' + billing + ')', totalPrice, 'out', 'Saldo Dompet', subUid).run();
           const newBalance = balance - totalPrice;
-          await db.prepare("INSERT INTO wallet_balance (key, value) VALUES ('balance', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value")
-            .bind(String(newBalance)).run();
+          await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+            .bind(balKey, String(newBalance)).run();
         } catch(e) {
           // If wallet tables don't exist, still allow free plans but block paid
           return new Response(JSON.stringify({ 
@@ -152,24 +161,26 @@ export async function onRequestPost({ request, env }) {
         }
       }
 
-      await db.prepare("INSERT INTO subscription (key, value) VALUES ('plan', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(validPlan).run();
+      await db.prepare("INSERT INTO subscription (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(subPfx + 'plan', validPlan).run();
       const now = new Date().toISOString();
-      await db.prepare("INSERT INTO subscription (key, value) VALUES ('start_date', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(now).run();
+      await db.prepare("INSERT INTO subscription (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(subPfx + 'start_date', now).run();
     }
 
     if (billingCycle) {
       const validCycle = ['Bulanan', 'Tahunan'].includes(billingCycle) ? billingCycle : 'Bulanan';
-      await db.prepare("INSERT INTO subscription (key, value) VALUES ('billing_cycle', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(validCycle).run();
+      await db.prepare("INSERT INTO subscription (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(subPfx + 'billing_cycle', validCycle).run();
     }
 
     if (paymentMethod !== undefined) {
-      await db.prepare("INSERT INTO subscription (key, value) VALUES ('payment_method', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(paymentMethod).run();
+      await db.prepare("INSERT INTO subscription (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(subPfx + 'payment_method', paymentMethod).run();
     }
 
+    await scopedKey(db, 'subscription', user, 'plan');
     const rows = await db.prepare('SELECT key, value FROM subscription').all();
+    const endPfx = user ? 'u' + user.id + ':' : '';
     const data = {};
     for (const row of rows.results || []) {
-      data[row.key] = row.value;
+      if (user ? row.key.startsWith(endPfx) : !row.key.includes(':')) data[row.key.slice(endPfx.length)] = row.value;
     }
 
     const currentPlan = data.plan || 'Starter';
