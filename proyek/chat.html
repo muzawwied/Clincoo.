@@ -1119,6 +1119,55 @@
             }, 300);
         });
 
+        // Label & ikon ramah untuk kartu "Menjalankan Tugas" (eksekusi tools workspace)
+        function toolCallIcon(name) {
+            const map = {
+                list_items: 'ph-folder-open', read_file: 'ph-file-text', write_file: 'ph-file-plus',
+                create_folder: 'ph-folder-plus', rename_item: 'ph-pencil-simple',
+                delete_item: 'ph-trash', search_items: 'ph-magnifying-glass'
+            };
+            return map[name] || 'ph-gear';
+        }
+        function toolCallLabel(tc) {
+            const a = tc.args || {};
+            switch (tc.name) {
+                case 'list_items': return 'Melihat isi folder: ' + (a.path || 'root');
+                case 'read_file': return 'Membaca file: ' + (a.path || '');
+                case 'write_file': return (tc.ok === false ? 'Gagal menulis file: ' : 'Menulis file: ') + (a.path || '');
+                case 'create_folder': return (tc.ok === false ? 'Gagal membuat folder: ' : 'Membuat folder: ') + (a.path || '');
+                case 'rename_item': return 'Mengubah nama: ' + (a.path || '') + ' → ' + (a.new_name || '');
+                case 'delete_item': return 'Menghapus: ' + (a.path || '');
+                case 'search_items': return 'Mencari: ' + (a.query || '');
+                default: return tc.name;
+            }
+        }
+        function renderToolCallsCard(msg) {
+            if (!msg.toolCalls || msg.toolCalls.length === 0) return '';
+            const running = !!msg.isProcessing;
+            const n = msg.toolCalls.length;
+            return `
+                <div class="mb-2 pointer-events-auto w-full fade-in">
+                    <details class="group border border-gray-200 rounded-xl overflow-hidden w-full max-w-sm bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)]" ${running ? 'open' : ''}>
+                        <summary class="flex items-center justify-between px-3 py-2.5 cursor-pointer select-none text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors bg-gray-50/50">
+                            <div class="flex items-center gap-2.5">
+                                <i class="ph ${running ? 'ph-circle-notch animate-spin' : 'ph-check-circle'} text-gray-500 text-lg"></i>
+                                <span>${running ? 'Menjalankan Tugas...' : n + ' Tugas Dijalankan'}</span>
+                            </div>
+                            <i class="ph ph-caret-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="px-3 py-2.5 border-t border-gray-100 bg-white flex flex-col gap-2">
+                            ${msg.toolCalls.map(tc => `
+                                <div class="flex items-center gap-2 text-[12.5px] ${tc.ok === false ? 'text-red-600' : 'text-gray-700'}">
+                                    <i class="ph ${tc.ok === false ? 'ph-x-circle' : toolCallIcon(tc.name)} text-base flex-shrink-0"></i>
+                                    <span class="truncate">${escText(toolCallLabel(tc))}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </details>
+                </div>
+            `;
+        }
+
         function renderMessages() {
             try { saveChatLog(); } catch(e) {}
             chatContainer.innerHTML = '';
@@ -1181,8 +1230,9 @@
                     messageEl.innerHTML = `
                         <div class="flex max-w-[95%] sm:max-w-[90%] w-full min-w-0">
                             <div class="flex flex-col gap-2 pt-1 w-full min-w-0">
+                                ${renderToolCallsCard(msg)}
                                 <div class="text-black text-[15px] leading-relaxed break-words w-full md-content pointer-events-auto overflow-hidden" style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;" id="msg-text-${msg.id}">
-                                    ${msg.isProcessing ? processIndicator : (msg.isImageResponse ? msg.text : formatMarkdown(balanceMarkdown(msg.text)))}
+                                    ${(msg.isProcessing && (!msg.toolCalls || msg.toolCalls.length === 0)) ? processIndicator : (msg.isImageResponse ? msg.text : formatMarkdown(balanceMarkdown(msg.text)))}
                                 </div>
                                 ${(msg.sources && msg.sources.length > 0) ? `
                                     <div class="mt-2 mb-1 pointer-events-auto w-full fade-in">
@@ -1808,7 +1858,8 @@
                 text: '', 
                 isProcessing: true,
                 isTyping: false,
-                processType: processType
+                processType: processType,
+                toolCalls: []
             };
             messages.push(aiMsgObj);
             renderMessages();
@@ -2068,9 +2119,13 @@
                             const result = (tc.result !== undefined && tc.result !== null)
                                 ? tc.result
                                 : executeWorkspaceTool(tc.name, tc.args || {});
+                            const ok = !(result && typeof result === 'object' && result.error);
+                            aiMsgObj.toolCalls.push({ name: tc.name, args: tc.args || {}, ok: ok });
                             return { type: 'function_response', name: tc.name, result: result };
                         });
                         apiMessagesWithTools.push({ role: 'user', content: functionResponses });
+                        // Tampilkan progres eksekusi tugas secara langsung ke chat (mirip kartu "Ran command")
+                        renderMessages();
                     }
 
                     if (hopError) throw hopError;
