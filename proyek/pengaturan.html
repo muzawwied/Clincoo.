@@ -347,7 +347,7 @@
     </div>
   </div>
 
-  <div id="notif-dropdown" class="fixed top-16 right-4 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-[90] origin-top-right">
+  <div id="notif-dropdown" class="fixed top-16 right-4 w-[calc(100vw-2rem)] sm:w-80 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-[90] origin-top-right">
     <div class="flex justify-between items-center mb-2 px-1">
       <span class="font-semibold text-sm text-gray-900">Notifikasi</span>
       <a href="../akun/notifikasi.html" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
@@ -424,7 +424,10 @@
 
     const NOTIF_KEY = 'clincoo_notifications';
     const NOTIF_API = 'https://clincoo.pages.dev/api/notifications';
-    function getNotifications() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch(e) { return []; } }
+    const NOTIF_ALLOWED = ['GitHub', 'Workspace', 'Deploy', 'Akun'];
+    function isAllowedNotif(n) { return NOTIF_ALLOWED.indexOf(String((n && n.source) || '')) > -1; }
+    (function(){ try { var _pn = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); var _pk = _pn.filter(isAllowedNotif); if (_pk.length !== _pn.length) { localStorage.setItem(NOTIF_KEY, JSON.stringify(_pk)); } } catch(e) {} })();
+    function getNotifications() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]').filter(isAllowedNotif); } catch(e) { return []; } }
     function saveNotifications(n) { localStorage.setItem(NOTIF_KEY, JSON.stringify(n)); }
     function escapeNotifHtml(str) { return String(str || '').replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
     function updateNotifBadge(count) {
@@ -444,9 +447,10 @@
         const res = await fetch(NOTIF_API);
         const data = await res.json();
         if (data && Array.isArray(data.notifications)) {
-          saveNotifications(data.notifications);
+          const allowed = data.notifications.filter(isAllowedNotif);
+          saveNotifications(allowed);
           renderNotifications();
-          updateNotifBadge(data.unreadCount || 0);
+          updateNotifBadge(allowed.filter(function(x) { return !x.read; }).length);
         }
       } catch(e) {}
     }
@@ -459,6 +463,7 @@
       fetch(NOTIF_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'mark_all_read' }) }).catch(function() {});
     }
     function addNotification(source, message, link) {
+      if (!isAllowedNotif({ source: source })) return;
       const n = getNotifications();
       n.unshift({ id: 'local-' + Date.now(), source: source, message: message, link: link || '', read: 0, created_at: new Date().toISOString() });
       if (n.length > 50) n.length = 50;
@@ -479,21 +484,23 @@
       if (!contentArea) return;
       const parent = contentArea.parentElement;
       if (notifs.length === 0) {
-        contentArea.textContent = 'Belum ada notifikasi baru';
-        contentArea.className = 'text-xs text-gray-500 text-center py-5';
         parent.innerHTML = '<div class="flex flex-col gap-2 mb-2"><div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div></div>';
         return;
       }
-      parent.innerHTML = '<div class="space-y-1.5 max-h-48 overflow-y-auto"></div>';
-      const listContainer = parent.querySelector('div');
+      let html = '<div class="flex flex-col gap-1 max-h-72 overflow-y-auto">';
       for (let n of notifs.slice(0, 5)) {
-        const item = document.createElement('div');
-        item.className = 'flex items-start gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer';
-        if (n.link) item.onclick = function() { window.location.href = n.link; };
         const isUnread = !n.read;
-        item.innerHTML = '<span class="text-xs font-semibold flex-shrink-0 ' + (isUnread ? 'text-gray-900' : 'text-gray-700') + '">' + escapeNotifHtml(n.source) + '</span><div class="flex-1 min-w-0"><p class="text-xs text-gray-600 ' + (isUnread ? 'font-medium' : '') + '">' + escapeNotifHtml(n.message) + '</p><p class="text-[10px] text-gray-400 mt-0.5">' + notifTime(n.created_at || n.timestamp) + '</p></div>';
-        listContainer.appendChild(item);
+        const linkAttr = n.link ? ' onclick="window.location.href=\'' + escapeNotifHtml(n.link) + '\'"' : '';
+        html += '<div class="flex items-start gap-2.5 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer"' + linkAttr + '>' +
+          '<span class="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-[7px] ' + (isUnread ? 'bg-red-500' : 'bg-transparent') + '"></span>' +
+          '<div class="flex-1 min-w-0">' +
+          '<div class="flex items-baseline gap-2"><span class="text-[11px] font-semibold text-gray-900 tracking-wide">' + escapeNotifHtml(n.source) + '</span>' +
+          '<span class="text-[10px] text-gray-400 ml-auto flex-shrink-0">' + notifTime(n.created_at || n.timestamp) + '</span></div>' +
+          '<p class="text-xs text-gray-600 leading-snug break-words line-clamp-2 mt-0.5">' + escapeNotifHtml(n.message) + '</p>' +
+          '</div></div>';
       }
+      html += '</div>';
+      parent.innerHTML = html;
     }
     renderNotifications();
     loadNotifications();
