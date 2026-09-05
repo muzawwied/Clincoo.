@@ -341,7 +341,7 @@
 
     <script>
         // Backend API — hosted on Cloudflare Pages
-        const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '';
+        const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev' : '';
         const WALLET_API_URL = API_BASE + '/api/wallet';
         var TOPUP_API = 'https://koda-da05205d.base44.app/functions/topup';
         let currentBalance = 0;
@@ -543,10 +543,11 @@
             var method = methodEl ? methodEl.value : 'QRIS Instant';
             var channel = XENDIT_METHOD_MAP[method] || 'qris';
             try {
+                var payerEmail = ''; try { payerEmail = localStorage.getItem('clincoo_email') || ''; } catch(e) {}
                 var res = await fetch(TOPUP_API, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'create', amount: selectedNominalAmount, method: channel })
+                    body: JSON.stringify({ action: 'create', amount: selectedNominalAmount, method: channel, email: payerEmail })
                 }).then(function(r) { return r.json(); });
                 if (!res.success) {
                     var msg = (res.error === 'payment_not_configured')
