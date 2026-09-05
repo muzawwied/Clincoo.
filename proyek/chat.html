@@ -215,6 +215,9 @@
             background: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%) !important;
         }
 
+        .tc-spin { display: inline-block; animation: tc-spin-anim 0.9s linear infinite; }
+        @keyframes tc-spin-anim { to { transform: rotate(360deg); } }
+
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -229,6 +232,32 @@
         .tool-task-text.err { color: #dc2626; }
         body.dark-mode .tool-task-text { color: #9ca3af !important; }
         body.dark-mode .tool-task-text.err { color: #f87171 !important; }
+
+        /* Kartu dropdown "Menjalankan Tugas" */
+        .toolcalls-card { border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; overflow: hidden; }
+        body.dark-mode .toolcalls-card { border-color: #262626; background: #0a0a0a; }
+        .toolcalls-summary { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; background: none; border: none; cursor: pointer; text-align: left; font-size: 12.5px; color: #374151; }
+        body.dark-mode .toolcalls-summary { color: #d1d5db; }
+        .toolcalls-summary .tc-chevron { margin-left: auto; transition: transform 0.15s ease; color: #9ca3af; }
+        .toolcalls-summary.open .tc-chevron { transform: rotate(180deg); }
+        .toolcalls-list { display: flex; flex-direction: column; border-top: 1px solid #e5e7eb; }
+        body.dark-mode .toolcalls-list { border-top-color: #262626; }
+        .toolcalls-item { border-bottom: 1px solid #eef0f2; }
+        body.dark-mode .toolcalls-item { border-bottom-color: #1a1a1a; }
+        .toolcalls-item:last-child { border-bottom: none; }
+        .toolcalls-item-header { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; background: none; border: none; cursor: pointer; text-align: left; font-size: 12.5px; color: #4b5563; }
+        body.dark-mode .toolcalls-item-header { color: #9ca3af; }
+        .toolcalls-item-header.err { color: #dc2626; }
+        body.dark-mode .toolcalls-item-header.err { color: #f87171 !important; }
+        .toolcalls-item-header .tc-chevron { margin-left: auto; transition: transform 0.15s ease; color: #9ca3af; flex-shrink: 0; }
+        .toolcalls-item-header.open .tc-chevron { transform: rotate(180deg); }
+        .toolcalls-item-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .toolcalls-item-detail { padding: 0 12px 10px 32px; display: flex; flex-direction: column; gap: 6px; }
+        .toolcalls-detail-block { border-radius: 8px; overflow: hidden; background: #1e1e1e; }
+        .toolcalls-detail-label { display: flex; align-items: center; justify-content: space-between; padding: 5px 10px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: #9ca3af; background: #171717; }
+        .toolcalls-detail-copy { background: none; border: none; color: #9ca3af; cursor: pointer; padding: 2px; display: flex; align-items: center; }
+        .toolcalls-detail-copy:hover { color: #ffffff; }
+        .toolcalls-detail-pre { margin: 0; padding: 8px 10px; font-size: 11.5px; line-height: 1.5; color: #e5e7eb; white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow-y: auto; font-family: 'SF Mono', Consolas, monospace; }
         body.dark-mode .bg-white { background-color: #0a0a0a !important; }
 
         body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
@@ -1146,15 +1175,82 @@
                 default: return tc.name;
             }
         }
+
+        function toggleToolCallsGroup(msgId) {
+            const msg = messages.find(m => m.id === msgId || m.id.toString() === msgId);
+            if (!msg) return;
+            const defaultOpen = !!msg.isProcessing;
+            const current = (msg.toolCallsOpen === undefined) ? defaultOpen : msg.toolCallsOpen;
+            msg.toolCallsOpen = !current;
+            renderMessages();
+        }
+
+        function toggleToolCallItem(msgId, idx) {
+            const msg = messages.find(m => m.id === msgId || m.id.toString() === msgId);
+            if (!msg || !msg.toolCalls || !msg.toolCalls[idx]) return;
+            msg.toolCalls[idx].expanded = !msg.toolCalls[idx].expanded;
+            renderMessages();
+        }
+
+        function toolCallDetailBlock(label, text) {
+            if (text === undefined || text === null || text === '') return '';
+            const encoded = encodeURIComponent(text);
+            return `
+                <div class="toolcalls-detail-block">
+                    <div class="toolcalls-detail-label">
+                        <span>${escText(label)}</span>
+                        <button type="button" class="toolcalls-detail-copy" onclick="event.stopPropagation(); copyCodeBlock(this)" data-code="${encoded}" title="Salin">
+                            <i class="ph-bold ph-copy text-[13px]"></i>
+                        </button>
+                    </div>
+                    <pre class="toolcalls-detail-pre">${escText(text)}</pre>
+                </div>
+            `;
+        }
+
         function renderToolCallsCard(msg) {
             if (!msg.toolCalls || msg.toolCalls.length === 0) return '';
             const running = !!msg.isProcessing;
+            const groupOpen = (msg.toolCallsOpen === undefined) ? running : msg.toolCallsOpen;
+            const errCount = msg.toolCalls.filter(tc => tc.ok === false).length;
+            const summaryText = running
+                ? 'Menjalankan Tugas...'
+                : (errCount > 0
+                    ? `Selesai ${msg.toolCalls.length} tugas (${errCount} gagal)`
+                    : `Selesai ${msg.toolCalls.length} tugas`);
+            const summaryIcon = running
+                ? '<i class="ph-bold ph-circle-notch tc-spin text-[15px]"></i>'
+                : (errCount > 0 ? '<i class="ph-bold ph-warning-circle text-[15px]" style="color:#dc2626"></i>' : '<i class="ph-bold ph-check-circle text-[15px]" style="color:#16a34a"></i>');
             return `
-                <div class="mb-1 flex flex-col gap-0.5 text-[12.5px] leading-snug fade-in">
-                    ${running ? `<div class="tool-task-text italic">Menjalankan Tugas...</div>` : ''}
-                    ${msg.toolCalls.map(tc => `
-                        <div class="tool-task-text${tc.ok === false ? ' err' : ''}">${tc.ok === false ? '✗' : '✓'} ${escText(toolCallLabel(tc))}</div>
-                    `).join('')}
+                <div class="mb-1.5 toolcalls-card fade-in">
+                    <button type="button" class="toolcalls-summary${groupOpen ? ' open' : ''}" onclick="toggleToolCallsGroup('${msg.id}')">
+                        ${summaryIcon}
+                        <span>${escText(summaryText)}</span>
+                        <i class="ph-bold ph-caret-down tc-chevron text-[13px]"></i>
+                    </button>
+                    ${groupOpen ? `
+                        <div class="toolcalls-list">
+                            ${msg.toolCalls.map((tc, idx) => {
+                                const itemOpen = !!tc.expanded;
+                                const argsText = (tc.args && Object.keys(tc.args).length) ? JSON.stringify(tc.args, null, 2) : '';
+                                const resultText = (tc.result !== undefined && tc.result !== null && tc.result !== '') ? String(tc.result) : '';
+                                return `
+                                <div class="toolcalls-item">
+                                    <button type="button" class="toolcalls-item-header${itemOpen ? ' open' : ''}${tc.ok === false ? ' err' : ''}" onclick="toggleToolCallItem('${msg.id}', ${idx})">
+                                        <i class="ph-bold ${toolCallIcon(tc.name)} text-[14px]" style="flex-shrink:0"></i>
+                                        <span class="toolcalls-item-label">${tc.ok === false ? '✗ ' : ''}${escText(toolCallLabel(tc))}</span>
+                                        ${(argsText || resultText) ? `<i class="ph-bold ph-caret-down tc-chevron text-[12px]"></i>` : ''}
+                                    </button>
+                                    ${(itemOpen && (argsText || resultText)) ? `
+                                        <div class="toolcalls-item-detail">
+                                            ${toolCallDetailBlock('Perintah', argsText)}
+                                            ${toolCallDetailBlock('Hasil', resultText)}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `; }).join('')}
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }
@@ -2111,7 +2207,10 @@
                                 ? tc.result
                                 : executeWorkspaceTool(tc.name, tc.args || {});
                             const ok = !(result && typeof result === 'object' && result.error);
-                            aiMsgObj.toolCalls.push({ name: tc.name, args: tc.args || {}, ok: ok });
+                            let resultText = '';
+                            try { resultText = (typeof result === 'string') ? result : JSON.stringify(result, null, 2); } catch(e) { resultText = String(result); }
+                            if (resultText && resultText.length > 4000) resultText = resultText.slice(0, 4000) + '\n… (dipotong)';
+                            aiMsgObj.toolCalls.push({ name: tc.name, args: tc.args || {}, ok: ok, result: resultText });
                             return { type: 'function_response', name: tc.name, result: result };
                         });
                         apiMessagesWithTools.push({ role: 'user', content: functionResponses });
