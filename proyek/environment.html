@@ -22,7 +22,7 @@
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
       font-family: 'Inter', sans-serif;
-      background-color: #f7f7f9;
+      background-color: #ffffff;
     }
     
     ::-webkit-scrollbar {
@@ -111,7 +111,6 @@
         body.dark-mode .text-accent { color: #ffffff !important; }
         body.dark-mode .border-accent { border-color: #ffffff !important; }
         body.dark-mode header { background-color: #000000 !important; }
-        body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
 
   /* auto-dark-fix v1 */
     body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
@@ -162,12 +161,12 @@
 <!-- no-flash-v1 -->
 <script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
-<body class="text-gray-900 antialiased fixed inset-0 w-full h-full overflow-hidden flex flex-col bg-[#f7f7f9]">
+<body class="text-gray-900 antialiased fixed inset-0 w-full h-full overflow-hidden flex flex-col bg-white">
   <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
 
   <div class="w-full h-full overflow-y-auto hide-scrollbar flex flex-col relative min-w-0">
 
-    <header class="w-full flex-shrink-0 bg-[#f7f7f9] z-30 p-3 flex justify-between items-center border-b border-gray-100">
+    <header class="w-full flex-shrink-0 bg-white z-30 p-3 flex justify-between items-center border-b border-gray-100">
       <div class="flex items-center gap-2 pointer-events-auto">
         <button onclick="toggleSidebar()" class="flex-shrink-0 flex items-center justify-center text-[#222222] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:text-black hover:bg-gray-50 transition-all rounded-full w-10 h-10" aria-label="Buka Menu">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -216,10 +215,10 @@
             
             <div class="flex gap-2 mb-4 w-full min-w-0">
               <div class="flex-1 min-w-0">
-                <input type="text" id="env-key" placeholder="Kunci" class="w-full px-4 py-2.5 bg-[#f7f7f9] border border-gray-200 rounded-full text-gray-700 placeholder-gray-400 focus:outline-none transition-colors text-[14px]">
+                <input type="text" id="env-key" placeholder="Kunci" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-full text-gray-700 placeholder-gray-400 focus:outline-none transition-colors text-[14px]">
               </div>
               <div class="flex-1 min-w-0">
-                <input type="text" id="env-value" placeholder="Nilai" class="w-full px-4 py-2.5 bg-[#f7f7f9] border border-gray-200 rounded-full text-gray-700 placeholder-gray-400 focus:outline-none transition-colors text-[14px]">
+                <input type="text" id="env-value" placeholder="Nilai" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-full text-gray-700 placeholder-gray-400 focus:outline-none transition-colors text-[14px]">
               </div>
             </div>
             
@@ -461,10 +460,10 @@
           row.className = 'flex items-center gap-3 animate-fade-in mb-3 min-w-0 w-full';
           
           row.innerHTML = `
-            <div class="flex-1 min-w-0 px-4 py-2.5 bg-[#f7f7f9] border border-gray-200 rounded-full text-gray-700 text-[14px] font-mono overflow-hidden text-ellipsis whitespace-nowrap">
+            <div class="flex-1 min-w-0 px-4 py-2.5 bg-white border border-gray-200 rounded-full text-gray-700 text-[14px] font-mono overflow-hidden text-ellipsis whitespace-nowrap">
               ${env.key}
             </div>
-            <div class="flex-1 min-w-0 px-4 py-2.5 bg-[#f7f7f9] border border-gray-200 rounded-full text-gray-700 text-[14px] font-mono overflow-hidden text-ellipsis whitespace-nowrap">
+            <div class="flex-1 min-w-0 px-4 py-2.5 bg-white border border-gray-200 rounded-full text-gray-700 text-[14px] font-mono overflow-hidden text-ellipsis whitespace-nowrap">
               ${env.value}
             </div>
             <button onclick="deleteEnvVar(${env.id})" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors focus:outline-none flex-shrink-0" aria-label="Hapus">

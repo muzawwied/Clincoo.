@@ -49,7 +49,6 @@
     body.dark-mode .hover\:bg-gray-200:hover { background-color: #222222 !important; }
     body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background-color: #0a0a0a; color: #ffffff; border-color: #222222; }
     body.dark-mode input:focus, body.dark-mode select:focus, body.dark-mode textarea:focus { border-color: #333333; outline: none; }
-    body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
     body.dark-mode header { background-color: #000000 !important; }
     body.dark-mode .modal-card { background-color: #0a0a0a !important; border-color: #222222 !important; }
 
@@ -81,14 +80,14 @@
     })();
   </script>
 </head>
-<body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-[#f7f7f9]">
+<body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-white">
   <script>
     if(document.documentElement.classList.contains('dark-mode')) {
         document.body.classList.add("dark-mode");
     }
   </script>
 
-  <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+  <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
         <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </button>

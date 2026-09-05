@@ -30,7 +30,6 @@
     body.dark-mode .hover\:bg-gray-200:hover { background-color: #222222 !important; }
     body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background-color: #0a0a0a; color: #ffffff; border-color: #222222; }
     body.dark-mode input:focus, body.dark-mode select:focus, body.dark-mode textarea:focus { border-color: #222222; outline: none; }
-    body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
     body.dark-mode header { background-color: #000000 !important; }
   /* auto-dark-fix v1 */
     body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
@@ -75,7 +74,7 @@
 <!-- no-flash-v1 -->
 <script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
-<body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-[#f7f7f9]">
+<body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-white">
   <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
   <div class="w-full h-full overflow-y-auto hide-scrollbar flex flex-col items-center">
     <header class="w-full max-w-5xl z-30 p-4 sm:px-6 flex items-center gap-3 flex-shrink-0 border-b border-gray-200/60 dark:border-slate-800">

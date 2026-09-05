@@ -41,7 +41,6 @@
     body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
     body.dark-mode .border-gray-200, body.dark-mode .border-gray-100, body.dark-mode .border-gray-300 { border-color: #222222 !important; }
     body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #1a1a1a !important; }
-    body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
 
     .fade-in { animation: fadeIn 0.2s ease-out forwards; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
@@ -54,12 +53,12 @@
     (function(){var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var isDark=(t==='Gelap')||(t==='Sistem (Default)'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(isDark)document.documentElement.classList.add('dark-mode');})();
   </script>
 </head>
-<body class="min-h-screen flex flex-col text-gray-900 bg-[#f7f7f9] pt-16 relative overflow-x-hidden antialiased">
+<body class="min-h-screen flex flex-col text-gray-900 bg-white pt-16 relative overflow-x-hidden antialiased">
   <script>
     (function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();
   </script>
   
-  <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors border-b border-gray-200/60 dark:border-slate-800">
+  <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors border-b border-gray-200/60 dark:border-slate-800">
     <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
         <i data-lucide="arrow-left" class="w-5 h-5"></i>
     </button>

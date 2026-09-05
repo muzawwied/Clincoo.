@@ -50,7 +50,6 @@
     body.dark-mode .border-gray-200, body.dark-mode .border-gray-100 { border-color: #222222 !important; }
     body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
     body.dark-mode .hover\:bg-gray-200\/50:hover { background-color: #1a1a1a !important; }
-    body.dark-mode .bg-\[#f7f7f9\] { background-color: #000000 !important; }
     body.dark-mode .border-gray-300 { border-color: #333333 !important; }
     body.dark-mode .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #222222 !important; }
     body.dark-mode .text-red-600, body.dark-mode .text-red-700 { color: #f0a3a3 !important; }
@@ -148,14 +147,14 @@
 .dark-mode .clincoo-shimmer::after{background:linear-gradient(90deg,transparent,rgba(148,163,184,.3),transparent)}
 </style>
 </head>
-<body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-[#f7f7f9]">
+<body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-white">
   <script>
     if(document.documentElement.classList.contains('dark-mode')) {
         document.body.classList.add("dark-mode");
     }
   </script>
 
-  <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+  <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
     <button onclick="history.back()" aria-label="Kembali" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
         <i data-lucide="arrow-left" class="w-5 h-5"></i>
     </button>
