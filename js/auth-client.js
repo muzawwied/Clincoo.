@@ -19,14 +19,29 @@
     }
   };
 
+  var origFetch = window.fetch;
+
   // Gate: buka halaman apa pun tanpa login -> langsung ke halaman auth
   if (!isAuthPage && !getToken()) {
     try { location.replace(AUTH_URL + '?next=' + encodeURIComponent(location.href)); } catch (e) { location.replace(AUTH_URL); }
     return;
   }
 
+  // Validasi token ke backend: token mati (logout perangkat / reset) -> auth ulang
+  if (!isAuthPage && getToken()) {
+    var API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo.pages.dev' : '';
+    origFetch(API + '/api/auth/me', { headers: { 'Authorization': 'Bearer ' + getToken() } })
+      .then(function (r) { return r.ok ? r.json() : { authenticated: false }; })
+      .then(function (d) {
+        if (!d || !d.authenticated) {
+          try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+          location.replace(AUTH_URL + '?next=' + encodeURIComponent(location.href));
+        }
+      })
+      .catch(function () {});
+  }
+
   // Wrapper fetch: semua call ke backend dibawa token Bearer; 401 -> auth
-  var origFetch = window.fetch;
   window.fetch = function (input, init) {
     init = init || {};
     var url = '';
