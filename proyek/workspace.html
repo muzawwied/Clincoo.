@@ -672,10 +672,25 @@
     const GITHUB_USER_KEY = 'clincoo_github_user';
     let isGithubConnected = !!localStorage.getItem(GITHUB_TOKEN_KEY);
 
-    const STORAGE_KEY_FILES = 'clincoo_workspace_files';
+    // Kunci workspace per-proyek — pola yang sama dengan riwayat per-chat (clincoo_ls_chat_<projectId>).
+    // Murni localStorage, tanpa D1.
+    function wsFilesKey() {
+      let pid = null;
+      try { pid = localStorage.getItem('clincoo_current_project_id'); } catch (e) {}
+      return 'clincoo_workspace_files_' + (pid ? String(pid) : 'global');
+    }
 
     function loadWorkspaceFiles() {
-      const savedFiles = localStorage.getItem(STORAGE_KEY_FILES);
+      const key = wsFilesKey();
+      let savedFiles = null;
+      try { savedFiles = localStorage.getItem(key); } catch (e) {}
+      // Migrasi sekali: data lama tersimpan di kunci global, pindahkan ke kunci proyek ini.
+      if (!savedFiles) {
+        try {
+          const legacy = localStorage.getItem('clincoo_workspace_files');
+          if (legacy) { localStorage.setItem(key, legacy); savedFiles = legacy; }
+        } catch (e) {}
+      }
       if (savedFiles) {
         try { projectFilesData = JSON.parse(savedFiles); } catch (e) { projectFilesData = { 'root': [] }; }
       } else {
@@ -685,7 +700,7 @@
 
     function saveData() {
       try {
-        localStorage.setItem(STORAGE_KEY_FILES, JSON.stringify(projectFilesData));
+        localStorage.setItem(wsFilesKey(), JSON.stringify(projectFilesData));
       } catch (e) {
         console.error('Gagal menyimpan workspace (penyimpanan browser penuh?):', e);
         try { addNotification('Workspace', 'Gagal menyimpan workspace — penyimpanan browser penuh, beberapa perubahan bisa hilang saat refresh.'); } catch (e2) {}

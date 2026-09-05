@@ -1480,11 +1480,21 @@
         const GEMINI_PROXY_URL = 'https://clincoo.pages.dev/api/chat';
 
         // ===== WORKSPACE FILE/FOLDER CRUD (shared store with workspace.html) =====
-        const WS_STORAGE_KEY = 'clincoo_workspace_files';
+        // Kunci workspace per-proyek — sama dengan pola per-chat (lsChatKey), murni localStorage tanpa D1.
+        function wsFilesKey() {
+            let pid = (typeof currentProjectId !== 'undefined' && currentProjectId) ? String(currentProjectId) : 'global';
+            return 'clincoo_workspace_files_' + pid;
+        }
 
         function wsLoad() {
             try {
-                const d = JSON.parse(localStorage.getItem(WS_STORAGE_KEY));
+                let raw = localStorage.getItem(wsFilesKey());
+                // Migrasi sekali: data lama tersimpan di kunci global, pindahkan ke kunci proyek ini.
+                if (!raw) {
+                    const legacy = localStorage.getItem('clincoo_workspace_files');
+                    if (legacy) { localStorage.setItem(wsFilesKey(), legacy); raw = legacy; }
+                }
+                const d = JSON.parse(raw);
                 if (d && typeof d === 'object' && Array.isArray(d.root)) return d;
             } catch (e) {}
             return { 'root': [] };
@@ -1492,7 +1502,7 @@
 
         function wsSave(data) {
             try {
-                localStorage.setItem(WS_STORAGE_KEY, JSON.stringify(data));
+                localStorage.setItem(wsFilesKey(), JSON.stringify(data));
             } catch (e) {
                 return { success: false, error: 'Gagal menyimpan workspace: penyimpanan browser penuh.' };
             }
