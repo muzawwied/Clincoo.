@@ -1,6 +1,6 @@
 // Clincoo API Helper - Connects to Cloudflare D1 edge functions
 // On GitHub Pages, API calls will fail gracefully (no server-side functions)
-const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev/api' : '/api';
+const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api';
 
 // Helper: get current project ID from URL path or localStorage
 function getCurrentProjectId() {

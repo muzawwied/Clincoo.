@@ -496,7 +496,7 @@
 <script>
     // Shared Notification System
     const NOTIF_KEY = 'clincoo_notifications';
-    const NOTIF_API = 'https://clincoo.pages.dev/api/notifications';
+    const NOTIF_API = 'https://clincoo-be2.pages.dev/api/notifications';
     const NOTIF_ALLOWED = ['GitHub', 'Workspace', 'Deploy', 'Akun', 'Dompet'];
     function isAllowedNotif(n) { return NOTIF_ALLOWED.indexOf(String((n && n.source) || '')) > -1; }
     (function(){ try { var _pn = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); var _pk = _pn.filter(isAllowedNotif); if (_pk.length !== _pn.length) { localStorage.setItem(NOTIF_KEY, JSON.stringify(_pk)); } } catch(e) {} })();
@@ -1103,7 +1103,7 @@
 
     async function handleGitHubOAuthCallback(code) {
       try {
-        const resp = await fetch('https://clincoo.pages.dev/api/github-oauth', {
+        const resp = await fetch('https://clincoo-be2.pages.dev/api/github-oauth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, redirect_uri: window.location.origin + window.location.pathname })
@@ -1159,7 +1159,7 @@
       try {
         const sessionToken = localStorage.getItem('clincoo_auth_token');
         if (!sessionToken) return;
-        const res = await fetch('https://clincoo.pages.dev/api/auth/github-token', {
+        const res = await fetch('https://clincoo-be2.pages.dev/api/auth/github-token', {
           headers: { 'Authorization': 'Bearer ' + sessionToken }
         });
         if (!res.ok) return;

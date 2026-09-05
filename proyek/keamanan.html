@@ -292,7 +292,7 @@
 
     // Shared Notification System
     const NOTIF_KEY = 'clincoo_notifications';
-    const NOTIF_API = 'https://clincoo.pages.dev/api/notifications';
+    const NOTIF_API = 'https://clincoo-be2.pages.dev/api/notifications';
     const NOTIF_ALLOWED = ['GitHub', 'Workspace', 'Deploy', 'Akun', 'Dompet'];
     function isAllowedNotif(n) { return NOTIF_ALLOWED.indexOf(String((n && n.source) || '')) > -1; }
     (function(){ try { var _pn = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); var _pk = _pn.filter(isAllowedNotif); if (_pk.length !== _pn.length) { localStorage.setItem(NOTIF_KEY, JSON.stringify(_pk)); } } catch(e) {} })();
@@ -387,7 +387,7 @@
 <script>
 // ===== Security Feed Real-time (situs proyek yang dideploy lewat Clincoo) =====
 (function(){
-  var SEC_API = 'https://clincoo.pages.dev/api/security-events';
+  var SEC_API = 'https://clincoo-be2.pages.dev/api/security-events';
   var POLL_MS = 10000;
   var pid = new URLSearchParams(window.location.search).get('id') || localStorage.getItem('clincoo_current_project_id') || '';
   var seenKey = 'clincoo_sec_seen_' + pid;

@@ -6,7 +6,7 @@
 // Respons 401 sama seperti versi production: {"error":"Login diperlukan","need_login":true}
 import { initTables as initAuthTables, getUserByToken, getToken } from './auth/shared.js';
 
-const PUBLIC = [/^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(\/|$)/];
+const PUBLIC = [/^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(\/|$)/, /^\/api\/wallet(\/|$)/];
 
 export async function onRequest({ request, env, next }) {
   if (request.method === 'OPTIONS') return next();

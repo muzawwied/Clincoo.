@@ -8,7 +8,7 @@ const _BASE = _isGHPages ? '/Clincoo.' : '';
 
 // === Sinkronisasi D1 per akun (Cloudflare) ===
 // Token Bearer diinjeksi otomatis oleh js/auth-client.js pada semua call /api/.
-const PROJECTS_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev/api' : '/api') + '/projects';
+const PROJECTS_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/projects';
 let _pushTimer = null;
 
 function pushProjectsToServer(projects) {
@@ -165,7 +165,7 @@ function deleteProject(id) {
     saveProjects(projects);
     
     try {
-        fetch('https://clincoo.pages.dev/api/activity', {
+        fetch('https://clincoo-be2.pages.dev/api/activity', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'delete_project', details: 'Proyek dihapus' })

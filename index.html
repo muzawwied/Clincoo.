@@ -419,7 +419,7 @@
     // ============================================
     // NOTIFICATION SYSTEM - D1-backed with page links
     // ============================================
-    const NOTIF_API = 'https://clincoo.pages.dev/api/notifications';
+    const NOTIF_API = 'https://clincoo-be2.pages.dev/api/notifications';
     let d1Notifs = [];
     let d1UnreadCount = 0;
 
@@ -613,7 +613,7 @@
 
         // Muat profil dari database per akun (D1) — sinkron lintas perangkat
         try {
-            const PROFILE_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev/api' : '/api') + '/account-profile';
+            const PROFILE_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/account-profile';
             fetch(PROFILE_API).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
                 if (!d) return;
                 const nm = d.name || '', em = d.email || '', av = d.avatar || '';
@@ -1114,7 +1114,7 @@
             }
         }
         // === Sinkronisasi daftar proyek per akun ke D1 (Cloudflare) ===
-        const PROJECTS_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev/api' : '/api') + '/projects';
+        const PROJECTS_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/projects';
         let _pushTimer = null;
         function pushProjectsToServer(projects) {
             if (_pushTimer) clearTimeout(_pushTimer);

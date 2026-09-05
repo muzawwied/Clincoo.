@@ -488,7 +488,7 @@
         }
         async function refreshProfileFromD1() {
             try {
-                const d = await fetch('https://clincoo.pages.dev/api/account-profile').then(function(r){ return r.json(); });
+                const d = await fetch('https://clincoo-be2.pages.dev/api/account-profile').then(function(r){ return r.json(); });
                 if (!d || d.error) return;
                 if (Object.keys(d).length > 0) {
                     applyProfileData(d);
@@ -505,7 +505,7 @@
                     if (em) payload.email = em.trim();
                     if (pc && pc.length < 700000) payload.avatar = pc;
                     if (Object.keys(payload).length > 0) {
-                        fetch('https://clincoo.pages.dev/api/account-profile', {
+                        fetch('https://clincoo-be2.pages.dev/api/account-profile', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)
@@ -530,7 +530,7 @@
                         try { localStorage.setItem('clincoo_profile_pic', base64); } catch(err) {}
                         if (base64 && base64.length < 700000) {
                             try {
-                                fetch('https://clincoo.pages.dev/api/account-profile', {
+                                fetch('https://clincoo-be2.pages.dev/api/account-profile', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ avatar: base64 })
