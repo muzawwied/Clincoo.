@@ -713,6 +713,116 @@
       }
     }
 
+
+    // ===== Sinkronisasi workspace ke Cloudflare D1 (data per-proyek) =====
+    const WS_CLOUD_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
+
+    function wsProjectId() {
+      try { return localStorage.getItem('clincoo_current_project_id') || ''; } catch (e) { return ''; }
+    }
+
+    // Rata-ratakan {folder: [item]} menjadi daftar {path, content}
+    function wsFlatten(data) {
+      const files = [];
+      Object.keys(data || {}).forEach(function(folderKey) {
+        (data[folderKey] || []).forEach(function(it) {
+          if (!it || !it.path) return;
+          if (it.type === 'file') {
+            files.push({ path: it.path, content: it.content || '' });
+          } else if (it.type === 'folder') {
+            const hasChildren = Object.keys(data).some(function(k) { return k === it.path || k.startsWith(it.path + '/'); });
+            if (!hasChildren) files.push({ path: it.path + '/', content: '' }); // penanda folder kosong
+          }
+        });
+      });
+      return files;
+    }
+
+    function wsSizeLabel(content) {
+      const b = new Blob([content || '']).size;
+      if (b > 1024 * 1024) return (b / (1024 * 1024)).toFixed(2) + ' MB';
+      if (b > 1024) return (b / 1024).toFixed(1) + ' KB';
+      return b + ' B';
+    }
+
+    // Bangun kembali struktur folder dari daftar file rata + penanda folder
+    function wsUnflatten(files) {
+      const data = { 'root': [] };
+      const ensureChain = function(folderKey) {
+        if (folderKey === 'root') return;
+        const parts = folderKey.split('/').filter(Boolean);
+        let parent = 'root', cum = '';
+        parts.forEach(function(part) {
+          cum = cum ? cum + '/' + part : part;
+          if (!Array.isArray(data[parent])) data[parent] = [];
+          if (!data[parent].some(function(i) { return i && i.type === 'folder' && i.name.toLowerCase() === part.toLowerCase(); })) {
+            data[parent].push({ type: 'folder', name: part, path: cum, fileCount: 0, previewText: 'Folder' });
+          }
+          if (!Array.isArray(data[cum])) data[cum] = [];
+          parent = cum;
+        });
+      };
+      (files || []).forEach(function(f) {
+        const p = String((f && f.path) || '').trim();
+        const content = (f && f.content) || '';
+        if (p.slice(-1) === '/') { ensureChain(p.slice(0, -1)); return; }
+        const parts = p.split('/').filter(Boolean);
+        const name = parts.pop();
+        if (!name) return;
+        const folderKey = parts.length ? parts.join('/') : 'root';
+        ensureChain(folderKey);
+        if (!Array.isArray(data[folderKey])) data[folderKey] = [];
+        if (!data[folderKey].some(function(i) { return i.path.toLowerCase() === p.toLowerCase(); })) {
+          data[folderKey].push({ type: 'file', name: name, size: wsSizeLabel(content), path: p, content: content });
+        }
+      });
+      return data;
+    }
+
+    // Ambil data workspace dari D1; kalau D1 kosong tapi lokal ada, unggah (migrasi sekali)
+    function wsCloudPull() {
+      const pid = wsProjectId();
+      if (!pid || wsCloudTimer) return; // jangan menimpa saat ada push tertunda
+      fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid))
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function(d) {
+          const files = (d && d.files) || [];
+          if (files.length) {
+            const merged = wsUnflatten(files);
+            const mergedStr = JSON.stringify(merged);
+            if (mergedStr !== JSON.stringify(projectFilesData)) {
+              projectFilesData = merged;
+              try { localStorage.setItem(wsFilesKey(), mergedStr); } catch (e) {}
+              renderFileList();
+            }
+          } else {
+            // D1 belum berisi untuk proyek ini: migrasikan data lokal ke cloud
+            const localRaw = localStorage.getItem(wsFilesKey());
+            if (localRaw && localRaw !== JSON.stringify({ 'root': [] })) {
+              fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { method: 'DELETE' }).catch(function() {});
+              fetch(WS_CLOUD_API, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_id: pid, files: wsFlatten(projectFilesData) }) }).catch(function() {});
+            }
+          }
+        })
+        .catch(function() {});
+    }
+
+    // Simpan ke D1 (debounce) — penggantian penuh supaya hapus/rename ikut tersimpan
+    let wsCloudTimer = null;
+    function wsCloudPushSchedule() {
+      const pid = wsProjectId();
+      if (!pid) return;
+      clearTimeout(wsCloudTimer);
+      wsCloudTimer = setTimeout(function() {
+        wsCloudTimer = null;
+        const payload = { project_id: pid, files: wsFlatten(projectFilesData) };
+        fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { method: 'DELETE' })
+          .then(function() { return fetch(WS_CLOUD_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); })
+          .catch(function() {});
+      }, 3000);
+    }
+
     function saveData() {
       try {
         localStorage.setItem(wsFilesKey(), JSON.stringify(projectFilesData));
@@ -720,6 +830,7 @@
         console.error('Gagal menyimpan workspace (penyimpanan browser penuh?):', e);
         try { addNotification('Workspace', 'Gagal menyimpan workspace — penyimpanan browser penuh, beberapa perubahan bisa hilang saat refresh.'); } catch (e2) {}
       }
+      wsCloudPushSchedule();
     }
 
     const defaultTemplates = {
@@ -1790,6 +1901,7 @@
     // Initialize application
     window.onload = function() {
       loadWorkspaceFiles();
+      wsCloudPull();
       showWorkspace();
       renderNotifications();
 

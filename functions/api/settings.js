@@ -1,5 +1,7 @@
 // Cloudflare Pages Functions - General App Settings Backend
-// Stores app-level configuration in D1 user_preferences table
+// Pengaturan umum: per-proyek (tabel p_*) jika ada project_id, global jika tidak.
+
+import { getProjectTables } from './_tables.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -41,6 +43,14 @@ export async function onRequestGet({ request, env }) {
     const url = new URL(request.url);
     const projectId = url.searchParams.get('project_id') || '';
     if (projectId) {
+      // Kunci umum per-proyek menimpa nilai global
+      try {
+        const T = await getProjectTables(db, projectId);
+        const pRows = await db.prepare(`SELECT key, value FROM ${T.projectSettings} WHERE project_id = ? AND key IN (${settingKeys.map(() => '?').join(',')})`).bind(projectId, ...settingKeys).all();
+        for (const row of pRows.results || []) {
+          if (row.key !== 'app_name' && row.key !== 'app_description') data[row.key] = row.value;
+        }
+      } catch (e) {}
       try {
         const proj = await db.prepare('SELECT name, description FROM projects WHERE id = ?').bind(projectId).first();
         if (proj) {
@@ -58,9 +68,13 @@ export async function onRequestGet({ request, env }) {
 
     let stats = { projects: 1, deploys: 0, chatSessions: 0, envVars: 0 };
     if (projectId) {
-      try { const r = await db.prepare('SELECT COUNT(*) as c FROM deploy_logs WHERE project_id = ?').bind(projectId).first(); stats.deploys = r?.c || 0; } catch(e) {}
-      try { const r = await db.prepare('SELECT COUNT(*) as c FROM env_vars WHERE project_id = ?').bind(projectId).first(); stats.envVars = r?.c || 0; } catch(e) {}
-      try { const r = await db.prepare('SELECT COUNT(*) as c FROM chat_sessions WHERE project_id = ?').bind(projectId).first(); stats.chatSessions = r?.c || 0; } catch(e) {}
+      // Statistik dari tabel milik proyek ini (bukan tabel bersama)
+      try {
+        const T = await getProjectTables(db, projectId);
+        stats.deploys = (await db.prepare(`SELECT COUNT(*) as c FROM ${T.deployLogs}`).first())?.c || 0;
+        stats.envVars = (await db.prepare(`SELECT COUNT(*) as c FROM ${T.envVars}`).first())?.c || 0;
+        stats.chatSessions = (await db.prepare(`SELECT COUNT(*) as c FROM ${T.sessions}`).first())?.c || 0;
+      } catch (e) {}
     } else {
       try { const r = await db.prepare('SELECT COUNT(*) as c FROM projects').first(); stats.projects = r?.c || 0; } catch(e) {}
       try { const r = await db.prepare('SELECT COUNT(*) as c FROM deploy_logs').first(); stats.deploys = r?.c || 0; } catch(e) {}
@@ -106,8 +120,18 @@ export async function onRequestPost({ request, env }) {
       } catch(e) {}
     }
 
-    for (const [key, value] of Object.entries(updates)) {
-      await db.prepare("INSERT INTO user_preferences (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(key, value).run();
+    if (projectId) {
+      // Simpan per-proyek — tidak menulis ke tabel global
+      try {
+        const T = await getProjectTables(db, projectId);
+        for (const [key, value] of Object.entries(updates)) {
+          await db.prepare(`INSERT INTO ${T.projectSettings} (project_id, key, value) VALUES (?, ?, ?) ON CONFLICT(project_id, key) DO UPDATE SET value = excluded.value`).bind(projectId, key, value).run();
+        }
+      } catch (e) {}
+    } else {
+      for (const [key, value] of Object.entries(updates)) {
+        await db.prepare("INSERT INTO user_preferences (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(key, value).run();
+      }
     }
 
     // Log activity

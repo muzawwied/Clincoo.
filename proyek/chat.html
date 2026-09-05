@@ -1643,7 +1643,114 @@
             } catch (e) {
                 return { success: false, error: 'Gagal menyimpan workspace: penyimpanan browser penuh.' };
             }
+            wsCloudPushSchedule();
             return null;
+        }
+
+
+        // ===== Sinkronisasi workspace ke Cloudflare D1 (data per-proyek) =====
+        const WS_CLOUD_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
+
+        function wsProjectId() {
+            try { return (typeof currentProjectId !== 'undefined' && currentProjectId) ? String(currentProjectId) : ''; } catch (e) { return ''; }
+        }
+
+        function wsFlatten(data) {
+            const files = [];
+            Object.keys(data || {}).forEach(function(folderKey) {
+                (data[folderKey] || []).forEach(function(it) {
+                    if (!it || !it.path) return;
+                    if (it.type === 'file') {
+                        files.push({ path: it.path, content: it.content || '' });
+                    } else if (it.type === 'folder') {
+                        const hasChildren = Object.keys(data).some(function(k) { return k === it.path || k.startsWith(it.path + '/'); });
+                        if (!hasChildren) files.push({ path: it.path + '/', content: '' });
+                    }
+                });
+            });
+            return files;
+        }
+
+        function wsSizeLabel(content) {
+            const b = new Blob([content || '']).size;
+            if (b > 1024 * 1024) return (b / (1024 * 1024)).toFixed(2) + ' MB';
+            if (b > 1024) return (b / 1024).toFixed(1) + ' KB';
+            return b + ' B';
+        }
+
+        function wsUnflatten(files) {
+            const data = { 'root': [] };
+            const ensureChain = function(folderKey) {
+                if (folderKey === 'root') return;
+                const parts = folderKey.split('/').filter(Boolean);
+                let parent = 'root', cum = '';
+                parts.forEach(function(part) {
+                    cum = cum ? cum + '/' + part : part;
+                    if (!Array.isArray(data[parent])) data[parent] = [];
+                    if (!data[parent].some(function(i) { return i && i.type === 'folder' && i.name.toLowerCase() === part.toLowerCase(); })) {
+                        data[parent].push({ type: 'folder', name: part, path: cum, fileCount: 0, previewText: 'Folder' });
+                    }
+                    if (!Array.isArray(data[cum])) data[cum] = [];
+                    parent = cum;
+                });
+            };
+            (files || []).forEach(function(f) {
+                const p = String((f && f.path) || '').trim();
+                const content = (f && f.content) || '';
+                if (p.slice(-1) === '/') { ensureChain(p.slice(0, -1)); return; }
+                const parts = p.split('/').filter(Boolean);
+                const name = parts.pop();
+                if (!name) return;
+                const folderKey = parts.length ? parts.join('/') : 'root';
+                ensureChain(folderKey);
+                if (!Array.isArray(data[folderKey])) data[folderKey] = [];
+                if (!data[folderKey].some(function(i) { return i.path.toLowerCase() === p.toLowerCase(); })) {
+                    data[folderKey].push({ type: 'file', name: name, size: wsSizeLabel(content), path: p, content: content });
+                }
+            });
+            return data;
+        }
+
+        let wsCloudTimer = null;
+
+        function wsCloudPushSchedule() {
+            const pid = wsProjectId();
+            if (!pid) return;
+            clearTimeout(wsCloudTimer);
+            wsCloudTimer = setTimeout(function() {
+                wsCloudTimer = null;
+                const payload = { project_id: pid, files: wsFlatten(wsLoad()) };
+                fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { method: 'DELETE' })
+                    .then(function() { return fetch(WS_CLOUD_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); })
+                    .catch(function() {});
+            }, 3000);
+        }
+
+        // Tarik data workspace dari D1 sekali saat halaman dibuka
+        function wsCloudPull() {
+            const pid = wsProjectId();
+            if (!pid || wsCloudTimer) return;
+            fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid))
+                .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+                .then(function(d) {
+                    const files = (d && d.files) || [];
+                    if (files.length) {
+                        const localRaw = localStorage.getItem(wsFilesKey());
+                        const merged = wsUnflatten(files);
+                        const mergedStr = JSON.stringify(merged);
+                        if (mergedStr !== localRaw) {
+                            try { localStorage.setItem(wsFilesKey(), mergedStr); } catch (e) {}
+                        }
+                    } else {
+                        const localRaw = localStorage.getItem(wsFilesKey());
+                        if (localRaw && localRaw !== JSON.stringify({ 'root': [] })) {
+                            fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { method: 'DELETE' }).catch(function() {});
+                            fetch(WS_CLOUD_API, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ project_id: pid, files: wsFlatten(wsLoad()) }) }).catch(function() {});
+                        }
+                    }
+                })
+                .catch(function() {});
         }
 
         function wsNormalize(p) {
@@ -2361,6 +2468,7 @@
                 if (urlProjectId || handoffProjectId) {
                     currentProjectId = urlProjectId || handoffProjectId;
                 }
+                setTimeout(function() { try { wsCloudPull(); } catch (e) {} }, 0);
                 // FIX: handoff basi milik proyek lain — buang, jangan di-submit di chat ini
                 if (handoffMsg && handoffMsg.trim() && urlProjectId && handoffProjectId && urlProjectId !== handoffProjectId) {
                     localStorage.removeItem('clincoo_current_chat_msg');

@@ -85,7 +85,16 @@ export async function onRequestDelete({ request, env }) {
         status: 400, headers: { 'Content-Type': 'application/json', ...CORS }
       });
     }
-    if (id) {
+    const projectId = url.searchParams.get('project_id') || '';
+    if (projectId) {
+      // Dibatasi ke tabel proyek ini saja — tidak boleh menyentuh data proyek lain
+      const T = await getProjectTables(env.DB, projectId);
+      if (id) {
+        await env.DB.prepare(`DELETE FROM ${T.envVars} WHERE id = ?`).bind(id).run();
+      } else {
+        await env.DB.prepare(`DELETE FROM ${T.envVars} WHERE key = ?`).bind(key).run();
+      }
+    } else if (id) {
       const r = await env.DB.prepare('DELETE FROM env_vars WHERE id = ?').bind(id).run();
       if (!r.meta || !r.meta.changes) {
         // tidak ada di tabel global: cari di tabel env_vars milik proyek

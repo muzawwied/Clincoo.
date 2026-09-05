@@ -29,7 +29,7 @@ const ClincooAPI = {
     return res.json();
   },
   async deleteEnvVar(id) {
-    const res = await fetch(API_BASE + '/env-vars?id=' + id, { method: 'DELETE' });
+    const res = await fetch(API_BASE + '/env-vars?id=' + id + '&project_id=' + encodeURIComponent(getCurrentProjectId()), { method: 'DELETE' });
     return res.json();
   },
 
