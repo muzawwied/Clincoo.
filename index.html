@@ -628,7 +628,12 @@
                 }
             });
         }
-        const text = "Hallo, Vylonium";
+        let greetName = 'Vylonium';
+        try {
+            const sn = localStorage.getItem('clincoo_fullname');
+            if (sn && sn.trim()) greetName = sn.trim().split(' ')[0];
+        } catch(e) {}
+        const text = "Hallo, " + greetName;
         const motivations = [
             "Setiap baris kode yang kamu tulis hari ini adalah fondasi untuk inovasi besar di masa depan.",
             "Wujudkan imajinasi tanpa batasmu menjadi karya digital yang memukau dan bermanfaat.",
