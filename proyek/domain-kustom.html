@@ -141,6 +141,7 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Domain kustom yang digunakan untuk situs produksi</p>
           </div>
           <div class="w-full sm:w-80">
+            <span id="cf-domain-status" class="inline-block text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-600">memuat…</span>
             <input type="text" value="" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none" placeholder="contohdomain.com">
           </div>
         </div>
@@ -323,6 +324,7 @@
                 selectPopoverOption('redirect', settings.redirect, settings.redirectLabel || 'Redirect ke domain utama');
             }
             updateDNSRecords(settings.domain || '');
+            loadRealDomainStatus();
         } catch(e) {}
     }
 
@@ -363,7 +365,48 @@
             });
             await ClincooAPI.logActivity('domain_updated', 'Domain: ' + settings.domain);
             updateDNSRecords(settings.domain);
+            if (settings.domain) attachDomainToPages(settings.domain);
         } catch(e) {}
+
+        async function attachDomainToPages(domain) {
+            const pid = localStorage.getItem('clincoo_current_project_id') || '';
+            const token = localStorage.getItem('clincoo_token') || '';
+            try {
+                const res = await fetch('https://clincoo.pages.dev/api/deploy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+                    body: JSON.stringify({ project_id: pid, action: 'add_domain', domain })
+                });
+                const data = await res.json();
+                loadRealDomainStatus();
+                if (data.error) alert('Domain belum terpasang di Cloudflare: ' + data.error);
+            } catch (e) {}
+        }
+
+        async function loadRealDomainStatus() {
+            const pid = localStorage.getItem('clincoo_current_project_id') || '';
+            const token = localStorage.getItem('clincoo_token') || '';
+            try {
+                const res = await fetch('https://clincoo.pages.dev/api/deploy?project_id=' + encodeURIComponent(pid), {
+                    headers: token ? { Authorization: 'Bearer ' + token } : {}
+                });
+                const st = await res.json();
+                const cnameValue = document.getElementById('dns-cname-value');
+                if (st.pages_url && cnameValue) cnameValue.textContent = st.pages_url.replace('https://', '');
+                const badge = document.getElementById('cf-domain-status');
+                if (badge) {
+                    if ((st.domains || []).length) {
+                        const d = st.domains[st.domains.length - 1];
+                        const active = d.status === 'active';
+                        badge.textContent = active ? 'Domain aktif di Cloudflare' : 'Menunggu verifikasi DNS (' + (d.status || 'pending') + ')';
+                        badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold ' + (active ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700 animate-pulse');
+                    } else {
+                        badge.textContent = 'Domain belum terhubung ke Cloudflare';
+                        badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-600';
+                    }
+                }
+            } catch (e) {}
+        }
     }
 
     // Override selectPopoverOption to also save

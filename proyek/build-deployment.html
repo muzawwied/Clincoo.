@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<script src="../js/auth-client.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -281,9 +282,11 @@
                     <button onclick="saveCustomDomain()" id="btn-save-domain" class="custom-domain-btn min-w-[72px] h-[34px] px-3 bg-white text-gray-900 border border-gray-300 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center shadow-sm">Simpan</button>
                 </div>
 
+                <p class="pt-2"><span id="cf-domain-status" class="text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-semibold">memuat status…</span></p>
+
                 <div class="pt-4 flex items-start gap-3">
                     <div class="mt-0.5">
-                        <input type="checkbox" id="check-https" onchange="toggleHttps()" checked disabled class="w-4 h-4 rounded border-gray-300 text-black focus:ring-black opacity-50 cursor-not-allowed">
+<input type="checkbox" id="check-https" onchange="toggleHttps()" checked disabled class="w-4 h-4 rounded border-gray-300 text-black focus:ring-black opacity-50 cursor-not-allowed">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-900">Wajibkan HTTPS</label>
@@ -303,6 +306,32 @@
         lucide.createIcons();
 
         // Fungsi berpindah antar tampilan/halaman
+        // ===================== DEPLOY ASLI (Cloudflare Pages) =====================
+        const API = 'https://clincoo.pages.dev/api';
+        const pid = () => localStorage.getItem('clincoo_current_project_id') || '';
+        let deployState = { pages_url: '', pollTimer: null, domainTimer: null };
+
+        async function apiFetch(path, opts = {}) {
+            const token = localStorage.getItem('clincoo_token') || '';
+            const res = await fetch(API + path, {
+                ...opts,
+                headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...(opts.headers || {}) }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+            return data;
+        }
+
+        function timeAgoIso(iso) {
+            if (!iso) return 'baru saja';
+            const t = new Date(iso + (iso.endsWith('Z') ? '' : 'Z')).getTime();
+            return timeAgo(t);
+        }
+
+        async function fetchStatus() {
+            return apiFetch('/deploy?project_id=' + encodeURIComponent(pid()));
+        }
+
         function switchView(viewId) {
             ['view-cta', 'view-config', 'view-dashboard'].forEach(id => {
                 const el = document.getElementById(id);
@@ -322,12 +351,15 @@
             loadCustomDomain();
         });
 
-        function checkDeploymentStatus() {
-            const isDeployed = localStorage.getItem('clincoo_is_deployed');
-            if (isDeployed === 'true') {
-                switchView('view-dashboard');
-                startDeploySimulation(); // Jalankan simulasi shimmer dulu
-            }
+        async function checkDeploymentStatus() {
+            try {
+                const st = await fetchStatus();
+                if (st && (st.last_deployment || (st.domains || []).length)) {
+                    switchView('view-dashboard');
+                    startDeploySimulation();
+                    return;
+                }
+            } catch (e) {}
         }
         
         function startDeploySimulation() {
@@ -336,36 +368,66 @@
             const link = document.getElementById('deployed-link');
             const timeLabel = document.getElementById('time-ago-label');
             const visitBtn = document.getElementById('btn-visit-site');
-            
-            // Set initial building state
+
+            // State awal: sedang membangun (real)
             indicator.className = 'w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse';
             shimmer.style.display = 'inline-block';
             link.style.display = 'none';
             timeLabel.innerText = 'sedang membangun situs...';
             visitBtn.disabled = true;
             visitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            
-            // Simulate build time (e.g., 3-5 seconds for demo purposes)
-            setTimeout(() => {
-                // Deployment complete
-                indicator.className = 'w-2.5 h-2.5 rounded-full bg-green-500';
-                shimmer.style.display = 'none';
-                link.style.display = 'inline-block';
-                
-                // Update time if not set yet (first deploy) or refresh
-                let deployTime = localStorage.getItem('clincoo_deploy_time');
-                if(!deployTime) {
-                    deployTime = Date.now();
-                    localStorage.setItem('clincoo_deploy_time', deployTime);
+
+            if (deployState.pollTimer) clearInterval(deployState.pollTimer);
+            let tries = 0;
+            deployState.pollTimer = setInterval(async () => {
+                tries++;
+                let st = null;
+                try { st = await fetchStatus(); } catch (e) { return; }
+                const dep = st.last_deployment;
+                if (!dep) return;
+                const done = ['success', 'active', 'failed', 'canceled'].includes(dep.status);
+                if (done || tries > 30) {
+                    clearInterval(deployState.pollTimer);
+                    const ok = ['success', 'active'].includes(dep.status);
+                    indicator.className = 'w-2.5 h-2.5 rounded-full ' + (ok ? 'bg-green-500' : 'bg-red-500');
+                    shimmer.style.display = 'none';
+                    link.style.display = 'inline-block';
+                    deployState.pages_url = st.pages_url || (ok ? dep.url : '');
+                    link.textContent = deployState.pages_url || 'gagal dideploy';
+                    link.href = deployState.pages_url || '#';
+                    timeLabel.innerText = ok ? timeAgoIso(dep.created) : 'deploy gagal';
+                    visitBtn.disabled = !ok;
+                    if (ok) {
+                        visitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        visitBtn.onclick = () => window.open(deployState.pages_url, '_blank');
+                    }
+                    renderRealDomains(st.domains || []);
                 }
-                
-                updateDeployTime();
-                setInterval(updateDeployTime, 60000); // Perbarui waktu otomatis tiap 1 menit
-                
-                visitBtn.disabled = false;
-                visitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                
-            }, 3500); // 3.5 seconds shimmer simulation
+            }, 4000);
+        }
+
+        function renderRealDomains(domains) {
+            const badge = document.getElementById('cf-domain-status');
+            if (!badge) return;
+            if (!domains.length) {
+                badge.textContent = 'Domain kustom belum terhubung ke Cloudflare';
+                badge.className = 'text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-semibold';
+                return;
+            }
+            const d = domains[domains.length - 1];
+            const active = d.status === 'active';
+            badge.textContent = d.name + ' — ' + (active ? 'AKTIF' : 'menunggu verifikasi DNS (' + (d.status || 'pending') + ')');
+            badge.className = 'text-[11px] px-2.5 py-1 rounded-full font-semibold ' + (active ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700 animate-pulse');
+            if (!active) {
+                if (deployState.domainTimer) clearInterval(deployState.domainTimer);
+                deployState.domainTimer = setInterval(async () => {
+                    try {
+                        const st = await fetchStatus();
+                        renderRealDomains(st.domains || []);
+                        if ((st.domains || []).every(x => x.status === 'active')) clearInterval(deployState.domainTimer);
+                    } catch (e) {}
+                }, 8000);
+            }
         }
 
         function updateDeployTime() {
@@ -401,44 +463,40 @@
             return "baru saja";
         }
 
-        // Simulasi Proses Deploy
-        function processDeploy() {
+        // Deploy ASLI: file workspace proyek -> Cloudflare Pages
+        async function processDeploy() {
             const btn = document.getElementById('btn-process-deploy');
-            // Menjaga teks agar terbaca jelas dengan warna teks menyesuaikan tombol
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Memproses...</span>`;
-            
-            // Ubah menjadi transparan di background putih
+            if (!pid()) { alert('Proyek belum dipilih.'); return; }
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Mengunggah file workspace...</span>`;
             btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
             lucide.createIcons();
-
-            setTimeout(() => {
+            try {
+                await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid() }) });
                 btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span class="inline-block">Berhasil Deploy!</span>`;
-                // Tetap transparan
-                btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
                 lucide.createIcons();
-                
+                switchView('view-dashboard');
+                startDeploySimulation();
                 setTimeout(() => {
-                    localStorage.setItem('clincoo_is_deployed', 'true');
-                    // We don't set deploy_time here yet, let startDeploySimulation handle it
-                    localStorage.removeItem('clincoo_deploy_time'); // Clear old time
-                    
-                    checkDeploymentStatus(); // This will trigger switchView and start simulation
-
-                    setTimeout(() => {
-                        btn.innerHTML = `Jalankan Deploy`;
-                        btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
-                    }, 1000);
-                }, 800);
-            }, 2000);
+                    btn.innerHTML = `Jalankan Deploy`;
+                    btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
+                    btn.disabled = false;
+                }, 1000);
+            } catch (err) {
+                alert('Deploy gagal: ' + err.message);
+                btn.innerHTML = `Jalankan Deploy`;
+                btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
+            }
         }
 
-        // Logika Unpublish (Membatalkan Deploy)
-        function unpublishSite() {
-            if(confirm("Apakah Anda yakin ingin menarik publikasi dan menonaktifkan situs ini?")) {
+        // Unpublish ASLI: hapus project Cloudflare Pages proyek ini
+        async function unpublishSite() {
+            if (!confirm("Apakah Anda yakin ingin menarik publikasi dan menonaktifkan situs ini?")) return;
+            try {
+                await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'unpublish' }) });
                 localStorage.removeItem('clincoo_is_deployed');
                 localStorage.removeItem('clincoo_deploy_time');
                 switchView('view-cta');
-            }
+            } catch (err) { alert('Gagal: ' + err.message); }
         }
         
         // Fitur Tombol Save di Source Config dengan Animasi Loading -> Check
@@ -481,9 +539,10 @@
                 checkHttps.classList.add('opacity-50', 'cursor-not-allowed');
                 checkHttps.checked = true;
             }
+            fetchStatus().then(st => renderRealDomains(st.domains || [])).catch(() => {});
         }
 
-        function saveCustomDomain() {
+        async function saveCustomDomain() {
             const input = document.getElementById('input-custom-domain').value.trim();
             const btn = document.getElementById('btn-save-domain');
             
@@ -498,29 +557,36 @@
             btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
             lucide.createIcons();
 
-            setTimeout(() => {
+            try {
+                await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'add_domain', domain: input }) });
                 localStorage.setItem('clincoo_custom_domain', input);
                 if(localStorage.getItem('clincoo_enforce_https') === null) {
                     localStorage.setItem('clincoo_enforce_https', 'true');
                 }
                 loadCustomDomain();
-                
+                const st = await fetchStatus().catch(() => null);
+                if (st) renderRealDomains(st.domains || []);
                 btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i>`;
                 lucide.createIcons();
+            } catch (err) {
+                alert('Gagal menghubungkan domain: ' + err.message);
+            }
 
-                setTimeout(() => {
-                    btn.innerHTML = "Simpan";
-                    btn.disabled = false;
-                }, 1500);
-            }, 1000);
+            setTimeout(() => {
+                btn.innerHTML = "Simpan";
+                btn.disabled = false;
+            }, 1500);
         }
 
-        function removeCustomDomain() {
-            if(confirm("Apakah Anda yakin ingin menghapus custom domain?")) {
-                localStorage.removeItem('clincoo_custom_domain');
-                localStorage.removeItem('clincoo_enforce_https');
-                loadCustomDomain();
-            }
+        async function removeCustomDomain() {
+            if(!confirm("Apakah Anda yakin ingin menghapus custom domain?")) return;
+            const domain = localStorage.getItem('clincoo_custom_domain');
+            try {
+                if (domain) await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'remove_domain', domain }) });
+            } catch (err) { alert('Gagal: ' + err.message); }
+            localStorage.removeItem('clincoo_custom_domain');
+            localStorage.removeItem('clincoo_enforce_https');
+            loadCustomDomain();
         }
 
         function toggleHttps() {
