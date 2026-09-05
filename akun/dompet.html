@@ -559,11 +559,6 @@
                 }
                 window.open(res.invoice_url, '_blank');
                 pollTopUpStatus(res.order_id, channel);
-                if (res.mode === 'sandbox') {
-                    showModal('Mode Sandbox (Test)', 'Halaman pembayaran Xendit TEST MODE telah dibuka di tab baru. Untuk menguji tanpa uang nyata, klik tautan "Click here to simulate your payment" di halaman tersebut. Saldo akan otomatis masuk begitu pembayaran terverifikasi.');
-                } else {
-                    showModal('Selesaikan Pembayaran', 'Halaman pembayaran telah dibuka di tab baru. Saldo akan otomatis masuk ke dompet Clincoo Anda setelah pembayaran terverifikasi.');
-                }
             } catch(e) {
                 showModal('Gagal', 'Tidak dapat terhubung ke server pembayaran.');
             }
@@ -585,7 +580,6 @@
                         await renderBalance();
                         await renderTransactions();
                         closeTopUpPage();
-                        showModal('Pengisian Saldo Berhasil', 'Pembayaran terverifikasi. Saldo sebesar Rp ' + formatNumberOnly(data.amount) + ' telah ditambahkan ke akun Clincoo Anda.');
                         try {
                             fetch('https://clincoo.pages.dev/api/notifications', {
                                 method: 'POST',

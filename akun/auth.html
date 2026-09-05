@@ -357,12 +357,7 @@
                 if (!res.ok || !data.token) throw new Error(data.error || 'Terjadi kesalahan, coba lagi.');
 
                 saveSession(data);
-                if (action === 'register') {
-                    showModal('Pendaftaran Berhasil', 'Akun Anda berhasil dibuat. Mengalihkan ke beranda...', 'success');
-                } else {
-                    showModal('Login Berhasil', 'Selamat datang kembali, ' + (data.user.name || '').split(' ')[0] + '. Mengalihkan...', 'success');
-                }
-                setTimeout(() => { window.location.href = '../index.html'; }, 1500);
+                setTimeout(() => { window.location.href = '../index.html'; }, 400);
             } catch (err) {
                 showModal(action === 'login' ? 'Login Gagal' : 'Pendaftaran Gagal', err.message, 'error');
                 btn.disabled = false;
@@ -401,8 +396,7 @@
                 const data = await res.json();
                 if (!res.ok || !data.token) throw new Error(data.error || 'Login ' + provider + ' gagal.');
                 saveSession(data);
-                showModal('Login Berhasil', 'Selamat datang, ' + (data.user.name || '').split(' ')[0] + '. Mengalihkan...', 'success');
-                setTimeout(() => { window.location.href = '../index.html'; }, 1500);
+                setTimeout(() => { window.location.href = '../index.html'; }, 400);
             } catch (err) {
                 showModal('Login ' + (provider === 'github' ? 'GitHub' : 'Google') + ' Gagal', err.message, 'error');
             }
