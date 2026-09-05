@@ -953,10 +953,13 @@
             const currentScrollTop = Math.ceil(chatContainer.scrollTop);
             const maxScrollTop = chatContainer.scrollHeight - chatContainer.clientHeight;
 
-            if (maxScrollTop - currentScrollTop > threshold) {
-                autoScrollActive = false;
-            } else {
+            if (maxScrollTop - currentScrollTop <= threshold) {
                 autoScrollActive = true;
+            } else if (currentScrollTop < lastScrollTop - 1) {
+                // FIX: hanya matikan auto-scroll kalau user BENAR-BENAR scroll ke atas.
+                // Pertumbuhan tinggi konten (markdown/gambar dimuat terlambat) tidak lagi
+                // mematikan auto-scroll — dulu inilah penyebab pesan baru "nempel di input".
+                autoScrollActive = false;
             }
 
             lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
@@ -1130,6 +1133,15 @@
                 chatContainer.scrollTo({
                     top: chatContainer.scrollHeight,
                     behavior: 'smooth'
+                });
+                // FIX: konten markdown/gambar/kode sering menambah tinggi SETELAH scroll
+                // selesai — pin ulang beberapa kali agar benar-benar sampai dasar.
+                [150, 400, 800].forEach(function(ms) {
+                    setTimeout(function() {
+                        if (autoScrollActive) {
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                        }
+                    }, ms);
                 });
             } else if (autoScrollActive && !isUserInteracting) {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -2492,6 +2504,15 @@ if (loadChatLog()) {
     renderMessages();
     autoScrollActive = true;
     scrollToBottom(true);
+    // FIX: jika pesan terakhir masih pertanyaan user tanpa jawaban AI (misalnya karena
+    // pindah halaman saat AI masih menjawab) — lanjutkan jawaban secara otomatis.
+    setTimeout(function() {
+        try {
+            if (!isGenerating && messages.length > 0 && messages[messages.length - 1].role === 'user' && (messages[messages.length - 1].text || '').trim()) {
+                fetchAIResponse();
+            }
+        } catch(e) { console.error('Resume pending answer error:', e); }
+    }, 1200);
 } else if (handoffMsg && handoffMsg.trim()) {
     submitHandoff();
 }
