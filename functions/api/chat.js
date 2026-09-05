@@ -169,8 +169,14 @@ async function callGemini(apiKey, messages, useWorkspaceTools) {
 
   for (const model of PREFERRED_MODELS) {
     try {
-      const payload = { contents, tools: [{ google_search: {} }] };
-      if (useWorkspaceTools) payload.tools.push({ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS });
+      // Catatan: Gemini API MENOLAK (400) kombinasi google_search grounding + functionDeclarations
+      // dalam satu request. Saat mode workspace tools aktif, jangan campur dengan google_search —
+      // itulah sebab bug sebelumnya: request tools gabungan gagal, fallback menghapus SEMUA tools,
+      // AI jadi tak punya function calling nyata tapi tetap disuruh system prompt "pakai tools",
+      // sehingga AI menulis JSON aksi palsu sebagai teks biasa alih-alih benar-benar membuat file.
+      const payload = useWorkspaceTools
+        ? { contents, tools: [{ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS }] }
+        : { contents, tools: [{ google_search: {} }] };
       if (systemInstruction) payload.systemInstruction = { parts: [{ text: systemInstruction }] };
 
       let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
