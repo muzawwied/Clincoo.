@@ -31,6 +31,7 @@
         body.dark-mode .text-gray-500, body.dark-mode .text-gray-600 { color: #888888 !important; }
         body.dark-mode .text-gray-400 { color: #666666 !important; }
         body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+        body.dark-mode .payment-logo-badge { background-color: #ffffff !important; }
         body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 { background-color: #222222 !important; }
         body.dark-mode .border-gray-200, body.dark-mode .border-gray-100, body.dark-mode .border-gray-50 { border-color: #222222 !important; }
         body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #222222 !important; }
@@ -124,7 +125,7 @@
                         <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">Pembayaran Instan</h4>
                         <label class="pay-method-card selected flex items-center justify-between p-4 border-2 border-gray-900 dark:border-white rounded-2xl w-full bg-gray-50 dark:bg-[#1a1a1a]" data-method="QRIS Instant" onclick="selectPaymentMethod(this)">
                             <div class="flex items-center space-x-3.5 flex-1 min-w-0 mr-2">
-                                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
                                     <img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain">
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -143,7 +144,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="GoPay" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2">
                                         <img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -157,7 +158,7 @@
                             
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="DANA" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-1.5">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-1.5">
                                         <img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -171,7 +172,7 @@
                             
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="OVO" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
                                         <img src="assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -185,7 +186,7 @@
                             
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="ShopeePay" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2">
                                         <img src="assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -199,7 +200,7 @@
                             
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="LinkAja" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
                                         <img src="assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -219,7 +220,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="BCA Virtual Account" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
                                         <img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -233,7 +234,7 @@
                             
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="Mandiri Virtual Account" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
                                         <img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -247,7 +248,7 @@
                             
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="BRI Virtual Account" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
                                         <img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -261,7 +262,7 @@
                             
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="BNI Virtual Account" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
+                                    <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700 p-2.5">
                                         <img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
@@ -364,16 +365,16 @@
 
         function getMethodLogo(method) {
             var m = (method || '').toLowerCase();
-            if (m.includes('qris')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain"></div>';
-            if (m.includes('bca')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>';
-            if (m.includes('mandiri')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>';
-            if (m.includes('bri')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain"></div>';
-            if (m.includes('bni')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>';
-            if (m.includes('gopay')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain"></div>';
-            if (m.includes('dana')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-0.5 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain"></div>';
-            if (m.includes('ovo')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain"></div>';
-            if (m.includes('shopee')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain"></div>';
-            if (m.includes('linkaja')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain"></div>';
+            if (m.includes('qris')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain"></div>';
+            if (m.includes('bca')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>';
+            if (m.includes('mandiri')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>';
+            if (m.includes('bri')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="w-full h-full object-contain"></div>';
+            if (m.includes('bni')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200 p-1.5"><img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>';
+            if (m.includes('gopay')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain"></div>';
+            if (m.includes('dana')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white p-0.5 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain"></div>';
+            if (m.includes('ovo')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain"></div>';
+            if (m.includes('shopee')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain"></div>';
+            if (m.includes('linkaja')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white p-1 border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain"></div>';
             if (m.includes('dompet')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="wallet" class="w-5 h-5 text-white dark:text-black"></i></div>';
             if (m.includes('sub')) return '<div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="crown" class="w-5 h-5 text-white dark:text-black"></i></div>';
             
