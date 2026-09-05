@@ -1131,15 +1131,29 @@
                     const list = d.projects;
                     let local = [];
                     try { const st = localStorage.getItem('clincoo_projects'); if (st) local = JSON.parse(st); } catch(e) {}
-                    if (list.length === 0 && local.length > 0) {
-                        // migrasi pertama: dorong proyek lokal ke akun yang login
+                    // MERGE DUA ARAH (aman dari kehilangan data):
+                    // 1) proyek lokal yang belum ada di server -> dorong ke server (registrasi kepemilikan utk deploy)
+                    // 2) proyek server yang belum ada di lokal -> tambahkan ke lokal
+                    // 3) id sama -> pakai yang updatedAt-nya lebih baru
+                    const serverById = {};
+                    list.forEach(sp => serverById[sp.id] = sp);
+                    const merged = local.slice();
+                    local.forEach(lp => {
+                        const sp = serverById[lp.id];
+                        if (sp && new Date(sp.updatedAt || 0) > new Date(lp.updatedAt || 0)) {
+                            const idx = merged.findIndex(m => m.id === lp.id);
+                            if (idx !== -1) merged[idx] = sp;
+                        }
+                    });
+                    list.forEach(sp => { if (!merged.some(m => m.id === sp.id)) merged.push(sp); });
+                    const toPush = merged.filter(m => !serverById[m.id]); // belum terdaftar di server
+                    if (toPush.length) {
                         try {
-                            fetch(PROJECTS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'replace_all', projects: local }) }).catch(function () {});
+                            fetch(PROJECTS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'upsert', projects: toPush }) }).catch(function () {});
                         } catch (e) {}
-                        return;
                     }
-                    if (JSON.stringify(list) !== JSON.stringify(local)) {
-                        try { localStorage.setItem('clincoo_projects', JSON.stringify(list)); } catch(e) {}
+                    if (JSON.stringify(merged) !== JSON.stringify(local)) {
+                        try { localStorage.setItem('clincoo_projects', JSON.stringify(merged)); } catch(e) {}
                         renderProjects();
                     }
                 }).catch(function () {});
