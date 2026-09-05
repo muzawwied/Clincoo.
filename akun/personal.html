@@ -136,7 +136,7 @@
         <!-- Avatar Photo Upload -->
         <div class="py-6 flex flex-col items-center gap-4">
           <div class="relative group cursor-pointer" onclick="document.getElementById('file-upload').click()">
-            <div id="avatar-container" class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold overflow-hidden bg-cover bg-center transition-all">
+            <div id="avatar-container" class="w-24 h-24 rounded-full bg-accent flex items-center justify-center text-white text-3xl font-bold overflow-hidden bg-cover bg-center transition-all shadow-lg">
               <span id="avatar-initial">C</span>
             </div>
             <div class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:bg-gray-50 transition-all z-10">
@@ -319,7 +319,7 @@
                     if (nm && avatarInitial && !pc) avatarInitial.innerText = nm.charAt(0).toUpperCase();
                     if (pc && avatarContainer) {
                         avatarContainer.style.backgroundImage = 'url(' + pc + ')';
-                        avatarContainer.classList.remove('bg-gradient-to-br', 'from-blue-500', 'to-purple-600');
+                        avatarContainer.classList.remove('bg-accent');
                         if (avatarInitial) avatarInitial.style.display = 'none';
                     }
                     // Bahasa & zona waktu juga tersinkron real-time dari D1
@@ -374,7 +374,7 @@
                     
                     if (avatarContainer) {
                         avatarContainer.style.backgroundImage = `url(${base64})`;
-                        avatarContainer.classList.remove('bg-gradient-to-br', 'from-blue-500', 'to-purple-600');
+                        avatarContainer.classList.remove('bg-accent');
                     }
                     if (avatarInitial) {
                         avatarInitial.style.display = 'none';
@@ -497,7 +497,7 @@
 
                 if (savedPic && avatarContainer) {
                     avatarContainer.style.backgroundImage = `url(${savedPic})`;
-                    avatarContainer.classList.remove('bg-gradient-to-br', 'from-blue-500', 'to-purple-600');
+                    avatarContainer.classList.remove('bg-accent');
                     if (avatarInitial) avatarInitial.style.display = 'none';
                 }
             } catch(e) {}
