@@ -13,14 +13,37 @@ export async function onRequestOptions() {
 }
 
 async function getSecrets(env) {
+  // 1) Cloudflare Pages environment variables (highest priority)
+  if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
+    return { clientId: env.GITHUB_CLIENT_ID, clientSecret: env.GITHUB_CLIENT_SECRET };
+  }
   if (!env.DB) return { clientId: '', clientSecret: '' };
   try {
+    let clientId = '';
+    let clientSecret = '';
+    // 2) Global env_vars table
     const idRow = await env.DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind('GITHUB_CLIENT_ID').first();
     const secretRow = await env.DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind('GITHUB_CLIENT_SECRET').first();
-    return {
-      clientId: idRow?.value || '',
-      clientSecret: secretRow?.value || ''
-    };
+    if (idRow?.value) clientId = idRow.value;
+    if (secretRow?.value) clientSecret = secretRow.value;
+    // 3) Fallback: any per-project env_vars table (set via the app's Environment page)
+    if (!clientId || !clientSecret) {
+      const tables = await env.DB.prepare(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'p\_%\_env\_vars'"
+      ).all();
+      for (const t of tables.results || []) {
+        if (clientId && clientSecret) break;
+        if (!clientId) {
+          const r = await env.DB.prepare('SELECT value FROM ' + t.name + ' WHERE key = ?').bind('GITHUB_CLIENT_ID').first();
+          if (r?.value) clientId = r.value;
+        }
+        if (!clientSecret) {
+          const r = await env.DB.prepare('SELECT value FROM ' + t.name + ' WHERE key = ?').bind('GITHUB_CLIENT_SECRET').first();
+          if (r?.value) clientSecret = r.value;
+        }
+      }
+    }
+    return { clientId, clientSecret };
   } catch {
     return { clientId: '', clientSecret: '' };
   }
@@ -30,7 +53,9 @@ export async function onRequestPost({ request, env }) {
   try {
     const { clientId, clientSecret } = await getSecrets(env);
     if (!clientId || !clientSecret) {
-      return new Response(JSON.stringify({ error: 'GitHub OAuth credentials not configured in database' }), {
+      const missing = !clientId && !clientSecret ? 'Client ID dan Client Secret'
+        : (!clientId ? 'Client ID' : 'Client Secret');
+      return new Response(JSON.stringify({ error: 'Kredensial GitHub OAuth belum lengkap: ' + missing + ' belum diatur' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
