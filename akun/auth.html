@@ -391,7 +391,8 @@
             // State acak per sesi — cegah serangan login-CSRF (callback jahat memaksa
             // korban login ke akun penyerang). Callback harus mengembalikan state ini.
             const st = (crypto.randomUUID ? crypto.randomUUID() : ('s' + Date.now() + Math.random())).replace(/-/g, '');
-            try { sessionStorage.setItem('clincoo_oauth_state', st); } catch (e) {}
+            // localStorage (bukan sessionStorage) -> tahan meski tab dibekukan/direstart Android saat login lama.
+            try { localStorage.setItem('clincoo_oauth_state', JSON.stringify({ v: st, t: Date.now() })); } catch (e) {}
             if (provider === 'github') {
                 window.location.href = 'https://github.com/login/oauth/authorize?client_id=' + GITHUB_CLIENT_ID +
                     '&scope=read:user%20user:email%20repo&state=' + st + '&redirect_uri=' + encodeURIComponent(redirectUri);
@@ -433,14 +434,21 @@
             const code = params.get('code');
             const oauthError = params.get('error');
             if (code) {
-                const savedState = (() => { try { return sessionStorage.getItem('clincoo_oauth_state'); } catch (e) { return null; } })();
+                const savedRaw = (() => { try { return localStorage.getItem('clincoo_oauth_state'); } catch (e) { return null; } })();
+                let savedState = null;
+                try {
+                    const parsed = JSON.parse(savedRaw || 'null');
+                    // Berlaku 15 menit — cukup utk proses login lambat, tetap cegah replay lama.
+                    if (parsed && parsed.v && (Date.now() - parsed.t) < 15 * 60 * 1000) savedState = parsed.v;
+                } catch (e) {}
                 const gotState = params.get('state');
                 // Tolak callback tanpa/beda state — indikasi kuat CSRF/serangan.
                 if (!savedState || gotState !== savedState) {
-                    showModal('Login Dibatalkan', 'Callback OAuth tidak valid (state tidak cocok). Silakan mulai login ulang.', 'error');
+                    try { localStorage.removeItem('clincoo_oauth_state'); } catch (e) {}
+                    showModal('Login Dibatalkan', 'Sesi login kedaluwarsa atau tidak valid. Silakan mulai login ulang.', 'error');
                     return;
                 }
-                try { sessionStorage.removeItem('clincoo_oauth_state'); } catch (e) {}
+                try { localStorage.removeItem('clincoo_oauth_state'); } catch (e) {}
                 document.getElementById('oauth-loading').classList.remove('hidden');
                 handleOAuthCallback(code, gotState === 'google' ? 'google' : 'github');
             } else if (oauthError) {
