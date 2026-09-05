@@ -42,7 +42,7 @@
         if (typeof input === 'object' && input && input.headers && !(init && init.headers)) { /* noop */ }
       } catch (e) {}
     }
-    var p = origFetch.apply(this, arguments.length > 1 ? [input, init] : [input]);
+    var p = origFetch.call(this, input, init);
     return p.then(function (res) {
       try {
         if (res.status === 401 && !isAuthPage && isApi && !isAuthApi) {
