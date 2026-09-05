@@ -385,14 +385,34 @@
             }
         }
 
+        // Helper cookie untuk state OAuth (lebih tahan redirect lintas-domain daripada
+        // localStorage/sessionStorage di beberapa browser dengan anti bounce-tracking).
+        function setOauthStateCookie(val, provider) {
+            const payload = encodeURIComponent(JSON.stringify({ v: val, t: Date.now(), p: provider }));
+            document.cookie = 'clincoo_oauth_state=' + payload + '; Max-Age=900; Path=' + window.location.pathname + '; SameSite=Lax; Secure';
+        }
+        function getOauthStateCookie() {
+            const m = document.cookie.match(/(?:^|;\s*)clincoo_oauth_state=([^;]+)/);
+            return m ? decodeURIComponent(m[1]) : null;
+        }
+        function clearOauthStateCookie() {
+            document.cookie = 'clincoo_oauth_state=; Max-Age=0; Path=' + window.location.pathname + '; SameSite=Lax; Secure';
+        }
+
         // ==== LOGIN SOSIAL (OAuth) ====
         function startOAuth(provider) {
             const redirectUri = window.location.origin + window.location.pathname;
             // State acak per sesi — cegah serangan login-CSRF (callback jahat memaksa
             // korban login ke akun penyerang). Callback harus mengembalikan state ini.
             const st = (crypto.randomUUID ? crypto.randomUUID() : ('s' + Date.now() + Math.random())).replace(/-/g, '');
-            // localStorage (bukan sessionStorage) -> tahan meski tab dibekukan/direstart Android saat login lama.
-            try { localStorage.setItem('clincoo_oauth_state', JSON.stringify({ v: st, t: Date.now(), p: provider })); } catch (e) {}
+            // Cookie (bukan localStorage/sessionStorage) — beberapa browser (Samsung
+            // Internet, Firefox, Brave) punya fitur anti "bounce tracking" yang otomatis
+            // MENGHAPUS localStorage yang baru ditulis persis sebelum redirect ke domain
+            // lain (github.com/accounts.google.com), jadi state selalu hilang saat kembali.
+            // Cookie SameSite=Lax dikecualikan dari itu karena memang untuk alur ini.
+            // Payload menyimpan provider (p) juga -> deteksi provider saat callback,
+            // karena state sekarang acak, bukan literal 'github'/'google'.
+            setOauthStateCookie(st, provider);
             if (provider === 'github') {
                 window.location.href = 'https://github.com/login/oauth/authorize?client_id=' + GITHUB_CLIENT_ID +
                     '&scope=read:user%20user:email%20repo&state=' + st + '&redirect_uri=' + encodeURIComponent(redirectUri);
@@ -434,7 +454,7 @@
             const code = params.get('code');
             const oauthError = params.get('error');
             if (code) {
-                const savedRaw = (() => { try { return localStorage.getItem('clincoo_oauth_state'); } catch (e) { return null; } })();
+                const savedRaw = getOauthStateCookie();
                 let savedState = null;
                 let savedProvider = 'github';
                 try {
@@ -448,11 +468,11 @@
                 const gotState = params.get('state');
                 // Tolak callback tanpa/beda state — indikasi kuat CSRF/serangan.
                 if (!savedState || gotState !== savedState) {
-                    try { localStorage.removeItem('clincoo_oauth_state'); } catch (e) {}
+                    clearOauthStateCookie();
                     showModal('Login Dibatalkan', 'Sesi login kedaluwarsa atau tidak valid. Silakan mulai login ulang.', 'error');
                     return;
                 }
-                try { localStorage.removeItem('clincoo_oauth_state'); } catch (e) {}
+                clearOauthStateCookie();
                 document.getElementById('oauth-loading').classList.remove('hidden');
                 handleOAuthCallback(code, savedProvider);
             } else if (oauthError) {
