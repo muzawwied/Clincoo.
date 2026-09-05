@@ -459,32 +459,65 @@
             }
         } catch(e) {}
 
-        // ===== SINKRONISASI D1: data profil terhubung dengan personal.html =====
-        try {
-            fetch('https://clincoo-be2.pages.dev/api/account-profile')
-                .then(function(r){ return r.json(); })
-                .then(function(d) {
-                    if (!d || d.error) return;
-                    const fill = {};
-                    if (d.name && !localStorage.getItem('clincoo_fullname')) { localStorage.setItem('clincoo_fullname', d.name); fill.name = d.name; }
-                    if (d.email && !localStorage.getItem('clincoo_email')) { localStorage.setItem('clincoo_email', d.email); fill.email = d.email; }
-                    if (d.avatar && !localStorage.getItem('clincoo_profile_pic')) {
-                        try { localStorage.setItem('clincoo_profile_pic', d.avatar); fill.avatar = d.avatar; } catch(e) {}
-                    }
+        // ===== SINKRONISASI D1: Profile = sumber utama; data selalu real-time dari D1 =====
+        var profileD1Seeded = false;
+        function applyProfileData(d) {
+            const nameEl = document.getElementById('profile-display-name');
+            const emailEl = document.getElementById('profile-display-email');
+            if (d.name) {
+                try { localStorage.setItem('clincoo_fullname', d.name); } catch(e) {}
+                if (nameEl && nameEl.textContent !== d.name) nameEl.textContent = d.name;
+            }
+            if (d.email) {
+                try { localStorage.setItem('clincoo_email', d.email); } catch(e) {}
+                if (emailEl && emailEl.textContent !== d.email) emailEl.textContent = d.email;
+            }
+            if (d.avatar) {
+                try { localStorage.setItem('clincoo_profile_pic', d.avatar); } catch(e) {}
+                if (profileDisplay) {
+                    profileDisplay.style.backgroundImage = 'url(' + d.avatar + ')';
+                    profileDisplay.textContent = '';
+                }
+            } else {
+                const nm = d.name || (nameEl ? nameEl.textContent : '');
+                if (nm && profileDisplay && !profileDisplay.style.backgroundImage) {
+                    profileDisplay.textContent = nm.charAt(0).toUpperCase();
+                }
+            }
+        }
+        async function refreshProfileFromD1() {
+            try {
+                const d = await fetch('https://clincoo-be2.pages.dev/api/account-profile').then(function(r){ return r.json(); });
+                if (!d || d.error) return;
+                if (Object.keys(d).length > 0) {
+                    applyProfileData(d);
+                } else if (!profileD1Seeded) {
+                    // D1 masih kosong: jadikan data Profile saat ini sebagai acuan (seed sekali)
+                    profileD1Seeded = true;
+                    const payload = {};
                     const nameEl = document.getElementById('profile-display-name');
                     const emailEl = document.getElementById('profile-display-email');
-                    if (fill.name && nameEl) {
-                        nameEl.textContent = fill.name;
-                        if (profileDisplay && !profileDisplay.style.backgroundImage) profileDisplay.textContent = fill.name.charAt(0).toUpperCase();
+                    const nm = localStorage.getItem('clincoo_fullname') || (nameEl ? nameEl.textContent : '');
+                    const em = localStorage.getItem('clincoo_email') || (emailEl ? emailEl.textContent : '');
+                    const pc = localStorage.getItem('clincoo_profile_pic');
+                    if (nm) payload.name = nm.trim();
+                    if (em) payload.email = em.trim();
+                    if (pc && pc.length < 700000) payload.avatar = pc;
+                    if (Object.keys(payload).length > 0) {
+                        fetch('https://clincoo-be2.pages.dev/api/account-profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        }).catch(function(){});
                     }
-                    if (fill.email && emailEl) emailEl.textContent = fill.email;
-                    if (fill.avatar && profileDisplay) {
-                        profileDisplay.style.backgroundImage = 'url(' + fill.avatar + ')';
-                        profileDisplay.textContent = '';
-                    }
-                })
-                .catch(function(){});
-        } catch(e) {}
+                }
+            } catch(e) {}
+        }
+        refreshProfileFromD1();
+        setInterval(refreshProfileFromD1, 10000);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) refreshProfileFromD1();
+        });
 
         if (profileInput) {
             profileInput.addEventListener('change', function(e) {

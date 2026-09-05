@@ -294,35 +294,48 @@
             try {
                 fetch(PROFILE_API).then(function(r){ return r.json(); }).then(function(d) {
                     if (!d || d.error) return;
-                    let changed = false;
-                    if (d.name && !localStorage.getItem('clincoo_fullname')) { localStorage.setItem('clincoo_fullname', d.name); changed = true; }
-                    if (d.email && !localStorage.getItem('clincoo_email')) { localStorage.setItem('clincoo_email', d.email); changed = true; }
-                    if (d.avatar && !localStorage.getItem('clincoo_profile_pic')) {
-                        try { localStorage.setItem('clincoo_profile_pic', d.avatar); changed = true; } catch(e) {}
-                    }
-                    if (!changed) return;
+                    const hasData = Object.keys(d).filter(function(k){ return k !== 'error'; }).length > 0;
+                    if (!hasData) return;
+                    // Jangan menimpa saat ada perubahan yang belum disimpan
+                    const actions = document.getElementById('action-buttons');
+                    if (actions && !actions.classList.contains('hidden')) return;
+                    // Selalu samakan dengan D1 (real-time)
+                    if (d.name) { try { localStorage.setItem('clincoo_fullname', d.name); } catch(e) {} }
+                    if (d.email) { try { localStorage.setItem('clincoo_email', d.email); } catch(e) {} }
+                    if (d.avatar) { try { localStorage.setItem('clincoo_profile_pic', d.avatar); } catch(e) {} }
                     const nameInput = document.getElementById('input-fullname');
                     const emailInput = document.getElementById('input-email');
                     const displayName = document.getElementById('user-display-name');
                     const displayEmail = document.getElementById('user-display-email');
                     const avatarContainer = document.getElementById('avatar-container');
                     const avatarInitial = document.getElementById('avatar-initial');
-                    const nm = localStorage.getItem('clincoo_fullname');
-                    const em = localStorage.getItem('clincoo_email');
-                    const pc = localStorage.getItem('clincoo_profile_pic');
-                    if (nm && nameInput) nameInput.value = nm;
-                    if (nm && displayName) displayName.innerText = nm;
+                    const nm = d.name || localStorage.getItem('clincoo_fullname');
+                    const em = d.email || localStorage.getItem('clincoo_email');
+                    const pc = d.avatar || localStorage.getItem('clincoo_profile_pic');
+                    if (nm && nameInput && document.activeElement !== nameInput && nameInput.value !== nm) nameInput.value = nm;
+                    if (nm && displayName && displayName.innerText !== nm) displayName.innerText = nm;
+                    if (em && emailInput && emailInput.value !== em) emailInput.value = em;
+                    if (em && displayEmail && displayEmail.innerText !== em) displayEmail.innerText = em;
                     if (nm && avatarInitial && !pc) avatarInitial.innerText = nm.charAt(0).toUpperCase();
-                    if (em && emailInput) emailInput.value = em;
-                    if (em && displayEmail) displayEmail.innerText = em;
                     if (pc && avatarContainer) {
                         avatarContainer.style.backgroundImage = 'url(' + pc + ')';
                         avatarContainer.classList.remove('bg-gradient-to-br', 'from-blue-500', 'to-purple-600');
                         if (avatarInitial) avatarInitial.style.display = 'none';
                     }
+                    // Bahasa & zona waktu juga tersinkron real-time dari D1
+                    const langText = document.getElementById('lang-text');
+                    const tzText = document.getElementById('tz-text');
+                    if (d.language && langText && activePopover !== 'lang-popover' && langText.innerText.trim() !== d.language) langText.innerText = d.language;
+                    if (d.timezone && tzText && activePopover !== 'tz-popover' && tzText.innerText.trim() !== d.timezone) tzText.innerText = d.timezone;
                 }).catch(function(){});
             } catch(e) {}
         }
+
+        // Refresh real-time: cek D1 tiap 10 detik dan tiap kali halaman aktif kembali
+        setInterval(syncProfileFromD1, 10000);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) syncProfileFromD1();
+        });
 
         function saveChanges() {
             const btn = document.querySelector('#action-buttons button.bg-black');
