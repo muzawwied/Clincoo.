@@ -129,7 +129,7 @@
                     <p class="text-sm text-gray-500 mt-1">Identitas utama aplikasi yang berjalan di server</p>
                 </div>
                 <div class="w-full sm:w-80">
-                    <input type="text" value="Frontend Prod" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors" placeholder="Masukkan nama aplikasi">
+                    <input type="text" id="input-app-name" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors" placeholder="Masukkan nama aplikasi">
                 </div>
             </div>
 
@@ -140,7 +140,7 @@
                     <p class="text-sm text-gray-500 mt-1">Catatan internal singkat mengenai tujuan atau status aplikasi ini</p>
                 </div>
                 <div class="w-full sm:w-80">
-                    <textarea rows="3" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors resize-none" placeholder="Contoh: Aplikasi web utama...">Aplikasi web React.js untuk sisi antarmuka pengguna utama.</textarea>
+                    <textarea rows="3" id="input-app-desc" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors resize-none" placeholder="Contoh: Aplikasi web utama..."></textarea>
                 </div>
             </div>
 
@@ -187,6 +187,52 @@
 
     <script>
         lucide.createIcons();
+
+        // ================= PENGATURAN UMUM -> DB (per proyek) =================
+        const API = 'https://clincoo.pages.dev/api';
+        const pid = () => localStorage.getItem('clincoo_current_project_id') || '';
+        const authHeaders = () => { const t = localStorage.getItem('clincoo_token') || ''; return t ? { Authorization: 'Bearer ' + t } : {}; };
+
+        async function loadUmum() {
+            try {
+                const res = await fetch(API + '/project-settings?project_id=' + encodeURIComponent(pid()), { headers: authHeaders() });
+                const data = await res.json();
+                if (data.error) return;
+                const st = data;
+                if (st.app_name) document.getElementById('input-app-name').value = st.app_name;
+                if (st.app_desc) document.getElementById('input-app-desc').value = st.app_desc;
+                if (st.runtime) { const l = document.getElementById('label-runtime'); if (l) l.textContent = st.runtime; }
+                if (st.maintenance === 'true') toggleSwitch('maintenance');
+            } catch (e) {}
+        }
+
+        async function saveUmum(updates) {
+            try {
+                const res = await fetch(API + '/project-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                    body: JSON.stringify({ project_id: pid(), ...updates })
+                });
+                const data = await res.json();
+                if (data.error) { showModal('Gagal', data.error); return false; }
+                return true;
+            } catch (e) { showModal('Gagal', 'Tidak dapat menyimpan: ' + e.message); return false; }
+        }
+
+        ['input-app-name', 'input-app-desc'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('blur', async () => {
+                if (el.value.trim() === '' || el.value === el.defaultValue) return;
+                const key = id === 'input-app-name' ? 'app_name' : 'app_desc';
+                const ok = await saveUmum({ [key]: el.value.trim() });
+                if (ok && key === 'app_name') {
+                    const slug = el.value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                    showModal('Nama aplikasi disimpan', 'Nama akan dipakai sebagai subdomain saat deploy pertama: ' + (slug || '-') + '.pages.dev');
+                }
+            });
+        });
+
+        loadUmum();
 
         function toggleDropdown(element, targetId, optionsArray) {
             const wrapper = element.parentElement;
@@ -242,13 +288,14 @@
             }
         }
 
-        function selectOption(event, targetId, value) {
+        async function selectOption(event, targetId, value) {
             event.stopPropagation();
             const label = document.getElementById('label-' + targetId);
             if (label) {
                 label.textContent = value;
             }
             closeAllDropdowns();
+            if (targetId === 'runtime') saveUmum({ runtime: value });
         }
 
         function toggleSwitch(idPrefix) {
