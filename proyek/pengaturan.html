@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script src="../../js/auth-client.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -427,7 +428,7 @@
     }
 
     const NOTIF_KEY = 'clincoo_notifications';
-    const NOTIF_API = 'https://clincoo-be2.pages.dev/api/notifications';
+    const NOTIF_API = 'https://clincoo.pages.dev/api/notifications';
     const NOTIF_ALLOWED = ['GitHub', 'Workspace', 'Deploy', 'Akun', 'Dompet'];
     function isAllowedNotif(n) { return NOTIF_ALLOWED.indexOf(String((n && n.source) || '')) > -1; }
     (function(){ try { var _pn = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); var _pk = _pn.filter(isAllowedNotif); if (_pk.length !== _pn.length) { localStorage.setItem(NOTIF_KEY, JSON.stringify(_pk)); } } catch(e) {} })();

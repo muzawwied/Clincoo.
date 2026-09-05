@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script src="../../js/auth-client.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -586,7 +587,7 @@
                         closeTopUpPage();
                         showModal('Pengisian Saldo Berhasil', 'Pembayaran terverifikasi. Saldo sebesar Rp ' + formatNumberOnly(data.amount) + ' telah ditambahkan ke akun Clincoo Anda.');
                         try {
-                            fetch('https://clincoo-be2.pages.dev/api/notifications', {
+                            fetch('https://clincoo.pages.dev/api/notifications', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({

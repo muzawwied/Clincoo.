@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script src="../../js/auth-client.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -208,7 +209,7 @@
                 <tr class="bg-white dark:bg-[#0a0a0a]">
                   <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">CNAME</td>
                   <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-name">www</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-value">clincoo-be2.pages.dev</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-value">clincoo.pages.dev</td>
                 </tr>
               </tbody>
             </table>
@@ -313,7 +314,7 @@
     async function loadDomainSettings() {
         try {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
-            const res = await fetch('https://clincoo-be2.pages.dev/api/project-settings?project_id=' + encodeURIComponent(pid));
+            const res = await fetch('https://clincoo.pages.dev/api/project-settings?project_id=' + encodeURIComponent(pid));
             const data = await res.json();
             const settings = data.domain_settings ? JSON.parse(data.domain_settings) : {};
             const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
@@ -334,12 +335,12 @@
             if (aName) aName.textContent = '@';
             if (aValue) aValue.textContent = '76.76.21.21';
             if (cnameName) cnameName.textContent = 'www';
-            if (cnameValue) cnameValue.textContent = domain + ' -> clincoo-be2.pages.dev';
+            if (cnameValue) cnameValue.textContent = domain + ' -> clincoo.pages.dev';
         } else {
             if (aName) aName.textContent = '@';
             if (aValue) aValue.textContent = '76.76.21.21';
             if (cnameName) cnameName.textContent = 'www';
-            if (cnameValue) cnameValue.textContent = 'clincoo-be2.pages.dev';
+            if (cnameValue) cnameValue.textContent = 'clincoo.pages.dev';
         }
     }
 
@@ -355,7 +356,7 @@
         };
         try {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
-            await fetch('https://clincoo-be2.pages.dev/api/project-settings', {
+            await fetch('https://clincoo.pages.dev/api/project-settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ project_id: pid, domain_settings: JSON.stringify(settings) })

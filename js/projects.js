@@ -120,7 +120,7 @@ function deleteProject(id) {
     saveProjects(projects);
     
     try {
-        fetch('https://clincoo-be2.pages.dev/api/activity', {
+        fetch('https://clincoo.pages.dev/api/activity', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'delete_project', details: 'Proyek dihapus' })
