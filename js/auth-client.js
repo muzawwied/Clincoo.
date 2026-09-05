@@ -187,4 +187,40 @@ try {
       return res;
     });
   };
+
+  // ---- FIX: project id yang benar harus IKUT di setiap link, bukan cuma di localStorage.
+  // localStorage (walau sudah dinamespace per akun di atas) tetap dibagi oleh SEMUA TAB
+  // dari akun yang sama -- kalau user punya banyak tab proyek berbeda terbuka, tab yang
+  // paling akhir aktif bisa menimpa 'clincoo_current_project_id' milik tab lain, sehingga
+  // Deploy/Pengaturan dsb membaca proyek yang SALAH ("Proyek tidak ditemukan atau bukan
+  // milik akun ini"). Solusi: begitu halaman proyek/ dimuat, ID dari URL (paling dipercaya)
+  // dipatch ke semua link sesama halaman proyek/ supaya klik selanjutnya selalu bawa ?id=
+  // yang benar, tidak bergantung urutan tab.
+  var PROJECT_PAGES = ['chat.html', 'workspace.html', 'environment.html', 'keamanan.html',
+    'pengaturan.html', 'umum.html', 'build-deployment.html', 'domain-kustom.html',
+    'keamanan-https.html', 'visibilitas-akses.html', 'integrasi-webhook.html', 'zona-bahaya.html'];
+
+  function patchProjectLinks() {
+    if (!isAuthPage && location.pathname.indexOf('/proyek/') !== -1) {
+      try {
+        var qid = new URLSearchParams(location.search).get('id');
+        var pid = qid || (function () { try { return localStorage.getItem('clincoo_current_project_id') || ''; } catch (e) { return ''; } })();
+        if (!pid) return;
+        try { localStorage.setItem('clincoo_current_project_id', pid); } catch (e) {}
+        var anchors = document.querySelectorAll('a[href]');
+        for (var i = 0; i < anchors.length; i++) {
+          var href = anchors[i].getAttribute('href') || '';
+          var bare = href.split('?')[0];
+          if (PROJECT_PAGES.indexOf(bare) !== -1) {
+            anchors[i].setAttribute('href', bare + '?id=' + encodeURIComponent(pid));
+          }
+        }
+      } catch (e) {}
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', patchProjectLinks);
+  } else {
+    patchProjectLinks();
+  }
 })();
