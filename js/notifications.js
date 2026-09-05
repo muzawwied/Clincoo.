@@ -3,6 +3,10 @@
  * Real-time D1-backed notifications with page links
  */
 const NOTIF_API = 'https://clincoo.pages.dev/api/notifications';
+const NOTIF_KEY = 'clincoo_notifications';
+const NOTIF_ALLOWED = ['GitHub', 'Workspace', 'Deploy', 'Akun'];
+function isAllowedNotif(n) { return NOTIF_ALLOWED.indexOf(String((n && n.source) || '')) > -1; }
+function getLocalNotifs() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]').filter(isAllowedNotif); } catch(e) { return []; } }
 let d1Notifs = [];
 let d1UnreadCount = 0;
 
@@ -36,8 +40,13 @@ async function fetchD1Notifications() {
         const res = await fetch(NOTIF_API);
         if (!res.ok) return;
         const data = await res.json();
-        d1Notifs = data.notifications || [];
-        d1UnreadCount = data.unreadCount || 0;
+        const apiNotifs = (data.notifications || []).filter(isAllowedNotif);
+        const local = getLocalNotifs();
+        const seen = {}; const merged = [];
+        apiNotifs.concat(local).forEach(function(n) { const k = String(n.id); if (!seen[k]) { seen[k] = true; merged.push(n); } });
+        merged.sort(function(a, b) { return new Date(b.created_at || b.timestamp || 0) - new Date(a.created_at || a.timestamp || 0); });
+        d1Notifs = merged;
+        d1UnreadCount = merged.filter(function(n) { return !n.read; }).length;
         renderBellBadge();
         renderNotifDropdown();
         renderNotifPage();
@@ -103,7 +112,7 @@ function renderNotifPage() {
             '<div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:' + color + '15"><svg class="w-4 h-4" style="color:' + color + '" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">' + iconPath + '</svg></div>' +
             '<div class="flex-1"><div class="flex items-center gap-2"><span class="text-sm font-semibold" style="color:' + color + '">' + (n.source || '') + '</span>' +
             '<span class="text-xs text-gray-400">' + timeStr + '</span></div>' +
-            '<p class="text-sm text-gray-600 mt-0.5">' + n.message + '</p>' +
+            '<p class="text-sm text-gray-600 mt-0.5 line-clamp-2">' + n.message + '</p>' +
             (n.link ? '<p class="text-xs text-blue-500 mt-1">Lihat detail \u2192</p>' : '') + '</div></div>';
     }
     html += '</div>';
@@ -151,6 +160,7 @@ function createLoginNotification() {
 }
 
 if (typeof window !== 'undefined') {
+    try { var _pn = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); var _pk = _pn.filter(isAllowedNotif); if (_pk.length !== _pn.length) localStorage.setItem(NOTIF_KEY, JSON.stringify(_pk)); } catch(e) {}
     fetchD1Notifications();
     setInterval(fetchD1Notifications, 30000);
     createLoginNotification();
