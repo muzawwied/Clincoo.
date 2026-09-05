@@ -305,7 +305,7 @@
             var p = JSON.parse(localStorage.getItem('clincoo_profile') || localStorage.getItem('clincoo_user') || 'null');
             if (p && (p.display_name || p.username)) return p.display_name || p.username;
         } catch (e) {}
-        return 'Wikybook';
+        return 'Pemilik proyek';
     }
 
     // Buat undangan baru -> dapat ID unik (inv_xxx)
@@ -574,6 +574,39 @@
         });
     }
 
+    // ===== Validasi email dobel (teks merah flat, tanpa card) =====
+    function checkDuplicateInviteEmail(email) {
+        var e = String(email || '').toLowerCase();
+        var isMember = (collabData.members || []).some(function(m) { return (m.email || '').toLowerCase() === e; });
+        if (isMember) return 'Email ini sudah terdaftar sebagai anggota proyek.';
+        var isPending = (collabData.pending || []).some(function(p) { return (p.email || '').toLowerCase() === e; });
+        if (isPending) return 'Email ini sudah diundang sebelumnya dan masih menunggu diterima.';
+        return null;
+    }
+
+    function showInviteEmailError(msg) {
+        var errEl = document.getElementById('invite-error');
+        if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
+    }
+
+    function hideInviteEmailError() {
+        var errEl = document.getElementById('invite-error');
+        if (errEl) { errEl.textContent = ''; errEl.classList.add('hidden'); }
+    }
+
+    // Live-check saat mengetik: tandai langsung jika email/user sudah ada
+    (function() {
+        var inp = document.getElementById('invite-email');
+        if (inp) {
+            inp.addEventListener('input', function() {
+                var v = inp.value.trim();
+                if (!v || !v.includes('@')) { hideInviteEmailError(); return; }
+                var msg = checkDuplicateInviteEmail(v);
+                if (msg) showInviteEmailError(msg); else hideInviteEmailError();
+            });
+        }
+    })();
+
     function sendEmailInvite() {
         const emailInput = document.getElementById('invite-email');
         const errEl = document.getElementById('invite-error');
@@ -582,6 +615,13 @@
 
         const email = emailInput.value.trim();
         if(!email || !email.includes('@')) {
+            showInviteEmailError('Masukkan alamat email yang valid.');
+            emailInput.focus();
+            return;
+        }
+        var dupMsg = checkDuplicateInviteEmail(email);
+        if (dupMsg) {
+            showInviteEmailError(dupMsg);
             emailInput.focus();
             return;
         }
