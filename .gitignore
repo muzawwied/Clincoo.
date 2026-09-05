@@ -1,0 +1,7 @@
+# Cache & tooling lokal
+.wrangler/
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -472,8 +472,7 @@
         if (!n.read) markNotifRead(n.id);
         if (n.link) {
             var link = n.link;
-            if (link.startsWith('/')) link = 'pages' + link;
-            if (link.startsWith('pages/pages/')) link = link.replace('pages/pages/', 'pages/');
+            if (link.startsWith('/')) link = link.substring(1);
             window.location.href = link;
         }
         // No link = just an informational notification, nothing to navigate to

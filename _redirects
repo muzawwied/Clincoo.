@@ -1,84 +1,80 @@
-# Cloudflare Pages redirects — clean URL nested routing
+# Cloudflare Pages redirects — clean URL langsung ke file asli
+# GitHub Pages mengabaikan file ini (navigasi app pakai path file langsung).
+# 301 dipakai agar path relatif aset (../js, ../akun, ../proyek) tetap benar.
 
 # Home
 /    /index.html    200
 
-# Projects list page (separated from index.html)
-/proyek    /pages/proyek.html    200
-/proyek/    /pages/proyek.html    200
+# Profil (akun)
+/profil    /akun/Profile.html    301
+/profil/    /akun/Profile.html    301
+/profil/aktivitas    /akun/aktivitas.html    301
+/profil/personal    /akun/personal.html    301
+/profil/dompet    /akun/dompet.html    301
+/profil/upgrade    /akun/upgrade.html    301
+/profil/langganan    /akun/langganan.html    301
+/profil/konfirmasi-langganan    /akun/konfirmasi-langganan.html    301
+/profil/kolaborasi    /akun/kolaborasi.html    301
+/profil/kontrol-data    /akun/kontrol-data.html    301
+/profil/laporkan-bug    /akun/laporkan-bug.html    301
+/profil/tentang    /akun/tentang.html    301
+/notifikasi    /akun/notifikasi.html    301
 
-# Profile (separated from index.html)
-/profil    /pages/profil.html    200
-/profil/    /pages/profil.html    200
+# Halaman proyek — id proyek dipertahankan lewat ?id= (rute spesifik dulu, catch-all terakhir)
+/workspace/*/pengaturan/umum    /proyek/umum.html?id=:splat    301
+/workspace/*/pengaturan/build-deployment    /proyek/build-deployment.html?id=:splat    301
+/workspace/*/pengaturan/domain-kustom    /proyek/domain-kustom.html?id=:splat    301
+/workspace/*/pengaturan/keamanan-https    /proyek/keamanan-https.html?id=:splat    301
+/workspace/*/pengaturan/visibilitas-akses    /proyek/visibilitas-akses.html?id=:splat    301
+/workspace/*/pengaturan/integrasi-webhook    /proyek/integrasi-webhook.html?id=:splat    301
+/workspace/*/pengaturan/zona-bahaya    /proyek/zona-bahaya.html?id=:splat    301
+/workspace/*/pengaturan    /proyek/pengaturan.html?id=:splat    301
+/workspace/*/chat    /proyek/chat.html?id=:splat    301
+/workspace/*/environment    /proyek/environment.html?id=:splat    301
+/workspace/*/keamanan    /proyek/keamanan.html?id=:splat    301
+/workspace/*    /proyek/workspace.html?id=:splat    301
 
-# Profile sub-pages (account level)
-/profil/aktivitas    /pages/aktivitas.html    200
-/profil/personal    /pages/personal.html    200
-/profil/dompet    /pages/dompet.html    200
-/profil/upgrade    /pages/upgrade.html    200
-/profil/langganan    /pages/langganan.html    200
-/profil/konfirmasi-langganan    /pages/konfirmasi-langganan.html    200
-/profil/kolaborasi    /pages/kolaborasi.html    200
-/profil/kontrol-data    /pages/kontrol-data.html    200
-/profil/laporkan-bug    /pages/laporkan-bug.html    200
-/profil/tentang    /pages/tentang.html    200
-/notifikasi    /pages/notifikasi.html    200
-
-# Project-level pages — specific routes first (top to bottom, first match wins)
-/workspace/*/pengaturan/umum    /pages/umum.html    200
-/workspace/*/pengaturan/build-deployment    /pages/build-deployment.html    200
-/workspace/*/pengaturan/domain-kustom    /pages/domain-kustom.html    200
-/workspace/*/pengaturan/keamanan-https    /pages/keamanan-https.html    200
-/workspace/*/pengaturan/visibilitas-akses    /pages/visibilitas-akses.html    200
-/workspace/*/pengaturan/integrasi-webhook    /pages/integrasi-webhook.html    200
-/workspace/*/pengaturan/zona-bahaya    /pages/zona-bahaya.html    200
-/workspace/*/pengaturan    /pages/pengaturan.html    200
-/workspace/*/chat    /pages/chat.html    200
-/workspace/*/environment    /pages/environment.html    200
-/workspace/*/keamanan    /pages/keamanan.html    200
-
-# Catch-all for workspace (must be last — project_id only)
-/workspace/*    /pages/workspace.html    200
-
-# Legacy redirects (old .html URLs to clean URLs)
-/chat    /pages/chat.html    301
-/chat.html    /pages/chat.html    301
-/aktivitas    /pages/aktivitas.html    301
-/aktivitas.html    /pages/aktivitas.html    301
-/personal    /pages/personal.html    301
-/personal.html    /pages/personal.html    301
-/dompet    /pages/dompet.html    301
-/dompet.html    /pages/dompet.html    301
-/pengaturan    /pages/pengaturan.html    301
-/pengaturan.html    /pages/pengaturan.html    301
-/umum    /pages/umum.html    301
-/umum.html    /pages/umum.html    301
-/upgrade    /pages/upgrade.html    301
-/upgrade.html    /pages/upgrade.html    301
-/langganan    /pages/langganan.html    301
-/langganan.html    /pages/langganan.html    301
-/kolaborasi    /pages/kolaborasi.html    301
-/kolaborasi.html    /pages/kolaborasi.html    301
-/tentang    /pages/tentang.html    301
-/tentang.html    /pages/tentang.html    301
-/laporkan-bug    /pages/laporkan-bug.html    301
-/laporkan-bug.html    /pages/laporkan-bug.html    301
-/workspace.html    /pages/workspace.html    301
-/environment    /pages/environment.html    301
-/environment.html    /pages/environment.html    301
-/keamanan    /pages/keamanan.html    301
-/keamanan.html    /pages/keamanan.html    301
-/keamanan-https    /pages/keamanan-https.html    301
-/keamanan-https.html    /pages/keamanan-https.html    301
-/kontrol-data    /pages/kontrol-data.html    301
-/kontrol-data.html    /pages/kontrol-data.html    301
-/zona-bahaya    /pages/zona-bahaya.html    301
-/zona-bahaya.html    /pages/zona-bahaya.html    301
-/build-deployment    /pages/build-deployment.html    301
-/build-deployment.html    /pages/build-deployment.html    301
-/integrasi-webhook    /pages/integrasi-webhook.html    301
-/integrasi-webhook.html    /pages/integrasi-webhook.html    301
-/domain-kustom    /pages/domain-kustom.html    301
-/domain-kustom.html    /pages/domain-kustom.html    301
-/visibilitas-akses    /pages/visibilitas-akses.html    301
-/visibilitas-akses.html    /pages/visibilitas-akses.html    301
+# Legacy URL lama -> path file asli
+/proyek    /akun/proyek.html    301
+/proyek/    /akun/proyek.html    301
+/chat    /proyek/chat.html    301
+/chat.html    /proyek/chat.html    301
+/aktivitas    /akun/aktivitas.html    301
+/aktivitas.html    /akun/aktivitas.html    301
+/personal    /akun/personal.html    301
+/personal.html    /akun/personal.html    301
+/dompet    /akun/dompet.html    301
+/dompet.html    /akun/dompet.html    301
+/pengaturan    /proyek/pengaturan.html    301
+/pengaturan.html    /proyek/pengaturan.html    301
+/umum    /proyek/umum.html    301
+/umum.html    /proyek/umum.html    301
+/upgrade    /akun/upgrade.html    301
+/upgrade.html    /akun/upgrade.html    301
+/langganan    /akun/langganan.html    301
+/langganan.html    /akun/langganan.html    301
+/kolaborasi    /akun/kolaborasi.html    301
+/kolaborasi.html    /akun/kolaborasi.html    301
+/tentang    /akun/tentang.html    301
+/tentang.html    /akun/tentang.html    301
+/laporkan-bug    /akun/laporkan-bug.html    301
+/laporkan-bug.html    /akun/laporkan-bug.html    301
+/workspace.html    /proyek/workspace.html    301
+/environment    /proyek/environment.html    301
+/environment.html    /proyek/environment.html    301
+/keamanan    /proyek/keamanan.html    301
+/keamanan.html    /proyek/keamanan.html    301
+/keamanan-https    /proyek/keamanan-https.html    301
+/keamanan-https.html    /proyek/keamanan-https.html    301
+/kontrol-data    /akun/kontrol-data.html    301
+/kontrol-data.html    /akun/kontrol-data.html    301
+/zona-bahaya    /proyek/zona-bahaya.html    301
+/zona-bahaya.html    /proyek/zona-bahaya.html    301
+/build-deployment    /proyek/build-deployment.html    301
+/build-deployment.html    /proyek/build-deployment.html    301
+/integrasi-webhook    /proyek/integrasi-webhook.html    301
+/integrasi-webhook.html    /proyek/integrasi-webhook.html    301
+/domain-kustom    /proyek/domain-kustom.html    301
+/domain-kustom.html    /proyek/domain-kustom.html    301
+/visibilitas-akses    /proyek/visibilitas-akses.html    301
+/visibilitas-akses.html    /proyek/visibilitas-akses.html    301
