@@ -234,11 +234,9 @@
 <body class="min-h-screen flex flex-col text-gray-900 pt-20">
     <script>try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||(t==='Sistem (Default)'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.body.classList.add('dark-mode');var a=localStorage.getItem('clincoo_accent')||'Hitam (Default)';var am={'Hitam (Default)':{m:'#000000',h:'#1f2937'},'Biru':{m:'#2563eb',h:'#1d4ed8'},'Hijau':{m:'#059669',h:'#047857'},'Ungu':{m:'#9333ea',h:'#7e22ce'},'Merah':{m:'#dc2626',h:'#b91c1c'}};var c=am[a]||am['Hitam (Default)'];document.documentElement.style.setProperty('--accent-color',c.m);document.documentElement.style.setProperty('--accent-hover',c.h);}catch(e){}</script>
     <main id="page-profile" class="page-view hidden flex-1 w-full max-w-2xl mx-auto pb-12 flex-col justify-start relative">
-        <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
-        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+        <button onclick="window.location.href='../index.html'" class="fixed top-3 left-3 w-10 h-10 flex items-center justify-center rounded-full bg-white backdrop-blur border border-gray-100 shadow-sm hover:bg-gray-50 transition-all cursor-pointer text-gray-700 hover:text-black z-50" aria-label="Kembali">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </button>
-    </header>
         <div class="flex items-center justify-between px-7 pb-8 gap-5 relative">
             <div class="flex flex-col">
                 <h2 id="profile-display-name" class="text-[24px] font-extrabold text-gray-900 tracking-tight">Muzawwied</h2>
