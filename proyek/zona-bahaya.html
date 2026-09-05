@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zona Bahaya</title>
   <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -77,16 +78,14 @@
 <body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-white">
   <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
   <div class="w-full h-full overflow-y-auto hide-scrollbar flex flex-col items-center">
-    <header class="w-full max-w-5xl z-30 p-4 sm:px-6 flex items-center gap-3 flex-shrink-0 border-b border-gray-200/60 dark:border-slate-800">
-      <button onclick="history.back()" class="p-2 -ml-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors flex items-center justify-center text-gray-800 dark:text-gray-100" aria-label="Kembali">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-      </button>
-      <div>
-        <h1 class="text-xl font-bold text-gray-800 dark:text-white tracking-tight">Zona Bahaya</h1>
-        <p class="text-xs text-gray-500 dark:text-gray-400">Tindakan berisiko yang tidak dapat dibatalkan</p>
-      </div>
+    <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Zona Bahaya</h1>
+        <div class="w-10"></div>
     </header>
-    <main class="w-full max-w-5xl px-4 sm:px-6 py-4 pb-24">
+    <main class="w-full max-w-5xl px-4 sm:px-6 pt-14 pb-24">
       <div class="w-full flex flex-col divide-y divide-red-200 dark:divide-red-900/30">
         <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="min-w-0 flex-1">
@@ -118,5 +117,6 @@
   <script>
     let isEdited=false;function showActionButtons(){if(!isEdited){isEdited=true;const c=document.getElementById('action-buttons');c.classList.remove('hidden');c.classList.add('flex');void c.offsetWidth;c.classList.remove('opacity-0');c.classList.add('opacity-100');}}function cancelChanges(){window.location.reload();}function saveChanges(){const btn=document.querySelector('#action-buttons button.bg-blue-600');if(!btn)return;btn.innerText='Menyimpan...';btn.disabled=true;btn.classList.add('opacity-80','cursor-not-allowed');setTimeout(()=>{btn.innerText='Tersimpan!';btn.classList.replace('bg-blue-600','bg-emerald-500');btn.classList.replace('hover:bg-blue-700','hover:bg-emerald-600');setTimeout(()=>window.location.reload(),800);},800);}document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('input,textarea,select').forEach(input=>{input.addEventListener('input',showActionButtons);input.addEventListener('change',showActionButtons);});});function toggleSwitch(idPrefix){showActionButtons();const bg=document.getElementById(idPrefix+'-bg');const knob=document.getElementById(idPrefix+'-knob');if(bg.classList.contains('bg-blue-500')){bg.classList.replace('bg-blue-500','bg-gray-200');bg.classList.add('dark:bg-slate-700');knob.classList.remove('translate-x-5');}else{bg.classList.remove('bg-gray-200','dark:bg-slate-700');bg.classList.add('bg-blue-500');knob.classList.add('translate-x-5');}}
   </script>
+    <script>if (window.lucide) { lucide.createIcons(); }</script>
 </body>
 </html>
