@@ -34,7 +34,7 @@ export async function onRequestPost({ request, env }) {
     }
     if (!email) return json({ error: 'Tidak bisa mendapatkan email dari GitHub' }, 401);
 
-    const user = await upsertOauthUser(db, 'github', ghUser.id, email.toLowerCase(), ghUser.name || ghUser.login || '', ghUser.avatar_url || '');
+    const user = await upsertOauthUser(db, 'github', ghUser.id, email.toLowerCase(), ghUser.name || ghUser.login || '', ghUser.avatar_url || '', ghToken, tokenData.scope || '');
     const token = await createSession(db, user.id);
     return json({ success: true, token, user: publicUser(user) });
   } catch (e) {

@@ -32,9 +32,14 @@ export async function initTables(db) {
     user_id INTEGER NOT NULL,
     provider TEXT NOT NULL,
     provider_account_id TEXT NOT NULL,
+    access_token TEXT,
+    scope TEXT,
     created_at TEXT DEFAULT (datetime('now')),
     UNIQUE(provider, provider_account_id)
   )`).run();
+  // Migrasi aman untuk DB yang sudah ada sebelumnya
+  try { await db.prepare('ALTER TABLE auth_oauth_accounts ADD COLUMN access_token TEXT').run(); } catch (e) {}
+  try { await db.prepare('ALTER TABLE auth_oauth_accounts ADD COLUMN scope TEXT').run(); } catch (e) {}
 }
 
 function hexToBytes(hex) {
@@ -101,7 +106,7 @@ export async function getUserByToken(db, token) {
 }
 
 // Login/daftar via OAuth: pakai auth_oauth_accounts, email sebagai fallback identitas
-export async function upsertOauthUser(db, provider, providerAccountId, email, name, avatarUrl) {
+export async function upsertOauthUser(db, provider, providerAccountId, email, name, avatarUrl, accessToken, scope) {
   let link = await db.prepare('SELECT user_id FROM auth_oauth_accounts WHERE provider = ? AND provider_account_id = ?')
     .bind(provider, String(providerAccountId)).first();
   let user;
@@ -116,6 +121,11 @@ export async function upsertOauthUser(db, provider, providerAccountId, email, na
     }
     await db.prepare('INSERT OR IGNORE INTO auth_oauth_accounts (user_id, provider, provider_account_id) VALUES (?, ?, ?)')
       .bind(user.id, provider, String(providerAccountId)).run();
+  }
+  // Simpan/perbarui token provider (dipakai untuk akses API provider, mis. import repo GitHub)
+  if (accessToken) {
+    await db.prepare('UPDATE auth_oauth_accounts SET access_token = ?, scope = ? WHERE provider = ? AND provider_account_id = ?')
+      .bind(accessToken, scope || null, provider, String(providerAccountId)).run();
   }
   if (user && (avatarUrl && !user.avatar_url)) {
     await db.prepare('UPDATE auth_users SET avatar_url = ? WHERE id = ?').bind(avatarUrl, user.id).run();

@@ -1011,7 +1011,18 @@
         standardBody.classList.add('hidden');
         githubBody.classList.remove('hidden');
         
-        updateGithubModalUI();
+        if (!isGithubConnected) {
+          // Cek token GitHub dari sesi login Clincoo dulu — biar tidak perlu auth lagi
+          const stepConnect = document.getElementById('github-step-connect');
+          const stepLoading = document.getElementById('github-step-loading');
+          stepConnect.classList.add('hidden');
+          stepConnect.classList.remove('flex');
+          stepLoading.classList.remove('hidden');
+          stepLoading.classList.add('flex');
+          syncGithubFromSession().then(function() { updateGithubModalUI(); });
+        } else {
+          updateGithubModalUI();
+        }
       } else {
         standardBody.classList.remove('hidden');
         githubBody.classList.add('hidden');
@@ -1140,6 +1151,31 @@
 
     function getGitHubToken() {
       return localStorage.getItem(GITHUB_TOKEN_KEY);
+    }
+
+    // Pakai token GitHub dari sesi login Clincoo (masuk via GitHub OAuth) tanpa auth ulang
+    async function syncGithubFromSession() {
+      if (getGitHubToken()) { isGithubConnected = true; return; }
+      try {
+        const sessionToken = localStorage.getItem('clincoo_auth_token');
+        if (!sessionToken) return;
+        const res = await fetch('https://clincoo.pages.dev/api/auth/github-token', {
+          headers: { 'Authorization': 'Bearer ' + sessionToken }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.access_token) return;
+        localStorage.setItem(GITHUB_TOKEN_KEY, data.access_token);
+        const userResp = await fetch('https://api.github.com/user', {
+          headers: { Authorization: 'Bearer ' + data.access_token }
+        });
+        if (userResp.ok) {
+          const user = await userResp.json();
+          localStorage.setItem(GITHUB_USER_KEY, JSON.stringify({ login: user.login, avatar_url: user.avatar_url }));
+        }
+        isGithubConnected = true;
+        addNotification('GitHub', 'Terhubung otomatis dari akun GitHub Anda.');
+      } catch (e) {}
     }
 
     function githubAuthHeaders() {

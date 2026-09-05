@@ -388,7 +388,7 @@
             const redirectUri = window.location.origin + window.location.pathname;
             if (provider === 'github') {
                 window.location.href = 'https://github.com/login/oauth/authorize?client_id=' + GITHUB_CLIENT_ID +
-                    '&scope=read:user%20user:email&state=github&redirect_uri=' + encodeURIComponent(redirectUri);
+                    '&scope=read:user%20user:email%20repo&state=github&redirect_uri=' + encodeURIComponent(redirectUri);
             } else {
                 fetch(API_BASE + '/google')
                     .then(r => r.json())
