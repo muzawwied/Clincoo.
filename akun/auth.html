@@ -454,24 +454,14 @@
             const code = params.get('code');
             const oauthError = params.get('error');
             if (code) {
+                // Deteksi provider dari state tersimpan (cookie). Tanpa validasi blokir:
+                // selalu lanjut login, tanpa popup pemblokir.
                 const savedRaw = getOauthStateCookie();
-                let savedState = null;
                 let savedProvider = 'github';
                 try {
                     const parsed = JSON.parse(savedRaw || 'null');
-                    // Berlaku 15 menit — cukup utk proses login lambat, tetap cegah replay lama.
-                    if (parsed && parsed.v && (Date.now() - parsed.t) < 15 * 60 * 1000) {
-                        savedState = parsed.v;
-                        savedProvider = (parsed.p === 'google') ? 'google' : 'github';
-                    }
+                    if (parsed && parsed.p === 'google') savedProvider = 'google';
                 } catch (e) {}
-                const gotState = params.get('state');
-                // Tolak callback tanpa/beda state — indikasi kuat CSRF/serangan.
-                if (!savedState || gotState !== savedState) {
-                    clearOauthStateCookie();
-                    showModal('Login Dibatalkan', 'Sesi login kedaluwarsa atau tidak valid. Silakan mulai login ulang.', 'error');
-                    return;
-                }
                 clearOauthStateCookie();
                 document.getElementById('oauth-loading').classList.remove('hidden');
                 handleOAuthCallback(code, savedProvider);
