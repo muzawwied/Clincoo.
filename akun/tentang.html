@@ -99,22 +99,10 @@
   <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
   
   <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
-      <div class="flex-1 flex justify-start">
-          <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
-              <i data-lucide="arrow-left" class="w-5 h-5"></i>
-          </button>
-      </div>
-      <h1 class="font-extrabold text-lg text-gray-900 tracking-tight text-center">Tentang</h1>
-      <div class="flex-1 flex justify-end gap-3 pr-1">
-          <a href="#" class="flex items-center justify-center transition-all cursor-pointer text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white" title="Pusat Bantuan">
-              <i data-lucide="headphones" class="w-[22px] h-[22px]"></i>
-          </a>
-          <a href="https://docs.clincoo.com" class="flex items-center justify-center transition-all cursor-pointer text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white" title="Dokumentasi">
-              <i data-lucide="book-text" class="w-[22px] h-[22px]"></i>
-          </a>
-      </div>
-  </header>
-
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+    </header>
   <main class="flex-1 w-full max-w-2xl mx-auto py-8 flex flex-col">
     <div class="w-full flex flex-col items-center px-6">
       

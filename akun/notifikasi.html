@@ -42,21 +42,11 @@
     <script>try{var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var d=(t==="Gelap")||((t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(d)document.body.classList.add("dark-mode");var a=localStorage.getItem("clincoo_accent")||"Hitam (Default)";var am={"Hitam (Default)":{m:"#000000",h:"#1f2937"},Biru:{m:"#2563eb",h:"#1d4ed8"},Hijau:{m:"#059669",h:"#047857"},Ungu:{m:"#9333ea",h:"#7e22ce"},Merah:{m:"#dc2626",h:"#b91c1c"}};var c=am[a]||am["Hitam (Default)"];document.documentElement.style.setProperty("--accent-color",c.m);document.documentElement.style.setProperty("--accent-hover",c.h);}catch(e){}</script>
 
     <!-- Header -->
-    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-100">
-        <div class="max-w-3xl mx-auto flex items-center justify-between px-5 h-14">
-            <div class="flex items-center gap-3">
-                <button onclick="history.back()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <i data-lucide="arrow-left" class="w-5 h-5 text-gray-700"></i>
-                </button>
-                <h1 class="text-base font-bold text-gray-900">Notifikasi</h1>
-            </div>
-            <button onclick="markAllNotifsRead()" class="text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1">
-                <i data-lucide="check-check" class="w-4 h-4"></i>
-                Tandai dibaca
-            </button>
-        </div>
+    <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
     </header>
-
     <!-- Content -->
     <main class="max-w-3xl mx-auto px-5 pt-6 pb-10">
         <div class="mb-4">
