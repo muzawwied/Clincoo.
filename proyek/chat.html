@@ -2111,7 +2111,7 @@
 
                         // Eksekusi tool workspace secara lokal (localStorage browser)
                         const assistantToolParts = resultJson.tool_calls.map(function(tc) {
-                            return { type: 'function_call', name: tc.name, args: tc.args || {} };
+                            return { type: 'function_call', name: tc.name, args: tc.args || {}, thought_signature: tc.thought_signature || undefined };
                         });
                         apiMessagesWithTools.push({ role: 'assistant', content: assistantToolParts });
 
