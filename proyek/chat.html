@@ -224,6 +224,10 @@
 
         /* Dark mode */
         body.dark-mode { background: #000000 !important; color: #ffffff !important; }
+        .tool-task-text { color: #6b7280; }
+        .tool-task-text.err { color: #dc2626; }
+        body.dark-mode .tool-task-text { color: #9ca3af !important; }
+        body.dark-mode .tool-task-text.err { color: #f87171 !important; }
         body.dark-mode .bg-white { background-color: #0a0a0a !important; }
 
         body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
@@ -1144,26 +1148,12 @@
         function renderToolCallsCard(msg) {
             if (!msg.toolCalls || msg.toolCalls.length === 0) return '';
             const running = !!msg.isProcessing;
-            const n = msg.toolCalls.length;
             return `
-                <div class="mb-2 pointer-events-auto w-full fade-in">
-                    <details class="group border border-gray-200 rounded-xl overflow-hidden w-full max-w-sm bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)]" ${running ? 'open' : ''}>
-                        <summary class="flex items-center justify-between px-3 py-2.5 cursor-pointer select-none text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors bg-gray-50/50">
-                            <div class="flex items-center gap-2.5">
-                                <i class="ph ${running ? 'ph-circle-notch animate-spin' : 'ph-check-circle'} text-gray-500 text-lg"></i>
-                                <span>${running ? 'Menjalankan Tugas...' : n + ' Tugas Dijalankan'}</span>
-                            </div>
-                            <i class="ph ph-caret-down text-gray-400 group-open:rotate-180 transition-transform"></i>
-                        </summary>
-                        <div class="px-3 py-2.5 border-t border-gray-100 bg-white flex flex-col gap-2">
-                            ${msg.toolCalls.map(tc => `
-                                <div class="flex items-center gap-2 text-[12.5px] ${tc.ok === false ? 'text-red-600' : 'text-gray-700'}">
-                                    <i class="ph ${tc.ok === false ? 'ph-x-circle' : toolCallIcon(tc.name)} text-base flex-shrink-0"></i>
-                                    <span class="truncate">${escText(toolCallLabel(tc))}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </details>
+                <div class="mb-1 flex flex-col gap-0.5 text-[12.5px] leading-snug fade-in">
+                    ${running ? `<div class="tool-task-text italic">Menjalankan Tugas...</div>` : ''}
+                    ${msg.toolCalls.map(tc => `
+                        <div class="tool-task-text${tc.ok === false ? ' err' : ''}">${tc.ok === false ? '✗' : '✓'} ${escText(toolCallLabel(tc))}</div>
+                    `).join('')}
                 </div>
             `;
         }
