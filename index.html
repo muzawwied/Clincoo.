@@ -438,6 +438,7 @@
         settings: '#6366f1',
         deploy: '#10b981',
         maintenance: '#f59e0b',
+        wallet: '#f59e0b',
         info: '#6b7280'
     };
 
@@ -448,7 +449,7 @@
             const data = await res.json();
             d1Notifs = data.notifications || [];
             d1UnreadCount = data.unreadCount || 0;
-            fetchD1Notifications();
+            renderIndexNotifications();
         } catch(e) {}
     }
 
