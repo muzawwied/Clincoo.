@@ -7,6 +7,97 @@
     ? '/Clincoo./akun/auth.html'
     : 'https://muzawwied.github.io/Clincoo./akun/auth.html';
 
+// ===== NAMESPACE DATA PER AKUN =====
+// Semua kunci localStorage (kecuali clincoo_auth_*) otomatis diawali u<id>:
+// sehingga data tiap akun (proyek, chat, file workspace, preferensi) terpisah total.
+// Data lama (tanpa prefix) diklaim SEKALI oleh akun pertama yang login di device ini.
+var NS_USER_KEY = 'clincoo_auth_user';
+var NS_AUTH_RE = /^clincoo_auth_/;
+var NS_NS_RE = /^u\d+:/;
+var NS_raw = window.localStorage;
+
+function nsPrefix() {
+  try {
+    var u = JSON.parse(NS_raw.getItem(NS_USER_KEY) || 'null');
+    if (u && u.id) return 'u' + u.id + ':';
+  } catch (e) {}
+  return '';
+}
+
+function nsRealKey(k) {
+  k = String(k);
+  if (NS_AUTH_RE.test(k)) return k;          // kunci auth tetap global
+  nsClaimLegacy();                            // klaim legacy begitu akun diketahui
+  var p = nsPrefix();
+  return p ? p + k : k;
+}
+
+// Klaim data legacy: pindahkan semua kunci tanpa prefix ke namespace akun ini (sekali).
+var NS_claimedPrefix = '';
+function nsClaimLegacy() {
+  var p = nsPrefix();
+  if (!p || p === NS_claimedPrefix || NS_raw.getItem(p + '__claimed')) return;
+  NS_claimedPrefix = p;
+  try {
+    var toMove = [];
+    for (var i = 0; i < NS_raw.length; i++) {
+      var k = NS_raw.key(i);
+      if (k && !NS_AUTH_RE.test(k) && !NS_NS_RE.test(k)) toMove.push(k);
+    }
+    for (var j = 0; j < toMove.length; j++) {
+      var kk = toMove[j];
+      NS_raw.setItem(p + kk, NS_raw.getItem(kk));
+      NS_raw.removeItem(kk);
+    }
+    NS_raw.setItem(p + '__claimed', '1');
+  } catch (e) {}
+}
+
+function nsEach(fn) {
+  var p = nsPrefix();
+  if (!p) { for (var i = 0; i < NS_raw.length; i++) { var k = NS_raw.key(i); if (k) fn(k, k); } return; }
+  for (var m = 0; m < NS_raw.length; m++) {
+    var kk = NS_raw.key(m);
+    if (kk && kk.indexOf(p) === 0) fn(kk, kk.slice(p.length));
+  }
+}
+
+var NS_shim = {
+  getItem: function (k) { return NS_raw.getItem(nsRealKey(k)); },
+  setItem: function (k, v) { NS_raw.setItem(nsRealKey(k), String(v)); },
+  removeItem: function (k) { NS_raw.removeItem(nsRealKey(k)); },
+  clear: function () { nsEach(function (real) { NS_raw.removeItem(real); }); },
+  key: function (i) { var c = 0, out = null; nsEach(function (real, user) { if (c++ === i) out = user; }); return out; }
+};
+Object.defineProperty(NS_shim, 'length', { get: function () { var c = 0; nsEach(function () { c++; }); return c; } });
+
+var NS_proxy = new Proxy(NS_shim, {
+  get: function (t, prop) {
+    if (prop in t) return t[prop];
+    return NS_raw.getItem(nsRealKey(prop));
+  },
+  set: function (t, prop, v) {
+    if (prop in t) return true;
+    NS_raw.setItem(nsRealKey(prop), String(v));
+    return true;
+  },
+  deleteProperty: function (t, prop) {
+    if (prop in t) return true;
+    NS_raw.removeItem(nsRealKey(prop));
+    return true;
+  },
+  has: function (t, prop) {
+    if (prop in t) return true;
+    return NS_raw.getItem(nsRealKey(prop)) !== null;
+  }
+});
+
+try {
+  Object.defineProperty(window, 'localStorage', { value: NS_proxy, configurable: true, writable: true });
+  nsClaimLegacy();
+} catch (e) { /* fallback: localStorage polos */ }
+// ===== AKHIR NAMESPACE PER AKUN =====
+
   function getToken() {
     try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
   }
@@ -49,8 +140,21 @@
     origFetch(API + '/api/auth/me', { headers: { 'Authorization': 'Bearer ' + getToken() } })
       .then(function (r) { return r.ok ? r.json() : { authenticated: false }; })
       .then(function (d) {
+        if (d && d.authenticated && d.user) {
+          try {
+            var prevUser = JSON.parse(NS_raw.getItem(NS_USER_KEY) || 'null');
+            if (!prevUser || !prevUser.id || String(prevUser.id) !== String(d.user.id)) {
+              NS_raw.setItem(NS_USER_KEY, JSON.stringify(d.user));
+              // aktivasi namespace per akun butuh reload sekali
+              if (!sessionStorage.getItem('clincoo_ns_reload')) {
+                try { sessionStorage.setItem('clincoo_ns_reload', '1'); } catch (e2) {}
+                location.reload();
+              }
+            }
+          } catch (e1) {}
+        }
         if (!d || !d.authenticated) {
-          try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+          try { NS_raw.removeItem(TOKEN_KEY); } catch (e) {}
           location.replace(AUTH_URL + '?next=' + encodeURIComponent(location.href));
         }
       })

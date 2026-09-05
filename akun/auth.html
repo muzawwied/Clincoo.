@@ -333,6 +333,8 @@
         function saveSession(data) {
             try {
                 localStorage.setItem(TOKEN_KEY, data.token);
+                // simpan user lebih dulu -> data profil di bawah otomatis masuk namespace akun
+                localStorage.setItem('clincoo_auth_user', JSON.stringify(data.user || {}));
                 localStorage.setItem('clincoo_fullname', data.user.name || '');
                 localStorage.setItem('clincoo_email', data.user.email || '');
                 if (data.user.avatar_url) localStorage.setItem('clincoo_profile_pic', data.user.avatar_url);
