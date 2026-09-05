@@ -140,17 +140,7 @@
     body.dark-mode .focus\:border-gray-400:focus,
     body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
     body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
-    body.dark-mode .bg-green-50 { background-color: #14301c !important; }
-    body.dark-mode .text-green-700 { color: #4ade80 !important; }
-    body.dark-mode .border-green-200 { border-color: #1e3a2a !important; }
-    body.dark-mode .bg-amber-50 { background-color: #3a2a14 !important; }
-    body.dark-mode .text-amber-700 { color: #fbbf24 !important; }
-    body.dark-mode .border-amber-200 { border-color: #4a3818 !important; }
-    body.dark-mode .text-red-700 { color: #f87171 !important; }
-    body.dark-mode .border-red-200 { border-color: #4a2020 !important; }
-    body.dark-mode .text-blue-600 { color: #60a5fa !important; }
-    body.dark-mode .bg-orange-500 { background-color: #fb923c !important; }
-    body.dark-mode #sec-status-card { background-color: #0a0a0a !important; border-color: #222222 !important; }
+
 </style>
   <script>
     (function() {
@@ -217,31 +207,9 @@
             </span>
           </div>
 
-          <!-- Status keamanan live situs proyek -->
-          <div id="sec-status-card" class="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 mb-2">
-            <div class="flex flex-wrap items-center gap-2 mb-3">
-              <span id="sec-level-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full border bg-gray-50 text-gray-500 border-gray-200">Memuat…</span>
-              <span id="sec-monitored-host" class="text-xs text-gray-500 truncate"></span>
-            </div>
-            <div class="grid grid-cols-3 gap-2 text-center">
-              <div class="rounded-xl bg-gray-50 py-2.5">
-                <div id="sec-stat-1m" class="text-lg font-bold text-gray-900">–</div>
-                <div class="text-[10px] text-gray-500 uppercase tracking-wide">Kunjungan/menit</div>
-              </div>
-              <div class="rounded-xl bg-gray-50 py-2.5">
-                <div id="sec-stat-5m" class="text-lg font-bold text-gray-900">–</div>
-                <div class="text-[10px] text-gray-500 uppercase tracking-wide">Kunjungan 5 menit</div>
-              </div>
-              <div class="rounded-xl bg-gray-50 py-2.5">
-                <div id="sec-stat-ip" class="text-lg font-bold text-gray-900">–</div>
-                <div class="text-[10px] text-gray-500 uppercase tracking-wide">IP unik 5 menit</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Feed event keamanan (di-poll real-time dari backend) -->
+          <!-- Notifikasi keamanan real-time situs proyek (di-poll dari backend) -->
           <ul id="sec-events-list" class="space-y-0 text-sm">
-            <li id="sec-loading" class="py-4 text-gray-500">Memuat data keamanan situs…</li>
+            <li id="sec-loading" class="py-4 text-gray-500">Memuat…</li>
           </ul>
         </div>
       </div>
@@ -438,54 +406,26 @@
   function getSeen(){ try { return JSON.parse(localStorage.getItem(seenKey) || '[]'); } catch(e){ return []; } }
   function markSeen(ids){ try { localStorage.setItem(seenKey, JSON.stringify(ids.slice(0,100))); } catch(e){} }
 
-  function levelInfo(level){
-    if (level === 'kritis') return { cls: 'bg-red-50 text-red-700 border-red-200', label: 'Status: KRITIS — indikasi serangan aktif' };
-    if (level === 'waspada') return { cls: 'bg-amber-50 text-amber-700 border-amber-200', label: 'Status: WASPADA — trafik tidak wajar' };
-    if (level === 'nodata') return { cls: 'bg-gray-50 text-gray-500 border-gray-200', label: 'Status: Belum ada trafik terpantau' };
-    return { cls: 'bg-green-50 text-green-700 border-green-200', label: 'Status: AMAN — dipantau real-time' };
-  }
-
   function render(data){
-    var badge = document.getElementById('sec-level-badge');
-    if (!badge) return;
-    var b = levelInfo(data.level || 'nodata');
-    badge.textContent = b.label;
-    badge.className = 'text-xs font-semibold px-2.5 py-1 rounded-full border ' + b.cls;
-    var s = data.stats || {};
-    document.getElementById('sec-stat-1m').textContent = (s.visits_1m != null) ? s.visits_1m : '–';
-    document.getElementById('sec-stat-5m').textContent = (s.visits_5m != null) ? s.visits_5m : '–';
-    document.getElementById('sec-stat-ip').textContent = (s.unique_ips_5m != null) ? s.unique_ips_5m : '–';
-    var hostEl = document.getElementById('sec-monitored-host');
-    if (s.last_hit && s.last_hit.host) {
-      hostEl.textContent = 'Situs terpantau: ' + s.last_hit.host + ' · kunjungan terakhir ' + timeWib(s.last_hit.at);
-    } else {
-      hostEl.textContent = 'Belum ada kunjungan terpantau';
-    }
-
     var list = document.getElementById('sec-events-list');
+    if (!list) return;
     var evs = data.events || [];
+
+    // Kosong dulu — notifikasi muncul sendiri nanti dengan gaya seperti sebelumnya.
     if (!evs.length) {
-      if (!pid) {
-        list.innerHTML = '<li class="py-4 text-gray-500">Buka halaman ini dari dalam sebuah proyek untuk melihat data keamanan situsnya.</li>';
-      } else if (data.level === 'nodata') {
-        list.innerHTML = '<li class="py-4 text-gray-500">Belum ada trafik terpantau di situs proyek ini. Beacon pemantauan otomatis dipasang saat situs dideploy lewat Clincoo — data keamanan muncul di sini secara real-time begitu situs mulai dikunjungi.</li>';
-      } else {
-        list.innerHTML = '<li class="py-4 text-gray-500">Tidak ada aktivitas mencurigakan terdeteksi. Pemantauan berjalan normal.</li>';
-      }
+      list.innerHTML = '<li class="py-4 text-gray-500">Belum ada notifikasi keamanan.</li>';
       return;
     }
 
     var seen = getSeen();
     var html = '';
-    evs.forEach(function(ev){
-      var sev = ev.severity || 'info';
-      var dotColor = sev === 'critical' ? 'bg-red-500' : (sev === 'high' ? 'bg-orange-500' : 'bg-amber-400');
+    evs.forEach(function(ev, i){
       var isNew = seen.indexOf(ev.id) === -1;
-      html += '<li class="py-4 border-b border-gray-200 flex items-start gap-3' + (isNew ? ' animate-fade-in' : '') + '">' +
-        '<span class="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full ' + dotColor + '"></span>' +
-        '<div class="min-w-0">' +
-        '<span class="font-medium text-gray-900 block">' + esc(ev.title) + (isNew ? ' <span class="text-[10px] font-bold text-blue-600 uppercase">Baru</span>' : '') + '</span>' +
-        '<span class="text-gray-500 block break-words">' + esc(ev.detail) + '</span>' +
+      var last = i === evs.length - 1;
+      html += '<li class="py-4 flex items-start gap-4' + (last ? '' : ' border-b border-gray-200') + (isNew ? ' animate-fade-in' : '') + '">' +
+        '<div>' +
+        '<span class="font-medium text-gray-900 block">' + esc(ev.title) + '</span>' +
+        '<span class="text-gray-500">' + esc(ev.detail) + '</span>' +
         '<div class="text-xs text-gray-400 mt-1.5">' + timeWib(ev.created_at) + (ev.ip ? ' · IP ' + esc(ev.ip) : '') + '</div>' +
         '</div></li>';
     });
@@ -494,7 +434,7 @@
   }
 
   function load(){
-    if (!pid) { render({ level: 'nodata', stats: {}, events: [] }); return; }
+    if (!pid) { render({ events: [] }); return; }
     fetch(SEC_API + '?project_id=' + encodeURIComponent(pid))
       .then(function(r){ return r.json(); })
       .then(function(data){
