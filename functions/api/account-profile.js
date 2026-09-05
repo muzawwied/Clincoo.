@@ -23,6 +23,7 @@ export async function onRequestGet({ request, env }) {
     
     const user = await currentUser(env, request);
 
+    const key = new URL(request.url).searchParams.get('key');
     if (key) {
       const row = await db.prepare('SELECT value FROM account_profile WHERE key = ?').bind(await scopedKey(db, 'account_profile', user, key)).first();
       return new Response(JSON.stringify({ key, value: row?.value || null }), {
