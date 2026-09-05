@@ -797,7 +797,7 @@
                 
                 let e2bKey = '';
                 try {
-                    const keyRes = await fetch('https://clincoo.pages.dev/api/e2b');
+                    const keyRes = await fetch('https://clincoo-be2.pages.dev/api/e2b');
                     if (keyRes.ok) { const kj = await keyRes.json(); e2bKey = kj.apiKey || ''; }
                 } catch(e) {}
                 if (!e2bKey) throw new Error("E2B API key tidak tersedia, beralih ke fallback.");
@@ -1527,7 +1527,7 @@
             renderMessages();
         }
 
-        const GEMINI_PROXY_URL = 'https://clincoo.pages.dev/api/chat';
+        const GEMINI_PROXY_URL = 'https://clincoo-be2.pages.dev/api/chat';
 
         // ===== WORKSPACE FILE/FOLDER CRUD (shared store with workspace.html) =====
         // Kunci workspace per-proyek — sama dengan pola per-chat (lsChatKey), murni localStorage tanpa D1.
@@ -1952,7 +1952,7 @@
             } 
             else {
                 let externalContext = "";
-                const JINA_PROXY_URL = 'https://clincoo.pages.dev/api/jina';
+                const JINA_PROXY_URL = 'https://clincoo-be2.pages.dev/api/jina';
                 
                 if (hasUrl) {
                     try {

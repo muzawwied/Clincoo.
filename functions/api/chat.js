@@ -33,11 +33,11 @@ function corsHeaders(request) {
   let origin = '';
   try { origin = (request && request.headers && request.headers.get('origin')) || ''; } catch (e) {}
   const allowed =
-    origin === 'https://clincoo.pages.dev' ||
+    origin === 'https://clincoo-be2.pages.dev' ||
     /^https:\/[a-z0-9][a-z0-9-]*\.clincoo\.pages\.dev$/i.test(origin) ||
     /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
   return {
-    'Access-Control-Allow-Origin': allowed ? origin : 'https://clincoo.pages.dev',
+    'Access-Control-Allow-Origin': allowed ? origin : 'https://clincoo-be2.pages.dev',
     'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Vary': 'Origin'

@@ -2,7 +2,7 @@
  * Clincoo Notifications System
  * Real-time D1-backed notifications with page links
  */
-const NOTIF_API = 'https://clincoo.pages.dev/api/notifications';
+const NOTIF_API = 'https://clincoo-be2.pages.dev/api/notifications';
 const NOTIF_KEY = 'clincoo_notifications';
 const NOTIF_ALLOWED = ['GitHub', 'Workspace', 'Deploy', 'Akun'];
 function isAllowedNotif(n) { return NOTIF_ALLOWED.indexOf(String((n && n.source) || '')) > -1; }

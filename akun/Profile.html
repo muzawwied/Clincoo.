@@ -461,7 +461,7 @@
 
         // ===== SINKRONISASI D1: data profil terhubung dengan personal.html =====
         try {
-            fetch('https://clincoo.pages.dev/api/account-profile')
+            fetch('https://clincoo-be2.pages.dev/api/account-profile')
                 .then(function(r){ return r.json(); })
                 .then(function(d) {
                     if (!d || d.error) return;
@@ -496,7 +496,7 @@
                         try { localStorage.setItem('clincoo_profile_pic', base64); } catch(err) {}
                         if (base64 && base64.length < 700000) {
                             try {
-                                fetch('https://clincoo.pages.dev/api/account-profile', {
+                                fetch('https://clincoo-be2.pages.dev/api/account-profile', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ avatar: base64 })
