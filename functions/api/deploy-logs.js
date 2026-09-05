@@ -1,4 +1,5 @@
 import { getProjectTables } from './_tables.js';
+import { guardProject } from './user-scope.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,8 @@ export async function onRequestGet({ request, env }) {
   try {
     const url = new URL(request.url);
     const projectId = url.searchParams.get('project_id') || '';
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     const limit = parseInt(url.searchParams.get('limit') || '20', 10);
 
     let rows;

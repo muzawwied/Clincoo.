@@ -1,6 +1,7 @@
 const CF_PROJECT = 'clincoo';
 
 import { getProjectTables } from './_tables.js';
+import { guardProject } from './user-scope.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -18,7 +19,9 @@ export async function onRequestOptions() {
   return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } });
 }
 
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ request, env }) {
+  const denyG = await guardProject(env, request, new URL(request.url).searchParams.get('project_id') || '');
+  if (denyG) return denyG;
   try {
     const { apiKey, accountId } = await getCFCreds(env);
     if (!apiKey) return new Response(JSON.stringify({ error: 'Cloudflare API key not configured' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
@@ -37,6 +40,8 @@ export async function onRequestGet({ env }) {
 export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => ({}));
   const projectId = body.project_id || '';
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
   try {
     const { apiKey, accountId } = await getCFCreds(env);
     if (!apiKey) return new Response(JSON.stringify({ error: 'Cloudflare API key not configured' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });

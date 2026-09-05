@@ -1,4 +1,5 @@
 import { getProjectTables, tableFor } from './_tables.js';
+import { guardProject } from './user-scope.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,8 @@ export async function onRequestGet({ request, env }) {
   try {
     const url = new URL(request.url);
     const projectId = url.searchParams.get('project_id') || '';
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     
     let rows;
     if (projectId) {
@@ -40,6 +43,8 @@ export async function onRequestPost({ request, env }) {
     const value = body.value;
     const is_secret = body.is_secret ? 1 : 0;
     const projectId = body.project_id || '';
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     
     if (!key || value === undefined) {
       return new Response(JSON.stringify({ error: 'key and value required' }), {
@@ -86,6 +91,8 @@ export async function onRequestDelete({ request, env }) {
       });
     }
     const projectId = url.searchParams.get('project_id') || '';
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     if (projectId) {
       // Dibatasi ke tabel proyek ini saja — tidak boleh menyentuh data proyek lain
       const T = await getProjectTables(env.DB, projectId);

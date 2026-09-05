@@ -45,3 +45,31 @@ export async function rowScope(db, table, user) {
   } catch (e) {}
   return user.id;
 }
+
+// Guard kepemilikan proyek (anti-IDOR): project_id yang dimiliki user LAIN
+// wajib ditolak. Proyek lama yang belum tercatat di user_projects tetap boleh
+// (kompatibel migrasi). Return: null = boleh lanjut; Response = tolak.
+export async function guardProject(env, request, projectId) {
+  if (!projectId) return null; // tanpa project_id: perilaku legacy (tabel global)
+  try {
+    const user = await currentUser(env, request);
+    if (!user) return new Response(JSON.stringify({ error: 'unauthorized', need_login: true }), { status: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    const db = env.DB;
+    // Skema identik dengan projects.js agar kolom tidak pernah hilang
+    await db.prepare(`CREATE TABLE IF NOT EXISTS user_projects (
+      id TEXT PRIMARY KEY,
+      user_id INTEGER,
+      title TEXT DEFAULT '',
+      prompt TEXT DEFAULT '',
+      ai_name TEXT DEFAULT '',
+      ai_desc TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT
+    )`).run();
+    const row = await db.prepare('SELECT user_id FROM user_projects WHERE id = ?').bind(String(projectId)).first();
+    if (!row || row.user_id == null || Number(row.user_id) === Number(user.id)) return null;
+    return new Response(JSON.stringify({ error: 'Bukan proyek Anda' }), { status: 403, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+  } catch (e) {
+    return null; // kegagalan cek tidak boleh memblokir flow lama
+  }
+}

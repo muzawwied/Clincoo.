@@ -2,6 +2,7 @@
 // Pengaturan umum: per-proyek (tabel p_*) jika ada project_id, global jika tidak.
 
 import { getProjectTables } from './_tables.js';
+import { guardProject } from './user-scope.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -42,6 +43,8 @@ export async function onRequestGet({ request, env }) {
     // If project_id provided, load project name/description from projects table
     const url = new URL(request.url);
     const projectId = url.searchParams.get('project_id') || '';
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     if (projectId) {
       // Kunci umum per-proyek menimpa nilai global
       try {
@@ -108,6 +111,8 @@ export async function onRequestPost({ request, env }) {
     }
 
     const projectId = body.project_id || '';
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     if (projectId && (updates.app_name || updates.app_description)) {
       try {
         const existing = await db.prepare('SELECT id FROM projects WHERE id = ?').bind(projectId).first();

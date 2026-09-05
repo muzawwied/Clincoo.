@@ -388,9 +388,13 @@
         // ==== LOGIN SOSIAL (OAuth) ====
         function startOAuth(provider) {
             const redirectUri = window.location.origin + window.location.pathname;
+            // State acak per sesi — cegah serangan login-CSRF (callback jahat memaksa
+            // korban login ke akun penyerang). Callback harus mengembalikan state ini.
+            const st = (crypto.randomUUID ? crypto.randomUUID() : ('s' + Date.now() + Math.random())).replace(/-/g, '');
+            try { sessionStorage.setItem('clincoo_oauth_state', st); } catch (e) {}
             if (provider === 'github') {
                 window.location.href = 'https://github.com/login/oauth/authorize?client_id=' + GITHUB_CLIENT_ID +
-                    '&scope=read:user%20user:email%20repo&state=github&redirect_uri=' + encodeURIComponent(redirectUri);
+                    '&scope=read:user%20user:email%20repo&state=' + st + '&redirect_uri=' + encodeURIComponent(redirectUri);
             } else {
                 fetch(API_BASE + '/google')
                     .then(r => r.json())
@@ -398,7 +402,7 @@
                         if (!data.client_id) throw new Error(data.error || 'Client ID Google tidak tersedia.');
                         window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + data.client_id +
                             '&redirect_uri=' + encodeURIComponent(redirectUri) +
-                            '&response_type=code&scope=openid%20email%20profile&state=google&prompt=select_account';
+                            '&response_type=code&scope=openid%20email%20profile&state=' + st + '&prompt=select_account';
                     })
                     .catch(err => showModal('Gagal Memulai Login Google', err.message, 'error'));
             }
@@ -429,8 +433,16 @@
             const code = params.get('code');
             const oauthError = params.get('error');
             if (code) {
+                const savedState = (() => { try { return sessionStorage.getItem('clincoo_oauth_state'); } catch (e) { return null; } })();
+                const gotState = params.get('state');
+                // Tolak callback tanpa/beda state — indikasi kuat CSRF/serangan.
+                if (!savedState || gotState !== savedState) {
+                    showModal('Login Dibatalkan', 'Callback OAuth tidak valid (state tidak cocok). Silakan mulai login ulang.', 'error');
+                    return;
+                }
+                try { sessionStorage.removeItem('clincoo_oauth_state'); } catch (e) {}
                 document.getElementById('oauth-loading').classList.remove('hidden');
-                handleOAuthCallback(code, params.get('state') === 'google' ? 'google' : 'github');
+                handleOAuthCallback(code, gotState === 'google' ? 'google' : 'github');
             } else if (oauthError) {
                 showModal('Login Dibatalkan', 'Proses login dibatalkan atau gagal. Silakan coba lagi.', 'error');
             }

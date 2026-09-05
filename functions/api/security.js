@@ -1,4 +1,5 @@
 import { getProjectTables } from './_tables.js';
+import { guardProject } from './user-scope.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -36,6 +37,8 @@ export async function onRequestGet({ request, env }) {
     await migrateSecurityTable(env.DB);
     const url = new URL(request.url);
     const projectId = url.searchParams.get('project_id') || '';
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     
     // Try per-project security settings first
     await env.DB.prepare('CREATE TABLE IF NOT EXISTS security_settings (project_id TEXT, key TEXT NOT NULL, value TEXT, PRIMARY KEY (project_id, key))').run();
@@ -71,6 +74,8 @@ export async function onRequestPost({ request, env }) {
     const body = await request.json();
     const { key, value, project_id } = body;
     const projectId = project_id || '';
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     
     if (!key) return new Response(JSON.stringify({ error: 'key required' }), {
       status: 400, headers: { 'Content-Type': 'application/json', ...CORS }

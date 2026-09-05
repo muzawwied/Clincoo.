@@ -2,6 +2,7 @@
 // Stores file content per project_id, used by workspace.html CodeMirror editor
 
 import { getProjectTables } from './_tables.js';
+import { guardProject } from './user-scope.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -30,6 +31,10 @@ export async function onRequestGet({ request, env }) {
 
     const url = new URL(request.url);
     const projectId = url.searchParams.get('project_id');
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     if (!projectId) return new Response(JSON.stringify({ error: 'project_id required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
 
     const T = await getProjectTables(db, projectId);
@@ -58,6 +63,8 @@ export async function onRequestPost({ request, env }) {
 
     const body = await request.json();
     const projectId = body.project_id;
+    const deny = await guardProject(env, request, projectId);
+    if (deny) return deny;
     if (!projectId) return new Response(JSON.stringify({ error: 'project_id required' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
 
     const filesToSave = body.files && Array.isArray(body.files) ? body.files : (body.path !== undefined ? [{ path: body.path, content: body.content }] : []);
