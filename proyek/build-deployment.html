@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="../js/auth-client.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +10,6 @@
     <title>Clincoo - Deployment</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
     
-    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,7 +21,7 @@
         /* Base styles */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #ffffff;
+            background-color: #f7f7f9;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
         
@@ -48,19 +46,47 @@
         body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 { color: #888888 !important; }
         body.dark-mode .border-gray-100, body.dark-mode .border-gray-200, body.dark-mode .border-gray-300 { border-color: #222222 !important; }
         body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
-        body.dark-mode .bg-\[#ffffff\], body.dark-mode .bg-gray-50 { background-color: #000000 !important; }
+        body.dark-mode .bg-\[#f7f7f9\], body.dark-mode .bg-gray-50 { background-color: #000000 !important; }
         body.dark-mode .bg-gray-100 { background-color: #111111 !important; }
         body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #1a1a1a !important; }
         
         /* Inputs & Buttons Custom Dark Mode */
         body.dark-mode input[type="text"], body.dark-mode .custom-select-trigger, body.dark-mode .dropdown-menu { background-color: #0a0a0a; color: #ffffff; border-color: #222222; }
-        body.dark-mode input[type="text"]:focus { border-color: #555555; }
+        body.dark-mode input[type="text"]:focus { border-color: #222222; }
         body.dark-mode .bg-black.text-white { background-color: #ffffff !important; color: #000000 !important; }
         body.dark-mode .hover\:bg-gray-800:hover { background-color: #dddddd !important; }
+        body.dark-mode .custom-domain-btn { background-color: #111111 !important; color: #ffffff !important; border-color: #444444 !important; }
+        body.dark-mode .custom-domain-btn:hover { background-color: #222222 !important; }
 
         /* Animation Utilities */
         .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Shimmer Loading Effect */
+        .shimmer {
+            background: #f6f7f8;
+            background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 100%; 
+            display: inline-block;
+            position: relative;
+            animation-duration: 1.5s;
+            animation-fill-mode: forwards; 
+            animation-iteration-count: infinite;
+            animation-name: placeholderShimmer;
+            animation-timing-function: linear;
+            border-radius: 4px;
+        }
+        
+        body.dark-mode .shimmer {
+            background: #111;
+            background-image: linear-gradient(to right, #111 0%, #222 20%, #111 40%, #111 100%);
+        }
+
+        @keyframes placeholderShimmer {
+            0% { background-position: -468px 0; }
+            100% { background-position: 468px 0; }
+        }
 
         /* Hide scrollbar */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -150,24 +176,30 @@
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2 mb-1">
-                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>                        
+                        <div id="live-indicator" class="w-2.5 h-2.5 rounded-full bg-green-500"></div>                        
                         <h3 class="text-sm font-medium text-gray-900">Situs Anda aktif di</h3>
                     </div>
-                    <a href="#" class="text-blue-600 dark:text-blue-400 font-semibold text-base hover:underline break-all">https://muzawwied.clincoo.io</a>
+                    
+                    <!-- Shimmer Placeholder for Link -->
+                    <div id="link-shimmer" class="w-64 h-6 shimmer mt-1 mb-1"></div>
+                    
+                    <!-- Actual Link (Hidden initially) -->
+                    <a id="deployed-link" href="https://muzawwied.clincoo.io" target="_blank" class="hidden text-blue-600 dark:text-blue-400 font-semibold text-base hover:underline break-all">https://muzawwied.clincoo.io</a>
+                    
                     <p class="text-xs text-gray-500 mt-2 flex items-center gap-1.5">
                         Terakhir dideploy oleh 
                         <span class="inline-flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-full text-gray-700 font-medium">
                             <i data-lucide="user" class="w-3 h-3"></i> muzawwied
                         </span>
-                        10 jam yang lalu
+                        <span id="time-ago-label">menunggu status...</span>
                     </p>
                 </div>
                 <div class="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
-                    <button class="flex-1 md:flex-none px-4 py-2 border border-gray-300 bg-white rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                        <i data-lucide="external-link" class="w-4 h-4"></i> Visit site
+                    <button id="btn-visit-site" onclick="window.open('https://muzawwied.clincoo.io', '_blank')" class="flex-1 md:flex-none px-4 py-2 border border-gray-300 bg-white rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                        <i data-lucide="external-link" class="w-4 h-4"></i> Kunjungi situs
                     </button>
-                    <button class="flex-1 md:flex-none px-4 py-2 border border-red-200 bg-red-50 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors dark:bg-red-900/20 dark:border-red-900/50 dark:hover:bg-red-900/40">
-                        Unpublish site
+                    <button onclick="unpublishSite()" class="flex-1 md:flex-none px-4 py-2 border border-red-200 bg-red-50 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors dark:bg-red-900/20 dark:border-red-900/50 dark:hover:bg-red-900/40">
+                        Batalkan publikasi
                     </button>
                 </div>
             </div>
@@ -176,21 +208,21 @@
 
             <!-- Bagian: Build and deployment (Flat) -->
             <section class="space-y-6">
-                <h2 class="text-xl font-bold text-gray-900">Build and deployment</h2>
+                <h2 class="text-xl font-bold text-gray-900">Build & deployment</h2>
                 
                 <div class="space-y-6">
                     <!-- Dropdown: Source -->
                     <div class="relative w-full sm:w-64">
-                        <label class="block text-sm font-semibold text-gray-900 mb-2">Source</label>
-                        <div class="custom-select-trigger inline-flex items-center justify-between w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'source', ['Deploy from a branch', 'Clincoo Actions'])">
-                            <span id="label-source" class="font-medium">Deploy from a branch</span>
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">Sumber</label>
+                        <div class="custom-select-trigger inline-flex items-center justify-between w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'source', ['Deploy dari branch', 'Clincoo Actions'])">
+                            <span id="label-source" class="font-medium">Deploy dari branch</span>
                             <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none"></i>
                         </div>
                     </div>
 
                     <div class="pt-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-1">Branch</label>
-                        <p class="text-sm text-gray-500 mb-3">Your Clincoo site is currently being built from the main branch. <a href="#" class="text-blue-600 hover:underline">Learn more about configuring the publishing source for your site.</a></p>
+                        <p class="text-sm text-gray-500 mb-3">Situs Clincoo Anda saat ini dibangun dari branch utama. <a href="#" class="text-blue-600 hover:underline">Pelajari lebih lanjut tentang mengonfigurasi sumber publikasi untuk situs Anda.</a></p>
                         
                         <div class="flex flex-wrap items-center gap-3">
                             <!-- Dropdown: Dash Branch -->
@@ -215,17 +247,17 @@
                                 </div>
                             </div>
 
-                            <button class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-semibold cursor-not-allowed dark:bg-gray-800 dark:text-gray-600">Save</button>
+                            <button onclick="saveSourceConfig()" id="btn-save-source" class="min-w-[72px] h-[38px] flex items-center justify-center px-4 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors">Simpan</button>
                         </div>
                     </div>
 
                     <div class="pt-2">
-                         <p class="text-sm text-gray-500">Learn how to <a href="#" class="text-blue-600 hover:underline">add a Jekyll theme</a> to your site.</p>
+                         <p class="text-sm text-gray-500">Pelajari cara <a href="#" class="text-blue-600 hover:underline">menambahkan tema kustom</a> ke situs Anda.</p>
                     </div>
 
                     <div class="pt-2 text-sm text-gray-500 leading-relaxed">
-                        Your site was last deployed to the <a href="#" class="text-blue-600 hover:underline font-semibold">clincoo-pages</a> environment by the <a href="#" class="text-blue-600 hover:underline font-semibold">pages build and deployment</a> workflow.<br>
-                        <a href="#" class="text-blue-600 hover:underline">Learn more about deploying to Clincoo Pages using custom workflows</a>
+                        Situs Anda terakhir kali di-deploy ke lingkungan <span class="font-semibold text-gray-700">clincoo-pages</span> melalui alur kerja otomatis.<br>
+                        <a href="#" class="text-blue-600 hover:underline">Pelajari lebih lanjut tentang mendeploy ke Clincoo menggunakan alur kerja kustom.</a>
                     </div>
                 </div>
             </section>
@@ -235,27 +267,29 @@
             <!-- Bagian: Custom Domain (Flat) -->
             <section class="space-y-5">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-900">Custom domain</h2>
-                    <p class="text-sm text-gray-500 mt-1">Custom domains allow you to serve your site from a domain other than muzawwied.Clincoo.io. <a href="#" class="text-blue-600 hover:underline">Learn more about configuring custom domains.</a></p>
+                    <h2 class="text-xl font-bold text-gray-900">Domain kustom</h2>
+                    <p class="text-sm text-gray-500 mt-1">Gunakan domain kustom untuk mengakses situs Anda selain dari URL default yang kami sediakan. <a href="#" class="text-blue-600 hover:underline">Pelajari lebih lanjut tentang mengonfigurasi domain kustom.</a></p>
                 </div>
                 
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <input type="text" placeholder="" class="w-full sm:w-72 px-4 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-colors">
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button class="flex-1 sm:flex-none px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-semibold cursor-not-allowed dark:bg-gray-800 dark:text-gray-600">Save</button>
-                        <button class="flex-1 sm:flex-none px-4 py-2 border border-gray-300 bg-white text-red-600 hover:bg-gray-50 rounded-lg text-sm font-semibold transition-colors">Remove</button>
-                    </div>
+                    <input type="text" id="input-custom-domain" placeholder="www.example.com" class="w-full sm:w-72 px-4 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none transition-colors">
+                </div>
+
+                <!-- Custom Domain Save Button: Removed button moved to the left, Save button with gray border -->
+                <div class="flex justify-end pt-1 gap-2">
+                    <button id="btn-remove-domain" onclick="removeCustomDomain()" class="px-3 py-1.5 border border-gray-300 bg-white text-red-600 hover:bg-gray-50 rounded-md text-xs font-semibold transition-colors hidden">Hapus</button>
+                    <button onclick="saveCustomDomain()" id="btn-save-domain" class="custom-domain-btn min-w-[72px] h-[34px] px-3 bg-white text-gray-900 border border-gray-300 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center shadow-sm">Simpan</button>
                 </div>
 
                 <div class="pt-4 flex items-start gap-3">
                     <div class="mt-0.5">
-                        <input type="checkbox" checked disabled class="w-4 h-4 rounded border-gray-300 text-black focus:ring-black opacity-50 cursor-not-allowed">
+                        <input type="checkbox" id="check-https" onchange="toggleHttps()" checked disabled class="w-4 h-4 rounded border-gray-300 text-black focus:ring-black opacity-50 cursor-not-allowed">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-900">Enforce HTTPS</label>
-                        <p class="text-sm text-gray-500 mt-0.5">— Required for your site because you are using the default domain (muzawwied.Clincoo.io)</p>
+                        <label class="block text-sm font-bold text-gray-900">Wajibkan HTTPS</label>
+                        <p class="text-sm text-gray-500 mt-0.5">Diperlukan karena Anda menggunakan domain default (muzawwied.Clincoo.io)</p>
                         <p class="text-sm text-gray-500 mt-4 leading-relaxed max-w-3xl">
-                            HTTPS provides a layer of encryption that prevents others from snooping on or tampering with traffic to your site. When HTTPS is enforced, your site will only be served over HTTPS. <a href="#" class="text-blue-600 hover:underline">Learn more about securing your Clincoo Pages site with HTTPS.</a>
+                            HTTPS menyediakan lapisan enkripsi yang mencegah pihak lain mengintip atau merusak lalu lintas ke situs Anda. Saat HTTPS diwajibkan, situs Anda hanya akan disajikan melalui HTTPS. <a href="#" class="text-blue-600 hover:underline">Pelajari lebih lanjut tentang mengamankan situs Anda dengan HTTPS.</a>
                         </p>
                     </div>
                 </div>
@@ -282,23 +316,216 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // --- SISTEM PENYIMPANAN REAL-TIME (LOCALSTORAGE) ---
+        document.addEventListener("DOMContentLoaded", () => {
+            checkDeploymentStatus();
+            loadCustomDomain();
+        });
+
+        function checkDeploymentStatus() {
+            const isDeployed = localStorage.getItem('clincoo_is_deployed');
+            if (isDeployed === 'true') {
+                switchView('view-dashboard');
+                startDeploySimulation(); // Jalankan simulasi shimmer dulu
+            }
+        }
+        
+        function startDeploySimulation() {
+            const indicator = document.getElementById('live-indicator');
+            const shimmer = document.getElementById('link-shimmer');
+            const link = document.getElementById('deployed-link');
+            const timeLabel = document.getElementById('time-ago-label');
+            const visitBtn = document.getElementById('btn-visit-site');
+            
+            // Set initial building state
+            indicator.className = 'w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse';
+            shimmer.style.display = 'inline-block';
+            link.style.display = 'none';
+            timeLabel.innerText = 'sedang membangun situs...';
+            visitBtn.disabled = true;
+            visitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            // Simulate build time (e.g., 3-5 seconds for demo purposes)
+            setTimeout(() => {
+                // Deployment complete
+                indicator.className = 'w-2.5 h-2.5 rounded-full bg-green-500';
+                shimmer.style.display = 'none';
+                link.style.display = 'inline-block';
+                
+                // Update time if not set yet (first deploy) or refresh
+                let deployTime = localStorage.getItem('clincoo_deploy_time');
+                if(!deployTime) {
+                    deployTime = Date.now();
+                    localStorage.setItem('clincoo_deploy_time', deployTime);
+                }
+                
+                updateDeployTime();
+                setInterval(updateDeployTime, 60000); // Perbarui waktu otomatis tiap 1 menit
+                
+                visitBtn.disabled = false;
+                visitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                
+            }, 3500); // 3.5 seconds shimmer simulation
+        }
+
+        function updateDeployTime() {
+            const deployTime = localStorage.getItem('clincoo_deploy_time');
+            if (deployTime) {
+                const el = document.getElementById('time-ago-label');
+                if(el && el.innerText !== 'sedang membangun situs...') {
+                    el.innerText = timeAgo(parseInt(deployTime));
+                }
+            }
+        }
+
+        function updateDeployTime() {
+            const deployTime = localStorage.getItem('clincoo_deploy_time');
+            if (deployTime) {
+                const el = document.getElementById('time-ago-label');
+                if(el) el.innerText = timeAgo(parseInt(deployTime));
+            }
+        }
+
+        function timeAgo(timestamp) {
+            const seconds = Math.floor((new Date() - timestamp) / 1000);
+            let interval = seconds / 31536000;
+            if (interval >= 1) return Math.floor(interval) + " tahun yang lalu";
+            interval = seconds / 2592000;
+            if (interval >= 1) return Math.floor(interval) + " bulan yang lalu";
+            interval = seconds / 86400;
+            if (interval >= 1) return Math.floor(interval) + " hari yang lalu";
+            interval = seconds / 3600;
+            if (interval >= 1) return Math.floor(interval) + " jam yang lalu";
+            interval = seconds / 60;
+            if (interval >= 1) return Math.floor(interval) + " menit yang lalu";
+            return "baru saja";
+        }
+
         // Simulasi Proses Deploy
         function processDeploy() {
             const btn = document.getElementById('btn-process-deploy');
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Memproses...`;
-            btn.classList.replace('bg-black', 'bg-gray-600');
-            btn.classList.add('cursor-not-allowed');
+            // Menjaga teks agar terbaca jelas dengan warna teks menyesuaikan tombol
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Memproses...</span>`;
+            
+            // Ubah menjadi transparan di background putih
+            btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
             lucide.createIcons();
 
             setTimeout(() => {
-                btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> Berhasil Deploy!`;
-                btn.classList.replace('bg-gray-600', 'bg-emerald-600');
+                btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span class="inline-block">Berhasil Deploy!</span>`;
+                // Tetap transparan
+                btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
                 lucide.createIcons();
                 
                 setTimeout(() => {
-                    switchView('view-dashboard');
+                    localStorage.setItem('clincoo_is_deployed', 'true');
+                    // We don't set deploy_time here yet, let startDeploySimulation handle it
+                    localStorage.removeItem('clincoo_deploy_time'); // Clear old time
+                    
+                    checkDeploymentStatus(); // This will trigger switchView and start simulation
+
+                    setTimeout(() => {
+                        btn.innerHTML = `Jalankan Deploy`;
+                        btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
+                    }, 1000);
                 }, 800);
             }, 2000);
+        }
+
+        // Logika Unpublish (Membatalkan Deploy)
+        function unpublishSite() {
+            if(confirm("Apakah Anda yakin ingin menarik publikasi dan menonaktifkan situs ini?")) {
+                localStorage.removeItem('clincoo_is_deployed');
+                localStorage.removeItem('clincoo_deploy_time');
+                switchView('view-cta');
+            }
+        }
+        
+        // Fitur Tombol Save di Source Config dengan Animasi Loading -> Check
+        function saveSourceConfig() {
+            const btn = document.getElementById('btn-save-source');
+            if (btn.disabled) return;
+            
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+            lucide.createIcons();
+
+            setTimeout(() => {
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    btn.innerHTML = "Simpan";
+                    btn.disabled = false;
+                }, 1500);
+            }, 1000);
+        }
+
+        // Manajemen Custom Domain & HTTPS
+        function loadCustomDomain() {
+            const domain = localStorage.getItem('clincoo_custom_domain');
+            const input = document.getElementById('input-custom-domain');
+            const btnRemove = document.getElementById('btn-remove-domain');
+            const checkHttps = document.getElementById('check-https');
+            
+            if (domain) {
+                input.value = domain;
+                btnRemove.classList.remove('hidden');
+                checkHttps.disabled = false;
+                checkHttps.classList.remove('opacity-50', 'cursor-not-allowed');
+                checkHttps.checked = localStorage.getItem('clincoo_enforce_https') === 'true';
+            } else {
+                input.value = '';
+                btnRemove.classList.add('hidden');
+                checkHttps.disabled = true;
+                checkHttps.classList.add('opacity-50', 'cursor-not-allowed');
+                checkHttps.checked = true;
+            }
+        }
+
+        function saveCustomDomain() {
+            const input = document.getElementById('input-custom-domain').value.trim();
+            const btn = document.getElementById('btn-save-domain');
+            
+            if (!input) {
+                alert("Mohon masukkan domain terlebih dahulu.");
+                return;
+            }
+
+            if (btn.disabled) return;
+            
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
+            lucide.createIcons();
+
+            setTimeout(() => {
+                localStorage.setItem('clincoo_custom_domain', input);
+                if(localStorage.getItem('clincoo_enforce_https') === null) {
+                    localStorage.setItem('clincoo_enforce_https', 'true');
+                }
+                loadCustomDomain();
+                
+                btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i>`;
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    btn.innerHTML = "Simpan";
+                    btn.disabled = false;
+                }, 1500);
+            }, 1000);
+        }
+
+        function removeCustomDomain() {
+            if(confirm("Apakah Anda yakin ingin menghapus custom domain?")) {
+                localStorage.removeItem('clincoo_custom_domain');
+                localStorage.removeItem('clincoo_enforce_https');
+                loadCustomDomain();
+            }
+        }
+
+        function toggleHttps() {
+            const checkHttps = document.getElementById('check-https');
+            localStorage.setItem('clincoo_enforce_https', checkHttps.checked);
         }
 
         // --- Logika Inline Dropdown (Popover Kustom sesuai CTA trigger) ---
