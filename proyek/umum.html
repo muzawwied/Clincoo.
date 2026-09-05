@@ -189,9 +189,9 @@
         lucide.createIcons();
 
         // ================= PENGATURAN UMUM -> DB (per proyek) =================
-        const API = 'https://clincoo.pages.dev/api';
+        const API = 'https://clincoo-be2.pages.dev/api';
         const pid = () => localStorage.getItem('clincoo_current_project_id') || '';
-        const authHeaders = () => { const t = localStorage.getItem('clincoo_token') || ''; return t ? { Authorization: 'Bearer ' + t } : {}; };
+        const authHeaders = () => { const t = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; return t ? { Authorization: 'Bearer ' + t } : {}; };
 
         async function loadUmum() {
             try {

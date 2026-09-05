@@ -370,9 +370,9 @@
 
         async function attachDomainToPages(domain) {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
-            const token = localStorage.getItem('clincoo_token') || '';
+            const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
             try {
-                const res = await fetch('https://clincoo-be2.pages.dev/api/deploy', {
+                const res = await fetch('https://clincoo.pages.dev/api/deploy', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
                     body: JSON.stringify({ project_id: pid, action: 'add_domain', domain })
@@ -385,9 +385,9 @@
 
         async function loadRealDomainStatus() {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
-            const token = localStorage.getItem('clincoo_token') || '';
+            const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
             try {
-                const res = await fetch('https://clincoo-be2.pages.dev/api/deploy?project_id=' + encodeURIComponent(pid), {
+                const res = await fetch('https://clincoo.pages.dev/api/deploy?project_id=' + encodeURIComponent(pid), {
                     headers: token ? { Authorization: 'Bearer ' + token } : {}
                 });
                 const st = await res.json();

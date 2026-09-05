@@ -307,12 +307,12 @@
 
         // Fungsi berpindah antar tampilan/halaman
         // ===================== DEPLOY ASLI (Cloudflare Pages) =====================
-        const API = 'https://clincoo-be2.pages.dev/api';
+        const API = 'https://clincoo.pages.dev/api'; // deploy engine (host ini; proxy auth ke be2)
         const pid = () => localStorage.getItem('clincoo_current_project_id') || '';
         let deployState = { pages_url: '', pollTimer: null, domainTimer: null };
 
         async function apiFetch(path, opts = {}) {
-            const token = localStorage.getItem('clincoo_token') || '';
+            const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
             const res = await fetch(API + path, {
                 ...opts,
                 headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...(opts.headers || {}) }
