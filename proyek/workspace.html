@@ -1096,7 +1096,7 @@
 
       const redirectUri = window.location.origin + window.location.pathname;
       const authUrl = 'https://github.com/login/oauth/authorize?client_id=' + GITHUB_CLIENT_ID +
-        '&scope=repo&redirect_uri=' + encodeURIComponent(redirectUri);
+        '&scope=repo%20user:email&redirect_uri=' + encodeURIComponent(redirectUri);
 
       window.location.href = authUrl;
     }
@@ -1122,6 +1122,46 @@
         });
         const user = await userResp.json();
         localStorage.setItem(GITHUB_USER_KEY, JSON.stringify({ login: user.login, avatar_url: user.avatar_url }));
+
+        // ==== Sinkronisasi profil GitHub -> profil akun Clincoo (data sama untuk semua metode login) ====
+        try {
+          const profilePatch = {};
+          // Nama: isi hanya kalau profil masih kosong (jangan menimpa data yang sudah ada)
+          const fullName = user.name || user.login;
+          if (fullName && !localStorage.getItem('clincoo_fullname')) {
+            localStorage.setItem('clincoo_fullname', fullName);
+            profilePatch.name = fullName;
+          }
+          // Email: ambil email utama dari GitHub (scope user:email)
+          if (!localStorage.getItem('clincoo_email')) {
+            try {
+              const emailResp = await fetch('https://api.github.com/user/emails', {
+                headers: { Authorization: 'Bearer ' + data.access_token, Accept: 'application/vnd.github.v3+json' }
+              });
+              if (emailResp.ok) {
+                const emails = await emailResp.json();
+                const primary = (Array.isArray(emails) ? emails : []).find(function(e) { return e && e.primary && e.verified; }) || (Array.isArray(emails) ? emails[0] : null);
+                if (primary && primary.email) {
+                  localStorage.setItem('clincoo_email', primary.email);
+                  profilePatch.email = primary.email;
+                }
+              }
+            } catch (e) {}
+          }
+          // Avatar: pakai avatar GitHub hanya kalau user belum punya foto profil sendiri
+          if (user.avatar_url && !localStorage.getItem('clincoo_profile_pic')) {
+            localStorage.setItem('clincoo_profile_pic', user.avatar_url);
+            profilePatch.avatar = user.avatar_url;
+          }
+          // Kirim ke database supaya sinkron di semua halaman & perangkat
+          if (Object.keys(profilePatch).length > 0) {
+            fetch('https://clincoo-be2.pages.dev/api/account-profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(profilePatch)
+            }).catch(function() {});
+          }
+        } catch (e) {}
 
         isGithubConnected = true;
         addNotification('GitHub', 'Terhubung sebagai ' + (user.login || 'GitHub user'));
