@@ -611,6 +611,26 @@
             }
         } catch(e) {}
 
+        // Muat profil dari database per akun (D1) — sinkron lintas perangkat
+        try {
+            const PROFILE_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev/api' : '/api') + '/account-profile';
+            fetch(PROFILE_API).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+                if (!d) return;
+                const nm = d.name || '', em = d.email || '', av = d.avatar || '';
+                try {
+                    if (nm) localStorage.setItem('clincoo_fullname', nm);
+                    if (em) localStorage.setItem('clincoo_email', em);
+                    if (av) localStorage.setItem('clincoo_profile_pic', av);
+                } catch(e) {}
+                const nameEl2 = document.getElementById('profile-display-name');
+                const emailEl2 = document.getElementById('profile-display-email');
+                if (nm && nameEl2) nameEl2.textContent = nm;
+                if (em && emailEl2) emailEl2.textContent = em;
+                if (av && profileDisplay) { profileDisplay.style.backgroundImage = 'url(' + av + ')'; profileDisplay.textContent = ''; }
+                else if (nm && profileDisplay && !profileDisplay.style.backgroundImage) { profileDisplay.textContent = nm.charAt(0).toUpperCase(); }
+            }).catch(function () {});
+        } catch(e) {}
+
         if (profileInput) {
             profileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
@@ -957,6 +977,7 @@
             projects.unshift(newProject);
             try {
                 localStorage.setItem('clincoo_projects', JSON.stringify(projects));
+                pushProjectsToServer(projects);
                 localStorage.setItem('clincoo_current_chat_msg', prompt);
                 localStorage.setItem('clincoo_current_project_id', projectId);
                 const fileChips = filePreviewContainer ? filePreviewContainer.querySelectorAll('.file-chip') : [];
@@ -1069,6 +1090,7 @@
             try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
             projects = projects.filter(p => p.id !== id);
             localStorage.setItem('clincoo_projects', JSON.stringify(projects));
+            pushProjectsToServer(projects);
             renderProjects();
         }
         function duplicateProject(id) {
@@ -1079,6 +1101,7 @@
                 const copy = { ...proj, id: 'proj_' + Date.now(), title: proj.title + ' (Copy)', updatedAt: new Date().toISOString() };
                 projects.unshift(copy);
                 localStorage.setItem('clincoo_projects', JSON.stringify(projects));
+                pushProjectsToServer(projects);
                 renderProjects();
             }
         }
@@ -1090,7 +1113,40 @@
                 navigator.share({ title: proj.title, text: proj.prompt }).catch(() => {});
             }
         }
+        // === Sinkronisasi daftar proyek per akun ke D1 (Cloudflare) ===
+        const PROJECTS_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo.pages.dev/api' : '/api') + '/projects';
+        let _pushTimer = null;
+        function pushProjectsToServer(projects) {
+            if (_pushTimer) clearTimeout(_pushTimer);
+            _pushTimer = setTimeout(function () {
+                try {
+                    fetch(PROJECTS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'replace_all', projects: projects }) }).catch(function () {});
+                } catch (e) {}
+            }, 700);
+        }
+        function syncProjectsFromServer() {
+            try {
+                fetch(PROJECTS_API).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+                    if (!d || !Array.isArray(d.projects)) return;
+                    const list = d.projects;
+                    let local = [];
+                    try { const st = localStorage.getItem('clincoo_projects'); if (st) local = JSON.parse(st); } catch(e) {}
+                    if (list.length === 0 && local.length > 0) {
+                        // migrasi pertama: dorong proyek lokal ke akun yang login
+                        try {
+                            fetch(PROJECTS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'replace_all', projects: local }) }).catch(function () {});
+                        } catch (e) {}
+                        return;
+                    }
+                    if (JSON.stringify(list) !== JSON.stringify(local)) {
+                        try { localStorage.setItem('clincoo_projects', JSON.stringify(list)); } catch(e) {}
+                        renderProjects();
+                    }
+                }).catch(function () {});
+            } catch (e) {}
+        }
         renderProjects();
+        syncProjectsFromServer();
 
         setTheme(currentThemeMode);
         setAccent(currentAccentName, accentMap[currentAccentName] ? accentMap[currentAccentName].cls : 'bg-gray-900');
