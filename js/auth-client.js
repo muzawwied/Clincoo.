@@ -13,9 +13,25 @@
   window.ClincooAuth = {
     getToken: getToken,
     authUrl: AUTH_URL,
-    logout: function () {
-      try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
-      location.replace(AUTH_URL);
+    logout: function (ev) {
+      if (ev && ev.preventDefault) { try { ev.preventDefault(); } catch (e) {} }
+      var API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo.pages.dev' : '';
+      var done = false;
+      var finish = function () {
+        if (done) return;
+        done = true;
+        try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+        location.replace(AUTH_URL);
+      };
+      var tk = getToken();
+      if (tk) {
+        try {
+          fetch(API + '/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + tk } })
+            .catch(function () {}).then(finish);
+          setTimeout(finish, 2000);
+        } catch (e) { finish(); }
+      } else { finish(); }
+      return false;
     }
   };
 

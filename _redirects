@@ -22,7 +22,6 @@
 /profil/kontrol-data    /pages/kontrol-data.html    200
 /profil/laporkan-bug    /pages/laporkan-bug.html    200
 /profil/tentang    /pages/tentang.html    200
-/profil/keluar    /pages/keluar.html    200
 /notifikasi    /pages/notifikasi.html    200
 
 # Project-level pages — specific routes first (top to bottom, first match wins)
@@ -60,8 +59,6 @@
 /langganan.html    /pages/langganan.html    301
 /kolaborasi    /pages/kolaborasi.html    301
 /kolaborasi.html    /pages/kolaborasi.html    301
-/keluar    /pages/keluar.html    301
-/keluar.html    /pages/keluar.html    301
 /tentang    /pages/tentang.html    301
 /tentang.html    /pages/tentang.html    301
 /laporkan-bug    /pages/laporkan-bug.html    301
