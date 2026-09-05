@@ -98,6 +98,10 @@
     body.dark-mode .shadow-xl { box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important; }
     body.dark-mode #sidebar-popup { background-color: #0a0a0a; }
     body.dark-mode #notif-dropdown { background-color: #0a0a0a; border-color: #222222; }
+    body.dark-mode #notif-dropdown .notif-src { color: #f5f5f5; }
+    body.dark-mode #notif-dropdown .notif-msg { color: #a3a3a3; }
+    body.dark-mode #notif-dropdown .notif-time { color: #6b7280; }
+    body.dark-mode #notif-dropdown .notif-row:hover { background: rgba(255,255,255,0.06); }
     body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
       background-color: #0a0a0a; color: #f0f0f0; border-color: #222222;
     }
@@ -398,12 +402,12 @@
       for (let n of notifs.slice(0, 5)) {
         const isUnread = !n.read;
         const linkAttr = n.link ? ' onclick="window.location.href=\'' + escapeNotifHtml(n.link) + '\'"' : '';
-        html += '<div class="flex items-start gap-2.5 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer"' + linkAttr + '>' +
+        html += '<div class="notif-row flex items-start gap-2.5 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer"' + linkAttr + '>' +
           '<span class="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-[7px] ' + (isUnread ? 'bg-red-500' : 'bg-transparent') + '"></span>' +
           '<div class="flex-1 min-w-0">' +
-          '<div class="flex items-baseline gap-2"><span class="text-[11px] font-semibold text-gray-900 tracking-wide">' + escapeNotifHtml(n.source) + '</span>' +
-          '<span class="text-[10px] text-gray-400 ml-auto flex-shrink-0">' + notifTime(n.created_at || n.timestamp) + '</span></div>' +
-          '<p class="text-xs text-gray-600 leading-snug break-words line-clamp-2 mt-0.5">' + escapeNotifHtml(n.message) + '</p>' +
+          '<div class="flex items-baseline gap-2"><span class="notif-src text-[11px] font-semibold text-gray-900 tracking-wide">' + escapeNotifHtml(n.source) + '</span>' +
+          '<span class="notif-time text-[10px] text-gray-400 ml-auto flex-shrink-0">' + notifTime(n.created_at || n.timestamp) + '</span></div>' +
+          '<p class="notif-msg text-xs text-gray-600 leading-snug break-words line-clamp-2 mt-0.5">' + escapeNotifHtml(n.message) + '</p>' +
           '</div></div>';
       }
       html += '</div>';
