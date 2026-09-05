@@ -4,7 +4,7 @@
  */
 const NOTIF_API = 'https://clincoo-be2.pages.dev/api/notifications';
 const NOTIF_KEY = 'clincoo_notifications';
-const NOTIF_ALLOWED = ['GitHub', 'Workspace', 'Deploy', 'Akun'];
+const NOTIF_ALLOWED = ['GitHub', 'Workspace', 'Deploy', 'Akun', 'Dompet'];
 function isAllowedNotif(n) { return NOTIF_ALLOWED.indexOf(String((n && n.source) || '')) > -1; }
 function getLocalNotifs() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]').filter(isAllowedNotif); } catch(e) { return []; } }
 let d1Notifs = [];
@@ -108,12 +108,11 @@ function renderNotifPage() {
         const type = n.type || 'info';
         const iconPath = notifIcons[type] || notifIcons.info;
         const color = notifColors[type] || notifColors.info;
-        html += '<div class="flex items-start gap-3 px-4 py-3 rounded-xl bg-white border border-gray-100 cursor-pointer hover:shadow-sm transition-shadow' + (n.read ? ' opacity-60' : '') + '" onclick="handleNotifClick(' + n.id + ')">' +
-            '<div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:' + color + '15"><svg class="w-4 h-4" style="color:' + color + '" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">' + iconPath + '</svg></div>' +
-            '<div class="flex-1"><div class="flex items-center gap-2"><span class="text-sm font-semibold" style="color:' + color + '">' + (n.source || '') + '</span>' +
+        html += '<div class="px-3 py-3 text-left rounded-xl bg-white border border-gray-100 cursor-pointer hover:shadow-sm transition-shadow' + (n.read ? ' opacity-60' : '') + '" onclick="handleNotifClick(' + n.id + ')">' +
+            '<div class="flex items-center gap-2"><span class="text-sm font-semibold" style="color:' + color + '">' + (n.source || '') + '</span>' +
             '<span class="text-xs text-gray-400">' + timeStr + '</span></div>' +
             '<p class="text-sm text-gray-600 mt-0.5 line-clamp-2">' + n.message + '</p>' +
-            (n.link ? '<p class="text-xs text-blue-500 mt-1">Lihat detail \u2192</p>' : '') + '</div></div>';
+            (n.link ? '<p class="text-xs text-blue-500 mt-1">Lihat detail \u2192</p>' : '') + '</div>';
     }
     html += '</div>';
     notifList.innerHTML = html;

@@ -585,6 +585,18 @@
                         await renderTransactions();
                         closeTopUpPage();
                         showModal('Pengisian Saldo Berhasil', 'Pembayaran terverifikasi. Saldo sebesar Rp ' + formatNumberOnly(data.amount) + ' telah ditambahkan ke akun Clincoo Anda.');
+                        try {
+                            fetch('https://clincoo-be2.pages.dev/api/notifications', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    source: 'Dompet',
+                                    message: 'Top up Rp ' + formatNumberOnly(data.amount) + ' berhasil. Saldo sekarang Rp ' + formatNumberOnly(data.balance) + '.',
+                                    type: 'wallet',
+                                    link: location.pathname
+                                })
+                            });
+                        } catch(e) {}
                         return;
                     }
                     if (data.status === 'failed') {
