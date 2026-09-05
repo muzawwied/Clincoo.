@@ -204,7 +204,7 @@
 
           <!-- Notifikasi keamanan real-time situs proyek (di-poll dari backend) -->
           <ul id="sec-events-list" class="space-y-0 text-sm">
-            <li id="sec-loading" class="py-4 text-gray-500">Memuat…</li>
+            <li id="sec-loading" class="flex items-center justify-center min-h-[240px] text-gray-500">Memuat…</li>
           </ul>
         </div>
       </div>
@@ -408,7 +408,7 @@
 
     // Kosong dulu — notifikasi muncul sendiri nanti dengan gaya seperti sebelumnya.
     if (!evs.length) {
-      list.innerHTML = '<li class="py-4 text-gray-500">Belum ada notifikasi keamanan.</li>';
+      list.innerHTML = '<li class="flex items-center justify-center min-h-[240px] text-gray-500">Belum ada notifikasi keamanan.</li>';
       return;
     }
 
