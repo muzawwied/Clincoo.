@@ -279,8 +279,8 @@
                             
                             <label class="pay-method-card flex items-center justify-between p-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]" data-method="BRI Virtual Account" onclick="selectPaymentMethod(this)">
                                 <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="relative w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
-                                        <img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="absolute inset-0 w-full h-full object-contain scale-[1.42]">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="assets/bank-logos/bri-logo.png" alt="BRI" class="w-full h-full object-contain">
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-bold text-gray-900 dark:text-white truncate">BRI</p>
@@ -444,7 +444,7 @@
             if (m.includes('qris')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-100 dark:border-gray-700"><img src="assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain"></div>';
             if (m.includes('bca')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200"><img src="assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>';
             if (m.includes('mandiri')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200"><img src="assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>';
-            if (m.includes('bri')) return '<div class="relative w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200"><img src="assets/bank-logos/bri-wikimedia.svg" alt="BRI" class="absolute inset-0 w-full h-full object-contain scale-[1.42]"></div>';
+            if (m.includes('bri')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200"><img src="assets/bank-logos/bri-logo.png" alt="BRI" class="w-full h-full object-contain"></div>';
             if (m.includes('bni')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200"><img src="assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>';
             if (m.includes('gopay')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain"></div>';
             if (m.includes('dana')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-100 dark:border-gray-700"><img src="assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain"></div>';
