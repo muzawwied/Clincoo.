@@ -52,17 +52,30 @@
         <div class="w-10"></div>
     </header>
     <!-- Content -->
-    <main class="max-w-3xl mx-auto px-5 pt-6 pb-10">
-        <div class="mb-4">
-            <h2 class="text-lg font-bold text-gray-900 tracking-tight">Semua proyek</h2>
-            <p class="text-sm text-gray-500">Kelola dan pantau seluruh proyek yang sedang Anda kerjakan.</p>
-        </div>
+    <main class="max-w-3xl mx-auto px-5 pt-20 pb-10">
         <div id="all-projects-list" class="flex flex-col gap-4"></div>
     </main>
 
     <script src="../js/projects.js"></script>
     <script src="../js/path-router.js"></script>
     <script>
+        // Dummy implementation of renderProjects to prevent ReferenceError in preview
+        function renderProjects() {
+            const list = document.getElementById('all-projects-list');
+            if (list) {
+                list.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-20 text-center">
+                        <i data-lucide="folder-open" class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4"></i>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Belum Ada Proyek</h3>
+                        <p class="text-sm text-gray-500 max-w-[250px]">Anda belum membuat atau ditambahkan ke proyek apa pun.</p>
+                    </div>
+                `;
+                // Re-initialize Lucide icons for dynamically added content
+                lucide.createIcons();
+            }
+            console.log("renderProjects called (dummy empty state)");
+        }
+
         // Render projects on load
         renderProjects();
         
