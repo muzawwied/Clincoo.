@@ -123,40 +123,6 @@
                 </div>
             </section>
 
-            <section class="space-y-4 pt-2 w-full" id="section-integrasi">
-                <div class="px-5"><h2 class="text-base font-bold text-gray-900 tracking-tight">Integrasi Wallet</h2></div>
-                <div class="mx-5 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 space-y-4 bg-white dark:bg-[#0a0a0a]">
-                    <div class="flex items-start gap-3">
-                        <div class="w-9 h-9 rounded-full bg-gray-50 dark:bg-[#1a1a1a] border border-gray-100 dark:border-gray-800 flex items-center justify-center shrink-0">
-                            <i data-lucide="link" class="w-4 h-4 text-gray-500 dark:text-gray-400"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white">Hubungkan web wallet kamu</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">Sinkron dua arah: saldo dan transaksi di web wallet kamu selalu sama dengan Dompet Clincoo.</p>
-                        </div>
-                    </div>
-                    <div id="intg-status" class="hidden text-xs font-medium px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#1a1a1a] text-gray-600 dark:text-gray-300"></div>
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs font-medium text-gray-500 dark:text-gray-400">URL web wallet (https://...)</label>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <input id="intg-url" type="url" placeholder="https://wallet-kamu.pages.dev" class="flex-1 px-3.5 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:outline-none focus:border-gray-400">
-                            <button id="intg-save" type="button" class="px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-700 dark:bg-white dark:text-black dark:hover:bg-gray-200 rounded-lg transition-colors cursor-pointer whitespace-nowrap">Hubungkan</button>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs font-medium text-gray-500 dark:text-gray-400">API key (tempel di web wallet kamu)</label>
-                        <div class="flex items-center gap-2">
-                            <input id="intg-key" type="text" readonly class="flex-1 px-3.5 py-2 text-xs rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-[#1a1a1a] text-gray-500 dark:text-gray-400 font-mono focus:outline-none">
-                            <button id="intg-copy" type="button" class="px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer whitespace-nowrap">Salin</button>
-                            <button id="intg-reset" type="button" class="px-3 py-2 text-xs font-medium text-red-500 hover:text-red-600 transition-colors cursor-pointer whitespace-nowrap">Ganti</button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between pt-1">
-                        <p id="intg-last" class="text-[11px] text-gray-400 dark:text-gray-500"></p>
-                        <button id="intg-sync" type="button" class="text-xs font-medium text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">Sinkron sekarang</button>
-                    </div>
-                </div>
-            </section>
         </main>
     </div>
 
@@ -734,79 +700,5 @@
         }
     </script>
 
-<script>
-(function () {
-  var API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '') + '/api/wallet-sync';
-  var urlInput = document.getElementById('intg-url');
-  if (!urlInput) return;
-  var saveBtn = document.getElementById('intg-save');
-  var keyInput = document.getElementById('intg-key');
-  var copyBtn = document.getElementById('intg-copy');
-  var resetBtn = document.getElementById('intg-reset');
-  var syncBtn = document.getElementById('intg-sync');
-  var statusEl = document.getElementById('intg-status');
-  var lastEl = document.getElementById('intg-last');
-
-  function headers(extra) {
-    var h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
-    var tok = ''; try { tok = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
-    if (tok) h['Authorization'] = 'Bearer ' + tok;
-    return h;
-  }
-  function showStatus(ok, msg) {
-    statusEl.classList.remove('hidden');
-    statusEl.textContent = msg;
-    statusEl.className = 'text-xs font-medium px-3 py-2 rounded-lg ' + (ok ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400');
-  }
-  function renderCfg(cfg) {
-    urlInput.value = cfg.target_url || '';
-    keyInput.value = cfg.api_key || '';
-    if (cfg.target_url) showStatus(true, 'Terhubung dengan ' + cfg.target_url);
-    if (cfg.last_sync_at) {
-      var d = new Date(cfg.last_sync_at);
-      lastEl.textContent = 'Sinkron terakhir: ' + d.toLocaleString('id-ID');
-    }
-    saveBtn.textContent = cfg.target_url ? 'Perbarui' : 'Hubungkan';
-  }
-  fetch(API, { headers: headers() }).then(function (r) { return r.ok ? r.json() : null; }).then(function (cfg) {
-    if (cfg && cfg.api_key) renderCfg(cfg);
-  }).catch(function () {});
-
-  saveBtn.addEventListener('click', function () {
-    saveBtn.textContent = 'Menyimpan...'; saveBtn.disabled = true;
-    fetch(API, { method: 'POST', headers: headers(), body: JSON.stringify({ action: 'set_url', target_url: urlInput.value.trim() }) })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        saveBtn.disabled = false;
-        if (d.error) { showStatus(false, d.error); saveBtn.textContent = 'Hubungkan'; return; }
-        showStatus(true, d.target_url ? 'Terhubung dengan ' + d.target_url : 'Koneksi diputus.');
-        saveBtn.textContent = d.target_url ? 'Perbarui' : 'Hubungkan';
-      })
-      .catch(function () { saveBtn.disabled = false; saveBtn.textContent = 'Hubungkan'; showStatus(false, 'Gagal menghubungi server.'); });
-  });
-  copyBtn.addEventListener('click', function () {
-    keyInput.select(); keyInput.setSelectionRange(0, 99999);
-    try { document.execCommand('copy'); copyBtn.textContent = 'Tersalin'; setTimeout(function () { copyBtn.textContent = 'Salin'; }, 1500); } catch (e) {}
-    try { navigator.clipboard.writeText(keyInput.value); } catch (e) {}
-  });
-  resetBtn.addEventListener('click', function () {
-    if (!confirm('Ganti API key? Web wallet lama harus diatur ulang dengan key baru.')) return;
-    fetch(API, { method: 'POST', headers: headers(), body: JSON.stringify({ action: 'reset_key' }) })
-      .then(function (r) { return r.json(); })
-      .then(function (d) { if (d.success) { fetch(API, { headers: headers() }).then(function (r) { return r.json(); }).then(renderCfg); } });
-  });
-  syncBtn.addEventListener('click', function () {
-    syncBtn.textContent = 'Menyinkronkan...';
-    fetch(API, { method: 'POST', headers: headers(), body: JSON.stringify({ action: 'push_now' }) })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        syncBtn.textContent = 'Sinkron sekarang';
-        showStatus(!d.error, d.error || 'Data dompet terkirim ke web wallet.');
-        lastEl.textContent = 'Sinkron terakhir: ' + new Date().toLocaleString('id-ID');
-      })
-      .catch(function () { syncBtn.textContent = 'Sinkron sekarang'; showStatus(false, 'Gagal mengirim.'); });
-  });
-})();
-</script>
 </body>
 </html>
