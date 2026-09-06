@@ -4,6 +4,7 @@
 // DELETE /api/projects?id=<id>    -> hapus satu proyek (tanpa id = semua milik user)
 // Semua aksi wajib Bearer token (per akun, terisolasi lewat user_id).
 import { currentUser } from './user-scope.js';
+import { getEffectivePlan } from './plan-helpers.js';
 import { tableFor } from './_tables.js';
 
 const CORS = {
@@ -121,14 +122,28 @@ export async function onRequestPost({ request, env }) {
     }
     if (action === 'replace_all') {
       const list = Array.isArray(body.projects) ? body.projects.slice(0, 500) : [];
+      const planInfo = await getEffectivePlan(db, user);
+      if (list.length > planInfo.limits.projectLimit) {
+        return j({ success: false, error: 'Batas paket ' + planInfo.plan + ' tercapai: maksimal ' + planInfo.limits.projectLimit + ' proyek. Upgrade paket di halaman Langganan untuk menambah.', plan: planInfo.plan, limit: planInfo.limits.projectLimit, upgrade_needed: true }, 402);
+      }
       await db.prepare('DELETE FROM user_projects WHERE user_id = ?').bind(user.id).run();
       for (const p of list) await upsert(db, user.id, p);
-      return j({ success: true, count: list.length });
+      return j({ success: true, count: list.length, plan: planInfo.plan });
     }
     // default: upsert satu proyek atau daftar
     const list = Array.isArray(body.projects) ? body.projects.slice(0, 500) : (body.project ? [body.project] : []);
+    if (!list.length) return j({ success: true, count: 0 });
+    // Penegakan batas paket: hanya proyek BARU yang dihitung (update proyek lama selalu boleh)
+    const planInfo = await getEffectivePlan(db, user);
+    const existing = await db.prepare('SELECT id FROM user_projects WHERE user_id = ?').bind(user.id).all();
+    const have = new Set((existing.results || []).map(r => String(r.id)));
+    const newCount = list.filter(p => p && p.id && !have.has(String(p.id))).length;
+    const cur = (existing.results || []).length;
+    if (cur + newCount > planInfo.limits.projectLimit) {
+      return j({ success: false, error: 'Batas paket ' + planInfo.plan + ' tercapai: maksimal ' + planInfo.limits.projectLimit + ' proyek (sekarang ' + cur + '). Upgrade paket di halaman Langganan untuk menambah.', plan: planInfo.plan, limit: planInfo.limits.projectLimit, current: cur, upgrade_needed: true }, 402);
+    }
     for (const p of list) await upsert(db, user.id, p);
-    return j({ success: true, count: list.length });
+    return j({ success: true, count: list.length, plan: planInfo.plan });
   } catch (err) {
     return j({ error: err.message }, 500);
   }

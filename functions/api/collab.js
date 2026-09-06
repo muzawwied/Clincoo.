@@ -4,6 +4,7 @@
 // Semua aksi (kecuali lihat info undangan) wajib Bearer token; penerima wajib login
 // dengan email yang sama dengan yang diundang. Undangan kedaluwarsa 24 jam.
 import { currentUser, getUserById } from './user-scope.js';
+import { getEffectivePlan, countProjectMembers, countPendingInvites } from './plan-helpers.js';
 import { emailTemplate, sendEmail, notifyEvent, getUserByEmail } from './notify-helpers.js';
 
 const CORS = {
@@ -186,6 +187,14 @@ export async function onRequestPost({ env, request }) {
       if (!proj) return j({ error: 'Proyek tidak ditemukan' }, 404);
       if (Number(proj.user_id) !== Number(user.id)) return j({ error: 'Hanya pemilik proyek yang dapat mengundang' }, 403);
 
+      // Penegakan batas paket: jumlah kolaborator per proyek
+      const planInfo = await getEffectivePlan(db, user);
+      const memberCount = await countProjectMembers(db, projectId);
+      const pendingCount = await countPendingInvites(db, projectId);
+      if (memberCount + pendingCount >= planInfo.limits.collaboratorLimit) {
+        return j({ success: false, error: 'Batas kolaborator paket ' + planInfo.plan + ' tercapai (' + planInfo.limits.collaboratorLimit + ' anggota per proyek). Upgrade paket di halaman Langganan untuk mengundang lebih banyak.', plan: planInfo.plan, limit: planInfo.limits.collaboratorLimit, current: memberCount, pending: pendingCount, upgrade_needed: true }, 402);
+      }
+
       const role = ['Editor', 'Viewer'].indexOf(body.role) !== -1 ? body.role : 'Viewer';
       const channel = ['email', 'link', 'whatsapp', 'telegram'].indexOf(body.channel) !== -1 ? body.channel : 'email';
       const email = String(body.email || '').trim().toLowerCase();
@@ -274,6 +283,15 @@ export async function onRequestPost({ env, request }) {
       if (action === 'accept') {
         const proj = await getProject(db, inv.project_id);
         const projTitle = (proj && proj.title) || 'Proyek Clincoo';
+        // Penegakan batas paket pemilik proyek saat penerimaan undangan
+        const projOwner = await getUserById(db, inv.owner_id);
+        if (projOwner) {
+          const ownerPlan = await getEffectivePlan(db, projOwner);
+          const memberCount = await countProjectMembers(db, inv.project_id);
+          if (memberCount >= ownerPlan.limits.collaboratorLimit) {
+            return j({ success: false, error: 'Batas kolaborator paket pemilik proyek sudah tercapai (' + ownerPlan.limits.collaboratorLimit + ' anggota). Pemilik perlu upgrade paket untuk menambah anggota.', upgrade_needed: true }, 402);
+          }
+        }
         await db.prepare('INSERT INTO project_members (project_id, owner_id, user_id, email, role) VALUES (?, ?, ?, ?, ?) ON CONFLICT(project_id, user_id) DO UPDATE SET role = excluded.role')
           .bind(inv.project_id, inv.owner_id, user.id, myEmail, inv.role).run();
         await db.prepare("UPDATE collab_invites SET status = 'accepted', responded_at = datetime('now') WHERE id = ?")
