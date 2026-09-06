@@ -59,7 +59,8 @@ async function fetchD1Notifications() {
         const cutoff = Date.now() - LOCAL_NOTIF_TTL_MS;
         const local = getLocalNotifs().filter(function(n) { return notifTime(n) > cutoff; });
         const seen = {}; const merged = [];
-        apiNotifs.concat(local).forEach(function(n) { const k = String(n.id); if (!seen[k]) { seen[k] = true; merged.push(n); } });
+        apiNotifs.forEach(function(n) { seen[String(n.id)] = true; seen[esc(n.source) + '|' + esc(n.message)] = true; merged.push(n); });
+        local.forEach(function(n) { const k2 = esc(n.source) + '|' + esc(n.message); if (!seen[String(n.id)] && !seen[k2]) { seen[k2] = true; merged.push(n); } });
         merged.sort(function(a, b) { return notifTime(b) - notifTime(a); });
         pruneLocalNotifs();
         d1Notifs = merged;
@@ -140,7 +141,23 @@ function renderNotifPage() {
 async function markNotifRead(id) {
     try {
         await fetch(NOTIF_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'mark_read', id }) });
+        markLocalNotifsRead(String(id));
         fetchD1Notifications();
+    } catch(e) {}
+}
+// Tandai salinan lokal (localStorage) sebagai dibaca — status D1 tidak tersinkron otomatis ke salinan lama
+function markLocalNotifsRead(onlyId) {
+    try {
+        const ref = onlyId ? d1Notifs.find(function(x) { return String(x.id) === onlyId; }) : null;
+        const local = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+        let changed = false;
+        for (let l of local) {
+            const match = onlyId
+                ? (String(l.id) === onlyId || (ref && String(l.source) === String(ref.source) && String(l.message) === String(ref.message)))
+                : true;
+            if (match && !l.read) { l.read = 1; changed = true; }
+        }
+        if (changed) localStorage.setItem(NOTIF_KEY, JSON.stringify(local));
     } catch(e) {}
 }
 
@@ -148,6 +165,7 @@ async function markAllNotifsRead() {
     try {
         await fetch(NOTIF_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'mark_all_read' }) });
         await fetch(NOTIF_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'clear_read' }) });
+        markLocalNotifsRead();
         fetchD1Notifications();
     } catch(e) {}
 }
