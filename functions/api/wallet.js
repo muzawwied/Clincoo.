@@ -1,5 +1,6 @@
 // Cloudflare Pages Functions - Wallet Backend (per-account)
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
+import { pushWalletToExternal } from './wallet-sync.js';
 import { emailTemplate, formatIDR, sendEmail, notifyEvent, getUserByEmail } from './notify-helpers.js';
 
 const CORS = {
@@ -66,6 +67,12 @@ export async function onRequestGet({ request, env }) {
   } catch (err) {
     return j({ error: err.message }, 500);
   }
+}
+
+
+// Dorong snapshot dompet ke web wallet eksternal (bila integrasi aktif) — tanpa menunggu
+function pushExternal(env, user) {
+  try { pushWalletToExternal(env, user).catch(function () {}); } catch (e) {}
 }
 
 // POST /api/wallet — add_transaction | set_balance | clear_transactions
@@ -157,6 +164,7 @@ export async function onRequestPost({ request, env }) {
         await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)').bind('wallet_transaction', title + ' (' + type + ': ' + amount + ')', uid).run();
       } catch {}
 
+      pushExternal(env, user);
       return j({ success: true, id: txId, balance });
     }
 
@@ -164,6 +172,7 @@ export async function onRequestPost({ request, env }) {
       const balance = parseFloat(body.balance || 0);
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
         .bind(balKey, String(balance)).run();
+      pushExternal(env, user);
       return j({ success: true, balance });
     }
 
@@ -172,6 +181,7 @@ export async function onRequestPost({ request, env }) {
       await db.prepare('DELETE FROM wallet_transactions WHERE user_id = ?').bind(uid).run();
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
         .bind(balKey, '0').run();
+      pushExternal(env, user);
       return j({ success: true, balance: 0 });
     }
 
