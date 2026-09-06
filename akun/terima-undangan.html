@@ -46,6 +46,13 @@
 
     <script>
     var COLLAB_API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api/collab' : '/api/collab';
+
+    // Header auth wajib untuk semua aksi kolaborasi (Bearer token login)
+    function authHeaders() {
+        var t = '';
+        try { t = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; } catch (e) {}
+        return t ? { Authorization: 'Bearer ' + t } : {};
+    }
     var activeInvite = null;
 
     function esc(s) {
@@ -192,7 +199,7 @@
         showLoading();
         fetch(COLLAB_API, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
             body: JSON.stringify({ action: 'accept', token: activeInvite.token })
         })
         .then(function(r) { return r.json(); })
@@ -218,7 +225,7 @@
         showLoading();
         fetch(COLLAB_API, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
             body: JSON.stringify({ action: 'decline', token: activeInvite.token })
         })
         .then(function() {

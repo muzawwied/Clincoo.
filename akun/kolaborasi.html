@@ -240,6 +240,13 @@
     var API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
     const COLLAB_API = API_BASE + '/collab';
     const PROJECTS_API = API_BASE + '/projects';
+
+    // Header auth wajib untuk semua aksi kolaborasi (Bearer token login)
+    function authHeaders() {
+        var t = '';
+        try { t = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; } catch (e) {}
+        return t ? { Authorization: 'Bearer ' + t } : {};
+    }
     var currentProject = null;   // { id, title }
     var projectsLoaded = false;
 
@@ -249,7 +256,7 @@
         try {
             const res = await fetch(COLLAB_API, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
                 body: JSON.stringify({ action: 'invite', project_id: currentProject.id, channel: channel, role: role || 'Viewer' })
             });
             const data = await res.json();
@@ -429,7 +436,7 @@
             if (activePopoverId) {
                 fetch(COLLAB_API, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
                     body: JSON.stringify({ action: 'setRole', member_id: activePopoverId, role: role })
                 }).then(function() { loadCollab(); }).catch(function() {});
             }
@@ -499,7 +506,7 @@
             if (removedId) {
                 fetch(COLLAB_API, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
                     body: JSON.stringify({ action: 'remove', member_id: removedId })
                 }).then(function() { loadCollab(); }).catch(function() {});
             }
@@ -707,7 +714,7 @@
         if (!currentProject) { renderCollab(); return; }
         fetch(COLLAB_API, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
             body: JSON.stringify({ action: 'list', project_id: currentProject.id })
         })
         .then(function(r) { return r.json(); })
