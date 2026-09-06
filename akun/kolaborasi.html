@@ -161,6 +161,11 @@
             <div id="pending-list" class="space-y-2.5"></div>
         </div>
 
+        <div class="flex items-center gap-2 mb-3">
+            <h4 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Anggota Tim</h4>
+            <span id="member-count" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-[#1a1a1a] rounded-full px-2 py-0.5"></span>
+        </div>
+
         <div class="space-y-4" id="member-list">
             <!-- Empty State / Belum Ada Anggota -->
             <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
@@ -840,6 +845,7 @@
         }
 
         var total = collabData.members.length;
+        var mc = document.getElementById('member-count'); if (mc) mc.innerText = total;
         var editors = collabData.members.filter(function(m) { return m.role === 'Editor' || m.role === 'Admin'; }).length;
         var viewers = collabData.members.filter(function(m) { return m.role === 'Viewer'; }).length;
         var t = document.getElementById('stat-total-users'); if (t) t.innerText = total;
