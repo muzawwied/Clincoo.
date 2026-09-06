@@ -225,14 +225,15 @@
             const daily = document.getElementById('daily-input'), interval = document.getElementById('interval-input');
             const bd = document.getElementById('type-daily'), bi = document.getElementById('type-interval');
             if (t === 'daily') {
-                daily.classList.remove('hidden'); interval.classList.add('hidden');
+                daily.style.display = 'flex'; interval.style.display = 'none';
                 bd.className = 'flex-1 px-3 py-2.5 text-sm font-medium rounded-xl border-2 border-black text-black bg-gray-50 transition-colors cursor-pointer';
                 bi.className = 'flex-1 px-3 py-2.5 text-sm font-medium rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer';
             } else {
-                daily.classList.add('hidden'); interval.classList.remove('hidden');
+                daily.style.display = 'none'; interval.style.display = 'flex';
                 bi.className = 'flex-1 px-3 py-2.5 text-sm font-medium rounded-xl border-2 border-black text-black bg-gray-50 transition-colors cursor-pointer';
                 bd.className = 'flex-1 px-3 py-2.5 text-sm font-medium rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer';
             }
+            updatePreview();
         }
 
         async function createTask() {
