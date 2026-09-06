@@ -113,7 +113,7 @@
                 <div class="mb-2">
                     <i data-lucide="activity" class="w-5 h-5 text-gray-400 dark:text-gray-500"></i>
                 </div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">12</div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight" id="stat-updates-today">12</div>
                 <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Pembaruan Hari Ini</div>
             </div>
         </div>
@@ -214,34 +214,6 @@
     let memberToRemove = null;
     
     try { lucide.createIcons(); } catch (e) {}
-
-    /* ========================================================
-       Fungsi Update Statistik Real-Time
-       ======================================================== */
-    function updateRealtimeStats() {
-        const visibleMembers = document.querySelectorAll('#member-list .member-item:not([style*="display: none"])');
-        const totalCount = visibleMembers.length;
-        
-        let editorCount = 0;
-        let viewerCount = 0;
-
-        visibleMembers.forEach(member => {
-            const role = member.getAttribute('data-role');
-            if (role === 'Owner' || role === 'Editor') {
-                editorCount++;
-            } else if (role === 'Viewer') {
-                viewerCount++;
-            }
-        });
-
-        const totalEl = document.getElementById('stat-total-users');
-        const editorEl = document.getElementById('stat-editors');
-        const viewerEl = document.getElementById('stat-viewers');
-
-        if (totalEl) totalEl.innerText = totalCount;
-        if (editorEl) editorEl.innerText = editorCount;
-        if (viewerEl) viewerEl.innerText = viewerCount;
-    }
 
     /* ========================================================
        Fungsi Dropdown Share (Undangan Instan)
@@ -386,7 +358,6 @@
             if (parentMember) {
                 parentMember.setAttribute('data-role', role);
             }
-            updateRealtimeStats();
             if (activePopoverId) {
                 fetch(COLLAB_API, {
                     method: 'POST',
@@ -456,7 +427,6 @@
             
             setTimeout(() => {
                 memberToRemove.style.display = 'none';
-                updateRealtimeStats();
             }, 300);
             if (removedId) {
                 fetch(COLLAB_API, {
@@ -495,8 +465,6 @@
         }
     });
 
-    // Inisialisasi statistik saat halaman dimuat
-    document.addEventListener('DOMContentLoaded', updateRealtimeStats);
     </script>
     <script>
     /* ========================================================
@@ -564,6 +532,11 @@
             '</div>';
         }
         list.appendChild(skel);
+        // Shimmer tipis pada angka statistik selagi data dimuat
+        ['stat-total-users', 'stat-editors', 'stat-viewers', 'stat-updates-today'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.innerHTML = '<span class="shimmer-bar shimmer-bar-sm" style="width:30px;"></span>';
+        });
     }
     function clearCollabSkeleton() {
         var skel = document.getElementById('collab-skeleton');
@@ -620,6 +593,26 @@
         if (window.lucide) try { lucide.createIcons(); } catch (e) {}
     }
 
+    // Kartu "Pembaruan Hari Ini": jumlah aktivitas akun hari ini (zona WIB)
+    var ACTIVITY_API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+    function loadUpdatesToday() {
+        var el = document.getElementById('stat-updates-today');
+        fetch(ACTIVITY_API + '/activity?limit=100')
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            var acts = (res && res.activities) || [];
+            var nowWIB = Date.now() + 7 * 3600000;
+            var startWIB = new Date(nowWIB); startWIB.setHours(0, 0, 0, 0);
+            var thr = startWIB.getTime() - 7 * 3600000;
+            var count = acts.filter(function(a) {
+                var d = new Date(String(a.created_at || '').replace(' ', 'T') + 'Z');
+                return !isNaN(d.getTime()) && d.getTime() >= thr;
+            }).length;
+            if (el) el.innerText = count;
+        })
+        .catch(function() { if (el) el.innerText = 0; });
+    }
+
     function loadCollab() {
         fetch(COLLAB_API, {
             method: 'POST',
@@ -641,6 +634,7 @@
     (function() {
         showCollabSkeleton();
         loadCollab();
+        loadUpdatesToday();
         var params = new URLSearchParams(window.location.search);
         var inviteId = params.get('invite');
         if (inviteId) {
