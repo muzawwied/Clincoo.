@@ -13,6 +13,54 @@ function j(data, status) {
 
 export async function onRequestOptions() { return new Response(null, { headers: CORS }); }
 
+// Ambil secret dari env Pages atau tabel env_vars D1 (per-proyek, key global = project_id NULL)
+async function getSecret(env, key) {
+  if (env[key]) return env[key];
+  try {
+    const row = await env.DB.prepare("SELECT value FROM env_vars WHERE key = ? AND (project_id IS NULL OR project_id = '')").bind(key).first();
+    if (row?.value) return row.value;
+  } catch {}
+  return null;
+}
+
+// Email konfirmasi top up (Brevo) — dikirim saat transaksi top up dikreditkan.
+async function sendTopupEmail(env, user, tx) {
+  try {
+    const apiKey = await getSecret(env, 'BREVO_API_KEY');
+    if (!apiKey || !user?.email) return;
+    const senderEmail = await getSecret(env, 'BREVO_SENDER_EMAIL');
+    if (!senderEmail) return;
+    const senderName = (await getSecret(env, 'BREVO_SENDER_NAME')) || 'Clincoo';
+    const orderId = (String(tx.title || '').match(/\[(TOPUP-[^\]]+)\]/) || [])[1] || '-';
+    const rp = n => 'Rp ' + Number(n).toLocaleString('id-ID');
+    const waktu = new Date().toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }) + ' WIB';
+    const html = [
+      '<div style="font-family:Inter,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px">',
+      '<h2 style="margin:0 0 4px">Top Up Berhasil</h2>',
+      '<p style="color:#666;margin:0 0 20px">Saldo Dompet Clincoo Anda sudah masuk.</p>',
+      '<table style="width:100%;border-collapse:collapse;font-size:14px">',
+      '<tr><td style="padding:8px 0;color:#666">Nominal</td><td style="padding:8px 0;text-align:right;font-weight:bold">' + rp(tx.amount) + '</td></tr>',
+      '<tr><td style="padding:8px 0;color:#666">Metode</td><td style="padding:8px 0;text-align:right">' + (tx.method || '-') + '</td></tr>',
+      '<tr><td style="padding:8px 0;color:#666">Order ID</td><td style="padding:8px 0;text-align:right;font-family:monospace">' + orderId + '</td></tr>',
+      '<tr><td style="padding:8px 0;color:#666">Biaya admin</td><td style="padding:8px 0;text-align:right">Gratis</td></tr>',
+      '<tr><td style="padding:8px 0;border-top:1px solid #eee;color:#666">Saldo sekarang</td><td style="padding:8px 0;border-top:1px solid #eee;text-align:right;font-weight:bold;font-size:16px">' + rp(tx.balance) + '</td></tr>',
+      '</table>',
+      '<p style="color:#999;font-size:12px;margin:24px 0 0">Waktu: ' + waktu + '<br>Email ini otomatis dari sistem Clincoo.</p>',
+      '</div>'
+    ].join('');
+    await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': apiKey, 'Content-Type': 'application/json', 'accept': 'application/json' },
+      body: JSON.stringify({
+        sender: { name: senderName, email: senderEmail },
+        to: [{ email: user.email, name: user.name || '' }],
+        subject: 'Top Up Berhasil — ' + rp(tx.amount) + ' masuk ke Dompet Clincoo',
+        htmlContent: html
+      })
+    });
+  } catch (e) { /* kegagalan email tidak boleh menggagalkan kredit saldo */ }
+}
+
 // GET /api/wallet?action=transactions — list transaksi; GET /api/wallet — saldo
 export async function onRequestGet({ request, env }) {
   const db = env.DB;
@@ -24,9 +72,8 @@ export async function onRequestGet({ request, env }) {
 
     if (action === 'transactions') {
       const uid = await rowScope(db, 'wallet_transactions', user);
-      const txs = uid
-        ? await db.prepare('SELECT * FROM wallet_transactions WHERE user_id = ? ORDER BY created_at DESC').bind(uid).all()
-        : await db.prepare('SELECT * FROM wallet_transactions ORDER BY created_at DESC').all();
+      if (!uid) return j({ transactions: [] }); // tanpa login: jangan bocorkan transaksi akun lain
+      const txs = await db.prepare('SELECT * FROM wallet_transactions WHERE user_id = ? ORDER BY created_at DESC').bind(uid).all();
       return j({ transactions: txs.results || [] });
     }
 
@@ -65,6 +112,11 @@ export async function onRequestPost({ request, env }) {
 
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
         .bind(balKey, String(balance)).run();
+
+      // Konfirmasi email top up (Brevo) — hanya utk transaksi hasil top up Xendit
+      if (/^top up xendit/i.test(String(title))) {
+        await sendTopupEmail(env, user, { title, amount: parseFloat(amount), method: method || '', balance });
+      }
 
       try {
         await rowScope(db, 'activity_log', user);
