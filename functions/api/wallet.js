@@ -161,6 +161,92 @@ export async function onRequestPost({ request, env }) {
       return j({ success: true, id: txId, balance });
     }
 
+    if (action === 'transfer') {
+      // Kirim saldo ke pengguna Clincoo lain (via email) — double-entry: out pengirim, in penerima
+      const toEmail = String(body.to_email || '').trim().toLowerCase();
+      const amount = Math.floor(parseFloat(body.amount));
+      const note = String(body.note || '').slice(0, 140);
+      if (!toEmail || toEmail.indexOf('@') < 1) return j({ error: 'Email penerima tidak valid' }, 400);
+      if (!amount || amount < 1000) return j({ error: 'Minimal kirim saldo Rp 1.000' }, 400);
+      if (String(user.email || '').toLowerCase() === toEmail) return j({ error: 'Tidak bisa mengirim ke akun sendiri' }, 400);
+      const target = await getUserByEmail(db, toEmail);
+      if (!target) return j({ error: 'Akun penerima tidak ditemukan. Pastikan email sudah terdaftar di Clincoo.' }, 404);
+
+      const senderBalKey = await scopedKey(db, 'wallet_balance', user, 'balance');
+      const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(senderBalKey).first();
+      const balance = parseFloat(balRow?.value || '0');
+      if (balance < amount) return j({ error: 'Saldo tidak cukup. Saldo Anda ' + formatIDR(balance) + '.', balance: balance, required: amount }, 402);
+
+      const recvBalKey = await scopedKey(db, 'wallet_balance', target, 'balance');
+      const txIdOut = 'TX-' + Math.floor(100000 + Math.random() * 900000);
+      const txIdIn = 'TX-' + Math.floor(100000 + Math.random() * 900000);
+      const recvRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(recvBalKey).first();
+      const recvBalance = parseFloat(recvRow?.value || '0') + amount;
+      const newBalance = balance - amount;
+      const senderLabel = (user.name || user.email || 'Pengirim');
+      const targetLabel = (target.name || target.email || 'Penerima');
+      const titleOut = 'Kirim Saldo ke ' + targetLabel + (note ? ' — ' + note : '');
+      const titleIn = 'Terima Saldo dari ' + senderLabel + (note ? ' — ' + note : '');
+
+      // Catat transaksi kedua pihak
+      await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(txIdOut, titleOut, amount, 'out', 'Kirim Saldo', uid).run();
+      await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(txIdIn, titleIn, amount, 'in', 'Terima Saldo', target.id).run();
+
+      // Update saldo kedua pihak
+      await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+        .bind(senderBalKey, String(newBalance)).run();
+      await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+        .bind(recvBalKey, String(recvBalance)).run();
+
+      // Notifikasi in-app kedua pihak
+      try {
+        await notifyEvent(db, user, {
+          source: 'Dompet', type: 'wallet',
+          message: 'Kirim ' + formatIDR(amount) + ' ke ' + targetLabel + ' berhasil. Saldo sekarang ' + formatIDR(newBalance) + '.',
+          link: 'https://muzawwied.github.io/Clincoo./akun/dompet.html'
+        });
+      } catch (e) {}
+      try {
+        await notifyEvent(db, target, {
+          source: 'Dompet', type: 'wallet',
+          message: 'Anda menerima ' + formatIDR(amount) + ' dari ' + senderLabel + '. Saldo sekarang ' + formatIDR(recvBalance) + '.',
+          link: 'https://muzawwied.github.io/Clincoo./akun/dompet.html'
+        });
+      } catch (e) {}
+
+      // Email konfirmasi ke penerima
+      if (target && target.email) {
+        try {
+          await sendEmail(env, {
+            toEmail: target.email, toName: target.name || '',
+            subject: 'Anda Menerima Saldo Clincoo — ' + formatIDR(amount),
+            html: emailTemplate(
+              'Saldo Diterima',
+              target.name || '',
+              'Anda baru saja menerima saldo dari pengguna Clincoo lain. Berikut rinciannya:',
+              [
+                ['Pengirim', senderLabel],
+                ['Jumlah', formatIDR(amount)],
+                ['Saldo Saat Ini', formatIDR(recvBalance)],
+                ['ID Transaksi', txIdIn]
+              ],
+              'Lihat Riwayat Dompet',
+              'https://muzawwied.github.io/Clincoo./akun/dompet.html',
+              'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
+            )
+          });
+        } catch (e) {}
+      }
+
+      // Catat aktivitas kedua pihak
+      try { await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)').bind('wallet_transfer', titleOut + ' (' + formatIDR(amount) + ')', uid).run(); } catch (e) {}
+      try { await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)').bind('wallet_transfer', titleIn + ' (' + formatIDR(amount) + ')', target.id).run(); } catch (e) {}
+
+      return j({ success: true, balance: newBalance, to: targetLabel, tx_id: txIdOut });
+    }
+
     if (action === 'set_balance') {
       const balance = parseFloat(body.balance || 0);
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
