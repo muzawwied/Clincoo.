@@ -81,6 +81,29 @@ export async function onRequestPost({ request, env }) {
     const body = await request.json();
     const action = body.action || 'upsert';
 
+    if (action === 'transfer') {
+      if (!body.id || !body.email) return j({ error: 'id dan email wajib diisi' }, 400);
+      const email = String(body.email).trim().toLowerCase();
+      const target = await db.prepare('SELECT id FROM auth_users WHERE email = ?').bind(email).all();
+      if (!target.results || !target.results.length) return j({ error: 'Akun dengan email tersebut tidak ditemukan' }, 404);
+      const targetId = target.results[0].id;
+      if (String(targetId) === String(user.id)) return j({ error: 'Proyek sudah menjadi milik akun ini' }, 400);
+      const upd = await db.prepare('UPDATE user_projects SET user_id = ? WHERE id = ? AND user_id = ?')
+        .bind(targetId, String(body.id), user.id).run();
+      if (!upd.meta || !upd.meta.changes) return j({ error: 'Proyek tidak ditemukan pada akun Anda' }, 404);
+      return j({ success: true, transferred_to: email });
+    }
+    if (action === 'wipe_data') {
+      if (!body.id) return j({ error: 'id required' }, 400);
+      const own = await db.prepare('SELECT id FROM user_projects WHERE id = ? AND user_id = ?')
+        .bind(String(body.id), user.id).all();
+      if (!own.results || !own.results.length) return j({ error: 'Proyek tidak ditemukan pada akun Anda' }, 404);
+      // kosongkan SEMUA data proyek (chat, file, settings, env vars, log) — proyek & situs tetap ada
+      for (const t of ['chat_sessions', 'chat_messages', 'project_files', 'env_vars', 'project_settings', 'security_settings', 'deploy_logs']) {
+        try { await db.prepare(`DELETE FROM ${tableFor(t, String(body.id))}`).run(); } catch (e) {}
+      }
+      return j({ success: true });
+    }
     if (action === 'delete') {
       if (!body.id) return j({ error: 'id required' }, 400);
       await db.prepare('DELETE FROM user_projects WHERE id = ? AND user_id = ?').bind(String(body.id), user.id).run();

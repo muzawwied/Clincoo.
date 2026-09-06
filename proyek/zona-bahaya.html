@@ -93,8 +93,9 @@
             <h4 class="text-base font-semibold text-red-600 dark:text-red-400">Transfer Kepemilikan</h4>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Pindahkan kepemilikan proyek ke akun lain</p>
           </div>
-          <div class="w-full sm:w-80">
-            <input type="email" value="" class="w-full px-3.5 py-2 text-sm rounded-lg border border-red-200 dark:border-red-900/50 focus:outline-none" placeholder="email akun baru">
+          <div class="w-full sm:w-80 flex flex-col gap-2">
+            <input type="email" id="input-transfer-email" class="w-full px-3.5 py-2 text-sm rounded-lg border border-red-200 dark:border-red-900/50 focus:outline-none" placeholder="email akun baru">
+            <button type="button" id="btn-transfer" class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-red-600 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer">Transfer Kepemilikan</button>
           </div>
         </div>
         <div class="py-5 flex items-center justify-between gap-4">
@@ -102,7 +103,7 @@
             <h4 class="text-base font-semibold text-red-600 dark:text-red-400">Hapus Semua Data</h4>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Hapus semua file, variabel, dan konfigurasi proyek</p>
           </div>
-          <button type="button" class="flex-shrink-0 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer">Hapus Data...</button>
+          <button type="button" id="btn-hapus-data" class="flex-shrink-0 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer">Hapus Data...</button>
         </div>
         <div class="py-5 flex items-center justify-between gap-4">
           <div class="min-w-0 flex-1">
@@ -120,58 +121,125 @@
   </script>
     <script>if (window.lucide) { lucide.createIcons(); }</script>
 
-<!-- Popup konfirmasi hapus proyek (CTA teks, radius kecil) -->
-<div id="confirm-delete-modal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">
+<!-- Popup generik zona bahaya (CTA teks, radius kecil) -->
+<div id="confirm-modal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">
   <div class="bg-white rounded-md w-full max-w-xs px-5 pt-5 pb-4 text-center">
-    <h3 class="text-base font-semibold text-gray-900">Hapus proyek ini?</h3>
-    <p id="confirm-delete-name" class="text-sm text-gray-500 mt-1 px-2 truncate"></p>
-    <p class="text-[13px] text-gray-400 mt-2 leading-snug">Semua data proyek akan dihapus, <span class="text-gray-500">termasuk situs yang sudah dipublish dan link publiknya</span>.</p>
+    <h3 id="confirm-title" class="text-base font-semibold text-gray-900"></h3>
+    <p id="confirm-msg" class="text-sm text-gray-500 mt-1.5 px-2 leading-snug"></p>
     <div class="flex items-center justify-center gap-10 mt-5">
-      <button type="button" id="confirm-delete-cancel" class="text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors px-1 py-0.5">Batal</button>
-      <button type="button" id="confirm-delete-ok" class="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors px-1 py-0.5">Hapus</button>
+      <button type="button" id="confirm-cancel" class="text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors px-1 py-0.5">Batal</button>
+      <button type="button" id="confirm-ok" class="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors px-1 py-0.5">Ya</button>
+    </div>
+  </div>
+</div>
+<div id="status-modal" class="fixed inset-0 z-[81] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">
+  <div class="bg-white rounded-md w-full max-w-xs px-5 pt-5 pb-4 text-center">
+    <h3 id="status-title" class="text-base font-semibold text-gray-900"></h3>
+    <p id="status-msg" class="text-sm text-gray-500 mt-1.5 px-2 leading-snug"></p>
+    <div class="flex items-center justify-center mt-5">
+      <button type="button" id="status-ok" class="text-sm font-semibold text-gray-700 hover:text-black transition-colors px-1 py-0.5">Oke</button>
     </div>
   </div>
 </div>
 <script>
 (function () {
   function apiRoot() { return (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api'; }
+  function homeUrl() { return (location.hostname.indexOf('github.io') !== -1) ? '/Clincoo./' : '/'; }
+  var confirmCb = null, statusCb = null, busy = false;
+  function askConfirm(title, msg, okLabel, cb) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-msg').textContent = msg;
+    document.getElementById('confirm-ok').textContent = okLabel || 'Ya';
+    confirmCb = cb;
+    var m = document.getElementById('confirm-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  function closeConfirm() { var m = document.getElementById('confirm-modal'); m.classList.add('hidden'); m.classList.remove('flex'); confirmCb = null; }
+  function showStatus(title, msg, cb) {
+    document.getElementById('status-title').textContent = title;
+    document.getElementById('status-msg').textContent = msg;
+    statusCb = cb || null;
+    var m = document.getElementById('status-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  async function postJSON(path, bodyObj) {
+    var tok = localStorage.getItem('clincoo_auth_token') || '';
+    var hdrs = { 'Content-Type': 'application/json' };
+    if (tok) hdrs['Authorization'] = 'Bearer ' + tok;
+    try {
+      var res = await fetch(apiRoot() + path, { method: 'POST', headers: hdrs, body: JSON.stringify(bodyObj) });
+      return await res.json();
+    } catch (e) { return { error: 'Tidak dapat menghubungi server: ' + e.message }; }
+  }
+  function removeLocalData(id) {
+    try {
+      localStorage.removeItem('clincoo_ls_chat_' + id);
+      localStorage.removeItem('clincoo_workspace_files_' + id);
+    } catch (e) {}
+  }
   document.addEventListener('DOMContentLoaded', function () {
     var pid = new URLSearchParams(location.search).get('id') || localStorage.getItem('clincoo_current_project_id') || '';
-    var btn = document.getElementById('btn-hapus-proyek');
-    if (!btn || !pid) return;
-    var modal = document.getElementById('confirm-delete-modal');
-    var okBtn = document.getElementById('confirm-delete-ok');
-    var cancelBtn = document.getElementById('confirm-delete-cancel');
-    var nameEl = document.getElementById('confirm-delete-name');
-    var title = pid;
-    try {
-      var list = JSON.parse(localStorage.getItem('clincoo_projects') || '[]');
-      var p = list.find(function (x) { return x.id === pid; });
-      if (p && p.title) title = p.title;
-    } catch (e) {}
-    nameEl.textContent = '"' + title + '"';
-    btn.addEventListener('click', function () { modal.classList.remove('hidden'); modal.classList.add('flex'); });
-    function close() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
-    cancelBtn.addEventListener('click', close);
-    okBtn.addEventListener('click', async function () {
-      okBtn.textContent = 'Menghapus...'; okBtn.disabled = true; cancelBtn.disabled = true;
-      try {
-        localStorage.removeItem('clincoo_ls_chat_' + pid);
-        localStorage.removeItem('clincoo_workspace_files_' + pid);
-        if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
-      } catch (e) {}
-      var tok = localStorage.getItem('clincoo_auth_token') || '';
-      var hdrs = { 'Content-Type': 'application/json' };
-      if (tok) hdrs['Authorization'] = 'Bearer ' + tok;
-      try { await fetch(apiRoot() + '/deploy', { method: 'POST', headers: hdrs, body: JSON.stringify({ project_id: pid, action: 'unpublish' }) }); } catch (e) {}
-      try { await fetch(apiRoot() + '/projects', { method: 'POST', headers: hdrs, body: JSON.stringify({ action: 'delete', id: pid }) }); } catch (e) {}
-      try {
-        var list2 = JSON.parse(localStorage.getItem('clincoo_projects') || '[]');
-        list2 = list2.filter(function (x) { return x.id !== pid; });
-        localStorage.setItem('clincoo_projects', JSON.stringify(list2));
-      } catch (e) {}
-      window.location.href = (location.hostname.indexOf('github.io') !== -1) ? '/Clincoo./' : '/';
+    var modal = document.getElementById('confirm-modal');
+    modal.addEventListener('click', function (e) { if (e.target === modal && !busy) closeConfirm(); });
+    document.getElementById('confirm-cancel').addEventListener('click', function () { if (!busy) closeConfirm(); });
+    document.getElementById('confirm-ok').addEventListener('click', function () {
+      if (busy || !confirmCb) return;
+      var cb = confirmCb; confirmCb = null;
+      var okBtn = document.getElementById('confirm-ok');
+      okBtn.textContent = 'Memproses...';
+      busy = true;
+      Promise.resolve(cb()).finally(function () { busy = false; closeConfirm(); okBtn.textContent = 'Ya'; });
+    });
+    document.getElementById('status-ok').addEventListener('click', function () {
+      var m = document.getElementById('status-modal'); m.classList.add('hidden'); m.classList.remove('flex');
+      if (statusCb) { var cb = statusCb; statusCb = null; cb(); }
+    });
+
+    // === Transfer kepemilikan ===
+    var btnT = document.getElementById('btn-transfer');
+    if (btnT) btnT.addEventListener('click', function () {
+      var email = (document.getElementById('input-transfer-email').value || '').trim();
+      if (!email) { showStatus('Email kosong', 'Masukkan email akun tujuan terlebih dahulu.'); return; }
+      askConfirm('Transfer kepemilikan?', 'Proyek ini akan dipindahkan permanen ke akun ' + email + ' dan tidak lagi muncul di daftar proyek Anda.', 'Transfer', async function () {
+        var r = await postJSON('/projects', { action: 'transfer', id: pid, email: email });
+        if (r.error) { showStatus('Transfer gagal', r.error); return; }
+        try {
+          var list = JSON.parse(localStorage.getItem('clincoo_projects') || '[]');
+          list = list.filter(function (x) { return x.id !== pid; });
+          localStorage.setItem('clincoo_projects', JSON.stringify(list));
+          if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
+        } catch (e) {}
+        showStatus('Transfer berhasil', 'Proyek kini menjadi milik ' + email + '.', function () { window.location.href = homeUrl(); });
+      });
+    });
+
+    // === Hapus semua data proyek (proyek & situs tetap ada) ===
+    var btnW = document.getElementById('btn-hapus-data');
+    if (btnW) btnW.addEventListener('click', function () {
+      askConfirm('Hapus semua data proyek?', 'Semua file, chat, variabel lingkungan, dan konfigurasi proyek ini akan dihapus permanen. Proyek dan situs yang sudah dipublish tetap aman.', 'Hapus Data', async function () {
+        var r = await postJSON('/projects', { action: 'wipe_data', id: pid });
+        if (r.error) { showStatus('Gagal menghapus data', r.error); return; }
+        removeLocalData(pid);
+        showStatus('Data dihapus', 'Semua data proyek telah dihapus. Proyek dan situs publish-an tetap ada.');
+      });
+    });
+
+    // === Hapus proyek (kaskade total) ===
+    var btnD = document.getElementById('btn-hapus-proyek');
+    if (btnD) btnD.addEventListener('click', function () {
+      askConfirm('Hapus proyek ini?', 'Semua data proyek akan dihapus permanen, termasuk situs yang sudah dipublish dan link publiknya.', 'Hapus', async function () {
+        var r1 = await postJSON('/deploy', { project_id: pid, action: 'unpublish' });
+        var r2 = await postJSON('/projects', { action: 'delete', id: pid });
+        if (r2.error) { showStatus('Gagal menghapus proyek', r2.error); return; }
+        removeLocalData(pid);
+        try {
+          var list = JSON.parse(localStorage.getItem('clincoo_projects') || '[]');
+          list = list.filter(function (x) { return x.id !== pid; });
+          localStorage.setItem('clincoo_projects', JSON.stringify(list));
+          if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
+        } catch (e) {}
+        showStatus('Proyek dihapus', 'Semua data dan situs publish-an telah dihapus.', function () { window.location.href = homeUrl(); });
+      });
     });
   });
 })();
