@@ -80,6 +80,9 @@ export async function onRequestPost({ request, env }) {
     const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
     const uid = user ? user.id : null;
 
+    // Mutasi dompet wajib login — mencegah penulisan/penghapusan data lintas akun
+    if (!uid) return j({ error: 'Login diperlukan', need_login: true }, 401);
+
     if (action === 'add_transaction') {
       const { title, amount, type, method } = body;
       if (!title || amount == null || !type) return j({ error: 'title, amount, type required' }, 400);
@@ -154,8 +157,7 @@ export async function onRequestPost({ request, env }) {
 
     if (action === 'clear_transactions') {
       await rowScope(db, 'wallet_transactions', user);
-      if (uid) await db.prepare('DELETE FROM wallet_transactions WHERE user_id = ?').bind(uid).run();
-      else await db.prepare('DELETE FROM wallet_transactions').run();
+      await db.prepare('DELETE FROM wallet_transactions WHERE user_id = ?').bind(uid).run();
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
         .bind(balKey, '0').run();
       return j({ success: true, balance: 0 });
@@ -177,12 +179,13 @@ export async function onRequestDelete({ request, env }) {
     const user = await currentUser(env, request);
     const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
     const uid = user ? user.id : null;
+
+    // Hapus transaksi wajib login — mencegah penghapusan data akun lain
+    if (!uid) return j({ error: 'Login diperlukan', need_login: true }, 401);
     await rowScope(db, 'wallet_transactions', user);
 
     if (id) {
-      const tx = uid
-        ? await db.prepare('SELECT * FROM wallet_transactions WHERE id = ? AND user_id = ?').bind(id, uid).first()
-        : await db.prepare('SELECT * FROM wallet_transactions WHERE id = ?').bind(id).first();
+      const tx = await db.prepare('SELECT * FROM wallet_transactions WHERE id = ? AND user_id = ?').bind(id, uid).first();
       if (tx) {
         const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
         let balance = parseFloat(balRow?.value || '0');
@@ -190,8 +193,7 @@ export async function onRequestDelete({ request, env }) {
         else if (tx.type === 'out') balance += parseFloat(tx.amount);
         if (balance < 0) balance = 0;
 
-        if (uid) await db.prepare('DELETE FROM wallet_transactions WHERE id = ? AND user_id = ?').bind(id, uid).run();
-        else await db.prepare('DELETE FROM wallet_transactions WHERE id = ?').bind(id).run();
+        await db.prepare('DELETE FROM wallet_transactions WHERE id = ? AND user_id = ?').bind(id, uid).run();
         await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
           .bind(balKey, String(balance)).run();
         return j({ success: true, balance });
