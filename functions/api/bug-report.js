@@ -58,6 +58,9 @@ export async function onRequestPost({ request, env }) {
     for (const a of rawAttachments.slice(0, 3)) {
       if (typeof a !== 'string' || !a.startsWith('data:image/')) continue;
       if (a.length > 700 * 1024) continue;
+      // base64 wajib valid (padding benar), kalau tidak Brevo akan menolak seluruh email
+      const b64 = a.split(',')[1] || '';
+      if (!/^[A-Za-z0-9+/]+={0,2}$/.test(b64) || b64.length % 4 !== 0) continue;
       attachments.push(a);
     }
 

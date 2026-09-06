@@ -81,7 +81,7 @@ export async function sendEmail(env, opts) {
       headers: { 'api-key': apiKey, 'Content-Type': 'application/json', accept: 'application/json' },
       body: JSON.stringify({
         sender: { name: senderName, email: senderEmail },
-        to: [{ email: opts.toEmail, name: opts.toName || '' }],
+        to: [{ email: opts.toEmail, ...(opts.toName ? { name: opts.toName } : {}) }],
         subject: opts.subject,
         htmlContent: opts.html,
         ...(Array.isArray(opts.attachment) && opts.attachment.length ? { attachment: opts.attachment } : {})
