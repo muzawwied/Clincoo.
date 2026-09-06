@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="../js/auth-client.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Pilih Proyek</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
+    <script src="https://unpkg.com/lucide@1.41.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; transition: background-color 0.3s ease, color 0.3s ease; }
+        body.dark-mode { background-color: #000000; color: #ffffff; }
+        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+        body.dark-mode button[onclick="goBack()"], body.dark-mode header button[onclick] {
+            background-color: #000000 !important; border: 1.5px solid rgba(255,255,255,0.4) !important; color: #ffffff !important;
+        }
+        body.dark-mode button[onclick="goBack()"] svg, body.dark-mode header button[onclick] svg { color: #ffffff !important; stroke: #ffffff !important; }
+        body.dark-mode button[onclick="goBack()"]:hover, body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important; border-color: rgba(255,255,255,0.7) !important;
+        }
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black { color: #ffffff !important; }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 { color: #888888 !important; }
+        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200, body.dark-mode .border-gray-300 { border-color: #222222 !important; }
+        body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #0a0a0a !important; }
+        body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 { background-color: #0f0f0f !important; }
+        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+        body.dark-mode .text-gray-400 { color: #666666 !important; }
+        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-black.text-white { color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #e5e5e5 !important; }
+        body.dark-mode .border-black { border-color: #ffffff !important; }
+        .selected-dark { border-color: #ffffff !important; }
+        .cta-bar { transition: transform .35s cubic-bezier(.16,1,.3,1), opacity .35s ease; }
+        .cta-hidden { transform: translateY(110%); opacity: 0; pointer-events: none; }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col text-gray-900 pt-16 pb-28 bg-[#ffffff]">
+    <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+
+    <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="goBack()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Pilih Proyek</h1>
+        <div class="w-10"></div>
+    </header>
+
+    <main class="flex-1 w-full max-w-md mx-auto px-6 py-8 flex flex-col">
+        <h2 class="font-extrabold text-2xl text-gray-900 tracking-tight font-['Space_Grotesk']">Undang via email</h2>
+        <p class="text-sm text-gray-500 mt-2.5">Pilih proyek yang ingin Anda bagikan kepada rekan tim Anda.</p>
+
+        <!-- Daftar Proyek -->
+        <div id="project-list" class="mt-8 flex flex-col gap-2.5"></div>
+    </main>
+
+    <!-- CTA Konfirmasi: muncul setelah proyek dipilih -->
+    <div id="cta-bar" class="cta-bar cta-hidden fixed bottom-0 left-0 right-0 z-40">
+        <div class="max-w-md mx-auto px-6 pb-6 pt-3 bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black">
+            <button type="button" onclick="confirmProject()" id="cta-btn" class="w-full flex items-center justify-center gap-2 py-3.5 bg-gray-900 text-white rounded-full font-bold text-sm hover:bg-gray-800 transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <span id="cta-text">Lanjut ke Email</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        var API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+        var selected = null; // { id, title }
+
+        function goBack() {
+            window.location.href = 'kolaborasi.html';
+        }
+
+        function esc(s) {
+            return String(s || '').replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
+        async function loadProjects() {
+            var list = document.getElementById('project-list');
+            list.innerHTML = '<div class="flex flex-col gap-2.5">' +
+                '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
+                '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
+                '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
+            '</div>';
+            try {
+                var res = await fetch(API_BASE + '/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'list' })
+                });
+                var data = await res.json().catch(function () { return {}; });
+                if (!res.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
+                renderProjects((data && data.projects) || []);
+            } catch (err) {
+                list.innerHTML = '<p class="text-sm text-red-500 py-6 text-center">Gagal memuat proyek: ' + esc(err.message) + '</p>';
+            }
+        }
+
+        function renderProjects(projects) {
+            var list = document.getElementById('project-list');
+            if (!projects.length) {
+                list.innerHTML =
+                    '<div class="flex flex-col items-center text-center py-10">' +
+                        '<i data-lucide="folder-open" class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4"></i>' +
+                        '<p class="text-base font-semibold text-gray-900">Belum ada proyek</p>' +
+                        '<p class="text-sm text-gray-500 mt-1.5 max-w-xs">Buat proyek terlebih dahulu di halaman Proyek, lalu kembali ke sini untuk mengundang rekan tim.</p>' +
+                    '</div>';
+                try { lucide.createIcons(); } catch (e) {}
+                return;
+            }
+            list.innerHTML = projects.map(function (p, i) {
+                return '<button type="button" id="proj-' + esc(p.id) + '" onclick="selectProject(\'' + esc(p.id) + '\', this.getAttribute(\'data-title\'))" data-title="' + esc(p.title || 'Proyek tanpa nama') + '" ' +
+                    'class="proj-item w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl border border-gray-200 dark:border-[#222] bg-white dark:bg-[#0a0a0a] text-left transition-all cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 focus:outline-none">' +
+                    '<span class="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#151515] flex items-center justify-center shrink-0">' +
+                        '<i data-lucide="folder" class="w-[18px] h-[18px] text-gray-500 dark:text-gray-400"></i>' +
+                    '</span>' +
+                    '<span class="flex-1 min-w-0">' +
+                        '<span class="block text-[15px] font-semibold text-gray-900 truncate">' + esc(p.title || 'Proyek tanpa nama') + '</span>' +
+                        '<span class="block text-xs text-gray-400 mt-0.5">Diperbarui ' + esc(String(p.updatedAt || p.createdAt || '').slice(0, 10)) + '</span>' +
+                    '</span>' +
+                    '<span class="check-wrap w-5 h-5 shrink-0 opacity-0 transition-opacity">' +
+                        '<i data-lucide="check-circle-2" class="w-5 h-5 text-gray-900 dark:text-white"></i>' +
+                    '</span>' +
+                '</button>';
+            }).join('');
+            try { lucide.createIcons(); } catch (e) {}
+        }
+
+        function selectProject(id, title) {
+            selected = { id: String(id), title: title };
+            document.querySelectorAll('.proj-item').forEach(function (el) {
+                var isSel = el.id === 'proj-' + id;
+                el.classList.toggle('border-black', isSel);
+                el.classList.toggle('selected-dark', isSel);
+                el.classList.toggle('dark:bg-[#111]', isSel);
+                var chk = el.querySelector('.check-wrap');
+                if (chk) chk.style.opacity = isSel ? '1' : '0';
+            });
+            var ctaText = document.getElementById('cta-text');
+            if (ctaText) ctaText.innerText = 'Lanjut ke Email';
+            var bar = document.getElementById('cta-bar');
+            if (bar) { bar.classList.remove('cta-hidden'); try { lucide.createIcons(); } catch (e) {} }
+        }
+
+        function confirmProject() {
+            if (!selected) return;
+            var url = 'undang-email.html?project=' + encodeURIComponent(selected.id) + '&project_name=' + encodeURIComponent(selected.title);
+            window.location.href = url;
+        }
+
+        loadProjects();
+    </script>
+</body>
+</html>
