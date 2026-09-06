@@ -274,22 +274,61 @@
         // ===== SINKRONISASI D1: data profile & personal terhubung ke backend =====
         const PROFILE_API = 'https://clincoo-be2.pages.dev/api/account-profile';
         function syncProfileToD1() {
+            return new Promise(function(resolve) {
+                try {
+                    const payload = {};
+                    const name = localStorage.getItem('clincoo_fullname');
+                    const email = localStorage.getItem('clincoo_email');
+                    const pic = localStorage.getItem('clincoo_profile_pic');
+                    if (name) payload.name = name;
+                    if (email) payload.email = email;
+                    if (pic && pic.length < 700000) payload.avatar = pic;
+                    const lang = document.getElementById('lang-text');
+                    const tz = document.getElementById('tz-text');
+                    if (lang && lang.textContent) payload.language = lang.textContent.trim();
+                    if (tz && tz.textContent) payload.timezone = tz.textContent.trim();
+                    if (Object.keys(payload).length > 0) {
+                        fetch(PROFILE_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                            .catch(function(){}).then(resolve, resolve);
+                    } else { resolve(); }
+                } catch(e) { resolve(); }
+            });
+        }
+
+        // Simpan preferensi bahasa/zona waktu REAL-TIME saat dipilih (tanpa tombol Simpan)
+        function savePrefRealtime(type, text) {
             try {
-                const payload = {};
-                const name = localStorage.getItem('clincoo_fullname');
-                const email = localStorage.getItem('clincoo_email');
-                const pic = localStorage.getItem('clincoo_profile_pic');
-                if (name) payload.name = name;
-                if (email) payload.email = email;
-                if (pic && pic.length < 700000) payload.avatar = pic;
-                const lang = document.getElementById('lang-text');
-                const tz = document.getElementById('tz-text');
-                if (lang && lang.textContent) payload.language = lang.textContent.trim();
-                if (tz && tz.textContent) payload.timezone = tz.textContent.trim();
-                if (Object.keys(payload).length > 0) {
-                    fetch(PROFILE_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(function(){});
-                }
+                const key = type === 'lang' ? 'language' : 'timezone';
+                const body = {};
+                body[key] = String(text || '').trim();
+                if (!body[key]) return;
+                fetch(PROFILE_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(function(){});
             } catch(e) {}
+        }
+
+        // Kompres gambar (maks 512px, JPEG) supaya avatar selalu lolos simpan ke D1 (<700KB)
+        function compressAvatar(file) {
+            return new Promise(function(resolve) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onload = function() {
+                        try {
+                            var maxDim = 512;
+                            var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+                            var canvas = document.createElement('canvas');
+                            canvas.width = Math.max(1, Math.round(img.width * scale));
+                            canvas.height = Math.max(1, Math.round(img.height * scale));
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            resolve(canvas.toDataURL('image/jpeg', 0.85));
+                        } catch (err) { resolve(e.target.result); }
+                    };
+                    img.onerror = function() { resolve(null); };
+                    img.src = e.target.result;
+                };
+                reader.onerror = function() { resolve(null); };
+                reader.readAsDataURL(file);
+            });
         }
         function syncProfileFromD1() {
             try {
@@ -338,7 +377,7 @@
             if (!document.hidden) syncProfileFromD1();
         });
 
-        function saveChanges() {
+        async function saveChanges() {
             const btn = document.querySelector('#action-buttons button.bg-black');
             if (!btn) return;
             
@@ -353,41 +392,31 @@
                 displayName.innerText = nameInput.value;
                 try { localStorage.setItem('clincoo_fullname', nameInput.value); } catch(e) {}
             }
-            syncProfileToD1(); // sinkron ke D1
+            await syncProfileToD1(); // tunggu benar2 tersimpan ke D1 baru tampil "Tersimpan"
 
-            setTimeout(() => {
-                btn.innerText = 'Tersimpan!';
-                btn.classList.replace('bg-black', 'bg-emerald-500');
-                btn.classList.replace('hover:bg-gray-800', 'hover:bg-emerald-600');
-                setTimeout(() => window.location.reload(), 800);
-            }, 800);
+            btn.innerText = 'Tersimpan!';
+            btn.classList.replace('bg-black', 'bg-emerald-500');
+            btn.classList.replace('hover:bg-gray-800', 'hover:bg-emerald-600');
+            setTimeout(() => window.location.reload(), 800);
         }
 
-        // Photo Upload Handling
+        // Photo Upload Handling — dikompres (maks 512px, JPEG) supaya selalu tersimpan ke D1
         function handleImageUpload(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64 = e.target.result;
-                    const avatarContainer = document.getElementById('avatar-container');
-                    const avatarInitial = document.getElementById('avatar-initial');
-                    
-                    if (avatarContainer) {
-                        avatarContainer.style.backgroundImage = `url(${base64})`;
-                        avatarContainer.classList.remove('bg-accent');
-                    }
-                    if (avatarInitial) {
-                        avatarInitial.style.display = 'none';
-                    }
-                    
-                    try { localStorage.setItem('clincoo_profile_pic', base64); } catch(err) {}
-                    
-                    syncProfileToD1(); // sinkron avatar ke D1
-                    showActionButtons();
-                };
-                reader.readAsDataURL(file);
-            }
+            if (!file) return;
+            compressAvatar(file).then(function(base64) {
+                if (!base64) return;
+                const avatarContainer = document.getElementById('avatar-container');
+                const avatarInitial = document.getElementById('avatar-initial');
+                if (avatarContainer) {
+                    avatarContainer.style.backgroundImage = 'url(' + base64 + ')';
+                    avatarContainer.classList.remove('bg-accent');
+                }
+                if (avatarInitial) avatarInitial.style.display = 'none';
+                try { localStorage.setItem('clincoo_profile_pic', base64); } catch(err) {}
+                syncProfileToD1(); // sinkron avatar ke D1
+                showActionButtons();
+            });
         }
 
         // Popover Logic
@@ -413,6 +442,7 @@
         function selectOption(type, text, value, event) {
             const textElem = document.getElementById(`${type}-text`);
             if (textElem) textElem.innerText = text;
+            savePrefRealtime(type, text);
             
             // Reset checkmarks for this group
             const checkmarks = document.querySelectorAll(`.${type}-check`);

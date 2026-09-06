@@ -528,30 +528,49 @@
             if (!document.hidden) refreshProfileFromD1();
         });
 
+        // Kompres avatar (maks 512px, JPEG) — sebelumnya foto >700KB diam2 tidak tersimpan ke D1
+        // lalu polling 10 detik menimpanya kembali dengan avatar lama (foto "kembali sendiri")
+        function compressAvatar(file) {
+            return new Promise(function(resolve) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onload = function() {
+                        try {
+                            var maxDim = 512;
+                            var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+                            var canvas = document.createElement('canvas');
+                            canvas.width = Math.max(1, Math.round(img.width * scale));
+                            canvas.height = Math.max(1, Math.round(img.height * scale));
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            resolve(canvas.toDataURL('image/jpeg', 0.85));
+                        } catch (err) { resolve(e.target.result); }
+                    };
+                    img.onerror = function() { resolve(null); };
+                    img.src = e.target.result;
+                };
+                reader.onerror = function() { resolve(null); };
+                reader.readAsDataURL(file);
+            });
+        }
+
         if (profileInput) {
             profileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                if(file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const base64 = event.target.result;
-                        try { localStorage.setItem('clincoo_profile_pic', base64); } catch(err) {}
-                        if (base64 && base64.length < 700000) {
-                            try {
-                                fetch('https://clincoo-be2.pages.dev/api/account-profile', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ avatar: base64 })
-                                }).catch(function(){});
-                            } catch(e) {}
-                        }
-                        if (profileDisplay) {
-                            profileDisplay.style.backgroundImage = `url(${base64})`;
-                            profileDisplay.textContent = '';
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                }
+                if (!file) return;
+                compressAvatar(file).then(function(base64) {
+                    if (!base64) return;
+                    try { localStorage.setItem('clincoo_profile_pic', base64); } catch(err) {}
+                    if (profileDisplay) {
+                        profileDisplay.style.backgroundImage = 'url(' + base64 + ')';
+                        profileDisplay.textContent = '';
+                    }
+                    fetch('https://clincoo-be2.pages.dev/api/account-profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ avatar: base64 })
+                    }).catch(function(){});
+                });
             });
         }
         const themeBtn = document.getElementById('theme-dropdown-btn');
