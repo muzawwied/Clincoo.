@@ -180,7 +180,7 @@
             <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Bahasa tampilan antarmuka</p>
           </div>
           <div class="w-full sm:w-80 relative">
-            <button id="lang-btn" type="button" onclick="togglePopover('lang-popover')" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 flex items-center justify-between bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <button id="lang-btn" type="button" onclick="togglePopoverMenu('lang-popover')" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 flex items-center justify-between bg-white focus:outline-none hover:bg-gray-50 transition-colors">
               <span id="lang-text" class="truncate">Bahasa Indonesia</span>
               <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
             </button>
@@ -204,7 +204,7 @@
             <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Untuk jadwal dan notifikasi</p>
           </div>
           <div class="w-full sm:w-80 relative">
-            <button id="tz-btn" type="button" onclick="togglePopover('tz-popover')" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 flex items-center justify-between bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <button id="tz-btn" type="button" onclick="togglePopoverMenu('tz-popover')" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 flex items-center justify-between bg-white focus:outline-none hover:bg-gray-50 transition-colors">
               <span id="tz-text" class="truncate">WIB - Asia/Jakarta (UTC+07:00)</span>
               <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
             </button>
@@ -391,7 +391,7 @@
         }
 
         // Popover Logic
-        function togglePopover(id) {
+        function togglePopoverMenu(id) {
             const popover = document.getElementById(id);
             if (!popover) return;
             
