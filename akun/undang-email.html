@@ -49,7 +49,8 @@
 
     <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 md:px-8 pb-12 pt-6 flex flex-col">
         <h1 class="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Undang via Email</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-6">Kirim undangan kolaborasi ke rekan tim Anda melalui email.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Kirim undangan kolaborasi ke rekan tim Anda melalui email.</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5 mb-6 truncate">Proyek: <span id="invite-project-name" class="font-medium text-gray-600 dark:text-gray-400">memuat…</span></p>
 
         <div class="mb-4 flex gap-1.5 items-center">
             <div class="relative flex-1">
@@ -89,8 +90,17 @@
     </main>
 
     <script>
-    const COLLAB_API = 'https://koda-da05205d.base44.app/functions/collabInvite';
+    var API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+    const COLLAB_API = API_BASE + '/collab';
     const collabData = { members: [], pending: [] };
+
+    // Konteks proyek dibawa dari halaman kolaborasi; tanpa proyek -> kembali
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = (urlParams.get('project') || '').trim();
+    const projectName = (urlParams.get('project_name') || '').trim();
+    if (!projectId) { window.location.replace('kolaborasi.html'); }
+    var nameEl = document.getElementById('invite-project-name');
+    if (nameEl) nameEl.innerText = projectName || 'Proyek Clincoo';
 
     try { lucide.createIcons(); } catch (e) {}
 
@@ -100,11 +110,6 @@
             if (p && (p.display_name || p.username)) return p.display_name || p.username;
         } catch (e) {}
         return 'Pemilik proyek';
-    }
-
-    function invitePageUrl() {
-        var dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-        return window.location.origin + dir + 'terima-undangan.html';
     }
 
     var INVITE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -121,7 +126,7 @@
         fetch(COLLAB_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'list' })
+            body: JSON.stringify({ action: 'list', project_id: projectId })
         })
         .then(function(r) { return r.json(); })
         .then(function(res) {
@@ -225,37 +230,44 @@
         btn.innerText = "Mengirim...";
         btn.disabled = true;
 
-        fetch('https://koda-da05205d.base44.app/functions/sendInviteEmail', {
+        fetch(COLLAB_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to: email, role: role, project: 'Clincoo', link: invitePageUrl(), inviter: getInviterName() })
+            body: JSON.stringify({ action: 'invite', project_id: projectId, email: email, role: role, channel: 'email' })
         })
         .then(r => r.json())
         .then(res => {
-            if (res.success) {
-                btn.innerText = "Terkirim!";
-                btn.classList.replace('bg-gray-900', 'bg-green-600');
-                btn.classList.replace('dark:bg-white', 'dark:bg-green-500');
-                btn.classList.replace('dark:text-gray-900', 'dark:text-white');
-                setTimeout(function() { window.location.href = 'kolaborasi.html'; }, 1200);
-            } else {
-                btn.innerText = "Kirim Undangan";
-                btn.disabled = false;
-                let msg = res.message || 'Gagal mengirim undangan. Coba lagi.';
-                if (res.error === 'domain_not_verified') {
-                    msg = 'Email hanya bisa dikirim ke alamat pemilik akun Resend untuk saat ini. Verifikasi domain di resend.com/domains agar undangan bisa dikirim ke siapa pun.';
-                }
-                errEl.textContent = msg;
-                errEl.classList.remove('hidden');
+            if (res.success && res.email_sent) return done();
+            if (res.success && res.invite_url) {
+                // Undangan tersimpan; server email D1 belum terpasang -> kirim via jalur cadangan (Base44/Brevo)
+                return fetch('https://koda-da05205d.base44.app/functions/sendInviteEmail', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to: email, role: role, project: (projectName || 'Clincoo'), link: res.invite_url, inviter: getInviterName() })
+                })
+                .then(r2 => r2.json())
+                .then(res2 => { if (res2.success) done(); else fail(res2.message || 'Gagal mengirim undangan. Coba lagi.'); })
+                .catch(function() { fail('Undangan tersimpan, namun email gagal dikirim. Coba lagi beberapa saat.'); });
             }
+            fail(res.error || res.message || 'Gagal mengirim undangan. Coba lagi.');
         })
         .catch(function(err) {
+            fail((err && err.message) ? err.message : 'Tidak dapat terhubung ke server. Periksa koneksi Anda.');
+        });
+
+        function done() {
+            btn.innerText = "Terkirim!";
+            btn.classList.replace('bg-gray-900', 'bg-green-600');
+            btn.classList.replace('dark:bg-white', 'dark:bg-green-500');
+            btn.classList.replace('dark:text-gray-900', 'dark:text-white');
+            setTimeout(function() { window.location.href = 'kolaborasi.html?project=' + encodeURIComponent(projectId); }, 1200);
+        }
+        function fail(msg) {
             btn.innerText = "Kirim Undangan";
             btn.disabled = false;
-            var detail = (err && err.message) ? err.message : 'periksa koneksi Anda';
-            errEl.textContent = 'Tidak dapat terhubung ke server email (' + detail + '). Coba lagi.';
+            errEl.textContent = msg;
             errEl.classList.remove('hidden');
-        });
+        }
     }
     </script>
 </body>

@@ -44,7 +44,7 @@
     </footer>
 
     <script>
-    var COLLAB_API = 'https://koda-da05205d.base44.app/functions/collabInvite';
+    var COLLAB_API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api/collab' : '/api/collab';
     var activeInvite = null;
 
     function esc(s) {
@@ -84,15 +84,17 @@
                 '<span class="font-semibold text-gray-900 dark:text-white">' + esc(invite.project) + '</span> sebagai ' +
                 '<span class="font-semibold text-gray-900 dark:text-white">' + esc(invite.role) + '</span>.' +
             '</p>' +
-            '<input id="accept-name" type="text" placeholder="Siapa nama Anda?" class="w-full bg-transparent border-0 border-b border-gray-200 dark:border-gray-800 focus:border-gray-500 dark:focus:border-gray-400 rounded-none text-base font-medium text-gray-900 dark:text-white placeholder-gray-400 py-3 text-center focus:ring-0 transition-colors" />' +
+            '<div id="session-email" class="text-xs text-gray-400 dark:text-gray-500 mt-4"></div>' +
             '<div id="accept-error" class="hidden text-xs text-red-500 mt-2.5"></div>' +
             '<button onclick="acceptInvite()" class="w-full py-3.5 mt-8 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors focus:outline-none">Terima Undangan</button>' +
             '<button onclick="declineInvite()" class="w-full py-3 mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none">Tolak Undangan</button>'
         );
-        var input = document.getElementById('accept-name');
-        if (input) {
-            input.addEventListener('keydown', function(e) { if (e.key === 'Enter') acceptInvite(); });
-            setTimeout(function() { input.focus(); }, 300);
+        var ses = document.getElementById('session-email');
+        if (ses) {
+            try {
+                var u = JSON.parse(localStorage.getItem('clincoo_auth_user') || 'null');
+                if (u && u.email) ses.innerText = 'Diterima sebagai ' + u.email;
+            } catch (e) {}
         }
     }
 
@@ -154,7 +156,7 @@
         );
     }
 
-    function showInactive(invite) {
+    function showInactive(invite, customMsg) {
         render(
             '<div class="flex justify-center mb-8">' +
                 '<span class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">Clincoo</span>' +
@@ -165,7 +167,7 @@
                 '</div>' +
             '</div>' +
             '<h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-3">Undangan tidak aktif</h1>' +
-            '<p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-10">Undangan ini sudah ' + esc(invite.status) + '.<br>Minta ' + esc(invite.invited_by) + ' mengirim undangan baru.</p>'
+            '<p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-10">' + (customMsg ? esc(customMsg) : 'Undangan ini sudah ' + esc(invite.status) + '.<br>Minta ' + esc(invite.invited_by) + ' mengirim undangan baru.') + '</p>'
         );
     }
 
@@ -186,26 +188,22 @@
     }
 
     function acceptInvite() {
-        var nameEl = document.getElementById('accept-name');
-        var errEl = document.getElementById('accept-error');
-        var name = nameEl ? nameEl.value.trim() : '';
-        if (!name) {
-            if (errEl) { errEl.innerText = 'Masukkan nama Anda dulu.'; errEl.classList.remove('hidden'); nameEl.focus(); }
-            return;
-        }
         showLoading();
         fetch(COLLAB_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'accept', invite_id: activeInvite.invite_id, name: name, email: activeInvite.email || '' })
+            body: JSON.stringify({ action: 'accept', token: activeInvite.token })
         })
         .then(function(r) { return r.json(); })
         .then(function(res) {
             if (res.success) {
                 activeInvite.status = 'accepted';
                 showAccepted(activeInvite);
+            } else if (res.error === 'email_mismatch') {
+                activeInvite.status = 'mismatch';
+                showInactive(activeInvite, res.message || 'Undangan ini ditujukan untuk alamat email lain.');
             } else {
-                showInactive(activeInvite);
+                showInactive(activeInvite, res.error === 'Undangan sudah expired' ? null : 'Undangan sudah tidak dapat diterima.');
             }
         })
         .catch(function() {
@@ -220,7 +218,7 @@
         fetch(COLLAB_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'decline', invite_id: activeInvite.invite_id })
+            body: JSON.stringify({ action: 'decline', token: activeInvite.token })
         })
         .then(function() {
             activeInvite.status = 'declined';
@@ -234,15 +232,16 @@
         var inviteId = params.get('invite');
         showLoading();
         if (!inviteId) { showNotFound(); return; }
-        fetch(COLLAB_API + '?invite_id=' + encodeURIComponent(inviteId))
+        fetch(COLLAB_API + '?token=' + encodeURIComponent(inviteId))
         .then(function(r) { return r.json(); })
         .then(function(res) {
             if (res.success && res.invite) {
                 activeInvite = res.invite;
-                if (res.invite.status === 'pending' && isInviteExpired(res.invite)) showExpired(res.invite);
-                else if (res.invite.status === 'pending') showPending(res.invite);
+                activeInvite.token = inviteId;
+                if (res.invite.status === 'pending') showPending(res.invite);
                 else if (res.invite.status === 'accepted') showAccepted(res.invite);
                 else if (res.invite.status === 'declined') showDeclined(res.invite);
+                else if (res.invite.status === 'expired') showExpired(res.invite);
                 else showInactive(res.invite);
             } else {
                 showNotFound();
