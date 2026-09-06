@@ -121,15 +121,28 @@ export async function onRequestPost({ request, env }) {
           let txId = (t.id != null && String(t.id)) ? String(t.id) : null;
           if (txId) {
             const existing = await db.prepare('SELECT addr FROM wallet_web_transactions WHERE id = ?').bind(txId).first();
-            if (existing && existing.addr !== addr) txId = null;
-          }
-          if (txId) {
-            // created_at baris lama dipertahankan (tanggal transaksi tidak bergeser tiap sync)
-            await db.prepare(`INSERT INTO wallet_web_transactions (id, addr, title, amount, type, method)
-              VALUES (?, ?, ?, ?, ?, ?)
-              ON CONFLICT(id) DO UPDATE SET title = excluded.title, amount = excluded.amount, type = excluded.type, method = excluded.method`)
-              .bind(txId, addr, title, amount, type, method).run();
-            continue;
+            if (existing && existing.addr !== addr) txId = null; // id dipakai alamat lain -> id baru
+            else if (existing) {
+              // Transaksi lama: update saja, created_at dipertahankan, tanpa notifikasi
+              await db.prepare(`INSERT INTO wallet_web_transactions (id, addr, title, amount, type, method)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET title = excluded.title, amount = excluded.amount, type = excluded.type, method = excluded.method`)
+                .bind(txId, addr, title, amount, type, method).run();
+              continue;
+            } else {
+              // Transaksi baru ber-ID -> simpan + notifikasi otomatis
+              await db.prepare('INSERT INTO wallet_web_transactions (id, addr, title, amount, type, method) VALUES (?, ?, ?, ?, ?, ?)')
+                .bind(txId, addr, title, amount, type, method).run();
+              if (newNotifs < 5) {
+                newNotifs++;
+                const msg = (type === 'in')
+                  ? 'Saldo masuk Rp ' + amount.toLocaleString('id-ID') + ' - ' + title
+                  : 'Transfer keluar Rp ' + amount.toLocaleString('id-ID') + ' - ' + title;
+                await db.prepare('INSERT INTO wallet_web_notifications (addr, source, message, type) VALUES (?, ?, ?, ?)')
+                  .bind(addr, 'Wallet', msg, type).run();
+              }
+              continue;
+            }
           }
           // Push tanpa id: hindari duplikat judul+nominal (idempotensi ringan)
           const dup = await db.prepare('SELECT id FROM wallet_web_transactions WHERE addr = ? AND title = ? AND amount = ? LIMIT 1')
