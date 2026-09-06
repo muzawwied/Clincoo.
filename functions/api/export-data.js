@@ -1,5 +1,9 @@
-// Cloudflare Pages Functions - Export All User Data
-// Pulls real data from all D1 tables for JSON export
+// Cloudflare Pages Functions — Ekspor Data (PER AKUN)
+// GET /api/export-data -> seluruh data milik user login saja (JSON).
+// Data akun lain & key global (kredensial deploy) tidak pernah ikut.
+
+import { currentUser, userPrefix } from './user-scope.js';
+import { tableSuffix } from './_tables.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -7,63 +11,96 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
+function json(data, status) {
+  return new Response(JSON.stringify(data), { status: status || 200, headers: { 'Content-Type': 'application/json', ...CORS } });
+}
+
 export async function onRequestOptions() {
   return new Response(null, { headers: CORS });
 }
 
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ request, env }) {
   const db = env.DB;
-  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  if (!db) return json({ error: 'D1 not bound' }, 500);
+  const user = await currentUser(env, request);
+  if (!user) return json({ error: 'Login diperlukan', need_login: true }, 401);
+  const uid = user.id;
+  const prefix = userPrefix(user); // u<id>:
+
+  const safe = async (sql, ...params) => {
+    try { const r = await db.prepare(sql).bind(...params).all(); return r.results || []; } catch (e) { return []; }
+  };
+  const safeFirst = async (sql, ...params) => {
+    try { return await db.prepare(sql).bind(...params).first(); } catch (e) { return null; }
+  };
 
   try {
-    // Gather all data from D1
-    const [prefs, sub, walletTxs, walletBal, activities, notifs, projects, envVars, chatSessions, chatMsgs] = await Promise.all([
-      db.prepare('SELECT key, value FROM user_preferences').all().catch(() => ({ results: [] })),
-      db.prepare('SELECT key, value FROM subscription').all().catch(() => ({ results: [] })),
-      db.prepare('SELECT * FROM wallet_transactions ORDER BY created_at DESC').all().catch(() => ({ results: [] })),
-      db.prepare("SELECT value FROM wallet_balance WHERE key = 'balance'").first().catch(() => null),
-      db.prepare('SELECT * FROM activity_log ORDER BY created_at DESC LIMIT 100').all().catch(() => ({ results: [] })),
-      db.prepare('SELECT * FROM notifications ORDER BY created_at DESC LIMIT 100').all().catch(() => ({ results: [] })),
-      db.prepare('SELECT * FROM projects ORDER BY created_at DESC').all().catch(() => ({ results: [] })),
-      db.prepare('SELECT key, is_secret, created_at, updated_at FROM env_vars ORDER BY created_at DESC').all().catch(() => ({ results: [] })),
-      db.prepare('SELECT * FROM chat_sessions ORDER BY created_at DESC').all().catch(() => ({ results: [] })),
-      db.prepare('SELECT * FROM chat_messages ORDER BY created_at DESC LIMIT 200').all().catch(() => ({ results: [] }))
+    // ===== Data akun (semua difilter per user) =====
+    const [prefsRows, subRows, txs, balRows, acts, notifs, projects] = await Promise.all([
+      safe('SELECT key, value FROM user_preferences WHERE key LIKE ?', prefix + '%'),
+      safe('SELECT key, value FROM subscription WHERE key LIKE ?', prefix + '%'),
+      safe('SELECT * FROM wallet_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 200', uid),
+      safe('SELECT key, value FROM wallet_balance WHERE key LIKE ?', prefix + '%'),
+      safe('SELECT * FROM activity_log WHERE user_id = ? ORDER BY created_at DESC LIMIT 200', uid),
+      safe('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 200', uid),
+      safe('SELECT * FROM user_projects WHERE user_id = ? ORDER BY COALESCE(updated_at, created_at) DESC', uid)
     ]);
 
-    // Build preferences object
     const preferences = {};
-    for (const row of prefs.results || []) { preferences[row.key] = row.value; }
+    for (const row of prefsRows) preferences[row.key.slice(prefix.length)] = row.value;
 
-    // Build subscription object
     const subscription = {};
-    for (const row of sub.results || []) { subscription[row.key] = row.value; }
+    for (const row of subRows) subscription[row.key.slice(prefix.length)] = row.value;
+
+    const walletBal = {};
+    for (const row of balRows) walletBal[row.key.slice(prefix.length)] = row.value;
+
+    // ===== Data per-proyek milik akun =====
+    const envVars = [];
+    const chatSessions = [];
+    const chatMessages = [];
+    const filesMeta = [];
+    for (const p of projects) {
+      const s = tableSuffix(p.id);
+      const t = (b) => `p_${s}_${b}`;
+      const ev = await safe(`SELECT key, is_secret, created_at, updated_at FROM ${t('env_vars')} ORDER BY created_at DESC`);
+      for (const row of ev) envVars.push({ project_id: p.id, ...row });
+      const sess = await safe(`SELECT id, title, project_id, created_at, updated_at FROM ${t('chat_sessions')} ORDER BY updated_at DESC`);
+      for (const row of sess) chatSessions.push(row);
+      const msgs = await safe(`SELECT session_id, role, content, model, created_at FROM ${t('chat_messages')} ORDER BY created_at DESC LIMIT 500`);
+      for (const row of msgs) chatMessages.push(row);
+      const files = await safe(`SELECT path, LENGTH(content) AS size, created_at, updated_at FROM ${t('project_files')} ORDER BY path`);
+      for (const row of files) filesMeta.push({ project_id: p.id, ...row });
+    }
 
     const exportData = {
       export_date: new Date().toISOString(),
-      app_name: "Clincoo",
-      app_version: "2.4.0",
+      app_name: 'Clincoo',
+      app_version: '2.4.0',
+      account: { id: user.id, email: user.email, name: user.name },
       preferences,
       subscription,
       wallet: {
-        balance: parseFloat(walletBal?.value || '0'),
-        transactions: walletTxs.results || []
+        balance: parseFloat(walletBal.balance || '0'),
+        transactions: txs
       },
-      activity_log: activities.results || [],
-      notifications: notifs.results || [],
-      projects: projects.results || [],
-      env_vars: envVars.results || [],
-      chat_sessions: chatSessions.results || [],
-      chat_messages: chatMsgs.results || []
+      activity_log: acts,
+      notifications: notifs,
+      projects,
+      env_vars: envVars,
+      files: filesMeta,
+      chat_sessions: chatSessions,
+      chat_messages: chatMessages
     };
 
     return new Response(JSON.stringify(exportData, null, 2), {
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Content-Disposition': 'attachment; filename="clincoo_data_export.json"',
-        ...CORS 
+        ...CORS
       }
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+    return json({ error: err.message }, 500);
   }
 }

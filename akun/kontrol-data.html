@@ -472,22 +472,24 @@
       loading.classList.add('flex');
 
       fetch(PREF_API, { method: 'DELETE' })
-        .then(res => res.json())
-        .then(data => {
+        .then(res => res.json().then(data => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
           closeDeleteModal();
+          if (!ok || data.error) {
+            showToast(data.error || "Gagal menghapus akun. Coba lagi.", "error");
+            return;
+          }
+          // Akun terhapus dari server: bersihkan seluruh data lokal akun ini
+          // (localStorage di-namespaced per akun oleh auth-client.js), lalu logout.
+          try { localStorage.clear(); } catch(e) {}
           showToast("Akun dan seluruh data Anda telah dihapus permanen.", "info");
-          // Clear localStorage too
-          try {
-            localStorage.removeItem('clincoo_fullname');
-            localStorage.removeItem('clincoo_email');
-            localStorage.removeItem('clincoo_theme');
-            localStorage.removeItem('clincoo_accent');
-            localStorage.removeItem('clincoo_profile_pic');
-            localStorage.removeItem('clincoo_current_page');
-            localStorage.removeItem('clincoo_analytics');
-            localStorage.removeItem('clincoo_personalization');
-          } catch(e) {}
-          setTimeout(() => { window.location.href = '../index.html'; }, 2000);
+          setTimeout(() => {
+            if (window.ClincooAuth && window.ClincooAuth.logout) {
+              window.ClincooAuth.logout();
+            } else {
+              window.location.href = '../index.html';
+            }
+          }, 1200);
         })
         .catch(e => {
           closeDeleteModal();

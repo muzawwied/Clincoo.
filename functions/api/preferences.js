@@ -1,19 +1,23 @@
-// Cloudflare Pages Functions - User Preferences Backend
-// Stores toggle/settings data in D1 (real-time, interconnected)
+// Cloudflare Pages Functions — Preferensi & Zona Bahaya: Hapus Akun (PER AKUN)
+// GET    /api/preferences            -> preferensi user login (key per-akun u<id>:<key>)
+// GET    /api/preferences?key=nama   -> satu key
+// POST   /api/preferences            -> simpan preferensi ({key,value} atau objek)
+// DELETE /api/preferences            -> HAPUS AKUN PERMANEN + kaskade seluruh data milik akun
+// Semua aksi wajib login (fail-closed). Key global (cloudflare_api_key, dll.) TIDAK
+// tersentuh — hanya key berprefix u<id>: yang dihapus.
+
+import { currentUser, userPrefix } from './user-scope.js';
+import { tableSuffix } from './_tables.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
-export async function onRequestOptions() {
-  return new Response(null, { headers: CORS });
-}
+const PROJECT_TABLES = ['chat_sessions', 'chat_messages', 'project_files', 'env_vars', 'project_settings', 'security_settings', 'deploy_logs'];
 
-// GET /api/preferences — get all preferences
-// GET /api/preferences?key=analytics — get specific key
-// Blind otomatis nilai sensitif di GET /api/preferences
+// Blind otomatis nilai sensitif
 const SENSITIVE_RE = /(api[_-]?key|token|secret|password|credential|bearer)/i;
 function maskSensitive(key, value) {
   if (!SENSITIVE_RE.test(key)) return value;
@@ -22,112 +26,149 @@ function maskSensitive(key, value) {
   return 'MASKED::' + s.slice(0, 4) + '••••••••';
 }
 
+function json(data, status) {
+  return new Response(JSON.stringify(data), { status: status || 200, headers: { 'Content-Type': 'application/json', ...CORS } });
+}
+
+async function requireUser(env, request) {
+  const user = await currentUser(env, request);
+  if (!user) return null;
+  return user;
+}
+
+export async function onRequestOptions() {
+  return new Response(null, { headers: CORS });
+}
+
+// ===== GET =====
 export async function onRequestGet({ request, env }) {
   const db = env.DB;
-  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  if (!db) return json({ error: 'D1 not bound' }, 500);
+  const user = await requireUser(env, request);
+  if (!user) return json({ error: 'Login diperlukan', need_login: true }, 401);
+  const prefix = userPrefix(user);
 
   try {
     await db.prepare('CREATE TABLE IF NOT EXISTS user_preferences (key TEXT PRIMARY KEY, value TEXT)').run();
-    
-    // Default values
-    const defaults = {
-      analytics: 'true',
-      personalization: 'true'
-    };
-
+    const defaults = { analytics: 'true', personalization: 'true' };
     const url = new URL(request.url);
     const key = url.searchParams.get('key');
 
-    if (key) {
-      const row = await db.prepare('SELECT value FROM user_preferences WHERE key = ?').bind(key).first();
-      let value = row?.value || defaults[key] || null;
-      if (value) value = maskSensitive(key, value);
-      return new Response(JSON.stringify({ key, value }), {
-        headers: { 'Content-Type': 'application/json', ...CORS }
-      });
-    }
+    const rows = await db.prepare('SELECT key, value FROM user_preferences WHERE key LIKE ?')
+      .bind(prefix + '%').all();
 
-    const rows = await db.prepare('SELECT key, value FROM user_preferences').all();
-    const data = { ...defaults };
+    const own = {};
     for (const row of rows.results || []) {
-      data[row.key] = row.value;
+      own[row.key.slice(prefix.length)] = row.value;
     }
 
-    // Also gather linked data for export
-    const subRow = await db.prepare("SELECT value FROM user_preferences WHERE key = 'plan_info'").first();
-    const exportData = {
-      preferences: data
-    };
+    if (key) {
+      let value = own[key] !== undefined ? own[key] : (defaults[key] || null);
+      if (value) value = maskSensitive(key, value);
+      return json({ key, value });
+    }
 
+    const data = { ...defaults, ...own };
     for (const k of Object.keys(data)) {
       if (data[k] && typeof data[k] === 'string') data[k] = maskSensitive(k, data[k]);
     }
-
-    return new Response(JSON.stringify(data), {
-      headers: { 'Content-Type': 'application/json', ...CORS }
-    });
+    return json(data);
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+    return json({ error: err.message }, 500);
   }
 }
 
-// POST /api/preferences — update preferences
-// Body: { analytics: 'true', personalization: 'false' }
-// Body: { key: 'analytics', value: 'true' }
+// ===== POST =====
 export async function onRequestPost({ request, env }) {
   const db = env.DB;
-  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  if (!db) return json({ error: 'D1 not bound' }, 500);
+  const user = await requireUser(env, request);
+  if (!user) return json({ error: 'Login diperlukan', need_login: true }, 401);
+  const prefix = userPrefix(user);
 
   try {
     await db.prepare('CREATE TABLE IF NOT EXISTS user_preferences (key TEXT PRIMARY KEY, value TEXT)').run();
-    
     const body = await request.json();
     const updates = body.key ? { [body.key]: body.value } : body;
-    
+
+    const written = [];
     for (const [key, value] of Object.entries(updates)) {
-      if (key === 'key' || key === 'value') continue; // skip wrapper fields
+      if (key === 'key' || key === 'value') continue; // field wrapper
       if (String(value).includes('MASKED::')) continue; // jangan timpa nilai asli dengan hasil masking
-      await db.prepare("INSERT INTO user_preferences (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(key, String(value)).run();
+      const fullKey = prefix + key;
+      await db.prepare("INSERT INTO user_preferences (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value")
+        .bind(fullKey, String(value)).run();
+      written.push(key);
     }
 
-    // Log activity
-    const changedKeys = Object.keys(updates).filter(k => k !== 'key' && k !== 'value');
-    if (changedKeys.length > 0) {
+    // Log aktivitas per-akun
+    if (written.length > 0) {
       try {
-        await db.prepare("INSERT INTO activity_log (action, details) VALUES (?, ?)").bind('preferences_update', JSON.stringify(updates)).run();
-      } catch(e) {}
+        await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
+          .bind('preferences_update', JSON.stringify(updates), user.id).run();
+      } catch (e) {}
     }
 
-    return new Response(JSON.stringify({ success: true, updated: updates }), {
-      headers: { 'Content-Type': 'application/json', ...CORS }
-    });
+    return json({ success: true, updated: written });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+    return json({ error: err.message }, 500);
   }
 }
 
-// DELETE /api/preferences — delete account data (danger zone)
+// ===== DELETE — ZONA BAHAYA: HAPUS AKUN PERMANEN (KASKADE) =====
 export async function onRequestDelete({ request, env }) {
   const db = env.DB;
-  if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+  if (!db) return json({ error: 'D1 not bound' }, 500);
+  const user = await requireUser(env, request);
+  if (!user) return json({ error: 'Login diperlukan', need_login: true }, 401);
+  const uid = user.id;
+  const prefix = userPrefix(user); // u<id>:
+
+  const step = async (sql, ...params) => {
+    try { await db.prepare(sql).bind(...params).run(); return true; } catch (e) { return false; }
+  };
+
+  const summary = { projects: 0, dropped_tables: 0, account_deleted: false };
 
   try {
-    // Clear all user data
-    await db.prepare("DELETE FROM user_preferences").run();
-    await db.prepare("DELETE FROM activity_log").run();
-    await db.prepare("DELETE FROM subscription").run();
-    await db.prepare("DELETE FROM notifications").run();
-    await db.prepare("DELETE FROM projects").run();
-    await db.prepare("DELETE FROM env_vars").run();
-    await db.prepare("DELETE FROM wallet_transactions").run();
-    await db.prepare("DELETE FROM wallet_balance").run();
-    await db.prepare("DELETE FROM chat_messages").run();
-    await db.prepare("DELETE FROM chat_sessions").run();
+    // 1) Hapus seluruh proyek milik akun: baris user_projects + tabel p_<proyek>_*
+    const projs = await db.prepare('SELECT id FROM user_projects WHERE user_id = ?').bind(uid).all();
+    for (const p of projs.results || []) {
+      const s = tableSuffix(p.id);
+      for (const base of PROJECT_TABLES) {
+        const okDrop = await step(`DROP TABLE IF EXISTS "p_${s}_${base}"`);
+        if (okDrop) summary.dropped_tables++;
+      }
+      await step('DELETE FROM _project_migrations WHERE project_id = ?', p.id);
+      await step('DELETE FROM _session_project WHERE project_id = ?', p.id);
+      summary.projects++;
+    }
 
-    return new Response(JSON.stringify({ success: true, message: 'All account data deleted' }), {
-      headers: { 'Content-Type': 'application/json', ...CORS }
-    });
+    // 2) Data per-baris milik akun
+    await step('DELETE FROM user_projects WHERE user_id = ?', uid);
+    await step('DELETE FROM activity_log WHERE user_id = ?', uid);
+    await step('DELETE FROM notifications WHERE user_id = ?', uid);
+    await step('DELETE FROM notifications WHERE from_user_id = ?', uid);
+    await step('DELETE FROM wallet_transactions WHERE user_id = ?', uid);
+
+    // 3) Key-value per-akun (prefix u<id>:) — key global tidak tersentuh
+    await step('DELETE FROM user_preferences WHERE key LIKE ?', prefix + '%');
+    await step('DELETE FROM wallet_balance WHERE key LIKE ?', prefix + '%');
+    await step('DELETE FROM subscription WHERE key LIKE ?', prefix + '%');
+    await step('DELETE FROM account_profile WHERE key LIKE ?', prefix + '%');
+
+    // 4) Sesi & akun itu sendiri (terakhir)
+    await step('DELETE FROM auth_sessions WHERE user_id = ?', uid);
+    await step('DELETE FROM auth_oauth_accounts WHERE user_id = ?', uid);
+    await step('DELETE FROM auth_users WHERE id = ?', uid);
+
+    // 5) Verifikasi akun benar-benar hilang
+    const still = await db.prepare('SELECT id FROM auth_users WHERE id = ?').bind(uid).first();
+    if (still) return json({ error: 'Gagal menghapus akun. Coba lagi.' }, 500);
+
+    summary.account_deleted = true;
+    return json({ success: true, message: 'Akun dan seluruh data telah dihapus permanen', summary });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
+    return json({ error: err.message }, 500);
   }
 }
