@@ -4,8 +4,11 @@
   <script src="../js/auth-client.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Clincoo - Kolaborasi</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@1.41.0"></script>
@@ -36,7 +39,20 @@
             background-color: #000000; color: #ffffff; border-color: #222222;
         }
         body.dark-mode input:focus, body.dark-mode select:focus { border-color: #444444; outline: none; }
-        
+
+        /* Tombol arrow-left header: perbaikan artefak putih di dark mode (pola aktivitas.html) */
+        body.dark-mode header button[onclick="history.back()"] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode header button[onclick="history.back()"] svg { color: #ffffff !important; stroke: #ffffff !important; }
+        body.dark-mode header button[onclick="history.back()"]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+
         /* Utility Scroll Samping Tanpa Scrollbar Visual */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -75,116 +91,29 @@
           <h1 class="text-xl font-bold text-gray-900 dark:text-white">
               Kolaborasi proyek
           </h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-6">Kelola anggota tim dan atur hak akses masing-masing ke dalam proyek ini.</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-6">Kelola anggota tim dan atur hak akses di setiap proyek Anda.</p>
 
-      <div class="relative mb-6" id="project-select-container">
-          <button type="button" onclick="toggleProjectDropdown()" id="project-select-btn" class="w-full px-4 py-3 text-sm font-medium text-gray-900 dark:text-white bg-gray-50/80 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-2xl hover:bg-gray-100 dark:hover:bg-[#1a1a1a] transition-all cursor-pointer flex items-center justify-between focus:outline-none">
-              <span class="flex items-center gap-2 min-w-0">
-                  <i data-lucide="folder" class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0"></i>
-                  <span id="selected-project-name" class="truncate">Memuat proyek…</span>
-              </span>
-              <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0"></i>
-          </button>
-          <div id="project-dropdown" class="hidden absolute left-0 right-0 mt-2 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border border-gray-100 dark:border-[#222] py-1.5 z-50 max-h-64 overflow-y-auto"></div>
-      </div>
-
-      <div class="w-full flex flex-col">
-        
-        <!-- Horizontal Scrollable Real-Time Stat Cards -->
-        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1 mb-6 snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
-            <!-- Card 1: Total Anggota -->
-            <div class="min-w-[130px] sm:min-w-[140px] flex-1 flex-shrink-0 snap-start p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]">
-                <div class="mb-2">
-                    <i data-lucide="users" class="w-5 h-5 text-gray-400 dark:text-gray-500"></i>
-                </div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight" id="stat-total-users">3</div>
-                <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Total Anggota</div>
-            </div>
-
-            <!-- Card 2: Akses Edit -->
-            <div class="min-w-[130px] sm:min-w-[140px] flex-1 flex-shrink-0 snap-start p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]">
-                <div class="mb-2">
-                    <i data-lucide="pen-tool" class="w-5 h-5 text-gray-400 dark:text-gray-500"></i>
-                </div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight" id="stat-editors">2</div>
-                <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Memiliki Akses Edit</div>
-            </div>
-
-            <!-- Card 3: Peran Viewer -->
-            <div class="min-w-[130px] sm:min-w-[140px] flex-1 flex-shrink-0 snap-start p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]">
-                <div class="mb-2">
-                    <i data-lucide="eye" class="w-5 h-5 text-gray-400 dark:text-gray-500"></i>
-                </div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight" id="stat-viewers">1</div>
-                <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Peran Viewer</div>
-            </div>
-
-            <!-- Card 4: Aktif Hari Ini -->
-            <div class="min-w-[130px] sm:min-w-[140px] flex-1 flex-shrink-0 snap-start p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]">
-                <div class="mb-2">
-                    <i data-lucide="activity" class="w-5 h-5 text-gray-400 dark:text-gray-500"></i>
-                </div>
-                <div class="text-lg font-bold text-gray-900 dark:text-white tracking-tight" id="stat-updates-today">12</div>
-                <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Pembaruan Hari Ini</div>
-            </div>
-        </div>
-
-        <div class="flex items-center justify-between mb-6">
-            <h4 class="text-lg font-bold text-gray-900 dark:text-white">
-              Anggota Proyek
-            </h4>
-            
-            <!-- CTA Undangan Kapsul dengan Dropdown Instant -->
-            <div class="relative" id="share-dropdown-container">
-                <button type="button" onclick="toggleShareDropdown()" class="px-4 py-1.5 text-sm font-medium text-gray-900 dark:text-white bg-transparent border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#111] rounded-full transition-all cursor-pointer flex items-center gap-1.5 focus:outline-none">
-                  <span>Tambah anggota</span>
-                  <i data-lucide="chevron-down" class="h-4 w-4 opacity-70"></i>
-                </button>
-                
-                <!-- Dropdown Menu -->
-                <div id="share-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border border-gray-100 dark:border-[#222] py-1.5 z-50">
-                    <button onclick="window.location.href='pilih-proyek-undang.html'" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
-                        <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>
-                        <span>Undang via Email</span>
-                    </button>
-                    <button onclick="shareDirect('whatsapp')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12.011 0C5.384 0 0 5.383 0 12.011c0 2.116.551 4.177 1.598 5.986L.057 24l6.182-1.621a11.96 11.96 0 0 0 5.772 1.482h.005c6.625 0 12.01-5.384 12.01-12.012A11.942 11.942 0 0 0 20.5 3.513 11.94 11.94 0 0 0 12.011 0zm0 21.921h-.004a9.904 9.904 0 0 1-5.048-1.383l-.362-.215-3.754.985 1.002-3.661-.236-.375a9.897 9.897 0 0 1-1.515-5.281c0-5.47 4.452-9.92 9.921-9.92 2.65 0 5.14 1.033 7.012 2.906a9.862 9.862 0 0 1 2.903 7.018c0 5.471-4.451 9.923-9.92 9.923zm5.438-7.43c-.298-.149-1.764-.87-2.037-.97-.272-.099-.47-.148-.669.15-.198.297-.768.97-.942 1.163-.173.198-.347.223-.644.074-.297-.149-1.258-.464-2.397-1.48-.886-.79-1.484-1.767-1.658-2.064-.173-.298-.018-.46.13-.607.135-.133.298-.347.447-.521.148-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347z"/></svg>
-                        <span>Undang via WhatsApp</span>
-                    </button>
-                    <button onclick="shareDirect('telegram')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-.13-.32.05-.44 2.2-1.2 3.67-1.99 4.41-2.37 2.1-.9 2.54-1.05 2.82-1.05.06 0 .2.01.29.08.08.06.1.14.11.21.01.06.01.12 0 .19z"/></svg>
-                        <span>Undang via Telegram</span>
-                    </button>
-                    <div class="h-px bg-gray-100 dark:bg-[#333] my-1 mx-2"></div>
-                    <button onclick="copyDirectLink()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
-                        <i data-lucide="link" class="w-4 h-4 flex-shrink-0"></i>
-                        <span>Salin Tautan Link</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="pending-section" class="hidden mb-6">
-            <div class="flex items-center gap-2 mb-3">
-                <h4 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Undangan Menunggu</h4>
-                <span id="pending-count" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-[#1a1a1a] rounded-full px-2 py-0.5"></span>
-            </div>
-            <div id="pending-list" class="space-y-2.5"></div>
-        </div>
-
-        <div class="flex items-center gap-2 mb-3">
-            <h4 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Anggota Tim</h4>
-            <span id="member-count" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-[#1a1a1a] rounded-full px-2 py-0.5"></span>
-        </div>
-
-        <div class="space-y-4" id="member-list">
-            <!-- Empty State / Belum Ada Anggota -->
-            <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
-                <i data-lucide="users" class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-4"></i>
-                <h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Belum ada anggota tim</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Undang rekan tim untuk mulai berkolaborasi di proyek ini.</p>
-            </div>
-        </div>
+      <div class="w-full flex flex-col" id="projects-root">
+          <div class="flex flex-col gap-8">
+              <div>
+                  <div class="flex items-center gap-3 mb-3"><span class="shimmer-bar shimmer-bar-md"></span></div>
+                  <div class="member-item flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222]">
+                      <div class="flex items-center gap-3 min-w-0">
+                          <div class="skel-dot w-10 h-10 rounded-full bg-gray-200 dark:bg-[#222] shrink-0"></div>
+                          <div class="space-y-2 min-w-0"><span class="shimmer-bar shimmer-bar-md"></span><span class="shimmer-bar shimmer-bar-sm" style="width:140px;"></span></div>
+                      </div>
+                  </div>
+              </div>
+              <div>
+                  <div class="flex items-center gap-3 mb-3"><span class="shimmer-bar shimmer-bar-md"></span></div>
+                  <div class="member-item flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222]">
+                      <div class="flex items-center gap-3 min-w-0">
+                          <div class="skel-dot w-10 h-10 rounded-full bg-gray-200 dark:bg-[#222] shrink-0"></div>
+                          <div class="space-y-2 min-w-0"><span class="shimmer-bar shimmer-bar-md"></span><span class="shimmer-bar shimmer-bar-sm" style="width:140px;"></span></div>
+                      </div>
+                  </div>
+              </div>
+          </div>
       </div>
     </main>
 
@@ -223,44 +152,50 @@
     let activePopoverButton = null;
     let activeTextTarget = null;
     let memberToRemove = null;
-    
+    let activeShareMenu = null;
+
     try { lucide.createIcons(); } catch (e) {}
 
     /* ========================================================
-       Fungsi Dropdown Share (Undangan Instan)
+       API & Data
        ======================================================== */
-    function toggleShareDropdown() {
-        const menu = document.getElementById('share-dropdown-menu');
-        menu.classList.toggle('hidden');
-    }
-
-    function closeShareDropdown() {
-        const menu = document.getElementById('share-dropdown-menu');
-        if (menu && !menu.classList.contains('hidden')) {
-            menu.classList.add('hidden');
-        }
-    }
-
-    // Link share dinamis: alamat asli halaman ini (kolaborasi),
-    // jadi yang disalin adalah halaman undangan, bukan index.
-    // Jika domain custom dipasang di GitHub Pages, kode tidak perlu diubah.
-    const staticShareLink = window.location.origin + window.location.pathname;
-
-    // API kolaborasi (D1 Clincoo) — anggota & undangan terikat proyek, per akun
     var API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
     const COLLAB_API = API_BASE + '/collab';
     const PROJECTS_API = API_BASE + '/projects';
-    var currentProject = null;   // { id, title }
-    var projectsLoaded = false;
 
-    // Buat undangan baru (terikat proyek terpilih) -> dapat tautan terima-undangan
-    async function createInvite(channel, role) {
-        if (!currentProject) return null;
+    var projects = [];          // daftar proyek real-time
+    var collabCache = {};       // data anggota/undangan per project_id
+
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+        });
+    }
+
+    function showToast(message) {
+        let el = document.getElementById('collab-toast');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'collab-toast';
+            el.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-semibold rounded-full shadow-lg transition-all duration-300 opacity-0 translate-y-3 pointer-events-none';
+            document.body.appendChild(el);
+        }
+        el.innerText = message;
+        el.classList.remove('opacity-0', 'translate-y-3');
+        clearTimeout(el._t);
+        el._t = setTimeout(function () { el.classList.add('opacity-0', 'translate-y-3'); }, 2200);
+    }
+
+    /* ========================================================
+       Undangan instan per proyek
+       ======================================================== */
+    async function createInvite(channel, role, projectId) {
+        if (!projectId) return null;
         try {
             const res = await fetch(COLLAB_API, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'invite', project_id: currentProject.id, channel: channel, role: role || 'Viewer' })
+                body: JSON.stringify({ action: 'invite', project_id: projectId, channel: channel, role: role || 'Viewer' })
             });
             const data = await res.json();
             if (data && data.success && data.invite_url) return data.invite_url;
@@ -268,9 +203,11 @@
         return null;
     }
 
-    async function copyDirectLink() {
-        const link = await createInvite('link', 'Viewer');
-        if (!link) { closeShareDropdown(); alert('Gagal membuat tautan undangan. Pastikan proyek sudah dipilih.'); return; }
+    async function copyDirectLink(btn) {
+        const projectId = btn.getAttribute('data-project-id');
+        const link = await createInvite('link', 'Viewer', projectId);
+        closeShareDropdown();
+        if (!link) { alert('Gagal membuat tautan undangan. Periksa koneksi Anda dan coba lagi — bila masih gagal, server kolaborasi sedang tidak dapat dihubungi.'); return; }
         let copied = false;
         // 1) Clipboard API modern (HTTPS)
         try {
@@ -293,131 +230,265 @@
                 document.body.removeChild(tempInput);
             } catch (e) {}
         }
-        closeShareDropdown();
         if (copied) {
             showToast('Tautan undangan tersalin');
-            loadCollab();
+            loadCollabFor(projectId);
         } else {
             // 3) Upaya terakhir: tampilkan tautan agar bisa disalin manual
             window.prompt('Salin tautan undangan ini:', link);
         }
     }
 
-    function showToast(message) {
-        let el = document.getElementById('collab-toast');
-        if (!el) {
-            el = document.createElement('div');
-            el.id = 'collab-toast';
-            el.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-semibold rounded-full shadow-lg transition-all duration-300 opacity-0 translate-y-3 pointer-events-none';
-            document.body.appendChild(el);
-        }
-        el.innerText = message;
-        el.classList.remove('opacity-0', 'translate-y-3');
-        clearTimeout(el._t);
-        el._t = setTimeout(function () { el.classList.add('opacity-0', 'translate-y-3'); }, 2200);
-    }
-
-    async function shareDirect(platform) {
+    async function shareDirect(btn, platform) {
         closeShareDropdown();
-        const link = await createInvite(platform, 'Viewer');
-        if (!link) return;
+        const projectId = btn.getAttribute('data-project-id');
+        const link = await createInvite(platform, 'Viewer', projectId);
+        if (!link) { alert('Gagal membuat undangan. Periksa koneksi Anda dan coba lagi.'); return; }
         let url = '';
-
         if (platform === 'whatsapp') {
             const text = encodeURIComponent(`Bergabung ke proyek Clincoo:\n${link}`);
             url = `https://api.whatsapp.com/send?text=${text}`;
         } else if (platform === 'telegram') {
             url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Bergabung ke proyek Clincoo.')}`;
         }
+        if (url) window.open(url, '_blank');
+        loadCollabFor(projectId);
+    }
 
-        if (url) {
-            window.open(url, '_blank');
-        }
-        loadCollab();
+    function inviteViaEmail(btn) {
+        const projectId = btn.getAttribute('data-project-id');
+        const projectName = btn.getAttribute('data-project-name') || 'Proyek Clincoo';
+        closeShareDropdown();
+        window.location.href = 'undang-email.html?project=' + encodeURIComponent(projectId) + '&project_name=' + encodeURIComponent(projectName);
     }
 
     /* ========================================================
-       Fungsi Dropdown Pilih Proyek
+       Dropdown share per proyek
        ======================================================== */
-    function toggleProjectDropdown() {
-        const dropdown = document.getElementById('project-dropdown');
-        if (dropdown) dropdown.classList.toggle('hidden');
+    function toggleShareDropdown(btn) {
+        const menu = btn.parentElement.querySelector('.share-menu');
+        if (!menu) return;
+        if (menu === activeShareMenu) { closeShareDropdown(); return; }
+        closeShareDropdown();
+        menu.classList.remove('hidden');
+        activeShareMenu = menu;
     }
 
-    function closeProjectDropdown() {
-        const dropdown = document.getElementById('project-dropdown');
-        if (dropdown && !dropdown.classList.contains('hidden')) dropdown.classList.add('hidden');
+    function closeShareDropdown() {
+        if (activeShareMenu) {
+            activeShareMenu.classList.add('hidden');
+            activeShareMenu = null;
+        }
     }
 
-    function selectProject(id, title) {
-        currentProject = { id: String(id), title: title };
-        try { localStorage.setItem('clincoo_collab_project', JSON.stringify(currentProject)); } catch (e) {}
-        closeProjectDropdown();
-        renderProjectUI();
-        showCollabSkeleton();
-        loadCollab();
+    /* ========================================================
+       Render daftar proyek + anggota (real-time)
+       ======================================================== */
+    function memberCard(m) {
+        return '' +
+        '<div class="member-item group flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]" data-member-id="' + esc(m.id) + '" data-role="' + esc(m.role) + '">' +
+            '<div class="flex items-center gap-3 min-w-0">' +
+                '<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-[#222] flex items-center justify-center text-[13px] font-bold text-gray-600 dark:text-gray-300 shrink-0">' + esc(m.initials) + '</div>' +
+                '<div class="min-w-0">' +
+                    '<div class="text-sm font-semibold text-gray-900 dark:text-white truncate">' + esc(m.name) + '</div>' +
+                    (m.email ? '<div class="text-xs text-gray-500 dark:text-gray-400 truncate">' + esc(m.email) + '</div>' : '') +
+                '</div>' +
+            '</div>' +
+            (m.role === 'Owner'
+                ? '<span class="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-full px-3 py-1.5 shrink-0">' + esc(m.role) + '</span>'
+                : '<button type="button" onclick="toggleRoleDropdown(\'' + esc(m.id) + '\', this)" class="flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-full hover:bg-gray-50 dark:hover:bg-[#222] transition-colors cursor-pointer focus:outline-none shrink-0">' +
+                    '<i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-60"></i>' +
+                    '<span class="role-text-label">' + esc(m.role) + '</span>' +
+                '</button>') +
+        '</div>';
     }
 
-    function renderProjectUI() {
-        var nameEl = document.getElementById('selected-project-name');
-        if (nameEl) nameEl.innerText = currentProject ? currentProject.title : 'Pilih proyek…';
-        var share = document.getElementById('share-dropdown-container');
-        if (share) shareElToggle(share);
+    function pendingCard(p) {
+        var label = p.email ? esc(p.email) : 'Tautan Undangan';
+        var icon = p.channel === 'email' ? 'mail' : 'link';
+        return '' +
+        '<div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/70 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/10">' +
+            '<div class="flex items-center gap-2.5 min-w-0">' +
+                '<i data-lucide="' + icon + '" class="w-4 h-4 text-amber-500 shrink-0"></i>' +
+                '<div class="min-w-0">' +
+                    '<div class="text-[13px] font-medium text-gray-900 dark:text-white truncate">' + label + '</div>' +
+                    '<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">Diundang sebagai ' + esc(p.role) + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<span class="text-[11px] font-medium text-amber-600 dark:text-amber-400 shrink-0 pl-2">Menunggu</span>' +
+        '</div>';
     }
 
-    function shareElToggle(share) {
-        // Undangan hanya bisa dibuat bila proyek sudah dipilih
-        share.style.display = currentProject ? '' : 'none';
-        var btn = share.querySelector('button');
-        if (btn) btn.style.display = currentProject ? '' : 'none';
+    function projectSection(p) {
+        var pid = esc(p.id);
+        var ptitle = esc(p.title || 'Proyek tanpa nama');
+        return '' +
+        '<section class="proj-section mb-8" data-project-id="' + pid + '" data-project-name="' + ptitle + '">' +
+            '<div class="flex items-center justify-between gap-3 mb-3">' +
+                '<div class="flex items-center gap-2.5 min-w-0">' +
+                    '<i data-lucide="folder" class="w-[18px] h-[18px] text-gray-400 dark:text-gray-500 shrink-0"></i>' +
+                    '<div class="min-w-0">' +
+                        '<h3 class="text-[15px] font-bold text-gray-900 dark:text-white truncate proj-title">' + ptitle + '</h3>' +
+                        '<span class="text-[11px] text-gray-400 proj-count">memuat…</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="relative shrink-0">' +
+                    '<button type="button" onclick="toggleShareDropdown(this)" class="px-4 py-1.5 text-sm font-medium text-gray-900 dark:text-white bg-transparent border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#111] rounded-full transition-all cursor-pointer flex items-center gap-1.5 focus:outline-none">' +
+                        '<span>Tambah anggota</span>' +
+                        '<i data-lucide="chevron-down" class="h-4 w-4 opacity-70"></i>' +
+                    '</button>' +
+                    '<div class="share-menu hidden absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border border-gray-100 dark:border-[#222] py-1.5 z-50">' +
+                        '<button type="button" data-project-id="' + pid + '" data-project-name="' + ptitle + '" onclick="inviteViaEmail(this)" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors">' +
+                            '<i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>' +
+                            '<span>Undang via Email</span>' +
+                        '</button>' +
+                        '<button type="button" data-project-id="' + pid + '" onclick="shareDirect(this, \'whatsapp\')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors">' +
+                            '<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12.011 0C5.384 0 0 5.383 0 12.011c0 2.116.551 4.177 1.598 5.986L.057 24l6.182-1.621a11.96 11.96 0 0 0 5.772 1.482h.005c6.625 0 12.01-5.384 12.01-12.012A11.942 11.942 0 0 0 20.5 3.513 11.94 11.94 0 0 0 12.011 0zm0 21.921h-.004a9.904 9.904 0 0 1-5.048-1.383l-.362-.215-3.754.985 1.002-3.661-.236-.375a9.897 9.897 0 0 1-1.515-5.281c0-5.47 4.452-9.92 9.921-9.92 2.65 0 5.14 1.033 7.012 2.906a9.862 9.862 0 0 1 2.903 7.018c0 5.471-4.451 9.923-9.92 9.923zm5.438-7.43c-.298-.149-1.764-.87-2.037-.97-.272-.099-.47-.148-.669.15-.198.297-.768.97-.942 1.163-.173.198-.347.223-.644.074-.297-.149-1.258-.464-2.397-1.48-.886-.79-1.484-1.767-1.658-2.064-.173-.298-.018-.46.13-.607.135-.133.298-.347.447-.521.148-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347z"/></svg>' +
+                            '<span>Undang via WhatsApp</span>' +
+                        '</button>' +
+                        '<button type="button" data-project-id="' + pid + '" onclick="shareDirect(this, \'telegram\')" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors">' +
+                            '<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-.13-.32.05-.44 2.2-1.2 3.67-1.99 4.41-2.37 2.1-.9 2.54-1.05 2.82-1.05.06 0 .2.01.29.08.08.06.1.14.11.21.01.06.01.12 0 .19z"/></svg>' +
+                            '<span>Undang via Telegram</span>' +
+                        '</button>' +
+                        '<div class="h-px bg-gray-100 dark:bg-[#333] my-1 mx-2"></div>' +
+                        '<button type="button" data-project-id="' + pid + '" onclick="copyDirectLink(this)" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors">' +
+                            '<i data-lucide="link" class="w-4 h-4 flex-shrink-0"></i>' +
+                            '<span>Salin Tautan Link</span>' +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="proj-pending space-y-2.5 mb-3"></div>' +
+            '<div class="proj-members space-y-2.5"></div>' +
+        '</section>';
     }
 
-    function projectMenuItem(p) {
-        const isSel = currentProject && String(currentProject.id) === String(p.id);
-        return '<button type="button" onclick="selectProject(\'' + esc(p.id) + '\', this.getAttribute(\'data-title\'))" data-title="' + esc(p.title || 'Proyek tanpa nama') + '" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between gap-2 transition-colors focus:outline-none">' +
-            '<span class="truncate">' + esc(p.title || 'Proyek tanpa nama') + '</span>' +
-            (isSel ? '<i data-lucide="check" class="w-4 h-4 text-gray-900 dark:text-white shrink-0"></i>' : '') +
-        '</button>';
+    function renderProjects(list) {
+        var root = document.getElementById('projects-root');
+        if (!root) return;
+        if (!list.length) {
+            root.innerHTML =
+                '<div class="flex flex-col items-center text-center py-16 px-4">' +
+                    '<i data-lucide="folder-open" class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4"></i>' +
+                    '<h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Belum ada proyek</h3>' +
+                    '<p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Buat proyek terlebih dahulu di halaman Proyek, lalu kembali ke sini untuk mengundang rekan tim.</p>' +
+                '</div>';
+            if (window.lucide) try { lucide.createIcons(); } catch (e) {}
+            return;
+        }
+        // ?project= di URL didahulukan
+        var params = new URLSearchParams(window.location.search);
+        var fromUrl = params.get('project');
+        var ordered = list.slice();
+        if (fromUrl) {
+            var idx = ordered.findIndex(function(p) { return String(p.id) === String(fromUrl); });
+            if (idx > 0) { var moved = ordered.splice(idx, 1)[0]; ordered.unshift(moved); }
+        }
+        root.innerHTML = ordered.map(projectSection).join('');
+        if (window.lucide) try { lucide.createIcons(); } catch (e) {}
+        if (fromUrl) {
+            var sec = root.querySelector('.proj-section[data-project-id="' + fromUrl + '"]');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
-    function loadProjects() {
-        fetch(PROJECTS_API)
+    // Undangan kedaluwarsa setelah 1 hari (24 jam) sejak dibuat
+    var INVITE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+    function isInviteExpired(inv) {
+        var raw = inv && inv.created_date ? String(inv.created_date).replace(' ', 'T') : '';
+        if (!raw) return false;
+        if (raw.charAt(raw.length - 1) !== 'Z') raw += 'Z';
+        var d = new Date(raw);
+        if (isNaN(d.getTime())) return false;
+        return (Date.now() - d.getTime()) > INVITE_MAX_AGE_MS;
+    }
+
+    function renderProjectCollab(p) {
+        var sec = document.querySelector('.proj-section[data-project-id="' + p.id + '"]');
+        if (!sec) return;
+        var data = collabCache[p.id] || { members: [], pending: [] };
+        var members = data.members || [];
+        var pending = (data.pending || []).filter(function(inv) { return !isInviteExpired(inv); });
+        var titleEl = sec.querySelector('.proj-title');
+        if (titleEl && p.title) titleEl.innerText = p.title;
+        var countEl = sec.querySelector('.proj-count');
+        if (countEl) countEl.innerText = members.length + ' anggota' + (pending.length ? ' · ' + pending.length + ' undangan menunggu' : '');
+        var pendEl = sec.querySelector('.proj-pending');
+        if (pendEl) pendEl.innerHTML = pending.map(pendingCard).join('');
+        var memEl = sec.querySelector('.proj-members');
+        if (memEl) {
+            memEl.innerHTML = members.length
+                ? members.map(memberCard).join('')
+                : '<div class="flex items-center gap-3 p-3.5 rounded-2xl border border-dashed border-gray-200 dark:border-[#333]">' +
+                    '<i data-lucide="user-plus" class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0"></i>' +
+                    '<span class="text-sm text-gray-500 dark:text-gray-400">Belum ada anggota tim — undang rekan lewat "Tambah anggota".</span>' +
+                  '</div>';
+        }
+        if (window.lucide) try { lucide.createIcons(); } catch (e) {}
+    }
+
+    function loadCollabFor(projectId) {
+        return fetch(COLLAB_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'list', project_id: projectId })
+        })
         .then(function(r) { return r.json(); })
         .then(function(res) {
-            projectsLoaded = true;
-            var projects = (res && res.projects) || [];
-            var dd = document.getElementById('project-dropdown');
-            if (dd) {
-                dd.innerHTML = projects.length
-                    ? projects.map(projectMenuItem).join('')
-                    : '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Belum ada proyek. Buat proyek dulu di halaman Proyek.</div>';
-            }
-            if (!projects.length) { renderProjectUI(); renderCollab(); return; }
-            // Prioritas: ?project= di URL > pilihan tersimpan
-            var params = new URLSearchParams(window.location.search);
-            var fromUrl = params.get('project');
-            var saved = null;
-            try { saved = JSON.parse(localStorage.getItem('clincoo_collab_project') || 'null'); } catch (e) {}
-            var pick = null;
-            if (fromUrl) pick = projects.find(function(p) { return String(p.id) === String(fromUrl); });
-            if (!pick && saved && saved.id) pick = projects.find(function(p) { return String(p.id) === String(saved.id); });
-            if (pick) {
-                selectProject(pick.id, pick.title);
+            if (res && res.success) {
+                collabCache[projectId] = { members: res.members || [], pending: res.pending || [] };
+                var p = projects.find(function(x) { return String(x.id) === String(projectId); });
+                if (p && res.project && res.project.title) p.title = res.project.title;
+                renderProjectCollab({ id: projectId, title: (p && p.title) || '' });
             } else {
-                renderProjectUI();
-                renderCollab();
+                collabCache[projectId] = { members: [], pending: [], error: true };
+                renderProjectCollab({ id: projectId, title: '' });
             }
-            if (window.lucide) try { lucide.createIcons(); } catch (e) {}
         })
         .catch(function() {
-            projectsLoaded = true;
-            renderProjectUI();
-            renderCollab();
+            collabCache[projectId] = { members: [], pending: [], error: true };
+            renderProjectCollab({ id: projectId, title: '' });
         });
     }
 
+    function loadProjectsRealtime() {
+        return fetch(PROJECTS_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'list' })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            var list = (res && res.projects) || [];
+            var prevIds = projects.map(function(p) { return String(p.id); });
+            projects = list;
+            var newIds = list.map(function(p) { return String(p.id); });
+            var changed = prevIds.length !== newIds.length || prevIds.some(function(id, i) { return id !== newIds[i]; });
+            if (changed) renderProjects(list);
+            list.forEach(function(p) { loadCollabFor(p.id); });
+        })
+        .catch(function() {
+            var root = document.getElementById('projects-root');
+            if (root && !root.querySelector('.proj-section')) {
+                root.innerHTML =
+                    '<div class="flex flex-col items-center text-center py-16 px-4">' +
+                        '<i data-lucide="cloud-off" class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4"></i>' +
+                        '<h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Gagal memuat data</h3>' +
+                        '<p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs mb-5">Periksa koneksi Anda, lalu coba lagi.</p>' +
+                        '<button type="button" onclick="retryLoad()" class="px-5 py-2.5 text-sm font-semibold text-white bg-gray-900 dark:bg-white dark:text-black rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">Coba lagi</button>' +
+                    '</div>';
+                if (window.lucide) try { lucide.createIcons(); } catch (e) {}
+            }
+        });
+    }
+
+    function retryLoad() {
+        document.getElementById('projects-root').innerHTML = '<div class="flex flex-col gap-8"><div><div class="flex items-center gap-3 mb-3"><span class="shimmer-bar shimmer-bar-md"></span></div><div class="member-item flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222]"><div class="flex items-center gap-3 min-w-0"><div class="skel-dot w-10 h-10 rounded-full bg-gray-200 dark:bg-[#222] shrink-0"></div><div class="space-y-2 min-w-0"><span class="shimmer-bar shimmer-bar-md"></span><span class="shimmer-bar shimmer-bar-sm" style="width:140px;"></span></div></div></div></div></div>';
+        loadProjectsRealtime();
+    }
+
     /* ========================================================
-       Fungsi Popover Peran Anggota (Utama)
+       Popover Peran Anggota
        ======================================================== */
     function toggleRoleDropdown(id, buttonEl) {
         const popover = document.getElementById('role-popover');
@@ -472,11 +543,13 @@
                 parentMember.setAttribute('data-role', role);
             }
             if (activePopoverId) {
+                const sec = activePopoverButton.closest('.proj-section');
+                const pid = sec ? sec.getAttribute('data-project-id') : null;
                 fetch(COLLAB_API, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'setRole', member_id: activePopoverId, role: role })
-                }).then(function() { loadCollab(); }).catch(function() {});
+                }).then(function() { if (pid) loadCollabFor(pid); }).catch(function() {});
             }
         }
         closePopover();
@@ -534,6 +607,8 @@
     function executeRemoveMember() {
         if (memberToRemove) {
             const removedId = memberToRemove.getAttribute('data-member-id');
+            const sec = memberToRemove.closest('.proj-section');
+            const pid = sec ? sec.getAttribute('data-project-id') : null;
             memberToRemove.style.transition = 'all 0.3s ease';
             memberToRemove.style.opacity = '0';
             memberToRemove.style.transform = 'translateX(-10px)';
@@ -546,7 +621,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'remove', member_id: removedId })
-                }).then(function() { loadCollab(); }).catch(function() {});
+                }).then(function() { if (pid) loadCollabFor(pid); }).catch(function() {});
             }
         }
         closeConfirmModal();
@@ -556,22 +631,10 @@
        Global Event Listener (Tutup dropdown & popover di luar)
        ========================================================== */
     document.addEventListener('click', (e) => {
-        // Dropdown Pilih Proyek
-        const projectContainer = document.getElementById('project-select-container');
-        if (projectContainer && !projectContainer.contains(e.target)) {
-            closeProjectDropdown();
-        }
-
-        // Dropdown Share
-        const shareContainer = document.getElementById('share-dropdown-container');
-        if (shareContainer && !shareContainer.contains(e.target)) {
-            closeShareDropdown();
-        }
-
-        // Dropdown Invite Role (Modal Email)
-        const inviteRoleContainer = document.getElementById('invite-role-container');
-        if (inviteRoleContainer && !inviteRoleContainer.contains(e.target)) {
-            closeInviteRoleDropdown();
+        // Dropdown share: tutup bila klik di luar tombol/menu aktif
+        if (activeShareMenu) {
+            const container = activeShareMenu.parentElement;
+            if (container && !container.contains(e.target)) closeShareDropdown();
         }
 
         // Popover Role Utama
@@ -584,201 +647,16 @@
         }
     });
 
-    </script>
-    <script>
-    /* ========================================================
-       Data Kolaborasi Real-time (Base44) + Alur Terima Undangan
-       ======================================================== */
-    var collabData = { members: [], pending: [] };
-
-    function esc(s) {
-        return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
-        });
-    }
-
-    function memberCard(m) {
-        return '' +
-        '<div class="member-item group flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] transition-all hover:border-gray-200 dark:hover:border-[#333]" data-member-id="' + esc(m.id) + '" data-role="' + esc(m.role) + '">' +
-            '<div class="flex items-center gap-3 min-w-0">' +
-                '<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-[#222] flex items-center justify-center text-[13px] font-bold text-gray-600 dark:text-gray-300 shrink-0">' + esc(m.initials) + '</div>' +
-                '<div class="min-w-0">' +
-                    '<div class="text-sm font-semibold text-gray-900 dark:text-white truncate">' + esc(m.name) + '</div>' +
-                    (m.email ? '<div class="text-xs text-gray-500 dark:text-gray-400 truncate">' + esc(m.email) + '</div>' : '') +
-                '</div>' +
-            '</div>' +
-            (m.role === 'Owner'
-                ? '<span class="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-full px-3 py-1.5 shrink-0">' + esc(m.role) + '</span>'
-                : '<button type="button" onclick="toggleRoleDropdown(\'' + esc(m.id) + '\', this)" class="flex items-center gap-1.5 pl-2.5 pr-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-full hover:bg-gray-50 dark:hover:bg-[#222] transition-colors cursor-pointer focus:outline-none shrink-0">' +
-                    '<i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-60"></i>' +
-                    '<span class="role-text-label">' + esc(m.role) + '</span>' +
-                '</button>') +
-        '</div>';
-    }
-
-    function pendingCard(p) {
-        var label = p.email ? esc(p.email) : 'Tautan Undangan';
-        var icon = p.channel === 'email' ? 'mail' : 'link';
-        return '' +
-        '<div class="flex items-center justify-between p-3 rounded-xl bg-amber-50/70 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/10">' +
-            '<div class="flex items-center gap-2.5 min-w-0">' +
-                '<i data-lucide="' + icon + '" class="w-4 h-4 text-amber-500 shrink-0"></i>' +
-                '<div class="min-w-0">' +
-                    '<div class="text-[13px] font-medium text-gray-900 dark:text-white truncate">' + label + '</div>' +
-                    '<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">Diundang sebagai ' + esc(p.role) + '</div>' +
-                '</div>' +
-            '</div>' +
-            '<span class="text-[11px] font-medium text-amber-600 dark:text-amber-400 shrink-0 pl-2">Menunggu</span>' +
-        '</div>';
-    }
-
-    // Skeleton shimmer saat data anggota masih dimuat (pola aktivitas.html)
-    function showCollabSkeleton() {
-        var list = document.getElementById('member-list');
-        if (!list) return;
-        list.innerHTML = '';
-        var skel = document.createElement('div');
-        skel.id = 'collab-skeleton';
-        for (var i = 0; i < 4; i++) {
-            skel.innerHTML += '' +
-            '<div class="member-item flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222]">' +
-                '<div class="flex items-center gap-3 min-w-0">' +
-                    '<div class="skel-dot w-10 h-10 rounded-full bg-gray-200 dark:bg-[#222] shrink-0"></div>' +
-                    '<div class="space-y-2 min-w-0">' +
-                        '<span class="shimmer-bar shimmer-bar-md"></span>' +
-                        '<span class="shimmer-bar shimmer-bar-sm" style="width:140px;"></span>' +
-                    '</div>' +
-                '</div>' +
-                '<span class="shimmer-bar shimmer-bar-sm shrink-0" style="width:64px;"></span>' +
-            '</div>';
-        }
-        list.appendChild(skel);
-        // Shimmer tipis pada angka statistik selagi data dimuat
-        ['stat-total-users', 'stat-editors', 'stat-viewers', 'stat-updates-today'].forEach(function(id) {
-            var el = document.getElementById(id);
-            if (el) el.innerHTML = '<span class="shimmer-bar shimmer-bar-sm" style="width:30px;"></span>';
-        });
-    }
-    function clearCollabSkeleton() {
-        var skel = document.getElementById('collab-skeleton');
-        if (skel) skel.remove();
-    }
-
-    // Undangan kedaluwarsa setelah 1 hari (24 jam) sejak dibuat
-    var INVITE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
-    function isInviteExpired(inv) {
-        var raw = inv && inv.created_date ? String(inv.created_date).replace(' ', 'T') : '';
-        if (!raw) return false;
-        if (raw.charAt(raw.length - 1) !== 'Z') raw += 'Z';
-        var d = new Date(raw);
-        if (isNaN(d.getTime())) return false;
-        return (Date.now() - d.getTime()) > INVITE_MAX_AGE_MS;
-    }
-
-    function renderCollab() {
-        var list = document.getElementById('member-list');
-        if (!list) return;
-        clearCollabSkeleton();
-        if (!currentProject) {
-            // Belum ada proyek terpilih: panduan memilih proyek
-            list.innerHTML = projectsLoaded
-                ? '<div class="flex flex-col items-center justify-center py-16 px-4 text-center">' +
-                    '<i data-lucide="folder" class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-4"></i>' +
-                    '<h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Pilih proyek dulu</h3>' +
-                    '<p class="text-sm text-gray-500 dark:text-gray-400">Pilih salah satu proyek Anda di atas untuk melihat dan mengundang anggota tim.</p>' +
-                '</div>'
-                : '<div id="collab-skeleton"><div class="flex flex-col items-center justify-center py-16 px-4 text-center"><span class="shimmer-bar shimmer-bar-md"></span><span class="shimmer-bar shimmer-bar-sm" style="width:180px"></span></div></div>';
-            if (window.lucide) try { lucide.createIcons(); } catch (e) {}
-            var psec0 = document.getElementById('pending-section');
-            if (psec0) psec0.classList.add('hidden');
-            return;
-        }
-        if (!collabData.members.length) {
-            list.innerHTML = '<div class="flex flex-col items-center justify-center py-16 px-4 text-center">' +
-                '<i data-lucide="users" class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-4"></i>' +
-                '<h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Belum ada anggota tim</h3>' +
-                '<p class="text-sm text-gray-500 dark:text-gray-400">Undang rekan tim untuk mulai berkolaborasi di proyek ini.</p>' +
-            '</div>';
-        } else {
-            list.innerHTML = collabData.members.map(memberCard).join('');
-        }
-
-        var psec = document.getElementById('pending-section');
-        var plist = document.getElementById('pending-list');
-        var pcount = document.getElementById('pending-count');
-        if (psec && plist) {
-            if (collabData.pending.length) {
-                psec.classList.remove('hidden');
-                plist.innerHTML = collabData.pending.map(pendingCard).join('');
-                if (pcount) pcount.innerText = collabData.pending.length;
-            } else {
-                psec.classList.add('hidden');
-                plist.innerHTML = '';
-            }
-        }
-
-        var total = collabData.members.length;
-        var mc = document.getElementById('member-count'); if (mc) mc.innerText = total;
-        var editors = collabData.members.filter(function(m) { return m.role === 'Editor' || m.role === 'Admin'; }).length;
-        var viewers = collabData.members.filter(function(m) { return m.role === 'Viewer'; }).length;
-        var t = document.getElementById('stat-total-users'); if (t) t.innerText = total;
-        var e = document.getElementById('stat-editors'); if (e) e.innerText = editors;
-        var v = document.getElementById('stat-viewers'); if (v) v.innerText = viewers;
-
-        if (window.lucide) try { lucide.createIcons(); } catch (e) {}
-    }
-
-    // Kartu "Pembaruan Hari Ini": jumlah aktivitas akun hari ini (zona WIB)
-    var ACTIVITY_API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
-    function loadUpdatesToday() {
-        var el = document.getElementById('stat-updates-today');
-        fetch(ACTIVITY_API + '/activity?limit=100')
-        .then(function(r) { return r.json(); })
-        .then(function(res) {
-            var acts = (res && res.activities) || [];
-            var nowWIB = Date.now() + 7 * 3600000;
-            var startWIB = new Date(nowWIB); startWIB.setHours(0, 0, 0, 0);
-            var thr = startWIB.getTime() - 7 * 3600000;
-            var count = acts.filter(function(a) {
-                var d = new Date(String(a.created_at || '').replace(' ', 'T') + 'Z');
-                return !isNaN(d.getTime()) && d.getTime() >= thr;
-            }).length;
-            if (el) el.innerText = count;
-        })
-        .catch(function() { if (el) el.innerText = 0; });
-    }
-
-    function loadCollab() {
-        if (!currentProject) { renderCollab(); return; }
-        fetch(COLLAB_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'list', project_id: currentProject.id })
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(res) {
-            if (res && res.success) {
-                if (res.project && res.project.title) {
-                    currentProject.title = res.project.title;
-                    var nameEl = document.getElementById('selected-project-name');
-                    if (nameEl) nameEl.innerText = currentProject.title;
-                }
-                collabData.members = res.members || [];
-                collabData.pending = res.pending || [];
-            } else {
-                collabData.members = [];
-                collabData.pending = [];
-            }
-            renderCollab();
-        })
-        .catch(function() { renderCollab(); });
-    }
-
-    // Init: muat data kolaborasi; link lama ?invite= diredirect ke halaman undangan terpisah
+    /* ==========================================================
+       Init
+       ========================================================== */
     (function() {
-        showCollabSkeleton();
-        loadProjects();
-        loadUpdatesToday();
+        loadProjectsRealtime();
+        // Real-time: muat ulang data diam-diam tiap 30 detik (saat tab aktif)
+        setInterval(function() {
+            if (document.visibilityState === 'visible') loadProjectsRealtime();
+        }, 30000);
+        // Link lama ?invite= diredirect ke halaman undangan terpisah
         var params = new URLSearchParams(window.location.search);
         var inviteId = params.get('invite');
         if (inviteId) {
