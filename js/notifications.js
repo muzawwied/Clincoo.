@@ -9,6 +9,19 @@ const NOTIF_KEY = 'clincoo_notifications';
 const NOTIF_ALLOWED = ['GitHub', 'Workspace', 'Deploy', 'Akun', 'Dompet'];
 function isAllowedNotif(n) { return NOTIF_ALLOWED.indexOf(String((n && n.source) || '')) > -1; }
 function getLocalNotifs() { try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]').filter(isAllowedNotif); } catch(e) { return []; } }
+// Waktu notif dalam ms — D1 menyimpan UTC ('YYYY-MM-DD HH:MM:SS'), lama pakai ISO (timestamp)
+function notifTime(n) { var t = String((n && (n.created_at || n.timestamp)) || ''); if (!t) return 0; if (t.indexOf('T') === -1) t = t.replace(' ', 'T') + 'Z'; var d = new Date(t); return isNaN(d.getTime()) ? 0 : d.getTime(); }
+// Notifikasi lokal lebih tua dari 24 jam dianggap basi — tidak ditampilkan dan dibersihkan
+const LOCAL_NOTIF_TTL_MS = 24 * 60 * 60 * 1000;
+function pruneLocalNotifs() {
+    try {
+        var now = Date.now();
+        var kept = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]').filter(function(n) {
+            return isAllowedNotif(n) && (now - notifTime(n)) < LOCAL_NOTIF_TTL_MS;
+        });
+        localStorage.setItem(NOTIF_KEY, JSON.stringify(kept));
+    } catch(e) {}
+}
 let d1Notifs = [];
 let d1UnreadCount = 0;
 
@@ -43,10 +56,12 @@ async function fetchD1Notifications() {
         if (!res.ok) return;
         const data = await res.json();
         const apiNotifs = (data.notifications || []).filter(isAllowedNotif);
-        const local = getLocalNotifs();
+        const cutoff = Date.now() - LOCAL_NOTIF_TTL_MS;
+        const local = getLocalNotifs().filter(function(n) { return notifTime(n) > cutoff; });
         const seen = {}; const merged = [];
         apiNotifs.concat(local).forEach(function(n) { const k = String(n.id); if (!seen[k]) { seen[k] = true; merged.push(n); } });
-        merged.sort(function(a, b) { return new Date(b.created_at || b.timestamp || 0) - new Date(a.created_at || a.timestamp || 0); });
+        merged.sort(function(a, b) { return notifTime(b) - notifTime(a); });
+        pruneLocalNotifs();
         d1Notifs = merged;
         d1UnreadCount = merged.filter(function(n) { return !n.read; }).length;
         renderBellBadge();
@@ -83,7 +98,8 @@ function renderNotifDropdown() {
     }
     let html = '<div class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar">';
     for (let n of d1Notifs.slice(0, 5)) {
-        let timeStr = new Date(n.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        var ts = notifTime(n);
+        let timeStr = ts ? new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
         const type = n.type || 'info';
         const iconPath = notifIcons[type] || notifIcons.info;
         const color = notifColors[type] || notifColors.info;
@@ -106,7 +122,8 @@ function renderNotifPage() {
     }
     let html = '<div class="space-y-3 mt-4">';
     for (let n of d1Notifs) {
-        let timeStr = new Date(n.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        var ts = notifTime(n);
+        let timeStr = ts ? new Date(ts).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
         const type = n.type || 'info';
         const iconPath = notifIcons[type] || notifIcons.info;
         const color = notifColors[type] || notifColors.info;
@@ -161,7 +178,7 @@ function createLoginNotification() {
 }
 
 if (typeof window !== 'undefined') {
-    try { var _pn = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); var _pk = _pn.filter(isAllowedNotif); if (_pk.length !== _pn.length) localStorage.setItem(NOTIF_KEY, JSON.stringify(_pk)); } catch(e) {}
+    pruneLocalNotifs();
     fetchD1Notifications();
     setInterval(fetchD1Notifications, 30000);
     createLoginNotification();
