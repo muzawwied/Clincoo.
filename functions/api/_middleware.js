@@ -2,11 +2,12 @@
 //   - /api/auth/*        (login, register, me, oauth akun)
 //   - /api/github-oauth* (redirect callback GitHub, tanpa header Bearer)
 //   - /api/topup*        (callback Xendit divalidasi sendiri via x-callback-token)
+//   - /api/scheduled-tasks (endpoint memvalidasi sendiri: aksi user wajib Bearer, run_due wajib x-cron-secret)
 //   - preflight OPTIONS  (CORS)
 // Respons 401 sama seperti versi production: {"error":"Login diperlukan","need_login":true}
 import { initTables as initAuthTables, getUserByToken, getToken } from './auth/shared.js';
 
-const PUBLIC = [/^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(\/|$)/, /^\/api\/wallet(\/|$)/];
+const PUBLIC = [/^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(\/|$)/, /^\/api\/wallet(\/|$)/, /^\/api\/scheduled-tasks(\/|$)/];
 
 export async function onRequest({ request, env, next }) {
   if (request.method === 'OPTIONS') return next();
