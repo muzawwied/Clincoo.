@@ -6,27 +6,12 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
-// Jenis aktivitas yang ditampilkan di halaman Aktivitas (semua yang memang ditulis sistem)
-const ALLOWED_ACTIONS = [
-  'login',                  // Login berhasil
-  'login_detected',         // (legacy)
-  'delete_project',         // Proyek dihapus
-  'wallet_transaction',     // Transaksi dompet / top up
-  'topup',                  // (legacy) Top up saldo
-  'topup_created',          // Order top up dibuat
-  'topup_paid',             // Top up dibayar
-  'subscription',           // Aktivasi/aktivitas langganan
-  'subscribe',              // (legacy)
-  'deploy_triggered',       // Deploy dipicu (build/push GitHub)
-  'redeploy_triggered',     // Deploy ulang
-  'settings_update',        // Perubahan pengaturan umum
-  'project_settings_update',// Perubahan pengaturan proyek
-  'security_updated',       // Perubahan keamanan
-  'profile_updated',        // Perubahan profil
-  'preferences_update',     // Perubahan preferensi
-  'env_var_added',          // Variabel environment ditambah
-  'env_var_deleted'         // Variabel environment dihapus
-];
+// Halaman Aktivitas hanya menampilkan: sesi login, hapus proyek, top up, dan langganan.
+// Jenis aktivitas lain tetap dicatat di database (jejak audit), hanya tidak ditampilkan.
+const DISPLAY_FILTER = `(
+  action IN ('login', 'login_detected', 'delete_project', 'subscription', 'subscribe', 'topup')
+  OR (action IN ('wallet_transaction', 'topup_created', 'topup_paid') AND details LIKE 'Top Up%')
+)`;
 
 export async function onRequestOptions() {
   return new Response(null, { headers: CORS });
@@ -43,9 +28,8 @@ export async function onRequestGet({ env, request }) {
     if (!uid) return new Response(JSON.stringify({ error: 'Login diperlukan', need_login: true }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
 
     await rowScope(env.DB, 'activity_log', user);
-    const placeholders = ALLOWED_ACTIONS.map(() => '?').join(',');
-    const rows = await env.DB.prepare('SELECT * FROM activity_log WHERE user_id = ? AND action IN (' + placeholders + ') ORDER BY created_at DESC LIMIT ?')
-      .bind(uid, ...ALLOWED_ACTIONS, limit).all();
+    const rows = await env.DB.prepare('SELECT * FROM activity_log WHERE user_id = ? AND ' + DISPLAY_FILTER + ' ORDER BY created_at DESC LIMIT ?')
+      .bind(uid, limit).all();
 
     return new Response(JSON.stringify({ activities: rows.results || [] }), {
       headers: { 'Content-Type': 'application/json', ...CORS }
