@@ -145,14 +145,30 @@ export async function onRequestPost({ request, env }) {
             const amount = parseFloat(t.amount);
             if (isNaN(amount)) continue;
             const title = String(t.title);
+            const type = (t.type === 'out') ? 'out' : 'in';
+            const method = String(t.method || 'wallet-sync');
+
+            // Upser berbasis ID: id dari web wallet dipertahankan (merge dua arah, tanpa duplikat).
+            // Guard kepemilikan: id yang sudah dipakai akun lain => pakai id baru (anti cross-user).
+            let txId = (t.id != null && String(t.id)) ? String(t.id) : null;
+            if (txId) {
+              const existing = await db.prepare('SELECT user_id FROM wallet_transactions WHERE id = ?').bind(txId).first();
+              if (existing && existing.user_id !== uid) txId = null;
+            }
+            if (txId) {
+              // created_at baris lama dipertahankan (tanggal transaksi tidak bergeser tiap sync)
+              await db.prepare(`INSERT INTO wallet_transactions (id, title, amount, type, method, user_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET title = excluded.title, amount = excluded.amount, type = excluded.type, method = excluded.method`)
+                .bind(txId, title, amount, type, method, uid).run();
+              continue;
+            }
             if (!data.replace) {
               const dup = await db.prepare('SELECT id FROM wallet_transactions WHERE user_id = ? AND title = ? LIMIT 1').bind(uid, title).first();
               if (dup) continue;
             }
-            const txId = (t.id != null && String(t.id)) ? String(t.id) : 'TX-' + Math.floor(100000 + Math.random() * 900000);
-            const type = (t.type === 'out') ? 'out' : 'in';
             await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
-              .bind(txId, title, amount, type, String(t.method || 'wallet-sync'), uid).run();
+              .bind('TX-' + Math.floor(100000 + Math.random() * 900000), title, amount, type, method, uid).run();
           }
           // Jika replace penuh tanpa saldo eksplisit, hitung ulang saldo dari transaksi
           if (data.replace && data.balance == null) {
