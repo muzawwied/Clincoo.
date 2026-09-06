@@ -159,7 +159,7 @@ var ClincooTemplates = (function () {
     if (!t || !site) return;
 
     var pid = 'proj_' + Date.now();
-    var newProject = { id: pid, title: t.name, prompt: t.desc, updatedAt: new Date().toISOString() };
+    var newProject = { id: pid, title: t.name, prompt: t.desc, template: key, updatedAt: new Date().toISOString() };
 
     // 1) Daftar proyek (lokal + D1)
     var projects = [];
