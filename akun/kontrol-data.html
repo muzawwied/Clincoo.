@@ -10,7 +10,7 @@
   <title>Kontrol Data - Clincoo</title>
   <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@1.41.0"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -276,7 +276,7 @@
   </div>
 
   <script>
-    lucide.createIcons();
+    try { lucide.createIcons(); } catch (e) {}
 
     const PREF_API = 'https://clincoo-be2.pages.dev/api/preferences';
     const EXPORT_API = 'https://clincoo-be2.pages.dev/api/export-data';
@@ -531,7 +531,7 @@
               Belum ada riwayat aktivitas.
             </div>
           `;
-          lucide.createIcons();
+          try { lucide.createIcons(); } catch (e) {}
           return;
         }
 
@@ -552,7 +552,7 @@
             </div>
           `;
         }).join('');
-        lucide.createIcons();
+        try { lucide.createIcons(); } catch (e) {}
       } catch(e) {
         listEl.innerHTML = `
           <div class="py-8 text-center text-xs text-gray-400">
@@ -560,7 +560,7 @@
             Gagal memuat riwayat. Periksa koneksi.
           </div>
         `;
-        lucide.createIcons();
+        try { lucide.createIcons(); } catch (e) {}
       }
     }
 
@@ -589,7 +589,7 @@
               Semua riwayat dan log telah dibersihkan.
             </div>
           `;
-          lucide.createIcons();
+          try { lucide.createIcons(); } catch (e) {}
           
         })
         .catch(e => {

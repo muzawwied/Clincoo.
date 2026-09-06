@@ -12,7 +12,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@1.41.0"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -349,7 +349,7 @@
         let selectedNominalAmount = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch (e) {}
             await initWalletFromD1();
             renderBalance();
             renderTransactions();
@@ -405,7 +405,7 @@
                 container.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 emptyState.classList.add('flex');
-                lucide.createIcons();
+                try { lucide.createIcons(); } catch (e) {}
                 return;
             }
             emptyState.classList.add('hidden');
@@ -435,7 +435,7 @@
                     '<p class="text-xs text-gray-500 mt-0.5">' + displayMethodName + (dateStr ? ' - ' + dateStr : '') + '</p></div></div>' +
                     '<span class="text-sm font-bold ' + amountColor + '">' + sign + ' ' + formatNumberOnly(tx.amount) + '</span></div>';
             }).join('');
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch (e) {}
         }
 
         var _lastTxSnapshot = '';
@@ -479,7 +479,7 @@
             var stepAmount = document.getElementById('step-amount');
             if (stepMethod) { stepMethod.classList.add('hidden'); stepMethod.classList.remove('flex'); }
             if (stepAmount) { stepAmount.classList.remove('hidden'); stepAmount.classList.add('flex'); }
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch (e) {}
         }
 
         var keypadAmount = '';
@@ -636,7 +636,7 @@
             var modal = document.getElementById('system-modal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch (e) {}
         }
 
         function closeModal() {

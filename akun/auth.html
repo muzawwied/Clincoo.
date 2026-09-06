@@ -11,7 +11,7 @@
     <!-- Tailwind & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@1.41.0"></script>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -277,7 +277,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch (e) {}
         });
 
         // Fungsi Toggle Password
@@ -292,7 +292,7 @@
                 input.type = 'password';
                 icon.setAttribute('data-lucide', 'eye');
             }
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch (e) {}
         }
 
         // Logika untuk pindah tampilan Masuk / Daftar
@@ -507,7 +507,7 @@
             var modal = document.getElementById('system-modal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch (e) {}
         }
 
         function closeModal() {
