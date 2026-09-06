@@ -112,7 +112,7 @@
 
             <section class="space-y-4 pt-4 w-full">
                 <div class="px-5"><h2 class="text-base font-bold text-gray-900 tracking-tight">Riwayat Transaksi</h2></div>
-                <div id="transaction-list" class="flex flex-col w-full border-t border-gray-100">
+                <div id="transaction-list" class="flex flex-col w-full border-t border-gray-100"></div>
                 <div id="empty-history" class="hidden flex-col items-center justify-center py-12 text-center w-full">
                     <div class="mb-4">
                         <i data-lucide="history" class="w-16 h-16 text-gray-300 dark:text-gray-600 stroke-[1.5]"></i>
@@ -453,14 +453,15 @@
             const allTxs = await getTransactions();
             clearWalletSkeleton();
             if (allTxs.length === 0) {
-                container.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 emptyState.classList.add('flex');
+                emptyState.style.display = '';
                 try { lucide.createIcons(); } catch (e) {}
                 return;
             }
             emptyState.classList.add('hidden');
             emptyState.classList.remove('flex');
+            emptyState.style.display = 'none';
             
             var methodDisplayMap = {
                 'qris': 'QRIS', 'gopay': 'GoPay', 'ovo': 'OVO', 'dana': 'DANA', 'shopeepay': 'ShopeePay', 'linkaja': 'LinkAja',
