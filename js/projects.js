@@ -161,11 +161,66 @@ function openProject(id) {
     }
 }
 
+// Popup konfirmasi hapus proyek (CTA teks saja, radius kecil) — disuntik sekali per halaman
+function _ensureDeleteModal() {
+    if (document.getElementById('confirm-delete-modal')) return;
+    const div = document.createElement('div');
+    div.innerHTML =
+        '<div id="confirm-delete-modal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
+        '<div class="bg-white rounded-md w-full max-w-xs px-5 pt-5 pb-4 text-center">' +
+        '<h3 class="text-base font-semibold text-gray-900">Hapus proyek ini?</h3>' +
+        '<p id="confirm-delete-name" class="text-sm text-gray-500 mt-1 px-2 truncate"></p>' +
+        '<p class="text-[13px] text-gray-400 mt-2 leading-snug">Semua data proyek akan dihapus, <span class="text-gray-500">termasuk situs yang sudah dipublish dan link publiknya</span>.</p>' +
+        '<div class="flex items-center justify-center gap-10 mt-5">' +
+        '<button type="button" id="confirm-delete-cancel" class="text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors px-1 py-0.5">Batal</button>' +
+        '<button type="button" id="confirm-delete-ok" class="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors px-1 py-0.5">Hapus</button>' +
+        '</div></div></div>';
+    document.body.appendChild(div.firstElementChild);
+    const modal = document.getElementById('confirm-delete-modal');
+    modal.addEventListener('click', function (e) { if (e.target === modal) _closeDeleteModal(); });
+    document.getElementById('confirm-delete-cancel').addEventListener('click', _closeDeleteModal);
+    document.getElementById('confirm-delete-ok').addEventListener('click', function () {
+        const id = _pendingDeleteId;
+        _closeDeleteModal();
+        if (id) _doDeleteProject(id);
+    });
+}
+function _closeDeleteModal() {
+    const modal = document.getElementById('confirm-delete-modal');
+    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    _pendingDeleteId = null;
+}
+let _pendingDeleteId = null;
 function deleteProject(id) {
+    _ensureDeleteModal();
+    const proj = getProjects().find(p => p.id === id);
+    _pendingDeleteId = id;
+    const nameEl = document.getElementById('confirm-delete-name');
+    if (nameEl) nameEl.textContent = (proj && (proj.aiName || proj.title)) ? '"' + esc(proj.aiName || proj.title) + '"' : 'Proyek ini';
+    const modal = document.getElementById('confirm-delete-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+async function _doDeleteProject(id) {
+    // tarik publish-an: situs + link publik (Cloudflare Pages) ikut dihapus
+    const tok = (function () { try { return localStorage.getItem('clincoo_auth_token') || ''; } catch (e) { return ''; } })();
+    const hdrs = { 'Content-Type': 'application/json' };
+    if (tok) hdrs['Authorization'] = 'Bearer ' + tok;
+    const apiRoot = PROJECTS_API.replace(/\/projects$/, '');
+    try { await fetch(apiRoot + '/deploy', { method: 'POST', headers: hdrs, body: JSON.stringify({ project_id: id, action: 'unpublish' }) }); } catch (e) {}
+    try { await fetch(PROJECTS_API, { method: 'POST', headers: hdrs, body: JSON.stringify({ action: 'delete', id: id }) }); } catch (e) {}
+
+    // data lokal proyek (chat, file workspace, penunjuk aktif)
+    try {
+        localStorage.removeItem('clincoo_ls_chat_' + id);
+        localStorage.removeItem('clincoo_workspace_files_' + id);
+        if (localStorage.getItem('clincoo_current_project_id') === id) localStorage.removeItem('clincoo_current_project_id');
+    } catch (e) {}
+
     let projects = getProjects();
     projects = projects.filter(p => p.id !== id);
-    saveProjects(projects);
-    
+    try { localStorage.setItem('clincoo_projects', JSON.stringify(projects)); } catch (e) {}
+
     try {
         fetch('https://clincoo-be2.pages.dev/api/activity', {
             method: 'POST',
@@ -173,7 +228,7 @@ function deleteProject(id) {
             body: JSON.stringify({ action: 'delete_project', details: 'Proyek dihapus' })
         }).catch(function(){});
     } catch(e) {}
-    
+
     renderProjects();
 }
 
