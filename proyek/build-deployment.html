@@ -309,7 +309,27 @@
         // ===================== DEPLOY ASLI (Cloudflare Pages) =====================
         const API = 'https://clincoo-be2.pages.dev/api'; // deploy engine (satu backend & satu D1 dgn auth/files)
         const pid = () => localStorage.getItem('clincoo_current_project_id') || '';
-        let deployState = { pages_url: '', pollTimer: null, domainTimer: null };
+        let deployState = { pages_url: '', pollTimer: null, domainTimer: null, deploying: false };
+
+        // ===================== SESI DEPLOY (klik deploy cukup sekali) =====================
+        // Sesi per proyek tersimpan di localStorage: halaman langsung membuka dashboard
+        // situs yang sudah dideploy tanpa harus menekan tombol Deploy lagi.
+        const DEPLOY_SESSION_KEY = 'clincoo_deploy_session';
+        function readDeploySession() {
+            try {
+                const ses = JSON.parse(localStorage.getItem(DEPLOY_SESSION_KEY) || 'null');
+                return (ses && ses.project_id && ses.project_id === pid()) ? ses : null;
+            } catch (e) { return null; }
+        }
+        function writeDeploySession(patch) {
+            try {
+                const cur = readDeploySession() || { project_id: pid() };
+                localStorage.setItem(DEPLOY_SESSION_KEY, JSON.stringify(Object.assign(cur, patch)));
+            } catch (e) {}
+        }
+        function clearDeploySession() {
+            try { localStorage.removeItem(DEPLOY_SESSION_KEY); } catch (e) {}
+        }
 
         async function apiFetch(path, opts = {}) {
             const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
@@ -360,6 +380,54 @@
                     return;
                 }
             } catch (e) {}
+            // Server tidak melaporkan deployment -> pakai sesi tersimpan (klik sekali)
+            const ses = readDeploySession();
+            if (!ses) return;
+            if (ses.status === 'done' && ses.pages_url) {
+                showDashboardFromSession(ses);
+            } else if (ses.status === 'deploying') {
+                // Klik deploy sebelumnya terputus (reload/tab ditutup): lanjut otomatis,
+                // tidak perlu menekan Deploy lagi. Aman: aset di-dedup per hash di Cloudflare.
+                switchView('view-dashboard');
+                startDeploySimulation();
+                processDeploy();
+            }
+        }
+
+        // Dashboard dari data sesi tersimpan (tanpa menunggu server)
+        function showDashboardFromSession(ses) {
+            switchView('view-dashboard');
+            const indicator = document.getElementById('live-indicator');
+            const shimmer = document.getElementById('link-shimmer');
+            const link = document.getElementById('deployed-link');
+            const timeLabel = document.getElementById('time-ago-label');
+            const visitBtn = document.getElementById('btn-visit-site');
+
+            deployState.pages_url = ses.pages_url;
+            indicator.className = 'w-2.5 h-2.5 rounded-full bg-green-500';
+            shimmer.style.display = 'none';
+            link.style.display = 'inline-block';
+            link.textContent = ses.pages_url;
+            link.href = ses.pages_url;
+            timeLabel.innerText = timeAgo(ses.done_at || ses.started_at || Date.now());
+            visitBtn.disabled = false;
+            visitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            visitBtn.onclick = () => window.open(ses.pages_url, '_blank');
+
+            // Segarkan data asli dari server bila tersedia (tidak menimpa sesi bila gagal)
+            fetchStatus().then(st => {
+                if (!st) return;
+                const dep = st.last_deployment;
+                if (dep && ['success', 'active'].includes(dep.status)) {
+                    const url = dep.url || ses.pages_url;
+                    deployState.pages_url = url;
+                    link.textContent = url;
+                    link.href = url;
+                    visitBtn.onclick = () => window.open(url, '_blank');
+                    if (dep.created) timeLabel.innerText = timeAgoIso(dep.created);
+                }
+                renderRealDomains(st.domains || []);
+            }).catch(() => {});
         }
         
         function startDeploySimulation() {
@@ -393,6 +461,7 @@
                     shimmer.style.display = 'none';
                     link.style.display = 'inline-block';
                     deployState.pages_url = st.pages_url || (ok ? dep.url : '');
+                    if (ok) writeDeploySession({ status: 'done', pages_url: deployState.pages_url, done_at: Date.now() });
                     link.textContent = deployState.pages_url || 'gagal dideploy';
                     link.href = deployState.pages_url || '#';
                     timeLabel.innerText = ok ? timeAgoIso(dep.created) : 'deploy gagal';
@@ -467,11 +536,16 @@
         async function processDeploy() {
             const btn = document.getElementById('btn-process-deploy');
             if (!pid()) { alert('Proyek belum dipilih.'); return; }
+            if (deployState.deploying) return; // klik hanya sekali per sesi
+            deployState.deploying = true;
+            writeDeploySession({ status: 'deploying', started_at: Date.now() });
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Mengunggah file workspace...</span>`;
             btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
             lucide.createIcons();
             try {
-                await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid() }) });
+                const res = await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid() }) });
+                deployState.deploying = false;
+                writeDeploySession({ status: 'done', pages_url: (res && res.pages_url) || deployState.pages_url || '', done_at: Date.now() });
                 btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span class="inline-block">Berhasil Deploy!</span>`;
                 lucide.createIcons();
                 switchView('view-dashboard');
@@ -482,6 +556,8 @@
                     btn.disabled = false;
                 }, 1000);
             } catch (err) {
+                deployState.deploying = false;
+                writeDeploySession({ status: 'failed' });
                 alert('Deploy gagal: ' + err.message);
                 btn.innerHTML = `Jalankan Deploy`;
                 btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
@@ -495,6 +571,7 @@
                 await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'unpublish' }) });
                 localStorage.removeItem('clincoo_is_deployed');
                 localStorage.removeItem('clincoo_deploy_time');
+                clearDeploySession();
                 switchView('view-cta');
             } catch (err) { alert('Gagal: ' + err.message); }
         }
