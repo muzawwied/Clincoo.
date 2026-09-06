@@ -83,7 +83,8 @@ export async function sendEmail(env, opts) {
         sender: { name: senderName, email: senderEmail },
         to: [{ email: opts.toEmail, name: opts.toName || '' }],
         subject: opts.subject,
-        htmlContent: opts.html
+        htmlContent: opts.html,
+        ...(Array.isArray(opts.attachment) && opts.attachment.length ? { attachment: opts.attachment } : {})
       })
     });
     return { sent: res.ok, via: 'brevo', reason: res.ok ? null : ('HTTP ' + res.status) };

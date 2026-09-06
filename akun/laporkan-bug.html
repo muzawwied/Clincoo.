@@ -221,6 +221,8 @@
     </main>
 
     <script>
+        const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '';
+
         try { lucide.createIcons(); } catch (e) {}
 
         let uploadedFiles = [];
@@ -372,46 +374,93 @@
             window.location.reload();
         }
 
-        function saveChanges() {
+        // Kompres gambar di sisi klien sebelum dikirim (maks 1280px, JPEG 72%)
+        function compressImage(file) {
+            return new Promise(function(resolve) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onload = function() {
+                        try {
+                            var maxDim = 1280;
+                            var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+                            var canvas = document.createElement('canvas');
+                            canvas.width = Math.round(img.width * scale);
+                            canvas.height = Math.round(img.height * scale);
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            resolve(canvas.toDataURL('image/jpeg', 0.72));
+                        } catch (err) { resolve(e.target.result); }
+                    };
+                    img.onerror = function() { resolve(null); };
+                    img.src = e.target.result;
+                };
+                reader.onerror = function() { resolve(null); };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function saveChanges() {
             const btn = document.querySelector('#action-buttons button.bg-black');
             if (!btn) return;
-            
+
             btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Mengirim...';
             try { lucide.createIcons(); } catch (e) {}
-            
             btn.disabled = true;
             btn.classList.add('opacity-80', 'cursor-not-allowed');
-            
-            setTimeout(() => {
+
+            try {
+                const attachments = [];
+                for (let i = 0; i < uploadedFiles.length && i < 3; i++) {
+                    const c = await compressImage(uploadedFiles[i].file);
+                    if (c) attachments.push(c);
+                }
+
+                const res = await fetch(API_BASE + '/api/bug-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category: document.getElementById('category-input').value,
+                        category_label: document.getElementById('category-text').innerText.trim(),
+                        description: document.getElementById('description-input').value.trim(),
+                        page_url: document.referrer || location.href,
+                        user_agent: navigator.userAgent,
+                        attachments: attachments
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.ok) throw new Error(data.error || ('HTTP ' + res.status));
+
                 const formView = document.getElementById('form-view');
                 const successView = document.getElementById('success-view');
                 const header = document.getElementById('main-header');
 
-                if(header) {
+                if (header) {
                     header.classList.add('-translate-y-full', 'opacity-0');
                 }
-
-                if(formView) formView.classList.add('opacity-0', 'scale-95');
+                if (formView) formView.classList.add('opacity-0', 'scale-95');
 
                 setTimeout(() => {
-                    if(formView) formView.classList.add('hidden');
-                    
-                    if(successView) {
+                    if (formView) formView.classList.add('hidden');
+
+                    if (successView) {
                         successView.scrollTop = 0;
                         successView.classList.remove('hidden');
                         successView.classList.add('flex');
                         void successView.offsetWidth;
-                        // Hapus scale effect pada tampilan surat digital, hanya opacity
                         successView.classList.remove('opacity-0');
                         successView.classList.add('opacity-100');
                         try { lucide.createIcons(); } catch (e) {}
                     }
-                    
-                    // Fitur kembali otomatis DIHAPUS. 
+                    // Fitur kembali otomatis DIHAPUS.
                     // Pengguna harus menekan tombol "Kembali" secara manual.
-
                 }, 300);
-            }, 1000);
+            } catch (err) {
+                btn.innerHTML = '<i data-lucide="send" class="w-4 h-4 mr-2"></i> Kirim Laporan';
+                lucide.createIcons();
+                btn.disabled = false;
+                btn.classList.remove('opacity-80', 'cursor-not-allowed');
+                alert('Gagal mengirim laporan: ' + (err && err.message ? err.message : 'kesalahan jaringan') + '. Silakan coba lagi.');
+            }
         }
 
         function goBackManually() {
