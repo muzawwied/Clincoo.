@@ -62,6 +62,25 @@
 
         .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .shimmer-bar {
+        display: inline-block;
+        height: 1em;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+        width: 60px;
+        vertical-align: middle;
+    }
+    .shimmer-bar-sm { height: 0.75em; width: 40px; }
+    .shimmer-bar-md { height: 0.875em; width: 120px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    body.dark-mode .shimmer-bar {
+        background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+        background-size: 200% 100%;
+    }
+    body.dark-mode .skel-dot { background-color: #141414 !important; border-color: #222222 !important; }
     </style>
     <script src="/js/path-router.js"></script>
 </head>
@@ -81,7 +100,8 @@
                 <span class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Saldo Clincoo</span>
                 <div class="py-1 flex flex-col items-center w-full">
                     <div class="flex items-center justify-center gap-4">
-                        <span class="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 font-['Space_Grotesk']" id="display-balance">0</span>
+                        <span id="balance-skeleton" class="shimmer-bar" style="height:2.5rem; width:170px;"></span>
+                        <span class="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 font-['Space_Grotesk'] hidden" id="display-balance">0</span>
                         <button onclick="openTopUpPage()" title="Isi Saldo" class="p-2 rounded-full text-gray-900 hover:text-gray-600 transition-all focus:outline-none shrink-0 flex items-center justify-center">
                             <i data-lucide="plus" class="w-8 h-8"></i>
                         </button>
@@ -350,10 +370,36 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try { lucide.createIcons(); } catch (e) {}
+            showWalletSkeleton();
             await initWalletFromD1();
             renderBalance();
             renderTransactions();
         });
+
+        function showWalletSkeleton() {
+            const list = document.getElementById('transaction-list');
+            list.innerHTML = '';
+            const skel = document.createElement('div');
+            skel.id = 'wallet-skeleton';
+            for (let i = 0; i < 6; i++) {
+                skel.innerHTML += `
+                  <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+                    <div class="flex items-center gap-3">
+                      <div class="skel-dot w-10 h-10 rounded-full bg-gray-50 border border-gray-100 shrink-0"></div>
+                      <div class="space-y-2">
+                        <span class="shimmer-bar shimmer-bar-md"></span>
+                        <span class="shimmer-bar shimmer-bar-sm" style="width:150px;"></span>
+                      </div>
+                    </div>
+                    <span class="shimmer-bar shimmer-bar-sm shrink-0"></span>
+                  </div>`;
+            }
+            list.appendChild(skel);
+        }
+        function clearWalletSkeleton() {
+            const skel = document.getElementById('wallet-skeleton');
+            if (skel) skel.remove();
+        }
 
         async function initWalletFromD1() {
             try {
@@ -387,7 +433,11 @@
                 const res = await fetch(WALLET_API_URL).then(r => r.json());
                 currentBalance = res.balance || 0;
             } catch(e) {}
-            document.getElementById('display-balance').textContent = formatNumberOnly(currentBalance);
+            const balSkeleton = document.getElementById('balance-skeleton');
+            if (balSkeleton) balSkeleton.remove();
+            const balEl = document.getElementById('display-balance');
+            balEl.classList.remove('hidden');
+            balEl.textContent = formatNumberOnly(currentBalance);
         }
 
         async function getTransactions() {
@@ -401,6 +451,7 @@
             const container = document.getElementById('transaction-list');
             const emptyState = document.getElementById('empty-history');
             const allTxs = await getTransactions();
+            clearWalletSkeleton();
             if (allTxs.length === 0) {
                 container.innerHTML = '';
                 emptyState.classList.remove('hidden');
