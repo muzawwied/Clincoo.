@@ -428,22 +428,6 @@
         </button>
       </div>
       <div id="modal-standard-body" class="p-6">
-        <div id="input-modal-type-container" class="mb-4 hidden">
-          <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipe File</label>
-          <select id="modal-file-type" onchange="handleModalFileTypeChange(event)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#273849] focus:border-transparent transition-all cursor-pointer">
-              <option value="">Otomatis dari ekstensi...</option>
-              <option value="html">HTML</option>
-              <option value="css">CSS</option>
-              <option value="js">JavaScript</option>
-              <option value="py">Python</option>
-              <option value="json">JSON</option>
-              <option value="txt">Teks</option>
-              <option value="md">Markdown</option>
-              <option value="xml">XML</option>
-              <option value="sql">SQL</option>
-              <option value="sh">Shell</option>
-          </select>
-        </div>
         <div>
           <label id="input-modal-label" class="block text-sm font-medium text-gray-700 mb-1.5">Nama File</label>
           <input type="text" id="modal-input-name" onkeydown="handleModalInputKeydown(event)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#273849] focus:border-transparent transition-all" placeholder="Misal: index.html" autocomplete="off">
@@ -487,8 +471,11 @@
             <p id="input-modal-github-error" class="text-xs text-red-500 mt-2 hidden">Gagal memuat repository.</p>
           </div>
       </div>     
-        
+
+      <div id="modal-footer" class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2">
+        <button type="button" onclick="closeInputModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors focus:outline-none">Batal</button>
         <button id="modal-btn-submit" onclick="submitInputModal()" class="px-4 py-2 text-sm font-medium text-white bg-[#273849] rounded-xl hover:bg-[#1a2530] shadow-sm transition-colors focus:outline-none">Simpan</button>
+      </div>
       </div>
     </div>
   </div>
@@ -1104,8 +1091,6 @@
       const title = document.getElementById('input-modal-title');
       const label = document.getElementById('input-modal-label');
       const input = document.getElementById('modal-input-name');
-      const typeContainer = document.getElementById('input-modal-type-container');
-      const typeSelect = document.getElementById('modal-file-type');
       const errorEl = document.getElementById('input-modal-error');
       const githubErrorEl = document.getElementById('input-modal-github-error');
       
@@ -1121,6 +1106,7 @@
         title.textContent = 'Import dari GitHub';
         standardBody.classList.add('hidden');
         githubBody.classList.remove('hidden');
+        document.getElementById('modal-footer').classList.add('hidden');
         
         if (!isGithubConnected) {
           // Cek token GitHub dari sesi login Clincoo dulu — biar tidak perlu auth lagi
@@ -1140,18 +1126,17 @@
         btnSubmit.classList.remove('hidden');
         btnSubmit.textContent = 'Simpan';
         
+        const footer = document.getElementById('modal-footer');
         if (type === 'folder') {
           title.textContent = 'Buat Folder Baru';
           label.textContent = 'Nama Folder';
           input.placeholder = 'Misal: assets';
-          typeContainer.classList.add('hidden');
         } else {
           title.textContent = 'Buat File Baru';
           label.textContent = 'Nama File';
           input.placeholder = 'Misal: index.html';
-          typeContainer.classList.remove('hidden');
-          typeSelect.value = '';
         }
+        footer.classList.remove('hidden');
       }
       
       showInputModal();
@@ -1162,6 +1147,7 @@
       const stepLoading = document.getElementById('github-step-loading');
       const stepImport = document.getElementById('github-step-import');
       const btnSubmit = document.getElementById('modal-btn-submit');
+      const footer = document.getElementById('modal-footer');
       
       stepLoading.classList.add('hidden');
       stepLoading.classList.remove('flex');
@@ -1172,12 +1158,14 @@
         stepImport.classList.add('hidden');
         stepImport.classList.remove('flex');
         btnSubmit.classList.add('hidden');
+        footer.classList.add('hidden');
       } else {
         stepConnect.classList.add('hidden');
         stepConnect.classList.remove('flex');
         stepImport.classList.remove('hidden');
         stepImport.classList.add('flex');
         btnSubmit.classList.add('hidden');
+        footer.classList.add('hidden');
 
         try {
           const savedUser = JSON.parse(localStorage.getItem(GITHUB_USER_KEY) || 'null');
@@ -1418,7 +1406,6 @@
       const title = document.getElementById('input-modal-title');
       const label = document.getElementById('input-modal-label');
       const input = document.getElementById('modal-input-name');
-      const typeContainer = document.getElementById('input-modal-type-container');
       const errorEl = document.getElementById('input-modal-error');
       
       const standardBody = document.getElementById('modal-standard-body');
@@ -1434,7 +1421,7 @@
       title.textContent = 'Ganti Nama';
       label.textContent = 'Nama Baru';
       input.value = itemBeingRenamed;
-      typeContainer.classList.add('hidden');
+      document.getElementById('modal-footer').classList.remove('hidden');
       
       showInputModal();
     }
@@ -1479,14 +1466,6 @@
       }, 300);
     }
 
-    function handleModalFileTypeChange(e) {
-      const input = document.getElementById('modal-input-name');
-      const ext = e.target.value;
-      const baseName = input.value.replace(/\.[^.]+$/, '');
-      input.value = baseName;
-      input.placeholder = ext ? 'Nama file (akan jadi .' + ext + ')' : 'Nama file (tanpa ekstensi)';
-    }
-
     function handleModalInputKeydown(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -1513,21 +1492,7 @@
       const items = projectFilesData[currentFolderPath] || [];
 
       if (modalAction === 'create_file' || modalAction === 'create_folder') {
-          let finalName = name;
-          
-          if (modalAction === 'create_file') {
-            const typeSelect = document.getElementById('modal-file-type');
-            const selectedType = typeSelect ? typeSelect.value : '';
-            if (selectedType) {
-              let baseName = finalName;
-              if(finalName.includes('.')) {
-                 baseName = finalName.substring(0, finalName.lastIndexOf('.'));
-              }
-              finalName = baseName + '.' + selectedType;
-            } else if (!finalName.includes('.')) {
-              finalName = finalName + '.txt';
-            }
-          }
+          const finalName = name; // nama murni manual sesuai ketikan user
           
           const exists = items.some(item => item.name.toLowerCase() === finalName.toLowerCase());
           if (exists) {
