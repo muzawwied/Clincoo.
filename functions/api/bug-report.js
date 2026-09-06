@@ -92,7 +92,7 @@ export async function onRequestPost({ request, env }) {
     const reportId = info.meta ? info.meta.last_row_id : null;
 
     // 2. Email ke pemilik via Brevo (+ lampiran)
-    const ownerEmail = (await getSecret(env, 'BUG_REPORT_EMAIL')) || 'muzawwied@gmail.com';
+    const ownerEmail = (await getSecret(env, 'BUG_REPORT_EMAIL')) || 'devconium@gmail.com';
     const details = [
       ['Kategori', esc(categoryLabel)],
       ['Pelapor', esc((user.name || '-') + ' <' + (user.email || '-') + '>')],
