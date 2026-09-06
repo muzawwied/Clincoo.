@@ -93,6 +93,25 @@
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-6">Kelola anggota tim dan atur hak akses di setiap proyek Anda.</p>
 
+      <div class="grid grid-cols-4 gap-2.5 mb-7">
+          <div class="rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] p-3.5">
+              <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-total-users">0</div>
+              <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Total Anggota</div>
+          </div>
+          <div class="rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] p-3.5">
+              <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-editors">0</div>
+              <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Editor</div>
+          </div>
+          <div class="rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] p-3.5">
+              <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-viewers">0</div>
+              <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Viewer</div>
+          </div>
+          <div class="rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222] p-3.5">
+              <div class="text-xl font-bold text-gray-900 dark:text-white" id="stat-updates-today">0</div>
+              <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Pembaruan Hari Ini</div>
+          </div>
+      </div>
+
       <div class="w-full flex flex-col" id="projects-root">
           <div class="flex flex-col gap-8">
               <div>
@@ -165,6 +184,7 @@
 
     var projects = [];          // daftar proyek real-time
     var collabCache = {};       // data anggota/undangan per project_id
+    var ACTIVITY_API = API_BASE + '/activity';
 
     function esc(s) {
         return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch) {
@@ -232,7 +252,7 @@
         }
         if (copied) {
             showToast('Tautan undangan tersalin');
-            loadCollabFor(projectId);
+            loadAll();
         } else {
             // 3) Upaya terakhir: tampilkan tautan agar bisa disalin manual
             window.prompt('Salin tautan undangan ini:', link);
@@ -252,7 +272,7 @@
             url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent('Bergabung ke proyek Clincoo.')}`;
         }
         if (url) window.open(url, '_blank');
-        loadCollabFor(projectId);
+        loadAll();
     }
 
     function inviteViaEmail(btn) {
@@ -427,45 +447,32 @@
         if (window.lucide) try { lucide.createIcons(); } catch (e) {}
     }
 
-    function loadCollabFor(projectId) {
+    // Satu request untuk SEMUA proyek: anggota + undangan (batch, cepat)
+    function loadAll() {
+        ['stat-total-users', 'stat-editors', 'stat-viewers'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && !/^[0-9]+$/.test(el.innerText)) el.innerHTML = '<span class="shimmer-bar shimmer-bar-sm" style="width:22px;"></span>';
+        });
         return fetch(COLLAB_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'list', project_id: projectId })
+            body: JSON.stringify({ action: 'list_all' })
         })
         .then(function(r) { return r.json(); })
         .then(function(res) {
-            if (res && res.success) {
-                collabCache[projectId] = { members: res.members || [], pending: res.pending || [] };
-                var p = projects.find(function(x) { return String(x.id) === String(projectId); });
-                if (p && res.project && res.project.title) p.title = res.project.title;
-                renderProjectCollab({ id: projectId, title: (p && p.title) || '' });
+            if (res && res.success && res.projects) {
+                projects = res.projects;
+                collabCache = {};
+                res.projects.forEach(function(p) { collabCache[p.id] = { members: p.members || [], pending: p.pending || [] }; });
+                renderProjects(projects);
+                projects.forEach(renderProjectCollab);
+                updateStats();
             } else {
-                collabCache[projectId] = { members: [], pending: [], error: true };
-                renderProjectCollab({ id: projectId, title: '' });
+                projects = [];
+                collabCache = {};
+                renderProjects([]);
+                updateStats();
             }
-        })
-        .catch(function() {
-            collabCache[projectId] = { members: [], pending: [], error: true };
-            renderProjectCollab({ id: projectId, title: '' });
-        });
-    }
-
-    function loadProjectsRealtime() {
-        return fetch(PROJECTS_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'list' })
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(res) {
-            var list = (res && res.projects) || [];
-            var prevIds = projects.map(function(p) { return String(p.id); });
-            projects = list;
-            var newIds = list.map(function(p) { return String(p.id); });
-            var changed = prevIds.length !== newIds.length || prevIds.some(function(id, i) { return id !== newIds[i]; });
-            if (changed) renderProjects(list);
-            list.forEach(function(p) { loadCollabFor(p.id); });
         })
         .catch(function() {
             var root = document.getElementById('projects-root');
@@ -482,9 +489,43 @@
         });
     }
 
+    // Statistik agregat semua proyek (real-time dari data yang sama)
+    function updateStats() {
+        var total = 0, editors = 0, viewers = 0;
+        projects.forEach(function(p) {
+            (collabCache[p.id] ? collabCache[p.id].members : []).forEach(function(m) {
+                total++;
+                if (m.role === 'Editor' || m.role === 'Admin') editors++;
+                else if (m.role === 'Viewer') viewers++;
+            });
+        });
+        var t = document.getElementById('stat-total-users'); if (t) t.innerText = total;
+        var e = document.getElementById('stat-editors'); if (e) e.innerText = editors;
+        var v = document.getElementById('stat-viewers'); if (v) v.innerText = viewers;
+    }
+
+    // Kartu "Pembaruan Hari Ini": jumlah aktivitas akun hari ini (zona WIB)
+    function loadUpdatesToday() {
+        var el = document.getElementById('stat-updates-today');
+        fetch(ACTIVITY_API + '?limit=100')
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            var acts = (res && res.activities) || [];
+            var nowWIB = Date.now() + 7 * 3600000;
+            var startWIB = new Date(nowWIB); startWIB.setHours(0, 0, 0, 0);
+            var thr = startWIB.getTime() - 7 * 3600000;
+            var count = acts.filter(function(a) {
+                var d = new Date(String(a.created_at || '').replace(' ', 'T') + 'Z');
+                return !isNaN(d.getTime()) && d.getTime() >= thr;
+            }).length;
+            if (el) el.innerText = count;
+        })
+        .catch(function() { if (el) el.innerText = 0; });
+    }
+
     function retryLoad() {
         document.getElementById('projects-root').innerHTML = '<div class="flex flex-col gap-8"><div><div class="flex items-center gap-3 mb-3"><span class="shimmer-bar shimmer-bar-md"></span></div><div class="member-item flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222]"><div class="flex items-center gap-3 min-w-0"><div class="skel-dot w-10 h-10 rounded-full bg-gray-200 dark:bg-[#222] shrink-0"></div><div class="space-y-2 min-w-0"><span class="shimmer-bar shimmer-bar-md"></span><span class="shimmer-bar shimmer-bar-sm" style="width:140px;"></span></div></div></div></div></div>';
-        loadProjectsRealtime();
+        loadAll();
     }
 
     /* ========================================================
@@ -549,7 +590,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'setRole', member_id: activePopoverId, role: role })
-                }).then(function() { if (pid) loadCollabFor(pid); }).catch(function() {});
+                }).then(function() { loadAll(); }).catch(function() {});
             }
         }
         closePopover();
@@ -621,7 +662,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'remove', member_id: removedId })
-                }).then(function() { if (pid) loadCollabFor(pid); }).catch(function() {});
+                }).then(function() { loadAll(); }).catch(function() {});
             }
         }
         closeConfirmModal();
@@ -651,10 +692,11 @@
        Init
        ========================================================== */
     (function() {
-        loadProjectsRealtime();
+        loadAll();
+        loadUpdatesToday();
         // Real-time: muat ulang data diam-diam tiap 30 detik (saat tab aktif)
         setInterval(function() {
-            if (document.visibilityState === 'visible') loadProjectsRealtime();
+            if (document.visibilityState === 'visible') { loadAll(); loadUpdatesToday(); }
         }, 30000);
         // Link lama ?invite= diredirect ke halaman undangan terpisah
         var params = new URLSearchParams(window.location.search);

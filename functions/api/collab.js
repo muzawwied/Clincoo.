@@ -182,6 +182,70 @@ export async function onRequestPost({ env, request }) {
     }
 
     /* ---------- invite: buat undangan (email / tautan / WA / TG) ---------- */
+    if (action === 'list_all') {
+      // SEMUA proyek milik user — anggota + undangan dalam SATU respons (batch, cepat)
+      const projs = await db.prepare('SELECT id, title FROM user_projects WHERE user_id = ? ORDER BY COALESCE(updated_at, created_at) DESC').bind(user.id).all();
+      const projList = projs.results || [];
+
+      const membersAll = await db.prepare(
+        "SELECT pm.* FROM project_members pm WHERE pm.project_id IN (SELECT id FROM user_projects WHERE user_id = ?) ORDER BY pm.joined_at ASC"
+      ).bind(user.id).all();
+      const pendingAll = await db.prepare(
+        "SELECT ci.id, ci.project_id, ci.invitee_email, ci.role, ci.channel, ci.created_at FROM collab_invites ci WHERE ci.status = 'pending' AND ci.project_id IN (SELECT id FROM user_projects WHERE user_id = ?) ORDER BY ci.created_at DESC"
+      ).bind(user.id).all();
+
+      // Profil anggota diambil SEKALI (bukan satu query per anggota)
+      const uidSet = new Set((membersAll.results || []).map(r => r.user_id));
+      const profileMap = {};
+      if (uidSet.size) {
+        const ids = Array.from(uidSet);
+        const ph = ids.map(() => '?').join(',');
+        const us = await db.prepare('SELECT id, name, email FROM auth_users WHERE id IN (' + ph + ')').bind(...ids).all();
+        for (const u of (us.results || [])) profileMap[u.id] = u;
+      }
+
+      const byProj = {};
+      for (const p of projList) byProj[p.id] = { id: p.id, title: p.title || 'Proyek Clincoo', members: [], pending: [] };
+      for (const r of (membersAll.results || [])) {
+        if (!byProj[r.project_id]) continue;
+        const u = profileMap[r.user_id];
+        byProj[r.project_id].members.push({
+          id: String(r.id),
+          user_id: r.user_id,
+          name: (u && u.name) || r.email || 'Anggota',
+          email: r.email || (u && u.email) || '',
+          role: r.role,
+          initials: initialsOf((u && u.name) || r.email)
+        });
+      }
+      for (const p of (pendingAll.results || [])) {
+        if (!byProj[p.project_id]) continue;
+        byProj[p.project_id].pending.push({
+          invite_id: p.id,
+          email: p.invitee_email,
+          role: p.role,
+          channel: p.channel,
+          created_date: p.created_at
+        });
+      }
+      const me = await getUserById(db, user.id);
+      const ownerCard = {
+        id: 'owner_' + user.id,
+        user_id: user.id,
+        name: (me && me.name) || 'Pemilik proyek',
+        email: (me && me.email) || '',
+        role: 'Owner',
+        initials: initialsOf((me && me.name) || (me && me.email))
+      };
+      const projects = projList.map(p => ({
+        id: byProj[p.id].id,
+        title: byProj[p.id].title,
+        members: [ownerCard].concat(byProj[p.id].members),
+        pending: byProj[p.id].pending
+      }));
+      return j({ success: true, projects: projects });
+    }
+
     if (action === 'invite') {
       const proj = await getProject(db, projectId);
       if (!proj) return j({ error: 'Proyek tidak ditemukan' }, 404);
