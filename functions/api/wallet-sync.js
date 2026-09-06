@@ -72,7 +72,13 @@ async function walletSnapshot(db, user) {
     const res = await db.prepare('SELECT * FROM wallet_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 100').bind(uid).all();
     txs = res.results || [];
   }
-  return { balance: parseFloat(balRow?.value || '0'), transactions: txs };
+  // Notifikasi Clincoo pemilik akun (terbaru 20)
+  let notifs = [];
+  try {
+    const nres = await db.prepare('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT 20').bind(user.id).all();
+    notifs = (nres.results || []).map(n => ({ id: n.id, source: n.source, message: n.message, type: n.type || 'info', read: n.read || 0, created_at: n.created_at }));
+  } catch (e) {}
+  return { balance: parseFloat(balRow?.value || '0'), transactions: txs, notifications: notifs };
 }
 
 // Dorong data dompet Clincoo ke web wallet eksternal (arah Clincoo -> wallet).
@@ -195,6 +201,15 @@ export async function onRequestPost({ request, env }) {
       if (!/^https:\/\//.test(u)) return j({ error: 'URL harus diawali https://' }, 400);
       await setPref(db, p + 'wallet_sync_url', u);
       return j({ success: true, target_url: u });
+    }
+    // Web wallet menandai notifikasi Clincoo sudah dibaca (berbasis api_key pemilik)
+    if (body.action === 'external_read') {
+      const owner = await findOwnerByApiKey(db, body.api_key);
+      if (!owner) return j({ error: 'API key tidak valid' }, 401);
+      const nid = parseInt(body.id, 10);
+      if (!nid) return j({ error: 'id notifikasi tidak valid' }, 400);
+      await db.prepare('UPDATE notifications SET read = 1 WHERE id = ? AND user_id = ?').bind(nid, owner.id).run();
+      return j({ success: true });
     }
     if (body.action === 'reset_key') {
       await setPref(db, p + 'wallet_sync_key', newApiKey());
