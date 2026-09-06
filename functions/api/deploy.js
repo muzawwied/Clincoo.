@@ -91,17 +91,32 @@ async function resolvePagesName(db, table, projectId) {
   return ('cno-be2' + slug).slice(0, 60);
 }
 
-async function ensurePagesProject(creds, name) {
+// Lihat project Pages tanpa membuat baru (8000007 = belum ada).
+async function lookupProject(creds, name) {
   try {
     return await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name, creds.apiKey);
   } catch (e) {
-    if (e.code === 8000007) {
-      return await cfFetch('/accounts/' + creds.accountId + '/pages/projects', creds.apiKey, {
-        method: 'POST', body: JSON.stringify({ name, production_branch: 'main' })
-      });
-    }
+    if (e.code === 8000007) return null;
     throw e;
   }
+}
+
+// Pastikan project ada; jika baru dibuat, TUNGGU sampai terpropagasi di semua
+// layanan Cloudflare (upload-token dll. bisa balas "Project not found" sesaat
+// setelah create — race condition nyata yang pernah membuat deploy gagal).
+async function ensurePagesProject(creds, name) {
+  let project = await lookupProject(creds, name);
+  if (!project) {
+    project = await cfFetch('/accounts/' + creds.accountId + '/pages/projects', creds.apiKey, {
+      method: 'POST', body: JSON.stringify({ name, production_branch: 'main' })
+    });
+    for (let i = 0; i < 12; i++) { // tunggu propagasi maks ~36 detik
+      await new Promise(r => setTimeout(r, 3000));
+      const check = await lookupProject(creds, name);
+      if (check) { project = check; break; }
+    }
+  }
+  return project;
 }
 
 async function readFiles(db, table, projectId) {
@@ -129,7 +144,7 @@ export async function onRequestGet({ request, env }) {
     const pagesUrl = 'https://' + name + '.pages.dev';
 
     let project = null;
-    try { project = await ensurePagesProject(creds, name); } catch (e) { project = null; }
+    try { project = await lookupProject(creds, name); } catch (e) { project = null; }
 
     let last = null;
     let domains = [];
@@ -179,6 +194,12 @@ export async function onRequestPost({ request, env }) {
     const pagesUrl = 'https://' + name + '.pages.dev';
 
     if (body.action === 'unpublish') {
+      const existing = await lookupProject(creds, name);
+      if (!existing) {
+        await db.prepare(`INSERT INTO ${T.deployLogs} (project_id, status, url, message, created_at) VALUES (?, 'unpublished', '', ?, datetime('now'))`)
+          .bind(projectId, 'tidak ada situs aktif').run();
+        return json({ success: true, unpublished: name, note: 'Situs belum pernah dideploy — tidak ada yang perlu ditarik.' });
+      }
       try {
         await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name, creds.apiKey, { method: 'DELETE' });
       } catch (e) {

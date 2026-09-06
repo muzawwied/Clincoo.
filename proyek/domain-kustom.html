@@ -315,7 +315,9 @@
     async function loadDomainSettings() {
         try {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
-            const res = await fetch('https://clincoo-be2.pages.dev/api/project-settings?project_id=' + encodeURIComponent(pid));
+            const _tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+            const res = await fetch('https://clincoo-be2.pages.dev/api/project-settings?project_id=' + encodeURIComponent(pid),
+                { headers: _tok ? { Authorization: 'Bearer ' + _tok } : {} });
             const data = await res.json();
             const settings = data.domain_settings ? JSON.parse(data.domain_settings) : {};
             const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
@@ -358,9 +360,10 @@
         };
         try {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
+            const _tok2 = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
             await fetch('https://clincoo-be2.pages.dev/api/project-settings', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...(_tok2 ? { Authorization: 'Bearer ' + _tok2 } : {}) },
                 body: JSON.stringify({ project_id: pid, domain_settings: JSON.stringify(settings) })
             });
             await ClincooAPI.logActivity('domain_updated', 'Domain: ' + settings.domain);
