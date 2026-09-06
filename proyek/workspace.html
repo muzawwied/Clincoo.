@@ -704,6 +704,13 @@
     // ===== Sinkronisasi workspace ke Cloudflare D1 (data per-proyek) =====
     const WS_CLOUD_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
 
+    // Token login wajib untuk sinkronisasi D1 (guardProject menolak tanpa auth)
+    function wsAuthHeaders() {
+      var t = '';
+      try { t = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; } catch (e) {}
+      return t ? { Authorization: 'Bearer ' + t } : {};
+    }
+
     function wsProjectId() {
       try { return localStorage.getItem('clincoo_current_project_id') || ''; } catch (e) { return ''; }
     }
@@ -770,7 +777,7 @@
     function wsCloudPull() {
       const pid = wsProjectId();
       if (!pid || wsCloudTimer) return; // jangan menimpa saat ada push tertunda
-      fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid))
+      fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { headers: wsAuthHeaders() })
         .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
         .then(function(d) {
           const files = (d && d.files) || [];
@@ -786,8 +793,8 @@
             // D1 belum berisi untuk proyek ini: migrasikan data lokal ke cloud
             const localRaw = localStorage.getItem(wsFilesKey());
             if (localRaw && localRaw !== JSON.stringify({ 'root': [] })) {
-              fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { method: 'DELETE' }).catch(function() {});
-              fetch(WS_CLOUD_API, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+              fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { method: 'DELETE', headers: wsAuthHeaders() }).catch(function() {});
+              fetch(WS_CLOUD_API, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, wsAuthHeaders()),
                 body: JSON.stringify({ project_id: pid, files: wsFlatten(projectFilesData) }) }).catch(function() {});
             }
           }
@@ -804,8 +811,8 @@
       wsCloudTimer = setTimeout(function() {
         wsCloudTimer = null;
         const payload = { project_id: pid, files: wsFlatten(projectFilesData) };
-        fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { method: 'DELETE' })
-          .then(function() { return fetch(WS_CLOUD_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); })
+        fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { method: 'DELETE', headers: wsAuthHeaders() })
+          .then(function(r) { return r.ok ? fetch(WS_CLOUD_API, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, wsAuthHeaders()), body: JSON.stringify(payload) }) : Promise.reject(); })
           .catch(function() {});
       }, 3000);
     }
