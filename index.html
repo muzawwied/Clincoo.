@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
   <script src="js/auth-client.js"></script>
+  <script src="js/templates-data.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -335,9 +336,7 @@
             <div class="flex flex-col gap-5 w-full">
                 <div class="w-full border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex flex-col gap-4 relative">
                     <div class="w-full aspect-video sm:h-60 bg-[#F9FAFB] rounded-xl border border-gray-100 group-hover:border-gray-200 transition-colors flex flex-col items-center justify-center p-4 gap-2">
-                        <div class="w-16 h-2 bg-gray-200 rounded-full"></div>
-                        <div class="w-24 h-2 bg-gray-200 rounded-full"></div>
-                        <div class="w-12 h-2 bg-gray-200 rounded-full"></div>
+                        <img src="assets/templates/portfolio.png" alt="Pratinjau Portfolio Profesional" class="w-full h-full object-cover rounded-lg group-hover:scale-[1.02] transition-transform duration-300">
                     </div>
                     <div class="flex justify-between items-end gap-3 w-full">
                         <div class="flex flex-col flex-1 overflow-hidden">
@@ -360,12 +359,7 @@
                 </div>
                 <div class="w-full border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex flex-col gap-4 relative">
                     <div class="w-full aspect-video sm:h-60 bg-[#F9FAFB] rounded-xl border border-gray-100 group-hover:border-gray-200 transition-colors flex items-center justify-center p-4">
-                        <div class="grid grid-cols-2 gap-2 w-1/2">
-                            <div class="h-6 bg-gray-200 rounded"></div>
-                            <div class="h-6 bg-gray-200 rounded"></div>
-                            <div class="h-6 bg-gray-200 rounded"></div>
-                            <div class="h-6 bg-gray-200 rounded"></div>
-                        </div>
+                        <img src="assets/templates/dashboard.png" alt="Pratinjau Dashboard Admin" class="w-full h-full object-cover rounded-lg group-hover:scale-[1.02] transition-transform duration-300">
                     </div>
                     <div class="flex justify-between items-end gap-3 w-full">
                         <div class="flex flex-col flex-1 overflow-hidden">
@@ -388,9 +382,7 @@
                 </div>
                 <div class="w-full border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex flex-col gap-4 relative">
                     <div class="w-full aspect-video sm:h-60 bg-[#F9FAFB] rounded-xl border border-gray-100 group-hover:border-gray-200 transition-colors flex flex-col items-center justify-between p-6">
-                         <div class="w-full h-2 bg-gray-200 rounded-full"></div>
-                         <div class="w-16 h-8 bg-gray-200 rounded"></div>
-                         <div class="w-full h-2 bg-gray-200 rounded-full"></div>
+                        <img src="assets/templates/landing.png" alt="Pratinjau Landing Page Bisnis" class="w-full h-full object-cover rounded-lg group-hover:scale-[1.02] transition-transform duration-300">
                     </div>
                     <div class="flex justify-between items-end gap-3 w-full">
                         <div class="flex flex-col flex-1 overflow-hidden">
@@ -946,107 +938,6 @@
                 window.scrollTo(0, 0);
             }
         }
-        // ===== FITUR TEMPLATE: aktifasi tombol menu kartu template =====
-        const TEMPLATES = {
-            portfolio: { name: 'Portfolio Profesional', desc: 'Desain minimalis dan elegan untuk menampilkan karya, resume, dan informasi kontak Anda agar lebih menonjol.', prompt: 'Buatkan website Portfolio Profesional dengan desain minimalis dan elegan. Sertakan bagian perkenalan singkat, galeri karya, resume dan pengalaman, serta informasi kontak. Gunakan tipografi modern, warna netral, dan animasi halus.' },
-            dashboard: { name: 'Dashboard Admin', desc: 'Template analitik lengkap dengan tata letak grid, grafik interaktif, dan sidebar navigasi yang responsif.', prompt: 'Buatkan Dashboard Admin interaktif dengan tata letak grid, kartu statistik ringkasan, grafik data interaktif, tabel data, dan navigasi sidebar yang responsif.' },
-            landing: { name: 'Landing Page Bisnis', desc: 'Halaman konversi tinggi dengan struktur untuk hero section, fitur unggulan, dan tabel pricing yang rapi.', prompt: 'Rancang Landing Page Bisnis dengan tujuan konversi tinggi. Sertakan hero section yang menarik, penjelasan fitur unggulan, testimoni, tabel harga yang elegan, dan call-to-action di akhir halaman.' }
-        };
-        function closeAllOptionPopups() {
-            document.querySelectorAll('.option-popup').forEach(function(popup) {
-                popup.classList.remove('opacity-100', 'visible', 'translate-y-0');
-                popup.classList.add('opacity-0', 'invisible', 'translate-y-2');
-            });
-        }
-        function useTemplate(key, event) {
-            if (event) { event.preventDefault(); event.stopPropagation(); }
-            closeAllOptionPopups();
-            const t = TEMPLATES[key];
-            if (!t) return;
-            if (mainPromptInput) mainPromptInput.value = t.prompt;
-            processPromptSubmission(t.name);
-        }
-        function previewTemplate(key, event) {
-            if (event) { event.preventDefault(); event.stopPropagation(); }
-            closeAllOptionPopups();
-            const t = TEMPLATES[key];
-            if (!t) return;
-            const card = event ? event.target.closest('.group') : null;
-            let mock = null;
-            if (card) {
-                const mockSrc = card.querySelector('.aspect-video');
-                if (mockSrc) mock = mockSrc.cloneNode(true);
-            }
-            let modal = document.getElementById('template-preview-modal');
-            if (modal) modal.remove();
-            modal = document.createElement('div');
-            modal.id = 'template-preview-modal';
-            modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
-            modal.style.background = 'rgba(0,0,0,0.45)';
-            modal.innerHTML = `
-                <div class="w-full max-w-lg bg-white border border-gray-100 rounded-2xl shadow-xl p-4 flex flex-col gap-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="font-semibold text-gray-900 text-base">${t.name}</h3>
-                        <button class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onclick="document.getElementById('template-preview-modal').remove()" aria-label="Tutup">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>
-                    <div class="template-preview-slot w-full"></div>
-                    <p class="text-sm text-gray-500 leading-relaxed">${t.desc}</p>
-                </div>`;
-            document.body.appendChild(modal);
-            if (mock) modal.querySelector('.template-preview-slot').appendChild(mock);
-            modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
-        }
-        function favoriteTemplate(key, event) {
-            if (event) { event.preventDefault(); event.stopPropagation(); }
-            closeAllOptionPopups();
-            const t = TEMPLATES[key];
-            if (!t) return;
-            try {
-                let favs = JSON.parse(localStorage.getItem('clincoo_template_favorites') || '[]');
-                if (favs.indexOf(key) === -1) {
-                    favs.push(key);
-                    localStorage.setItem('clincoo_template_favorites', JSON.stringify(favs));
-                    showToast('Template "' + t.name + '" disimpan ke favorit.');
-                } else {
-                    showToast('Template ini sudah ada di favorit.');
-                }
-            } catch(e) {}
-        }
-        function reportTemplate(key, event) {
-            if (event) { event.preventDefault(); event.stopPropagation(); }
-            closeAllOptionPopups();
-            const t = TEMPLATES[key];
-            if (!t) return;
-            try {
-                let reports = JSON.parse(localStorage.getItem('clincoo_template_reports') || '[]');
-                if (reports.indexOf(key) === -1) {
-                    reports.push(key);
-                    localStorage.setItem('clincoo_template_reports', JSON.stringify(reports));
-                }
-            } catch(e) {}
-            showToast('Terima kasih, laporanmu sudah kami terima.');
-        }
-        let __toastTimer = null;
-        function showToast(message) {
-            let toast = document.getElementById('clincoo-toast');
-            if (!toast) {
-                toast = document.createElement('div');
-                toast.id = 'clincoo-toast';
-                toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 rounded-full bg-gray-900 text-white text-sm font-medium shadow-lg transition-all duration-300 opacity-0 translate-y-2';
-                document.body.appendChild(toast);
-            }
-            toast.textContent = message;
-            requestAnimationFrame(function() {
-                toast.classList.remove('opacity-0', 'translate-y-2');
-            });
-            clearTimeout(__toastTimer);
-            __toastTimer = setTimeout(function() {
-                toast.classList.add('opacity-0', 'translate-y-2');
-            }, 2600);
-        }
-        // ===== akhir fitur template =====
         const submitPromptBtn = document.getElementById('submit-prompt-btn');
         const mainPromptInput = document.getElementById('main-prompt-input');
         function processPromptSubmission(customTitle) {
