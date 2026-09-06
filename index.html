@@ -1084,7 +1084,25 @@
                 }
             }
         }
+        var _pendingDeleteId = null;
         function deleteProject(id) {
+            let projects = [];
+            try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
+            const proj = projects.find(p => p.id === id);
+            const modal = document.getElementById('confirm-delete-modal');
+            const nameEl = document.getElementById('confirm-delete-name');
+            if (!modal) return; // popup tidak ada: jangan hapus tanpa konfirmasi
+            _pendingDeleteId = id;
+            if (nameEl) nameEl.textContent = (proj && proj.title) ? '"' + proj.title + '"' : 'Proyek ini';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        function closeDeleteModal() {
+            const modal = document.getElementById('confirm-delete-modal');
+            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+            _pendingDeleteId = null;
+        }
+        function doDeleteProject(id) {
             let projects = [];
             try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
             projects = projects.filter(p => p.id !== id);
@@ -1092,6 +1110,17 @@
             pushProjectsToServer(projects);
             renderProjects();
         }
+        document.addEventListener('DOMContentLoaded', function wireDeleteModal() {
+            const modal = document.getElementById('confirm-delete-modal');
+            if (!modal) return;
+            modal.addEventListener('click', function (e) { if (e.target === modal) closeDeleteModal(); });
+            document.getElementById('confirm-delete-cancel').addEventListener('click', closeDeleteModal);
+            document.getElementById('confirm-delete-ok').addEventListener('click', function () {
+                const id = _pendingDeleteId;
+                closeDeleteModal();
+                if (id) doDeleteProject(id);
+            });
+        });
         function duplicateProject(id) {
             let projects = [];
             try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
@@ -1164,5 +1193,18 @@
         setTheme(currentThemeMode);
         setAccent(currentAccentName, accentMap[currentAccentName] ? accentMap[currentAccentName].cls : 'bg-gray-900');
     </script>
+
+<!-- Popup konfirmasi hapus proyek (CTA teks, radius kecil) -->
+<div id="confirm-delete-modal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">
+  <div class="bg-white rounded-md w-full max-w-xs px-5 pt-5 pb-4 text-center">
+    <h3 class="text-base font-semibold text-gray-900">Hapus proyek ini?</h3>
+    <p id="confirm-delete-name" class="text-sm text-gray-500 mt-1 px-2 truncate"></p>
+    <p class="text-[13px] text-gray-400 mt-2 leading-snug">Situs yang sudah dipublish <span class="text-gray-500">tidak ikut terhapus</span>.</p>
+    <div class="flex items-center justify-center gap-10 mt-5">
+      <button type="button" id="confirm-delete-cancel" class="text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors px-1 py-0.5">Batal</button>
+      <button type="button" id="confirm-delete-ok" class="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors px-1 py-0.5">Hapus</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
