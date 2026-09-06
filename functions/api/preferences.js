@@ -148,7 +148,6 @@ export async function onRequestDelete({ request, env }) {
     await step('DELETE FROM user_projects WHERE user_id = ?', uid);
     await step('DELETE FROM activity_log WHERE user_id = ?', uid);
     await step('DELETE FROM notifications WHERE user_id = ?', uid);
-    await step('DELETE FROM notifications WHERE from_user_id = ?', uid);
     await step('DELETE FROM wallet_transactions WHERE user_id = ?', uid);
 
     // 3) Key-value per-akun (prefix u<id>:) — key global tidak tersentuh
