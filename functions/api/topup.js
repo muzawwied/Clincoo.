@@ -1,4 +1,5 @@
 import { currentUser, scopedKey, getUserById } from './user-scope.js';
+import { emailTemplate, formatIDR, sendEmail, notifyEvent } from './notify-helpers.js';
 // Cloudflare Pages Functions - Top Up via Xendit Invoice (real-time)
 // Flow: pilih metode -> buat Invoice Xendit -> bayar -> webhook/poll verifikasi -> saldo masuk D1
 // Env: XENDIT_SECRET_KEY (wajib) & XENDIT_CALLBACK_TOKEN (opsional, utk verifikasi webhook)
@@ -70,7 +71,7 @@ export async function onRequestGet({ request, env }) {
           try {
             const inv = await xenditGet('/v2/invoices/' + order.xendit_id, secretKey);
             if (inv && (inv.status === 'PAID' || inv.status === 'SETTLED')) {
-              await creditTopup(env.DB, order);
+              await creditTopup(env, order);
               order = await env.DB.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(orderId).first();
             } else if (inv && inv.status === 'EXPIRED' && order.status === 'pending') {
               await env.DB.prepare("UPDATE topup_orders SET status = 'failed' WHERE id = ?").bind(orderId).run();
@@ -119,7 +120,7 @@ export async function onRequestPost({ request, env }) {
     if (body.status === 'PAID' || body.status === 'SETTLED') {
       const order = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(body.external_id).first();
       if (order && order.status !== 'paid') {
-        await creditTopup(db, order);
+        await creditTopup(env, order);
       }
     } else if (['EXPIRED', 'EXPIRED'].includes(body.status)) {
       await db.prepare("UPDATE topup_orders SET status = 'failed' WHERE id = ? AND status = 'pending'").bind(body.external_id).run();
@@ -186,7 +187,8 @@ export async function onRequestPost({ request, env }) {
 }
 
 // Kredit saldo D1 — dipakai webhook & live status (idempotent via status order)
-async function creditTopup(db, order) {
+async function creditTopup(env, order) {
+  const db = env.DB;
   const owner = await getUserById(db, order.user_id);
   const balKey = await scopedKey(db, 'wallet_balance', owner, 'balance');
   const txId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
@@ -200,6 +202,43 @@ async function creditTopup(db, order) {
     .bind(balKey, String(balance)).run();
 
   await db.prepare("UPDATE topup_orders SET status = 'paid', paid_at = datetime('now') WHERE id = ?").bind(order.id).run();
+
+  // Notifikasi in-app + email konfirmasi (Brevo) ke pemilik akun
+  if (owner) {
+    const nres = { notif: false, email: null };
+    try {
+      nres.notif = await notifyEvent(db, owner, {
+        source: 'Dompet', type: 'wallet',
+        message: 'Top up ' + formatIDR(order.amount) + ' via ' + (order.method || 'Xendit') + ' berhasil. Saldo sekarang ' + formatIDR(balance) + '.',
+        link: 'https://muzawwied.github.io/Clincoo./akun/dompet.html'
+      });
+    } catch (e) {}
+    if (owner.email) {
+      try {
+        nres.email = await sendEmail(env, {
+          toEmail: owner.email, toName: owner.name || '',
+          subject: 'Konfirmasi Top Up Clincoo — ' + formatIDR(order.amount),
+          html: emailTemplate(
+            'Top Up Berhasil',
+            owner.name || '',
+            'Top up saldo Clincoo Anda telah berhasil diproses dan saldo telah masuk ke Dompet Anda. Berikut rincian transaksinya:',
+            [
+              ['Jumlah Top Up', formatIDR(order.amount) + ' (' + (order.method || 'Xendit') + ')'],
+              ['Saldo Saat Ini', formatIDR(balance)],
+              ['Order ID', order.id]
+            ],
+            'Lihat Riwayat Dompet',
+            'https://muzawwied.github.io/Clincoo./akun/dompet.html',
+            'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
+          )
+        });
+      } catch (e) {}
+    }
+    try {
+      await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
+        .bind('notify_email_result', 'notif=' + String(nres.notif) + ' email=' + JSON.stringify(nres.email).slice(0, 200), order.user_id || null).run();
+    } catch (e2) {}
+  }
 
   try {
     try { await db.prepare('ALTER TABLE activity_log ADD COLUMN user_id INTEGER').run(); } catch (e) {}

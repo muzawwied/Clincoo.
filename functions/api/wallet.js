@@ -1,5 +1,6 @@
 // Cloudflare Pages Functions - Wallet Backend (per-account)
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
+import { emailTemplate, formatIDR, sendEmail, notifyEvent, getUserByEmail } from './notify-helpers.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -23,42 +24,25 @@ async function getSecret(env, key) {
   return null;
 }
 
-// Email konfirmasi top up (Brevo) — dikirim saat transaksi top up dikreditkan.
-async function sendTopupEmail(env, user, tx) {
-  try {
-    const apiKey = await getSecret(env, 'BREVO_API_KEY');
-    if (!apiKey || !user?.email) return;
-    const senderEmail = await getSecret(env, 'BREVO_SENDER_EMAIL');
-    if (!senderEmail) return;
-    const senderName = (await getSecret(env, 'BREVO_SENDER_NAME')) || 'Clincoo';
-    const orderId = (String(tx.title || '').match(/\[(TOPUP-[^\]]+)\]/) || [])[1] || '-';
-    const rp = n => 'Rp ' + Number(n).toLocaleString('id-ID');
-    const waktu = new Date().toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }) + ' WIB';
-    const html = [
-      '<div style="font-family:Inter,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px">',
-      '<h2 style="margin:0 0 4px">Top Up Berhasil</h2>',
-      '<p style="color:#666;margin:0 0 20px">Saldo Dompet Clincoo Anda sudah masuk.</p>',
-      '<table style="width:100%;border-collapse:collapse;font-size:14px">',
-      '<tr><td style="padding:8px 0;color:#666">Nominal</td><td style="padding:8px 0;text-align:right;font-weight:bold">' + rp(tx.amount) + '</td></tr>',
-      '<tr><td style="padding:8px 0;color:#666">Metode</td><td style="padding:8px 0;text-align:right">' + (tx.method || '-') + '</td></tr>',
-      '<tr><td style="padding:8px 0;color:#666">Order ID</td><td style="padding:8px 0;text-align:right;font-family:monospace">' + orderId + '</td></tr>',
-      '<tr><td style="padding:8px 0;color:#666">Biaya admin</td><td style="padding:8px 0;text-align:right">Gratis</td></tr>',
-      '<tr><td style="padding:8px 0;border-top:1px solid #eee;color:#666">Saldo sekarang</td><td style="padding:8px 0;border-top:1px solid #eee;text-align:right;font-weight:bold;font-size:16px">' + rp(tx.balance) + '</td></tr>',
-      '</table>',
-      '<p style="color:#999;font-size:12px;margin:24px 0 0">Waktu: ' + waktu + '<br>Email ini otomatis dari sistem Clincoo.</p>',
-      '</div>'
-    ].join('');
-    await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: { 'api-key': apiKey, 'Content-Type': 'application/json', 'accept': 'application/json' },
-      body: JSON.stringify({
-        sender: { name: senderName, email: senderEmail },
-        to: [{ email: user.email, name: user.name || '' }],
-        subject: 'Top Up Berhasil — ' + rp(tx.amount) + ' masuk ke Dompet Clincoo',
-        htmlContent: html
-      })
-    });
-  } catch (e) { /* kegagalan email tidak boleh menggagalkan kredit saldo */ }
+// Callback top up (Base44/Xendit) datang TANPA login — identifikasi pemilik akun
+// dari email di payload (email/payer_email) atau fallback PERSONAL_EMAIL (env_vars),
+// lalu scope saldo/transaksi/notifikasi/email ke akun pemilik.
+async function resolveOwner(env, request, body) {
+  const u = await currentUser(env, request);
+  if (u) return u;
+  const cands = [];
+  if (body) {
+    if (body.email) cands.push(body.email);
+    if (body.payer_email) cands.push(body.payer_email);
+  }
+  const pe = await getSecret(env, 'PERSONAL_EMAIL');
+  if (pe) cands.push(pe);
+  for (const c of cands) {
+    if (!c) continue;
+    const found = await getUserByEmail(env.DB, c);
+    if (found) return found;
+  }
+  return null;
 }
 
 // GET /api/wallet?action=transactions — list transaksi; GET /api/wallet — saldo
@@ -92,7 +76,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const body = await request.json();
     const action = body.action || 'add_transaction';
-    const user = await currentUser(env, request);
+    const user = await resolveOwner(env, request, body);
     const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
     const uid = user ? user.id : null;
 
@@ -113,9 +97,44 @@ export async function onRequestPost({ request, env }) {
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
         .bind(balKey, String(balance)).run();
 
-      // Konfirmasi email top up (Brevo) — hanya utk transaksi hasil top up Xendit
+      // Notifikasi in-app + email konfirmasi (Brevo) — hanya utk transaksi hasil top up Xendit
       if (/^top up xendit/i.test(String(title))) {
-        await sendTopupEmail(env, user, { title, amount: parseFloat(amount), method: method || '', balance });
+        const orderId = (String(title).match(/\[(TOPUP-[^\]]+)\]/) || [])[1] || '-';
+        const nres = { notif: false, email: null };
+        try {
+          nres.notif = await notifyEvent(db, user, {
+            source: 'Dompet', type: 'wallet',
+            message: 'Top up ' + formatIDR(amount) + ' via ' + (method || 'Xendit') + ' berhasil. Saldo sekarang ' + formatIDR(balance) + '.',
+            link: 'https://muzawwied.github.io/Clincoo./akun/dompet.html'
+          });
+        } catch (e) { nres.notifErr = String(e && e.message || e); }
+        if (user && user.email) {
+          try {
+            nres.email = await sendEmail(env, {
+              toEmail: user.email, toName: user.name || '',
+              subject: 'Konfirmasi Top Up Clincoo — ' + formatIDR(amount),
+              html: emailTemplate(
+                'Top Up Berhasil',
+                user.name || '',
+                'Top up saldo Clincoo Anda telah berhasil diproses dan saldo telah masuk ke Dompet Anda. Berikut rincian transaksinya:',
+                [
+                  ['Jumlah Top Up', formatIDR(amount) + ' (' + (method || 'Xendit') + ')'],
+                  ['Saldo Saat Ini', formatIDR(balance)],
+                  ['ID Transaksi', txId],
+                  ['Order ID', orderId]
+                ],
+                'Lihat Riwayat Dompet',
+                'https://muzawwied.github.io/Clincoo./akun/dompet.html',
+                'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
+              )
+            });
+          } catch (e) { nres.emailErr = String(e && e.message || e); }
+        }
+        try {
+          await rowScope(db, 'activity_log', user);
+          await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
+            .bind('notify_email_result', 'notif=' + String(nres.notif) + ' email=' + JSON.stringify(nres.email).slice(0, 200), uid).run();
+        } catch (e2) {}
       }
 
       try {

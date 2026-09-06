@@ -1,4 +1,5 @@
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
+import { emailTemplate, formatIDR, sendEmail, notifyEvent } from './notify-helpers.js';
 
 // Cloudflare Pages Functions - Subscription Backend
 // Stores subscription plan data in D1 (real-time, interconnected between pages)
@@ -152,6 +153,38 @@ export async function onRequestPost({ request, env }) {
           const newBalance = balance - totalPrice;
           await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
             .bind(balKey, String(newBalance)).run();
+
+          // Notifikasi in-app + email konfirmasi aktivasi langganan
+          try {
+            await notifyEvent(db, user, {
+              source: 'Langganan', type: 'subscription',
+              message: 'Langganan ' + validPlan + ' (' + billing + ') berhasil diaktifkan. Total ' + formatIDR(totalPrice) + ' dipotong dari Saldo Dompet. Saldo sekarang ' + formatIDR(newBalance) + '.',
+              link: 'https://muzawwied.github.io/Clincoo./akun/langganan.html'
+            });
+          } catch (e2) {}
+          if (user && user.email) {
+            try {
+              await sendEmail(env, {
+                toEmail: user.email, toName: user.name || '',
+                subject: 'Langganan Clincoo Aktif — ' + validPlan,
+                html: emailTemplate(
+                  'Langganan Aktif',
+                  user.name || '',
+                  'Langganan ' + validPlan + ' Anda telah berhasil diaktifkan. Total pembayaran telah dipotong dari Saldo Dompet Anda. Berikut rinciannya:',
+                  [
+                    ['Paket', validPlan],
+                    ['Siklus Tagihan', billing],
+                    ['Total Pembayaran', formatIDR(totalPrice) + ' (Saldo Dompet)'],
+                    ['Tanggal Aktif', new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB'],
+                    ['Saldo Dompet Tersisa', formatIDR(newBalance)]
+                  ],
+                  'Lihat Detail Langganan',
+                  'https://muzawwied.github.io/Clincoo./akun/langganan.html',
+                  'Rincian langganan dapat dilihat di halaman Langganan pada akun Clincoo Anda.'
+                )
+              });
+            } catch (e3) {}
+          }
         } catch(e) {
           // If wallet tables don't exist, still allow free plans but block paid
           return new Response(JSON.stringify({ 
