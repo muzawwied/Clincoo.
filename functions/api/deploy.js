@@ -107,9 +107,13 @@ async function lookupProject(creds, name) {
 async function ensurePagesProject(creds, name) {
   let project = await lookupProject(creds, name);
   if (!project) {
-    project = await cfFetch('/accounts/' + creds.accountId + '/pages/projects', creds.apiKey, {
-      method: 'POST', body: JSON.stringify({ name, production_branch: 'main' })
-    });
+    try {
+      project = await cfFetch('/accounts/' + creds.accountId + '/pages/projects', creds.apiKey, {
+        method: 'POST', body: JSON.stringify({ name, production_branch: 'main' })
+      });
+    } catch (e) {
+      if (e.code !== 8000002) throw e; // "already exists": nama sisa hapus/limbo -> lanjut tunggu lookup
+    }
     for (let i = 0; i < 12; i++) { // tunggu propagasi maks ~36 detik
       await new Promise(r => setTimeout(r, 3000));
       const check = await lookupProject(creds, name);
