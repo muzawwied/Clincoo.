@@ -47,7 +47,7 @@ async function sha256hex(str) {
 async function cfFetch(path, apiKey, opts = {}) {
   const headers = { ...(opts.headers || {}) };
   if (opts.body && typeof opts.body === 'string' && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
-  headers['Authorization'] = 'Bearer ' + apiKey;
+  if (!headers['Authorization']) headers['Authorization'] = 'Bearer ' + apiKey;
   const res = await fetch(API_BASE + path, { ...opts, headers });
   let data = null;
   try { data = await res.json(); } catch (e) { throw new Error('Cloudflare API tidak merespons'); }
