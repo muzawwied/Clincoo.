@@ -95,7 +95,8 @@
             '<div id="session-email" class="text-xs text-gray-400 dark:text-gray-500 mt-4"></div>' +
             '<div id="accept-error" class="hidden text-xs text-red-500 mt-2.5"></div>' +
             '<button onclick="acceptInvite()" class="w-full py-3.5 mt-8 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors focus:outline-none">Terima Undangan</button>' +
-            '<button onclick="declineInvite()" class="w-full py-3 mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none">Tolak Undangan</button>'
+            (invite.channel && invite.channel !== 'email' && !invite.email ? '' :
+            '<button onclick="declineInvite()" class="w-full py-3 mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none">Tolak Undangan</button>')
         );
         var ses = document.getElementById('session-email');
         if (ses) {

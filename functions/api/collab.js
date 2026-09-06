@@ -340,7 +340,18 @@ export async function onRequestPost({ env, request }) {
       if (inv.status !== 'pending') return j({ error: 'Undangan sudah ' + inv.status }, 400);
 
       const myEmail = String(user.email || '').toLowerCase();
-      if (!inv.invitee_email || String(inv.invitee_email).toLowerCase() !== myEmail) {
+      if (!inv.invitee_email) {
+        // Undangan tautan (tanpa email target): bisa diterima siapa saja yang login,
+        // kecuali pemilik proyek atau yang sudah jadi anggota. Email penerima dicatat.
+        if (inv.owner_id === user.id) return j({ error: 'Anda pemilik proyek ini.' }, 400);
+        const alreadyMember = await db.prepare('SELECT id FROM project_members WHERE project_id = ? AND user_id = ?').bind(inv.project_id, user.id).first();
+        if (alreadyMember) return j({ error: 'Anda sudah menjadi anggota proyek ini.' }, 400);
+        if (action === 'decline') {
+          // Menolak undangan tautan akan mematikan tautan bersama — tidak diperbolehkan, cukup abaikan.
+          return j({ error: 'link_invite', message: 'Undangan tautan tidak perlu ditolak — abaikan saja tautannya.' }, 400);
+        }
+        await db.prepare("UPDATE collab_invites SET invitee_email = ?, responded_at = datetime('now') WHERE id = ?").bind(myEmail, inv.id).run();
+      } else if (String(inv.invitee_email).toLowerCase() !== myEmail) {
         return j({ error: 'email_mismatch', message: 'Undangan ini ditujukan untuk alamat email lain.' }, 403);
       }
 
