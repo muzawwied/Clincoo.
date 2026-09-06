@@ -568,7 +568,10 @@
         function pollTopUpStatus(orderId, channel) {
             stopTopUpPoll();
             var attempts = 0;
+            var checking = false; // cegah tick tumpang tindih (race condition) jika request sebelumnya belum selesai
             topupPollTimer = setInterval(async function() {
+                if (checking) return;
+                checking = true;
                 attempts++;
                 try {
                     var data = await fetch(TOPUP_API, {
@@ -581,18 +584,8 @@
                         await renderBalance();
                         await renderTransactions();
                         closeTopUpPage();
-                        try {
-                            fetch('https://clincoo-be2.pages.dev/api/notifications', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    source: 'Dompet',
-                                    message: 'Top up Rp ' + formatNumberOnly(data.amount) + ' berhasil. Saldo sekarang Rp ' + formatNumberOnly(data.balance) + '.',
-                                    type: 'wallet',
-                                    link: location.pathname
-                                })
-                            });
-                        } catch(e) {}
+                        // Notifikasi top up sudah dikirim server (wallet.js add_transaction) saat saldo dikreditkan —
+                        // jangan kirim lagi dari sini (dulu bikin notif dobel & saldo "NaN" karena field respons tidak lengkap).
                         return;
                     }
                     if (data.status === 'failed') {
@@ -600,7 +593,10 @@
                         showModal('Pembayaran Tidak Selesai', 'Transaksi kedaluwarsa atau dibatalkan.');
                         return;
                     }
-                } catch(err) {}
+                } catch(err) {
+                } finally {
+                    checking = false;
+                }
                 if (attempts > 300) stopTopUpPoll();
             }, 3000);
         }

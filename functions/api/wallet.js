@@ -85,28 +85,41 @@ export async function onRequestPost({ request, env }) {
     if (action === 'add_transaction') {
       const { title, amount, type, method } = body;
       if (!title || amount == null || !type) return j({ error: 'title, amount, type required' }, 400);
+      const parsedAmount = parseFloat(amount);
+      if (isNaN(parsedAmount)) return j({ error: 'amount tidak valid' }, 400);
 
       await rowScope(db, 'wallet_transactions', user);
+
+      // Idempotensi top up Xendit: order_id yang sudah pernah dikreditkan tidak dikreditkan/dinotifikasi lagi
+      // (mencegah saldo & notif dobel jika pemanggil — mis. callback Koda — mengirim request yang sama 2x)
+      const orderId = (String(title).match(/\[(TOPUP-[^\]]+)\]/) || [])[1] || null;
+      if (orderId) {
+        const dup = await db.prepare('SELECT id FROM wallet_transactions WHERE user_id = ? AND title = ? LIMIT 1').bind(uid, title).first();
+        if (dup) {
+          const balRowDup = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
+          return j({ success: true, id: dup.id, balance: parseFloat(balRowDup?.value || '0'), duplicate: true });
+        }
+      }
+
       const txId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
       await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
-        .bind(txId, title, parseFloat(amount), type, method || '', uid).run();
+        .bind(txId, title, parsedAmount, type, method || '', uid).run();
 
       const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
       let balance = parseFloat(balRow?.value || '0');
-      if (type === 'in') balance += parseFloat(amount);
-      else if (type === 'out') balance -= parseFloat(amount);
+      if (type === 'in') balance += parsedAmount;
+      else if (type === 'out') balance -= parsedAmount;
 
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
         .bind(balKey, String(balance)).run();
 
       // Notifikasi in-app + email konfirmasi (Brevo) — hanya utk transaksi hasil top up Xendit
       if (/^top up xendit/i.test(String(title))) {
-        const orderId = (String(title).match(/\[(TOPUP-[^\]]+)\]/) || [])[1] || '-';
         const nres = { notif: false, email: null };
         try {
           nres.notif = await notifyEvent(db, user, {
             source: 'Dompet', type: 'wallet',
-            message: 'Top up ' + formatIDR(amount) + ' via ' + (method || 'Xendit') + ' berhasil. Saldo sekarang ' + formatIDR(balance) + '.',
+            message: 'Top up ' + formatIDR(parsedAmount) + ' via ' + (method || 'Xendit') + ' berhasil. Saldo sekarang ' + formatIDR(balance) + '.',
             link: 'https://muzawwied.github.io/Clincoo./akun/dompet.html'
           });
         } catch (e) { nres.notifErr = String(e && e.message || e); }
@@ -114,13 +127,13 @@ export async function onRequestPost({ request, env }) {
           try {
             nres.email = await sendEmail(env, {
               toEmail: user.email, toName: user.name || '',
-              subject: 'Konfirmasi Top Up Clincoo — ' + formatIDR(amount),
+              subject: 'Konfirmasi Top Up Clincoo — ' + formatIDR(parsedAmount),
               html: emailTemplate(
                 'Top Up Berhasil',
                 user.name || '',
                 'Top up saldo Clincoo Anda telah berhasil diproses dan saldo telah masuk ke Dompet Anda. Berikut rincian transaksinya:',
                 [
-                  ['Jumlah Top Up', formatIDR(amount) + ' (' + (method || 'Xendit') + ')'],
+                  ['Jumlah Top Up', formatIDR(parsedAmount) + ' (' + (method || 'Xendit') + ')'],
                   ['Saldo Saat Ini', formatIDR(balance)],
                   ['ID Transaksi', txId],
                   ['Order ID', orderId]
