@@ -1,16 +1,19 @@
-// Cloudflare Pages Functions — Jembatan sinkronisasi DOMPET dua arah
-// (Clincoo Dompet <-> web wallet eksternal milik akun)
+// Cloudflare Pages Functions — Backend data WEB WALLET (mandiri)
 //
-// GET  /api/wallet-sync                  (Bearer JWT) -> konfigurasi integrasi; api_key dibuat otomatis
-// GET  /api/wallet-sync?action=external_pull&api_key=K -> data dompet terbaru (ditarik web wallet)
-// POST /api/wallet-sync (Bearer JWT)     -> { action: 'set_url' | 'reset_key' | 'push_now' }
-// POST /api/wallet-sync (tanpa login)    -> { action: 'external_push', api_key, data } dari web wallet
+// Data wallet web disimpan di tabelnya SENDIRI di D1 (wallet_web_balance,
+// wallet_web_transactions, wallet_web_notifications) — terpisah penuh dari
+// data dompet Clincoo (wallet_balance / wallet_transactions) dan tidak
+// terhubung ke akun Clincoo sama sekali.
+//
+// Identitas wallet = alamat wallet (0x + 40 hex) yang digenerate per
+// perangkat di web wallet dan tersimpan di localStorage-nya.
+//
+// GET  /api/wallet-sync?action=external_pull&addr=0x..  -> snapshot wallet terbaru
+// POST /api/wallet-sync  { action:'external_push', addr, data }  -> simpan saldo+transaksi
+// POST /api/wallet-sync  { action:'external_read', addr, id }     -> tandai notifikasi dibaca
 //
 // Protokol data: { balance: number, transactions: [{ id?, title, amount, type:'in'|'out', method? }] }
-// Arah wallet -> Clincoo: external_push. Arah Clincoo -> wallet: pushWalletToExternal
-// (dipanggil otomatis setelah saldo berubah di Clincoo, plus manual via push_now).
-
-import { currentUser, scopedKey, rowScope } from './user-scope.js';
+// Notifikasi wallet dibuat OTOMATIS di server untuk transaksi baru (transfer keluar / saldo masuk).
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -24,79 +27,46 @@ function j(data, status) {
 
 export async function onRequestOptions() { return new Response(null, { headers: CORS }); }
 
-function newApiKey() {
-  const bytes = new Uint8Array(20);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+function validAddr(a) {
+  return typeof a === 'string' && /^0x[0-9a-f]{16,64}$/i.test(a);
 }
 
-async function getPref(db, fullKey) {
-  const r = await db.prepare('SELECT value FROM user_preferences WHERE key = ?').bind(fullKey).first();
-  return r?.value || '';
-}
-async function setPref(db, fullKey, val) {
-  await db.prepare('INSERT INTO user_preferences (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
-    .bind(fullKey, String(val)).run();
+async function ensureTables(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS wallet_web_balance (
+    addr TEXT PRIMARY KEY,
+    value TEXT NOT NULL DEFAULT '0'
+  )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS wallet_web_transactions (
+    id TEXT PRIMARY KEY,
+    addr TEXT NOT NULL,
+    title TEXT,
+    amount REAL,
+    type TEXT,
+    method TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS wallet_web_notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    addr TEXT NOT NULL,
+    source TEXT,
+    message TEXT,
+    type TEXT DEFAULT 'info',
+    read INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`).run();
 }
 
-// Konfigurasi integrasi per akun (api_key dibuat malas saat pertama kali diminta)
-async function ensureSyncConfig(db, user) {
-  const p = 'u' + user.id + ':';
-  let key = await getPref(db, p + 'wallet_sync_key');
-  if (!key) { key = newApiKey(); await setPref(db, p + 'wallet_sync_key', key); }
+async function snapshot(db, addr) {
+  const bal = await db.prepare('SELECT value FROM wallet_web_balance WHERE addr = ?').bind(addr).first();
+  const txRes = await db.prepare('SELECT * FROM wallet_web_transactions WHERE addr = ? ORDER BY created_at DESC, id DESC LIMIT 100').bind(addr).all();
+  const nRes = await db.prepare('SELECT * FROM wallet_web_notifications WHERE addr = ? ORDER BY created_at DESC, id DESC LIMIT 20').bind(addr).all();
   return {
-    api_key: key,
-    target_url: await getPref(db, p + 'wallet_sync_url'),
-    last_sync_at: await getPref(db, p + 'wallet_sync_at') || null
+    balance: parseFloat(bal?.value || '0'),
+    transactions: txRes.results || [],
+    notifications: (nRes.results || []).map(n => ({
+      id: n.id, source: n.source, message: n.message, type: n.type || 'info', read: n.read || 0, created_at: n.created_at
+    }))
   };
-}
-
-// Cari pemilik akun dari API key (jalur eksternal tanpa login — fail-closed bila key tak cocok)
-async function findOwnerByApiKey(db, apiKey) {
-  if (!apiKey) return null;
-  const row = await db.prepare("SELECT key FROM user_preferences WHERE value = ? AND key LIKE '%:wallet_sync_key'")
-    .bind(String(apiKey)).first();
-  if (!row || !row.key) return null;
-  const m = row.key.match(/^u(\d+):/);
-  if (!m) return null;
-  return { id: Number(m[1]) };
-}
-
-// Snapshot data dompet (saldo + 100 transaksi terakhir)
-async function walletSnapshot(db, user) {
-  const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
-  const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
-  const uid = await rowScope(db, 'wallet_transactions', user);
-  let txs = [];
-  if (uid) {
-    const res = await db.prepare('SELECT * FROM wallet_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 100').bind(uid).all();
-    txs = res.results || [];
-  }
-  // Notifikasi Clincoo pemilik akun (terbaru 20)
-  let notifs = [];
-  try {
-    const nres = await db.prepare('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT 20').bind(user.id).all();
-    notifs = (nres.results || []).map(n => ({ id: n.id, source: n.source, message: n.message, type: n.type || 'info', read: n.read || 0, created_at: n.created_at }));
-  } catch (e) {}
-  return { balance: parseFloat(balRow?.value || '0'), transactions: txs, notifications: notifs };
-}
-
-// Dorong data dompet Clincoo ke web wallet eksternal (arah Clincoo -> wallet).
-// Fire-and-forget: dipanggil tanpa await setelah mutasi saldo di /api/wallet.
-export async function pushWalletToExternal(env, user) {
-  try {
-    const db = env.DB;
-    if (!db || !user) return null;
-    const cfg = await ensureSyncConfig(db, user);
-    if (!cfg.target_url || !/^https:\/\//.test(cfg.target_url)) return null;
-    const snap = await walletSnapshot(db, user);
-    const payload = JSON.stringify({ source: 'clincoo', api_key: cfg.api_key, synced_at: new Date().toISOString(), data: snap });
-    try {
-      await fetch(cfg.target_url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload });
-    } catch (e) {}
-    await setPref(db, 'u' + user.id + ':wallet_sync_at', new Date().toISOString());
-    return true;
-  } catch (e) { return null; }
 }
 
 export async function onRequestGet({ request, env }) {
@@ -104,19 +74,14 @@ export async function onRequestGet({ request, env }) {
   if (!db) return j({ error: 'D1 not bound' }, 500);
   try {
     const url = new URL(request.url);
-    const action = url.searchParams.get('action');
-
-    // Web wallet menarik data dompet Clincoo (arah Clincoo -> wallet, pull)
-    if (action === 'external_pull') {
-      const owner = await findOwnerByApiKey(db, url.searchParams.get('api_key'));
-      if (!owner) return j({ error: 'API key tidak valid' }, 401);
-      const snap = await walletSnapshot(db, owner);
-      return j({ source: 'clincoo', synced_at: new Date().toISOString(), data: snap });
+    if (url.searchParams.get('action') === 'external_pull') {
+      const addr = (url.searchParams.get('addr') || '').trim();
+      if (!validAddr(addr)) return j({ error: 'Alamat wallet tidak valid' }, 400);
+      await ensureTables(db);
+      const snap = await snapshot(db, addr);
+      return j({ synced_at: new Date().toISOString(), data: snap });
     }
-
-    const user = await currentUser(env, request);
-    if (!user) return j({ error: 'Login diperlukan', need_login: true }, 401);
-    return j(await ensureSyncConfig(db, user));
+    return j({ error: 'Aksi tidak dikenal' }, 400);
   } catch (err) { return j({ error: err.message }, 500); }
 }
 
@@ -125,101 +90,84 @@ export async function onRequestPost({ request, env }) {
   if (!db) return j({ error: 'D1 not bound' }, 500);
   try {
     const body = await request.json();
+    const addr = String(body.addr || '').trim();
+    if (!validAddr(addr)) return j({ error: 'Alamat wallet tidak valid' }, 400);
+    await ensureTables(db);
 
-    // === Jalur eksternal: web wallet mendorong datanya (arah wallet -> Clincoo) ===
+    // Simpan saldo + transaksi dari web wallet (upsert berbasis id, tanpa duplikat)
     if (body.action === 'external_push') {
-      const owner = await findOwnerByApiKey(db, body.api_key);
-      if (!owner) return j({ error: 'API key tidak valid' }, 401);
       const data = body.data || {};
-      const p = 'u' + owner.id + ':';
 
       if (data.balance != null) {
         const bal = parseFloat(data.balance);
         if (!isNaN(bal)) {
-          const balKey = await scopedKey(db, 'wallet_balance', owner, 'balance');
-          await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
-            .bind(balKey, String(bal)).run();
+          await db.prepare('INSERT INTO wallet_web_balance (addr, value) VALUES (?, ?) ON CONFLICT(addr) DO UPDATE SET value = excluded.value')
+            .bind(addr, String(bal)).run();
         }
       }
 
+      let newNotifs = 0;
       if (Array.isArray(data.transactions)) {
-        const uid = await rowScope(db, 'wallet_transactions', owner);
-        if (uid) {
-          if (data.replace) await db.prepare('DELETE FROM wallet_transactions WHERE user_id = ?').bind(uid).run();
-          for (const t of data.transactions.slice(0, 200)) {
-            if (!t || t.title == null || t.amount == null) continue;
-            const amount = parseFloat(t.amount);
-            if (isNaN(amount)) continue;
-            const title = String(t.title);
-            const type = (t.type === 'out') ? 'out' : 'in';
-            const method = String(t.method || 'wallet-sync');
+        for (const t of data.transactions.slice(0, 200)) {
+          if (!t || t.title == null || t.amount == null) continue;
+          const amount = parseFloat(t.amount);
+          if (isNaN(amount)) continue;
+          const title = String(t.title);
+          const type = (t.type === 'out') ? 'out' : 'in';
+          const method = String(t.method || 'wallet');
 
-            // Upser berbasis ID: id dari web wallet dipertahankan (merge dua arah, tanpa duplikat).
-            // Guard kepemilikan: id yang sudah dipakai akun lain => pakai id baru (anti cross-user).
-            let txId = (t.id != null && String(t.id)) ? String(t.id) : null;
-            if (txId) {
-              const existing = await db.prepare('SELECT user_id FROM wallet_transactions WHERE id = ?').bind(txId).first();
-              if (existing && existing.user_id !== uid) txId = null;
-            }
-            if (txId) {
-              // created_at baris lama dipertahankan (tanggal transaksi tidak bergeser tiap sync)
-              await db.prepare(`INSERT INTO wallet_transactions (id, title, amount, type, method, user_id)
-                VALUES (?, ?, ?, ?, ?, ?)
-                ON CONFLICT(id) DO UPDATE SET title = excluded.title, amount = excluded.amount, type = excluded.type, method = excluded.method`)
-                .bind(txId, title, amount, type, method, uid).run();
-              continue;
-            }
-            if (!data.replace) {
-              const dup = await db.prepare('SELECT id FROM wallet_transactions WHERE user_id = ? AND title = ? LIMIT 1').bind(uid, title).first();
-              if (dup) continue;
-            }
-            await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
-              .bind('TX-' + Math.floor(100000 + Math.random() * 900000), title, amount, type, method, uid).run();
+          // Upsert berbasis ID: id dari web wallet dipertahankan (tanpa duplikat).
+          // Guard kepemilikan: id yang sudah dipakai alamat lain => pakai id baru.
+          let txId = (t.id != null && String(t.id)) ? String(t.id) : null;
+          if (txId) {
+            const existing = await db.prepare('SELECT addr FROM wallet_web_transactions WHERE id = ?').bind(txId).first();
+            if (existing && existing.addr !== addr) txId = null;
           }
-          // Jika replace penuh tanpa saldo eksplisit, hitung ulang saldo dari transaksi
-          if (data.replace && data.balance == null) {
-            const res = await db.prepare("SELECT COALESCE(SUM(CASE WHEN type='in' THEN amount ELSE -amount END), 0) AS b FROM wallet_transactions WHERE user_id = ?").bind(uid).first();
-            const balKey = await scopedKey(db, 'wallet_balance', owner, 'balance');
-            await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
-              .bind(balKey, String(res?.b || 0)).run();
+          if (txId) {
+            // created_at baris lama dipertahankan (tanggal transaksi tidak bergeser tiap sync)
+            await db.prepare(`INSERT INTO wallet_web_transactions (id, addr, title, amount, type, method)
+              VALUES (?, ?, ?, ?, ?, ?)
+              ON CONFLICT(id) DO UPDATE SET title = excluded.title, amount = excluded.amount, type = excluded.type, method = excluded.method`)
+              .bind(txId, addr, title, amount, type, method).run();
+            continue;
           }
+          // Push tanpa id: hindari duplikat judul+nominal (idempotensi ringan)
+          const dup = await db.prepare('SELECT id FROM wallet_web_transactions WHERE addr = ? AND title = ? AND amount = ? LIMIT 1')
+            .bind(addr, title, amount).first();
+          if (dup) continue;
+          txId = 'TX-' + Date.now() + '-' + Math.floor(1000 + Math.random() * 9000);
+          await db.prepare('INSERT INTO wallet_web_transactions (id, addr, title, amount, type, method) VALUES (?, ?, ?, ?, ?, ?)')
+            .bind(txId, addr, title, amount, type, method).run();
+          // Notifikasi otomatis untuk transaksi baru (maks 5 per push)
+          if (newNotifs < 5) {
+            newNotifs++;
+            const msg = (type === 'in')
+              ? 'Saldo masuk Rp ' + amount.toLocaleString('id-ID') + ' - ' + title
+              : 'Transfer keluar Rp ' + amount.toLocaleString('id-ID') + ' - ' + title;
+            await db.prepare('INSERT INTO wallet_web_notifications (addr, source, message, type) VALUES (?, ?, ?, ?)')
+              .bind(addr, 'Wallet', msg, type).run();
+          }
+        }
+        // Replace penuh tanpa saldo eksplisit -> hitung ulang dari transaksi
+        if (data.replace && data.balance == null) {
+          const res = await db.prepare("SELECT COALESCE(SUM(CASE WHEN type='in' THEN amount ELSE -amount END), 0) AS b FROM wallet_web_transactions WHERE addr = ?").bind(addr).first();
+          await db.prepare('INSERT INTO wallet_web_balance (addr, value) VALUES (?, ?) ON CONFLICT(addr) DO UPDATE SET value = excluded.value')
+            .bind(addr, String(res?.b || 0)).run();
         }
       }
 
-      await setPref(db, p + 'wallet_sync_at', new Date().toISOString());
-      const snap = await walletSnapshot(db, owner);
+      const snap = await snapshot(db, addr);
       return j({ success: true, synced_at: new Date().toISOString(), data: snap });
     }
 
-    const user = await currentUser(env, request);
-    if (!user) return j({ error: 'Login diperlukan', need_login: true }, 401);
-    const p = 'u' + user.id + ':';
-
-    if (body.action === 'set_url') {
-      const u = String(body.target_url || '').trim();
-      if (!u) { await setPref(db, p + 'wallet_sync_url', ''); return j({ success: true, target_url: '' }); }
-      if (!/^https:\/\//.test(u)) return j({ error: 'URL harus diawali https://' }, 400);
-      await setPref(db, p + 'wallet_sync_url', u);
-      return j({ success: true, target_url: u });
-    }
-    // Web wallet menandai notifikasi Clincoo sudah dibaca (berbasis api_key pemilik)
+    // Tandai notifikasi wallet sudah dibaca
     if (body.action === 'external_read') {
-      const owner = await findOwnerByApiKey(db, body.api_key);
-      if (!owner) return j({ error: 'API key tidak valid' }, 401);
       const nid = parseInt(body.id, 10);
       if (!nid) return j({ error: 'id notifikasi tidak valid' }, 400);
-      await db.prepare('UPDATE notifications SET read = 1 WHERE id = ? AND user_id = ?').bind(nid, owner.id).run();
+      await db.prepare('UPDATE wallet_web_notifications SET read = 1 WHERE id = ? AND addr = ?').bind(nid, addr).run();
       return j({ success: true });
     }
-    if (body.action === 'reset_key') {
-      await setPref(db, p + 'wallet_sync_key', newApiKey());
-      return j({ success: true });
-    }
-    if (body.action === 'push_now') {
-      const ok = await pushWalletToExternal(env, user);
-      if (!ok) return j({ error: 'URL wallet belum diatur atau tidak valid' }, 400);
-      return j({ success: true, pushed: true });
-    }
-    return j({ error: 'action tidak dikenal' }, 400);
+
+    return j({ error: 'Aksi tidak dikenal' }, 400);
   } catch (err) { return j({ error: err.message }, 500); }
 }
