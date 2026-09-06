@@ -270,16 +270,51 @@
 
     async function copyDirectLink() {
         const link = await createInvite('link', 'Viewer');
-        if (!link) { closeShareDropdown(); return; }
-        const tempInput = document.createElement("input");
-        tempInput.value = link;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-        
+        if (!link) { closeShareDropdown(); alert('Gagal membuat tautan undangan. Pastikan proyek sudah dipilih.'); return; }
+        let copied = false;
+        // 1) Clipboard API modern (HTTPS)
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(link);
+                copied = true;
+            }
+        } catch (e) {}
+        // 2) Fallback execCommand
+        if (!copied) {
+            try {
+                const tempInput = document.createElement("input");
+                tempInput.value = link;
+                tempInput.style.position = 'fixed';
+                tempInput.style.opacity = '0';
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                tempInput.setSelectionRange(0, link.length);
+                copied = document.execCommand("copy");
+                document.body.removeChild(tempInput);
+            } catch (e) {}
+        }
         closeShareDropdown();
-        loadCollab();
+        if (copied) {
+            showToast('Tautan undangan tersalin');
+            loadCollab();
+        } else {
+            // 3) Upaya terakhir: tampilkan tautan agar bisa disalin manual
+            window.prompt('Salin tautan undangan ini:', link);
+        }
+    }
+
+    function showToast(message) {
+        let el = document.getElementById('collab-toast');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'collab-toast';
+            el.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-semibold rounded-full shadow-lg transition-all duration-300 opacity-0 translate-y-3 pointer-events-none';
+            document.body.appendChild(el);
+        }
+        el.innerText = message;
+        el.classList.remove('opacity-0', 'translate-y-3');
+        clearTimeout(el._t);
+        el._t = setTimeout(function () { el.classList.add('opacity-0', 'translate-y-3'); }, 2200);
     }
 
     async function shareDirect(platform) {
