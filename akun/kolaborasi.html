@@ -40,6 +40,25 @@
         /* Utility Scroll Samping Tanpa Scrollbar Visual */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .shimmer-bar {
+        display: inline-block;
+        height: 1em;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+        width: 60px;
+        vertical-align: middle;
+    }
+    .shimmer-bar-sm { height: 0.75em; width: 40px; }
+    .shimmer-bar-md { height: 0.875em; width: 120px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    body.dark-mode .shimmer-bar {
+        background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+        background-size: 200% 100%;
+    }
+    body.dark-mode .skel-dot { background-color: #141414 !important; border-color: #222222 !important; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 pt-16 bg-white dark:bg-black transition-colors duration-300 relative">
@@ -747,16 +766,55 @@
                 '<i data-lucide="' + icon + '" class="w-4 h-4 text-amber-500 shrink-0"></i>' +
                 '<div class="min-w-0">' +
                     '<div class="text-[13px] font-medium text-gray-900 dark:text-white truncate">' + label + '</div>' +
-                    '<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">Diundang sebagai ' + esc(p.role) + ' &bull; ID: ' + esc(p.invite_id) + '</div>' +
+                    '<div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">Diundang sebagai ' + esc(p.role) + '</div>' +
                 '</div>' +
             '</div>' +
             '<span class="text-[11px] font-medium text-amber-600 dark:text-amber-400 shrink-0 pl-2">Menunggu</span>' +
         '</div>';
     }
 
+    // Skeleton shimmer saat data anggota masih dimuat (pola aktivitas.html)
+    function showCollabSkeleton() {
+        var list = document.getElementById('member-list');
+        if (!list) return;
+        list.innerHTML = '';
+        var skel = document.createElement('div');
+        skel.id = 'collab-skeleton';
+        for (var i = 0; i < 4; i++) {
+            skel.innerHTML += '' +
+            '<div class="member-item flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-[#111] border border-gray-100 dark:border-[#222]">' +
+                '<div class="flex items-center gap-3 min-w-0">' +
+                    '<div class="skel-dot w-10 h-10 rounded-full bg-gray-200 dark:bg-[#222] shrink-0"></div>' +
+                    '<div class="space-y-2 min-w-0">' +
+                        '<span class="shimmer-bar shimmer-bar-md"></span>' +
+                        '<span class="shimmer-bar shimmer-bar-sm" style="width:140px;"></span>' +
+                    '</div>' +
+                '</div>' +
+                '<span class="shimmer-bar shimmer-bar-sm shrink-0" style="width:64px;"></span>' +
+            '</div>';
+        }
+        list.appendChild(skel);
+    }
+    function clearCollabSkeleton() {
+        var skel = document.getElementById('collab-skeleton');
+        if (skel) skel.remove();
+    }
+
+    // Undangan kedaluwarsa setelah 1 hari (24 jam) sejak dibuat
+    var INVITE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+    function isInviteExpired(inv) {
+        var raw = inv && inv.created_date ? String(inv.created_date).replace(' ', 'T') : '';
+        if (!raw) return false;
+        if (raw.charAt(raw.length - 1) !== 'Z') raw += 'Z';
+        var d = new Date(raw);
+        if (isNaN(d.getTime())) return false;
+        return (Date.now() - d.getTime()) > INVITE_MAX_AGE_MS;
+    }
+
     function renderCollab() {
         var list = document.getElementById('member-list');
         if (!list) return;
+        clearCollabSkeleton();
         if (!collabData.members.length) {
             list.innerHTML = '<div class="flex flex-col items-center justify-center py-16 px-4 text-center">' +
                 '<i data-lucide="users" class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-4"></i>' +
@@ -801,7 +859,7 @@
         .then(function(res) {
             if (res && res.success) {
                 collabData.members = res.members || [];
-                collabData.pending = res.pending || [];
+                collabData.pending = (res.pending || []).filter(function(p) { return !isInviteExpired(p); });
             }
             renderCollab();
         })
@@ -810,6 +868,7 @@
 
     // Init: muat data kolaborasi; link lama ?invite= diredirect ke halaman undangan terpisah
     (function() {
+        showCollabSkeleton();
         loadCollab();
         var params = new URLSearchParams(window.location.search);
         var inviteId = params.get('invite');

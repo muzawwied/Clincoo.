@@ -127,6 +127,33 @@
         );
     }
 
+    // Undangan kedaluwarsa setelah 1 hari (24 jam) sejak dibuat
+    var INVITE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+    function isInviteExpired(inv) {
+        var raw = inv && inv.created_date ? String(inv.created_date).replace(' ', 'T') : '';
+        if (!raw) return false;
+        if (raw.charAt(raw.length - 1) !== 'Z') raw += 'Z';
+        var d = new Date(raw);
+        if (isNaN(d.getTime())) return false;
+        return (Date.now() - d.getTime()) > INVITE_MAX_AGE_MS;
+    }
+
+    function showExpired(invite) {
+        render(
+            '<div class="flex justify-center mb-8">' +
+                '<span class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">Clincoo</span>' +
+            '</div>' +
+            '<div class="flex justify-center mb-6">' +
+                '<div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-[#111] flex items-center justify-center">' +
+                    '<i data-lucide="clock" class="w-7 h-7 text-gray-400"></i>' +
+                '</div>' +
+            '</div>' +
+            '<h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-3">Undangan kedaluwarsa</h1>' +
+            '<p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-10">Undangan ini sudah tidak berlaku karena melewati 1 hari. Minta ' + esc(invite.invited_by) + ' mengirim undangan baru.</p>' +
+            '<a href="kolaborasi.html" class="block w-full py-3.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors">Ke Halaman Kolaborasi</a>'
+        );
+    }
+
     function showInactive(invite) {
         render(
             '<div class="flex justify-center mb-8">' +
@@ -212,7 +239,8 @@
         .then(function(res) {
             if (res.success && res.invite) {
                 activeInvite = res.invite;
-                if (res.invite.status === 'pending') showPending(res.invite);
+                if (res.invite.status === 'pending' && isInviteExpired(res.invite)) showExpired(res.invite);
+                else if (res.invite.status === 'pending') showPending(res.invite);
                 else if (res.invite.status === 'accepted') showAccepted(res.invite);
                 else if (res.invite.status === 'declined') showDeclined(res.invite);
                 else showInactive(res.invite);
