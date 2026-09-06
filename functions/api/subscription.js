@@ -162,6 +162,11 @@ export async function onRequestPost({ request, env }) {
               link: 'https://muzawwied.github.io/Clincoo./akun/langganan.html'
             });
           } catch (e2) {}
+          // Catat aktivitas langganan di halaman Aktivitas (per-akun)
+          try {
+            await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
+              .bind('subscription', 'Langganan ' + validPlan + ' (' + billing + ') aktif — ' + formatIDR(totalPrice) + ' dari Saldo Dompet', subUid).run();
+          } catch (eSub) {}
           if (user && user.email) {
             try {
               await sendEmail(env, {

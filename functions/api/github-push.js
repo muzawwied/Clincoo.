@@ -1,4 +1,5 @@
 // Cloudflare Pages Functions - Push project files to GitHub + trigger Cloudflare Pages deploy
+import { getUserByToken, getToken } from './auth/shared.js';
 // POST /api/github-push { project_id, repo (owner/name), branch, commit_message }
 
 const CORS = {
@@ -87,8 +88,9 @@ export async function onRequestPost({ request, env }) {
     }
 
     const failedFiles = results.filter(r => !r.ok);
-    await db.prepare('INSERT INTO activity_log (action, details) VALUES (?, ?)')
-      .bind('deploy_triggered', `Push ke ${repo}@${branch}: ${results.length - failedFiles.length}/${results.length} file berhasil`).run();
+    const ghUser = await getUserByToken(env.DB, getToken(request)).catch(() => null);
+    await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
+      .bind('deploy_triggered', `Push ke ${repo}@${branch}: ${results.length - failedFiles.length}/${results.length} file berhasil`, ghUser ? ghUser.id : null).run();
     await db.prepare('INSERT INTO deploy_logs (project_id, status, url, message) VALUES (?, ?, ?, ?)')
       .bind(projectId, failedFiles.length === 0 ? 'success' : 'partial', `https://github.com/${repo}`, `Push ${results.length - failedFiles.length}/${results.length} file`).run();
 

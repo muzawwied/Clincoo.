@@ -15,6 +15,10 @@ export async function onRequestPost({ request, env }) {
     const ok = await verifyPassword(password, user.password_hash);
     if (!ok) return json({ error: 'Email atau kata sandi salah' }, 401);
     const token = await createSession(db, user.id);
+    try {
+      await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
+        .bind('login', 'Login berhasil dari perangkat baru', user.id).run();
+    } catch (e2) { /* aktivitas opsional */ }
     return json({ success: true, token, user: publicUser(user) });
   } catch (e) {
     return json({ error: e.message }, 500);

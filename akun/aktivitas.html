@@ -214,19 +214,30 @@
               return;
             }
             const iconMap = {
+              'login': 'log-in',
+              'login_detected': 'log-in',
+              'delete_project': 'folder-minus',
+              'wallet_transaction': 'wallet',
+              'topup': 'wallet',
+              'topup_created': 'receipt',
+              'topup_paid': 'badge-check',
+              'subscription': 'crown',
+              'subscribe': 'crown',
               'deploy_triggered': 'rocket',
-              'env_var_added': 'key',
-              'env_var_deleted': 'trash',
+              'redeploy_triggered': 'rocket',
+              'settings_update': 'settings',
+              'project_settings_update': 'sliders-horizontal',
               'security_updated': 'shield',
-              'notification': 'bell',
-              'system': 'settings',
-              'github': 'github'
+              'profile_updated': 'user-cog',
+              'preferences_update': 'sliders-horizontal',
+              'env_var_added': 'key',
+              'env_var_deleted': 'trash'
             };
             for (let a of activities) {
               const icon = iconMap[a.action] || 'activity';
               const time = a.created_at ? new Date(a.created_at.replace(' ', 'T') + 'Z').toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
               const date = a.created_at ? new Date(a.created_at.replace(' ', 'T') + 'Z').toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '';
-              addActivity(a.action.replace(/_/g, ' '), (a.details || '') + ' \u00b7 ' + date + ', ' + time + ' WIB', icon);
+              addActivity(a.action.replace(/_/g, ' '), (a.details || '') + ' \u00b7 ' + date + ', ' + time + ' WIB', icon, time);
             }
           } catch (e) {
             console.error('Failed to load activities:', e);
@@ -235,7 +246,7 @@
         }
 
 
-        function addActivity(title, desc, iconName) {
+        function addActivity(title, desc, iconName, timeStr) {
             const list = document.getElementById('activity-list');
             const emptyState = document.getElementById('empty-state');
             
@@ -243,7 +254,7 @@
                 emptyState.style.display = 'none';
             }
 
-            const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            timeStr = timeStr || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
             const item = document.createElement('div');
             
             item.className = 'py-4 flex items-start gap-4 transition-colors hover:bg-gray-50/50 px-2 rounded-xl opacity-0 translate-y-2 transition-all duration-300';
