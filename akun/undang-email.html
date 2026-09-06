@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="../js/auth-client.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clincoo - Undang via Email</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
+    <script src="https://unpkg.com/lucide@1.41.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #ffffff !important; }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600 { color: #888888 !important; }
+        body.dark-mode .text-gray-500 { color: #666666 !important; }
+        body.dark-mode .border-gray-200, body.dark-mode .border-gray-300 { border-color: #222222 !important; }
+        body.dark-mode .border-gray-100 { border-color: #1a1a1a !important; }
+        body.dark-mode .bg-gray-50, body.dark-mode .bg-gray-100 { background-color: #111111 !important; }
+        body.dark-mode .hover\:bg-gray-50:hover { background-color: #1a1a1a !important; }
+        body.dark-mode input, body.dark-mode select {
+            background-color: #000000; color: #ffffff; border-color: #222222;
+        }
+        body.dark-mode input:focus, body.dark-mode select:focus { border-color: #444444; outline: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-900 pt-16 bg-white dark:bg-black transition-colors duration-300 relative">
+    <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+
+    <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <div class="w-10"></div>
+    </header>
+
+    <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 md:px-8 pb-12 pt-6 flex flex-col">
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Undang via Email</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-6">Kirim undangan kolaborasi ke rekan tim Anda melalui email.</p>
+
+        <div class="mb-4 flex gap-1.5 items-center">
+            <div class="relative flex-1">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="mail" class="h-4 w-4 text-gray-400"></i>
+                </div>
+                <input type="email" id="invite-email" placeholder="contoh@perusahaan.com" class="block w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-[#333] bg-gray-50 dark:bg-black text-gray-900 dark:text-white focus:bg-white dark:focus:bg-[#0a0a0a] outline-none placeholder-gray-400 h-[42px]">
+            </div>
+
+            <div class="relative flex-shrink-0" id="invite-role-container">
+                <button type="button" onclick="toggleInviteRoleDropdown()" class="h-[42px] px-3.5 py-2.5 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl flex items-center gap-1.5 hover:bg-gray-100 dark:hover:bg-[#222] focus:outline-none">
+                    <span id="selected-invite-role" class="text-sm font-medium text-gray-700 dark:text-gray-300">Viewer</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                </button>
+
+                <div id="invite-role-dropdown" class="hidden absolute right-0 mt-2 w-36 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border border-gray-100 dark:border-[#222] py-1 z-50">
+                    <button onclick="selectInviteRole('Viewer')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between transition-colors focus:outline-none">
+                        <span>Viewer</span>
+                        <i data-lucide="check" class="w-3 h-3 text-gray-900 dark:text-white" data-invite-role="Viewer"></i>
+                    </button>
+                    <button onclick="selectInviteRole('Editor')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between transition-colors focus:outline-none">
+                        <span>Editor</span>
+                        <i data-lucide="check" class="w-3 h-3 text-gray-900 dark:text-white hidden" data-invite-role="Editor"></i>
+                    </button>
+                    <button onclick="selectInviteRole('Admin')" class="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between transition-colors focus:outline-none">
+                        <span>Admin</span>
+                        <i data-lucide="check" class="w-3 h-3 text-gray-900 dark:text-white hidden" data-invite-role="Admin"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button id="send-email-btn" onclick="sendEmailInvite()" class="w-full py-2.5 px-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-semibold hover:bg-black dark:hover:bg-gray-100 transition-colors focus:outline-none flex justify-center items-center shadow-lg shadow-gray-900/10 dark:shadow-white/5">
+            Kirim Undangan
+        </button>
+        <p id="invite-error" class="hidden text-[12px] text-red-500 dark:text-red-400 mt-2 text-center leading-snug"></p>
+    </main>
+
+    <script>
+    const COLLAB_API = 'https://koda-da05205d.base44.app/functions/collabInvite';
+    const collabData = { members: [], pending: [] };
+
+    try { lucide.createIcons(); } catch (e) {}
+
+    function getInviterName() {
+        try {
+            var p = JSON.parse(localStorage.getItem('clincoo_profile') || localStorage.getItem('clincoo_user') || 'null');
+            if (p && (p.display_name || p.username)) return p.display_name || p.username;
+        } catch (e) {}
+        return 'Pemilik proyek';
+    }
+
+    function invitePageUrl() {
+        var dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+        return window.location.origin + dir + 'terima-undangan.html';
+    }
+
+    var INVITE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+    function isInviteExpired(inv) {
+        var raw = inv && inv.created_date ? String(inv.created_date).replace(' ', 'T') : '';
+        if (!raw) return false;
+        if (raw.charAt(raw.length - 1) !== 'Z') raw += 'Z';
+        var d = new Date(raw);
+        if (isNaN(d.getTime())) return false;
+        return (Date.now() - d.getTime()) > INVITE_MAX_AGE_MS;
+    }
+
+    (function loadCollabForValidation() {
+        fetch(COLLAB_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'list' })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res && res.success) {
+                collabData.members = res.members || [];
+                collabData.pending = (res.pending || []).filter(function(p) { return !isInviteExpired(p); });
+            }
+        })
+        .catch(function() {});
+    })();
+
+    function toggleInviteRoleDropdown() {
+        const dropdown = document.getElementById('invite-role-dropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('hidden');
+            updateInviteRoleChecks();
+        }
+    }
+
+    function closeInviteRoleDropdown() {
+        const dropdown = document.getElementById('invite-role-dropdown');
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+            dropdown.classList.add('hidden');
+        }
+    }
+
+    function selectInviteRole(role) {
+        document.getElementById('selected-invite-role').innerText = role;
+        closeInviteRoleDropdown();
+    }
+
+    function updateInviteRoleChecks() {
+        const currentRole = document.getElementById('selected-invite-role').innerText;
+        document.querySelectorAll('#invite-role-dropdown [data-lucide="check"]').forEach(icon => {
+            if (icon.getAttribute('data-invite-role') === currentRole) {
+                icon.classList.remove('hidden');
+            } else {
+                icon.classList.add('hidden');
+            }
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        const container = document.getElementById('invite-role-container');
+        if (container && !container.contains(e.target)) closeInviteRoleDropdown();
+    });
+
+    function checkDuplicateInviteEmail(email) {
+        var e = String(email || '').toLowerCase();
+        var isMember = (collabData.members || []).some(function(m) { return (m.email || '').toLowerCase() === e; });
+        if (isMember) return 'Email ini sudah terdaftar sebagai anggota proyek.';
+        var isPending = (collabData.pending || []).some(function(p) { return (p.email || '').toLowerCase() === e; });
+        if (isPending) return 'Email ini sudah diundang sebelumnya dan masih menunggu diterima.';
+        return null;
+    }
+
+    function showInviteEmailError(msg) {
+        var errEl = document.getElementById('invite-error');
+        if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
+    }
+
+    function hideInviteEmailError() {
+        var errEl = document.getElementById('invite-error');
+        if (errEl) { errEl.textContent = ''; errEl.classList.add('hidden'); }
+    }
+
+    (function() {
+        var inp = document.getElementById('invite-email');
+        if (inp) {
+            inp.addEventListener('input', function() {
+                var v = inp.value.trim();
+                if (!v || !v.includes('@')) { hideInviteEmailError(); return; }
+                var msg = checkDuplicateInviteEmail(v);
+                if (msg) showInviteEmailError(msg); else hideInviteEmailError();
+            });
+        }
+    })();
+
+    function sendEmailInvite() {
+        const emailInput = document.getElementById('invite-email');
+        const errEl = document.getElementById('invite-error');
+        errEl.classList.add('hidden');
+        errEl.textContent = '';
+
+        const email = emailInput.value.trim();
+        if (!email || !email.includes('@')) {
+            showInviteEmailError('Masukkan alamat email yang valid.');
+            emailInput.focus();
+            return;
+        }
+        var dupMsg = checkDuplicateInviteEmail(email);
+        if (dupMsg) {
+            showInviteEmailError(dupMsg);
+            emailInput.focus();
+            return;
+        }
+
+        var roleEl = document.getElementById('selected-invite-role'); var role = ((roleEl && roleEl.textContent) || 'Viewer').trim();
+        const btn = document.getElementById('send-email-btn');
+
+        btn.innerText = "Mengirim...";
+        btn.disabled = true;
+
+        fetch('https://koda-da05205d.base44.app/functions/sendInviteEmail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to: email, role: role, project: 'Clincoo', link: invitePageUrl(), inviter: getInviterName() })
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                btn.innerText = "Terkirim!";
+                btn.classList.replace('bg-gray-900', 'bg-green-600');
+                btn.classList.replace('dark:bg-white', 'dark:bg-green-500');
+                btn.classList.replace('dark:text-gray-900', 'dark:text-white');
+                setTimeout(function() { window.location.href = 'kolaborasi.html'; }, 1200);
+            } else {
+                btn.innerText = "Kirim Undangan";
+                btn.disabled = false;
+                let msg = res.message || 'Gagal mengirim undangan. Coba lagi.';
+                if (res.error === 'domain_not_verified') {
+                    msg = 'Email hanya bisa dikirim ke alamat pemilik akun Resend untuk saat ini. Verifikasi domain di resend.com/domains agar undangan bisa dikirim ke siapa pun.';
+                }
+                errEl.textContent = msg;
+                errEl.classList.remove('hidden');
+            }
+        })
+        .catch(function(err) {
+            btn.innerText = "Kirim Undangan";
+            btn.disabled = false;
+            var detail = (err && err.message) ? err.message : 'periksa koneksi Anda';
+            errEl.textContent = 'Tidak dapat terhubung ke server email (' + detail + '). Coba lagi.';
+            errEl.classList.remove('hidden');
+        });
+    }
+    </script>
+</body>
+</html>
