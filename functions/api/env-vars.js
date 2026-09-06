@@ -23,7 +23,8 @@ export async function onRequestGet({ request, env }) {
       const T = await getProjectTables(env.DB, projectId);
       rows = await env.DB.prepare(`SELECT id, project_id, key, value, is_secret, created_at, updated_at FROM ${T.envVars} WHERE project_id = ? ORDER BY created_at DESC`).bind(projectId).all();
     } else {
-      rows = await env.DB.prepare('SELECT id, project_id, key, value, is_secret, created_at, updated_at FROM env_vars ORDER BY created_at DESC').all();
+      // Tanpa project_id: hanya tampilkan variabel global (bukan milik proyek lain)
+      rows = await env.DB.prepare("SELECT id, project_id, key, value, is_secret, created_at, updated_at FROM env_vars WHERE project_id IS NULL OR project_id = '' ORDER BY created_at DESC").all();
     }
     const vars = rows.results.map(r => ({ ...r, value: r.is_secret ? '••••••••' : r.value }));
     return new Response(JSON.stringify({ env_vars: vars }), {
