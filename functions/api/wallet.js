@@ -25,8 +25,9 @@ async function getSecret(env, key) {
 }
 
 // Callback top up (Base44/Xendit) datang TANPA login — identifikasi pemilik akun
-// dari email di payload (email/payer_email) atau fallback PERSONAL_EMAIL (env_vars),
-// lalu scope saldo/transaksi/notifikasi/email ke akun pemilik.
+// dari email di payload (email/payer_email) saja, lalu scope saldo/transaksi/notifikasi/email
+// ke akun pemilik. Tanpa token ATAU email dikenal => ditolak (fail-closed).
+// Webhook Xendit asli memakai /api/topup dengan verifikasi x-callback-token, bukan endpoint ini.
 async function resolveOwner(env, request, body) {
   const u = await currentUser(env, request);
   if (u) return u;
@@ -35,8 +36,6 @@ async function resolveOwner(env, request, body) {
     if (body.email) cands.push(body.email);
     if (body.payer_email) cands.push(body.payer_email);
   }
-  const pe = await getSecret(env, 'PERSONAL_EMAIL');
-  if (pe) cands.push(pe);
   for (const c of cands) {
     if (!c) continue;
     const found = await getUserByEmail(env.DB, c);
