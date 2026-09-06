@@ -4,6 +4,7 @@
 // DELETE /api/projects?id=<id>    -> hapus satu proyek (tanpa id = semua milik user)
 // Semua aksi wajib Bearer token (per akun, terisolasi lewat user_id).
 import { currentUser } from './user-scope.js';
+import { tableFor } from './_tables.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -83,6 +84,12 @@ export async function onRequestPost({ request, env }) {
     if (action === 'delete') {
       if (!body.id) return j({ error: 'id required' }, 400);
       await db.prepare('DELETE FROM user_projects WHERE id = ? AND user_id = ?').bind(String(body.id), user.id).run();
+      // Kaskade: hapus SEMUA data proyek (chat, file workspace, settings, env vars, log deploy)
+      try {
+        for (const t of ['chat_sessions', 'chat_messages', 'project_files', 'env_vars', 'project_settings', 'security_settings', 'deploy_logs']) {
+          await db.prepare(`DROP TABLE IF EXISTS ${tableFor(t, String(body.id))}`).run();
+        }
+      } catch (e) {}
       return j({ success: true });
     }
     if (action === 'delete_all') {

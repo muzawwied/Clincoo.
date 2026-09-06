@@ -1102,7 +1102,25 @@
             if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
             _pendingDeleteId = null;
         }
-        function doDeleteProject(id) {
+        async function doDeleteProject(id) {
+            // data lokal proyek (chat, file workspace, penunjuk aktif)
+            try {
+                localStorage.removeItem('clincoo_ls_chat_' + id);
+                localStorage.removeItem('clincoo_workspace_files_' + id);
+                localStorage.removeItem('clincoo_current_chat_msg_' + id);
+                if (localStorage.getItem('clincoo_current_project_id') === id) localStorage.removeItem('clincoo_current_project_id');
+            } catch (e) {}
+            const tok = localStorage.getItem('clincoo_auth_token') || '';
+            const API_ROOT = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
+            const authHdr = { 'Content-Type': 'application/json', ...(tok ? { Authorization: 'Bearer ' + tok } : {}) };
+            // tarik publish-an: situs + link publik (Cloudflare Pages) dihapus
+            try {
+                await fetch(API_ROOT + '/deploy', { method: 'POST', headers: authHdr, body: JSON.stringify({ project_id: id, action: 'unpublish' }) });
+            } catch (e) {}
+            // hapus SEMUA data proyek di server (chat, file, settings, env vars, log)
+            try {
+                await fetch(PROJECTS_API, { method: 'POST', headers: authHdr, body: JSON.stringify({ action: 'delete', id: id }) });
+            } catch (e) {}
             let projects = [];
             try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
             projects = projects.filter(p => p.id !== id);
@@ -1199,7 +1217,7 @@
   <div class="bg-white rounded-md w-full max-w-xs px-5 pt-5 pb-4 text-center">
     <h3 class="text-base font-semibold text-gray-900">Hapus proyek ini?</h3>
     <p id="confirm-delete-name" class="text-sm text-gray-500 mt-1 px-2 truncate"></p>
-    <p class="text-[13px] text-gray-400 mt-2 leading-snug">Situs yang sudah dipublish <span class="text-gray-500">tidak ikut terhapus</span>.</p>
+    <p class="text-[13px] text-gray-400 mt-2 leading-snug">Semua data proyek akan dihapus, <span class="text-gray-500">termasuk situs yang sudah dipublish dan link publiknya</span>.</p>
     <div class="flex items-center justify-center gap-10 mt-5">
       <button type="button" id="confirm-delete-cancel" class="text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors px-1 py-0.5">Batal</button>
       <button type="button" id="confirm-delete-ok" class="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors px-1 py-0.5">Hapus</button>
