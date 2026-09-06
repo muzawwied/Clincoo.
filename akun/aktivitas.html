@@ -40,7 +40,25 @@
         body.dark-mode button[onclick="toggleSidebar()"],
         body.dark-mode button[onclick="history.back()"],
         body.dark-mode button[onclick="navigateTo(\'page-home\')"],
-        body.dark-mode .header-glass button[onclick],
+        .shimmer-bar {
+        display: inline-block;
+        height: 1em;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+        width: 60px;
+        vertical-align: middle;
+    }
+    .shimmer-bar-sm { height: 0.75em; width: 40px; }
+    .shimmer-bar-md { height: 0.875em; width: 120px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    body.dark-mode .shimmer-bar {
+        background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+        background-size: 200% 100%;
+    }
+    body.dark-mode .skel-dot { background-color: #141414 !important; border-color: #222222 !important; }
+    body.dark-mode .header-glass button[onclick],
         body.dark-mode header button[onclick] {
             background-color: #000000 !important;
             border: 1.5px solid rgba(255,255,255,0.4) !important;
@@ -155,15 +173,10 @@
         <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Aktivitas</h1>
         <div class="w-10"></div>
     </header>
-    <main class="flex-1 w-full max-w-2xl mx-auto px-6 py-8 flex flex-col">
-        <div class="flex items-center justify-between mb-6 pb-4">
-            <div>
-               
-            </div>
-        </div>
+    <main class="flex-1 w-full max-w-2xl mx-auto px-6 pt-2 flex flex-col">
 
         <div id="activity-list" class="flex flex-col divide-y divide-gray-100">
-            <div id="empty-state" class="flex flex-col items-center justify-center py-16 text-center">
+            <div id="empty-state" style="display:none" class="flex flex-col items-center justify-center py-16 text-center">
                 <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4">
                     <i data-lucide="history" class="w-10 h-10 text-gray-400"></i>
                 </div>
@@ -185,6 +198,7 @@
     <script src="../js/api.js"></script>
 <script>
         lucide.createIcons();
+        showActivitySkeleton();
         loadActivitiesFromD1();
 
         // Shared Notification System
@@ -204,11 +218,38 @@
           saveNotifications(n);
         }
 
+        // Skeleton shimmer saat data masih dimuat
+        function showActivitySkeleton() {
+          const list = document.getElementById('activity-list');
+          const emptyState = document.getElementById('empty-state');
+          if (emptyState) emptyState.style.display = 'none';
+          list.innerHTML = '';
+          const skel = document.createElement('div');
+          skel.id = 'activity-skeleton';
+          for (let i = 0; i < 6; i++) {
+            skel.innerHTML += `
+              <div class="py-4 flex items-start gap-4 px-2">
+                <div class="skel-dot w-10 h-10 rounded-full bg-gray-50 border border-gray-100 shrink-0"></div>
+                <div class="flex-1 space-y-2 pt-1">
+                  <span class="shimmer-bar shimmer-bar-md"></span>
+                  <span class="shimmer-bar shimmer-bar-sm" style="width:170px;"></span>
+                </div>
+                <span class="shimmer-bar shimmer-bar-sm shrink-0"></span>
+              </div>`;
+          }
+          list.appendChild(skel);
+        }
+        function clearActivitySkeleton() {
+          const skel = document.getElementById('activity-skeleton');
+          if (skel) skel.remove();
+        }
+
         // Load activities from D1 database (real backend)
         async function loadActivitiesFromD1() {
           try {
             const data = await ClincooAPI.getActivity(50);
             const activities = data.activities || [];
+            clearActivitySkeleton();
             if (activities.length === 0) {
               document.getElementById('empty-state').style.display = 'flex';
               return;
@@ -232,6 +273,7 @@
             }
           } catch (e) {
             console.error('Failed to load activities:', e);
+            clearActivitySkeleton();
             document.getElementById('empty-state').style.display = 'flex';
           }
         }
