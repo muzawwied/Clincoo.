@@ -109,7 +109,7 @@
             <h4 class="text-base font-semibold text-red-600 dark:text-red-400">Hapus Proyek</h4>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Menghapus proyek secara permanen beserta semua data terkait</p>
           </div>
-          <button type="button" class="flex-shrink-0 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors cursor-pointer">Hapus Proyek...</button>
+          <button type="button" id="btn-hapus-proyek" class="flex-shrink-0 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors cursor-pointer">Hapus Proyek...</button>
         </div>
       </div>
 
@@ -119,5 +119,62 @@
     let isEdited=false;function showActionButtons(){if(!isEdited){isEdited=true;const c=document.getElementById('action-buttons');c.classList.remove('hidden');c.classList.add('flex');void c.offsetWidth;c.classList.remove('opacity-0');c.classList.add('opacity-100');}}function cancelChanges(){window.location.reload();}function saveChanges(){const btn=document.querySelector('#action-buttons button.bg-blue-600');if(!btn)return;btn.innerText='Menyimpan...';btn.disabled=true;btn.classList.add('opacity-80','cursor-not-allowed');setTimeout(()=>{btn.innerText='Tersimpan!';btn.classList.replace('bg-blue-600','bg-emerald-500');btn.classList.replace('hover:bg-blue-700','hover:bg-emerald-600');setTimeout(()=>window.location.reload(),800);},800);}document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('input,textarea,select').forEach(input=>{input.addEventListener('input',showActionButtons);input.addEventListener('change',showActionButtons);});});function toggleSwitch(idPrefix){showActionButtons();const bg=document.getElementById(idPrefix+'-bg');const knob=document.getElementById(idPrefix+'-knob');if(bg.classList.contains('bg-blue-500')){bg.classList.replace('bg-blue-500','bg-gray-200');bg.classList.add('dark:bg-slate-700');knob.classList.remove('translate-x-5');}else{bg.classList.remove('bg-gray-200','dark:bg-slate-700');bg.classList.add('bg-blue-500');knob.classList.add('translate-x-5');}}
   </script>
     <script>if (window.lucide) { lucide.createIcons(); }</script>
+
+<!-- Popup konfirmasi hapus proyek (CTA teks, radius kecil) -->
+<div id="confirm-delete-modal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">
+  <div class="bg-white rounded-md w-full max-w-xs px-5 pt-5 pb-4 text-center">
+    <h3 class="text-base font-semibold text-gray-900">Hapus proyek ini?</h3>
+    <p id="confirm-delete-name" class="text-sm text-gray-500 mt-1 px-2 truncate"></p>
+    <p class="text-[13px] text-gray-400 mt-2 leading-snug">Semua data proyek akan dihapus, <span class="text-gray-500">termasuk situs yang sudah dipublish dan link publiknya</span>.</p>
+    <div class="flex items-center justify-center gap-10 mt-5">
+      <button type="button" id="confirm-delete-cancel" class="text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors px-1 py-0.5">Batal</button>
+      <button type="button" id="confirm-delete-ok" class="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors px-1 py-0.5">Hapus</button>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  function apiRoot() { return (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api'; }
+  document.addEventListener('DOMContentLoaded', function () {
+    var pid = new URLSearchParams(location.search).get('id') || localStorage.getItem('clincoo_current_project_id') || '';
+    var btn = document.getElementById('btn-hapus-proyek');
+    if (!btn || !pid) return;
+    var modal = document.getElementById('confirm-delete-modal');
+    var okBtn = document.getElementById('confirm-delete-ok');
+    var cancelBtn = document.getElementById('confirm-delete-cancel');
+    var nameEl = document.getElementById('confirm-delete-name');
+    var title = pid;
+    try {
+      var list = JSON.parse(localStorage.getItem('clincoo_projects') || '[]');
+      var p = list.find(function (x) { return x.id === pid; });
+      if (p && p.title) title = p.title;
+    } catch (e) {}
+    nameEl.textContent = '"' + title + '"';
+    btn.addEventListener('click', function () { modal.classList.remove('hidden'); modal.classList.add('flex'); });
+    function close() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+    cancelBtn.addEventListener('click', close);
+    okBtn.addEventListener('click', async function () {
+      okBtn.textContent = 'Menghapus...'; okBtn.disabled = true; cancelBtn.disabled = true;
+      try {
+        localStorage.removeItem('clincoo_ls_chat_' + pid);
+        localStorage.removeItem('clincoo_workspace_files_' + pid);
+        if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
+      } catch (e) {}
+      var tok = localStorage.getItem('clincoo_auth_token') || '';
+      var hdrs = { 'Content-Type': 'application/json' };
+      if (tok) hdrs['Authorization'] = 'Bearer ' + tok;
+      try { await fetch(apiRoot() + '/deploy', { method: 'POST', headers: hdrs, body: JSON.stringify({ project_id: pid, action: 'unpublish' }) }); } catch (e) {}
+      try { await fetch(apiRoot() + '/projects', { method: 'POST', headers: hdrs, body: JSON.stringify({ action: 'delete', id: pid }) }); } catch (e) {}
+      try {
+        var list2 = JSON.parse(localStorage.getItem('clincoo_projects') || '[]');
+        list2 = list2.filter(function (x) { return x.id !== pid; });
+        localStorage.setItem('clincoo_projects', JSON.stringify(list2));
+      } catch (e) {}
+      window.location.href = (location.hostname.indexOf('github.io') !== -1) ? '/Clincoo./' : '/';
+    });
+  });
+})();
+</script>
 </body>
 </html>
