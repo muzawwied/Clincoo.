@@ -80,9 +80,36 @@
             border-top: 3px solid #fff;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ==== Panel Hero 3D (split-screen login ala Cloudflare) ==== */
+        .hero-grid {
+            background-image: linear-gradient(to right, rgba(0,0,0,0.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.045) 1px, transparent 1px);
+            background-size: 48px 48px;
+            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+        }
+        body.dark-mode .hero-grid {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+        }
+        .hero-glow { background: radial-gradient(circle, rgba(120,120,120,0.14), transparent 65%); }
+        .hero-glow2 { background: radial-gradient(circle, rgba(120,120,120,0.10), transparent 65%); }
+        body.dark-mode .hero-glow { background: radial-gradient(circle, rgba(255,255,255,0.07), transparent 65%); }
+        body.dark-mode .hero-glow2 { background: radial-gradient(circle, rgba(255,255,255,0.05), transparent 65%); }
+        .scene { perspective: 900px; }
+        .cube { width: 130px; height: 130px; position: relative; transform-style: preserve-3d; animation: cube-spin 16s linear infinite; }
+        .cube .face { position: absolute; inset: 0; border: 1.5px solid rgba(0,0,0,0.28); border-radius: 18px; background: rgba(255,255,255,0.45); }
+        body.dark-mode .cube .face { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.015); }
+        .cube .f-front  { transform: rotateY(0deg) translateZ(65px); }
+        .cube .f-back   { transform: rotateY(180deg) translateZ(65px); }
+        .cube .f-left   { transform: rotateY(-90deg) translateZ(65px); }
+        .cube .f-right  { transform: rotateY(90deg) translateZ(65px); }
+        .cube .f-top    { transform: rotateX(90deg) translateZ(65px); }
+        .cube .f-bottom { transform: rotateX(-90deg) translateZ(65px); }
+        @keyframes cube-spin { from { transform: rotateX(-18deg) rotateY(0deg); } to { transform: rotateX(-18deg) rotateY(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .cube { animation: none; } }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-3 sm:p-6 selection:bg-gray-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
+<body class="min-h-screen flex flex-col lg:flex-row selection:bg-gray-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
     <!-- Script Deteksi Tema (Langsung dieksekusi agar tidak flash) -->
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((t==="Sistem (Default)"||!t)&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
 
@@ -92,7 +119,8 @@
     </div>
 
     <!-- Kontainer Utama -->
-    <div class="w-full max-w-[700px] flex flex-col relative z-10 animate-fade-in mx-auto">
+    <div class="w-full lg:w-1/2 flex flex-col justify-center min-h-screen relative z-10 animate-fade-in px-2 sm:px-8 xl:px-16">
+        <div class="w-full max-w-[480px] mx-auto">
         
         <!-- Header Section -->
         <div class="px-2 sm:px-8 pt-10 pb-6 text-center">
@@ -169,6 +197,30 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">Belum punya akun? <a href="../akun/daftar/" class="font-bold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Daftar sekarang</a></p>
                 </div>
             </div>
+
+        </div>
+    </div>
+
+    <!-- Panel Kanan: Visual 3D ala Cloudflare (hanya tampil di layar lebar) -->
+    <div id="hero-panel" class="hidden lg:flex w-1/2 relative items-center justify-center overflow-hidden bg-gray-50/60 dark:bg-[#0a0a0a] border-l border-gray-200/80 dark:border-white/10">
+        <div class="hero-grid absolute inset-0 opacity-70"></div>
+        <div class="hero-glow absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full blur-3xl"></div>
+        <div class="hero-glow2 absolute -bottom-40 -left-24 w-[420px] h-[420px] rounded-full blur-3xl"></div>
+        <div class="relative z-10 flex flex-col items-center text-center px-12">
+            <div class="scene mb-10">
+                <div class="cube">
+                    <div class="face f-front"></div>
+                    <div class="face f-back"></div>
+                    <div class="face f-left"></div>
+                    <div class="face f-right"></div>
+                    <div class="face f-top"></div>
+                    <div class="face f-bottom"></div>
+                </div>
+            </div>
+            <h2 class="font-['Space_Grotesk'] font-extrabold text-4xl text-gray-900 dark:text-white tracking-tight">Clincoo</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-3 max-w-xs leading-relaxed">Ruang kerja untuk membangun, mendeploy, dan berkolaborasi — semuanya dalam satu tempat.</p>
+        </div>
+    </div>
 
             <!-- Tampilan Daftar -->
             <!-- Sistem Modal -->
