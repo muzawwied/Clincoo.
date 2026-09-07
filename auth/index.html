@@ -153,6 +153,23 @@
             50%      { transform: translateY(-12px) rotateX(-20deg) rotateY(360deg); }
         }
 
+        /* Cincin orbit ala Saturnus: dibagi 2 setengah supaya keliatan MENGELILINGI kubus,
+           bukan menembusnya. Setengah "back" (sisi jauh) digambar sebelum kubus,
+           setengah "front" (sisi dekat) digambar setelah kubus. */
+        .orbit-ring { position: absolute; top: 50%; left: 50%; border-radius: 9999px; }
+        .orbit-ring.back  { clip-path: inset(0 0 50% 0); }
+        .orbit-ring.front { clip-path: inset(50% 0 0 0); }
+        .ring-a { width: 230px; height: 230px; margin: -115px 0 0 -115px; border: 1.5px dashed rgba(0,0,0,0.20); animation: ring-a-spin 16s ease-in-out infinite; }
+        body.dark-mode .ring-a { border-color: rgba(255,255,255,0.18); }
+        .ring-b { width: 172px; height: 172px; margin: -86px 0 0 -86px; border: 1px solid rgba(0,0,0,0.10); animation: ring-b-spin 22s linear infinite; }
+        body.dark-mode .ring-b { border-color: rgba(255,255,255,0.09); }
+        @keyframes ring-a-spin {
+            0%   { transform: rotateX(68deg) rotateZ(0deg); }
+            50%  { transform: rotateX(80deg) rotateZ(180deg); }
+            100% { transform: rotateX(68deg) rotateZ(360deg); }
+        }
+        @keyframes ring-b-spin {
+            0%   { transform: rotateX(80deg) rotateZ(0deg); }
             50%  { transform: rotateX(70deg) rotateZ(-180deg); }
             100% { transform: rotateX(80deg) rotateZ(-360deg); }
         }
@@ -287,6 +304,8 @@
         <div class="hero-dot dot-5"></div>
         <div class="relative z-10 flex flex-col items-center text-center px-12">
             <div class="scene mb-12 relative">
+                <div class="orbit-ring ring-a back"></div>
+                <div class="orbit-ring ring-b back"></div>
                 <div class="cube-wrap">
                     <div class="cube">
                         <div class="face f-front"></div>
@@ -298,6 +317,8 @@
                     </div>
                     <div class="cube-shadow"></div>
                 </div>
+                <div class="orbit-ring ring-a front"></div>
+                <div class="orbit-ring ring-b front"></div>
                 <div class="cube-sm cs-a">
                     <div class="face f-front"></div>
                     <div class="face f-back"></div>
