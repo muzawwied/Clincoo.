@@ -1,6 +1,7 @@
 // Cloudflare Pages Functions - Wallet Backend (per-account)
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
 import { emailTemplate, formatIDR, sendEmail, notifyEvent, getUserByEmail } from './notify-helpers.js';
+import { getCpConnection, mirroredBalance, mirrorDelta } from './clincoopay-helpers.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -62,6 +63,14 @@ export async function onRequestGet({ request, env }) {
 
     const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
     const row = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
+    // ClincooPay: dompet terhubung → saldo live dari web Wallet (mirroring 2 arah, frontend tidak berubah)
+    if (user) {
+      const conn = await getCpConnection(db, user.id);
+      if (conn) {
+        const wb = await mirroredBalance(conn);
+        if (wb !== null) return j({ balance: wb, mirrored: true, wallet_address: conn.wallet_address });
+      }
+    }
     return j({ balance: parseFloat(row?.value || '0') });
   } catch (err) {
     return j({ error: err.message }, 500);
@@ -105,6 +114,18 @@ export async function onRequestPost({ request, env }) {
       const txId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
       await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(txId, title, parsedAmount, type, method || '', uid).run();
+
+      // ClincooPay: pengguna terhubung → saldo di web Wallet yang diubah (mirroring 2 arah)
+      const cpConn = await getCpConnection(db, uid);
+      if (cpConn && (type === 'in' || type === 'out')) {
+        const delta = type === 'in' ? Math.abs(parsedAmount) : -Math.abs(parsedAmount);
+        const mr = await mirrorDelta(cpConn, delta, 'Clincoo: ' + String(title), txId);
+        if (!mr.ok) {
+          const kurang = String(mr.error).indexOf('tidak cukup') >= 0;
+          return j({ error: kurang ? 'Saldo ClincooPay tidak cukup.' : mr.error }, kurang ? 402 : 502);
+        }
+        return j({ success: true, id: txId, balance: mr.balance, mirrored: true });
+      }
 
       const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
       let balance = parseFloat(balRow?.value || '0');
@@ -174,15 +195,20 @@ export async function onRequestPost({ request, env }) {
 
       const senderBalKey = await scopedKey(db, 'wallet_balance', user, 'balance');
       const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(senderBalKey).first();
-      const balance = parseFloat(balRow?.value || '0');
+      let balance = parseFloat(balRow?.value || '0');
+      // ClincooPay: pengirim terhubung → cek saldo live web Wallet
+      const senderConn = await getCpConnection(db, uid);
+      if (senderConn) {
+        const wb = await mirroredBalance(senderConn);
+        if (wb !== null) balance = wb;
+      }
       if (balance < amount) return j({ error: 'Saldo tidak cukup. Saldo Anda ' + formatIDR(balance) + '.', balance: balance, required: amount }, 402);
 
       const recvBalKey = await scopedKey(db, 'wallet_balance', target, 'balance');
       const txIdOut = 'TX-' + Math.floor(100000 + Math.random() * 900000);
       const txIdIn = 'TX-' + Math.floor(100000 + Math.random() * 900000);
       const recvRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(recvBalKey).first();
-      const recvBalance = parseFloat(recvRow?.value || '0') + amount;
-      const newBalance = balance - amount;
+      let newBalance = balance - amount;
       const senderLabel = (user.name || user.email || 'Pengirim');
       const targetLabel = (target.name || target.email || 'Penerima');
       const titleOut = 'Kirim Saldo ke ' + targetLabel + (note ? ' — ' + note : '');
@@ -194,11 +220,32 @@ export async function onRequestPost({ request, env }) {
       await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(txIdIn, titleIn, amount, 'in', 'Terima Saldo', target.id).run();
 
-      // Update saldo kedua pihak
-      await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
-        .bind(senderBalKey, String(newBalance)).run();
-      await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
-        .bind(recvBalKey, String(recvBalance)).run();
+      // ClincooPay: mirror debit pengirim ke web Wallet (idempotent via txIdOut)
+      if (senderConn) {
+        const mr = await mirrorDelta(senderConn, -amount, 'Clincoo: ' + titleOut, txIdOut);
+        if (!mr.ok) {
+          const kurang = String(mr.error).indexOf('tidak cukup') >= 0;
+          return j({ error: kurang ? 'Saldo ClincooPay tidak cukup.' : mr.error }, kurang ? 402 : 502);
+        }
+        newBalance = mr.balance;
+      }
+      // ClincooPay: mirror kredit penerima bila terhubung
+      const recvConn = await getCpConnection(db, target.id);
+      let recvBalance = parseFloat(recvRow?.value || '0') + amount;
+      if (recvConn) {
+        const mr2 = await mirrorDelta(recvConn, amount, 'Clincoo: ' + titleIn, txIdIn);
+        if (mr2.ok) recvBalance = mr2.balance;
+      }
+
+      // Update saldo kedua pihak (hanya yang LOKAL — pengguna terhubung ClincooPay dikelola web Wallet)
+      if (!senderConn) {
+        await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+          .bind(senderBalKey, String(newBalance)).run();
+      }
+      if (!recvConn) {
+        await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+          .bind(recvBalKey, String(recvBalance)).run();
+      }
 
       // Notifikasi in-app kedua pihak
       try {
@@ -249,6 +296,13 @@ export async function onRequestPost({ request, env }) {
 
     if (action === 'set_balance') {
       const balance = parseFloat(body.balance || 0);
+      const conn0 = await getCpConnection(db, uid);
+      if (conn0) {
+        const live = await mirroredBalance(conn0);
+        const mr = await mirrorDelta(conn0, Math.round(balance - (live || 0)), 'Clincoo: set saldo', 'CP-SET-' + Date.now());
+        if (!mr.ok) return j({ error: mr.error }, 502);
+        return j({ success: true, balance: mr.balance, mirrored: true });
+      }
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
         .bind(balKey, String(balance)).run();
       return j({ success: true, balance });

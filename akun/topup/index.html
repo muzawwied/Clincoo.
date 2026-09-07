@@ -194,6 +194,9 @@
                             <div class="radio-indicator shrink-0"></div>
                             <input type="radio" name="payment-method" value="ClincooPay" checked>
                         </label>
+
+                        <!-- Panel koneksi ClincooPay (login dompet web Wallet) -->
+                        <div id="clincoopay-connect" class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] p-4"></div>
                         <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
                             <div class="flex items-center space-x-3.5 flex-1 min-w-0 mr-2">
                                 <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
@@ -482,6 +485,10 @@
         }
 
         async function processClincooPay() {
+            if (cpConnected) {
+                showModal('Saldo Sudah Terhubung', 'Saldo ClincooPay dan saldo Clincoo kamu sudah tersinkron otomatis. Tidak perlu isi saldo — cukup isi dari aplikasi Wallet.');
+                return;
+            }
             var token = '';
             try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
             try {
@@ -501,6 +508,110 @@
                 showModal('Gagal', 'Tidak dapat terhubung ke server ClincooPay.');
             }
         }
+
+        // ===== ClincooPay: hubungkan/putuskan dompet web Wallet (mirroring saldo 2 arah) =====
+        var cpConnected = false;
+        function cpAuthHeaders() {
+            var token = '';
+            try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
+            return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+        }
+        function cpMask(addr) { return addr ? '0x…' + String(addr).slice(-6) : ''; }
+
+        async function cpLoad() {
+            var el = document.getElementById('clincoopay-connect');
+            if (!el) return;
+            try {
+                var st = await fetch(API_BASE + '/api/clincoopay', { headers: cpAuthHeaders() }).then(function(r) { return r.json(); });
+                cpConnected = !!st.connected;
+                if (st.connected) {
+                    var bal = (st.wallet_balance == null) ? '…' : 'Rp ' + Number(st.wallet_balance).toLocaleString('id-ID');
+                    el.innerHTML =
+                        '<div class="flex items-center justify-between gap-3">' +
+                        '<div class="flex items-center space-x-3 min-w-0">' +
+                        '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-gray-800">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-900 dark:text-white"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' +
+                        '</div>' +
+                        '<div class="min-w-0">' +
+                        '<p class="text-sm font-bold text-gray-900 dark:text-white truncate">Terhubung ke ' + cpMask(st.wallet_address) + '</p>' +
+                        '<p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Saldo tersinkron: ' + bal + '</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '<button type="button" onclick="cpUnlink()" class="shrink-0 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 hover:border-gray-900 dark:hover:border-white hover:text-gray-900 dark:hover:text-white transition-all">Putuskan</button>' +
+                        '</div>';
+                } else {
+                    el.innerHTML =
+                        '<div class="flex items-center justify-between gap-3">' +
+                        '<div class="min-w-0">' +
+                        '<p class="text-sm font-bold text-gray-900 dark:text-white">Dompet Belum Terhubung</p>' +
+                        '<p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Hubungkan dompet web Wallet agar saldo Clincoo tersinkron otomatis.</p>' +
+                        '</div>' +
+                        '<button type="button" onclick="cpShowForm()" class="shrink-0 px-4 py-2.5 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-black text-xs font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">Hubungkan</button>' +
+                        '</div>';
+                }
+            } catch (e) {
+                el.innerHTML = '<p class="text-[11px] md:text-xs text-gray-500">Gagal memuat status ClincooPay.</p>';
+            }
+        }
+
+        function cpShowForm() {
+            var el = document.getElementById('clincoopay-connect');
+            var inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-900 dark:focus:border-white transition-all';
+            el.innerHTML =
+                '<div class="space-y-3">' +
+                '<div>' +
+                '<p class="text-sm font-bold text-gray-900 dark:text-white mb-1">Hubungkan Dompet ClincooPay</p>' +
+                '<p class="text-[11px] md:text-xs text-gray-500">Masukkan alamat dompet web Wallet kamu (mulai 0x…) dan PIN wallet.</p>' +
+                '</div>' +
+                '<input id="cp-addr" type="text" placeholder="Alamat dompet (0x…)" class="' + inputCls + '">' +
+                '<input id="cp-pin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN wallet (6 digit)" class="' + inputCls + '">' +
+                '<p id="cp-error" class="text-xs text-red-500 hidden"></p>' +
+                '<div class="flex items-center gap-2">' +
+                '<button type="button" onclick="cpConnect()" class="flex-1 py-3 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-black text-xs font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">Hubungkan Dompet</button>' +
+                '<button type="button" onclick="cpLoad()" class="px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 hover:border-gray-900 dark:hover:border-white transition-all">Batal</button>' +
+                '</div>' +
+                '</div>';
+        }
+
+        async function cpConnect() {
+            var addr = (document.getElementById('cp-addr').value || '').trim();
+            var pin = (document.getElementById('cp-pin').value || '').trim();
+            var errEl = document.getElementById('cp-error');
+            if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { errEl.textContent = 'Alamat dompet tidak valid — harus 0x diikuti 40 karakter hex.'; errEl.classList.remove('hidden'); return; }
+            if (!/^\d{6}$/.test(pin)) { errEl.textContent = 'PIN harus 6 digit angka.'; errEl.classList.remove('hidden'); return; }
+            try {
+                var res = await fetch(API_BASE + '/api/clincoopay', {
+                    method: 'POST',
+                    headers: cpAuthHeaders(),
+                    body: JSON.stringify({ action: 'link', wallet_address: addr, pin: pin })
+                }).then(function(r) { return r.json(); });
+                if (!res.success) {
+                    if (res.need_login) { showModal('Sesi Berakhir', 'Silakan masuk ulang, lalu hubungkan dompet lagi.'); return; }
+                    errEl.textContent = res.error || 'Gagal menghubungkan dompet.';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                showModal('Dompet Terhubung', 'Saldo Clincoo kamu kini tersinkron otomatis dengan dompet ClincooPay ' + cpMask(res.wallet_address) + '.');
+                cpLoad();
+            } catch (e) {
+                errEl.textContent = 'Tidak dapat terhubung ke server ClincooPay.';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function cpUnlink() {
+            try {
+                await fetch(API_BASE + '/api/clincoopay', {
+                    method: 'POST',
+                    headers: cpAuthHeaders(),
+                    body: JSON.stringify({ action: 'unlink' })
+                }).then(function(r) { return r.json(); });
+                showModal('Dompet Diputuskan', 'Saldo Clincoo kembali berdiri sendiri dan tidak lagi tersinkron.');
+                cpLoad();
+            } catch (e) {}
+        }
+
+        cpLoad();
 
         var XENDIT_METHOD_MAP = { 'QRIS Instant': 'qris', 'LinkAja': 'linkaja', 'GoPay': 'gopay', 'OVO': 'ovo', 'DANA': 'dana', 'ShopeePay': 'shopeepay', 'BCA Virtual Account': 'bca', 'Mandiri Virtual Account': 'mandiri', 'BRI Virtual Account': 'bri', 'BNI Virtual Account': 'bni' };
         var topupPollTimer = null;

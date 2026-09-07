@@ -1,4 +1,5 @@
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
+import { getCpConnection, mirroredBalance, mirrorDelta } from './clincoopay-helpers.js';
 import { emailTemplate, formatIDR, sendEmail, notifyEvent } from './notify-helpers.js';
 
 // Cloudflare Pages Functions - Subscription Backend
@@ -137,7 +138,13 @@ export async function onRequestPost({ request, env }) {
         try {
           const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
           const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
-          const balance = parseFloat(balRow?.value || '0');
+          let balance = parseFloat(balRow?.value || '0');
+          // ClincooPay: dompet terhubung → saldo live web Wallet
+          const subConn = await getCpConnection(db, user.id);
+          if (subConn) {
+            const wb = await mirroredBalance(subConn);
+            if (wb !== null) balance = wb;
+          }
           if (balance < totalPrice) {
             return new Response(JSON.stringify({ 
               success: false, 
@@ -148,11 +155,22 @@ export async function onRequestPost({ request, env }) {
           }
           // Deduct from wallet
           const subUid = await rowScope(db, 'wallet_transactions', user);
+          const subTxId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
           await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
-            .bind('TX-' + Math.floor(100000 + Math.random() * 900000), 'Langganan ' + validPlan + ' (' + billing + ')', totalPrice, 'out', 'Saldo Dompet', subUid).run();
-          const newBalance = balance - totalPrice;
-          await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
-            .bind(balKey, String(newBalance)).run();
+            .bind(subTxId, 'Langganan ' + validPlan + ' (' + billing + ')', totalPrice, 'out', 'Saldo Dompet', subUid).run();
+          let newBalance = balance - totalPrice;
+          // ClincooPay: dompet terhubung → potong saldo di web Wallet (mirroring 2 arah)
+          if (subConn) {
+            const mr = await mirrorDelta(subConn, -totalPrice, 'Clincoo: Langganan ' + validPlan + ' (' + billing + ')', subTxId);
+            if (!mr.ok) {
+              const kurang = String(mr.error).indexOf('tidak cukup') >= 0;
+              return new Response(JSON.stringify({ success: false, error: kurang ? 'Saldo ClincooPay tidak cukup.' : mr.error }), { status: kurang ? 402 : 502, headers: { 'Content-Type': 'application/json' } });
+            }
+            newBalance = mr.balance;
+          } else {
+            await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+              .bind(balKey, String(newBalance)).run();
+          }
 
           // Notifikasi in-app + email konfirmasi aktivasi langganan
           try {
