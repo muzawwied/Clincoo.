@@ -97,8 +97,19 @@
         body.dark-mode .hero-glow2 { background: radial-gradient(circle, rgba(255,255,255,0.05), transparent 65%); }
         .scene { perspective: 900px; }
         .cube { width: 130px; height: 130px; position: relative; transform-style: preserve-3d; animation: cube-spin 16s linear infinite; }
-        .cube .face { position: absolute; inset: 0; border: 1.5px solid rgba(0,0,0,0.28); border-radius: 18px; background: rgba(255,255,255,0.45); }
-        body.dark-mode .cube .face { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.015); }
+        /* Muka kubus HARUS opaque supaya cincin sisi belakang beneran ketutup (ilusi Saturnus) */
+        .cube .face { position: absolute; inset: 0; border: 1.5px solid rgba(0,0,0,0.30); border-radius: 18px; background: #f2f2f2; }
+        .cube .f-top { background: #ffffff; }
+        .cube .f-front { background: #f7f7f7; }
+        .cube .f-back { background: #e8e8e8; }
+        .cube .f-left, .cube .f-right { background: #ededed; }
+        .cube .f-bottom { background: #e0e0e0; }
+        body.dark-mode .cube .face { border-color: rgba(255,255,255,0.22); background: #151515; }
+        body.dark-mode .cube .f-top { background: #1d1d1d; }
+        body.dark-mode .cube .f-front { background: #171717; }
+        body.dark-mode .cube .f-back { background: #101010; }
+        body.dark-mode .cube .f-left, body.dark-mode .cube .f-right { background: #121212; }
+        body.dark-mode .cube .f-bottom { background: #0c0c0c; }
         .cube .f-front  { transform: rotateY(0deg) translateZ(65px); }
         .cube .f-back   { transform: rotateY(180deg) translateZ(65px); }
         .cube .f-left   { transform: rotateY(-90deg) translateZ(65px); }
@@ -126,7 +137,8 @@
 
         /* Kubus kecil pendamping: 2 buah, melayang + berputar berlawanan */
         .cube-sm { width: 56px; height: 56px; position: absolute; transform-style: preserve-3d; }
-        .cube-sm .face { border-width: 1px; border-radius: 10px; }
+        .cube-sm .face { border-width: 1px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.30); background: #f2f2f2; }
+        body.dark-mode .cube-sm .face { border-color: rgba(255,255,255,0.22); background: #151515; }
         .cube-sm .f-front  { transform: rotateY(0deg) translateZ(28px); }
         .cube-sm .f-back   { transform: rotateY(180deg) translateZ(28px); }
         .cube-sm .f-left   { transform: rotateY(-90deg) translateZ(28px); }
@@ -139,8 +151,8 @@
             50%      { transform: translateY(-14px) rotateX(-28deg) rotateY(-180deg); }
         }
         .cube-xs { width: 40px; height: 40px; position: absolute; transform-style: preserve-3d; }
-        .cube-xs .face { border-width: 1px; border-radius: 8px; background: rgba(255,255,255,0.5); }
-        body.dark-mode .cube-xs .face { background: rgba(255,255,255,0.02); }
+        .cube-xs .face { border-width: 1px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.30); background: #f2f2f2; }
+        body.dark-mode .cube-xs .face { border-color: rgba(255,255,255,0.22); background: #151515; }
         .cube-xs .f-front  { transform: rotateY(0deg) translateZ(20px); }
         .cube-xs .f-back   { transform: rotateY(180deg) translateZ(20px); }
         .cube-xs .f-left   { transform: rotateY(-90deg) translateZ(20px); }
