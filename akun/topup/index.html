@@ -180,6 +180,20 @@
                     <!-- Instant Payment -->
                     <div class="space-y-3">
                         <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">Pembayaran Instan</h4>
+                        <!-- ClincooPay (metode aktif satu-satunya) -->
+                        <label class="pay-method-card selected flex items-center justify-between p-4 border-2 border-gray-900 dark:border-white rounded-2xl w-full bg-gray-50 dark:bg-[#1a1a1a]" data-method="ClincooPay" onclick="selectPaymentMethod(this)">
+                            <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                <div class="relative w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                    <img src="https://muzawwied.github.io/Wallet/logo.png" alt="ClincooPay" class="absolute inset-0 w-full h-full object-cover scale-[1.42]">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ClincooPay</p>
+                                    <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Isi saldo instan dari dompet ClincooPay kamu</p>
+                                </div>
+                            </div>
+                            <div class="radio-indicator shrink-0"></div>
+                            <input type="radio" name="payment-method" value="ClincooPay" checked>
+                        </label>
                         <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
                             <div class="flex items-center space-x-3.5 flex-1 min-w-0 mr-2">
                                 <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
@@ -191,26 +205,6 @@
                                 </div>
                             </div>
                             <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Terkunci</span>
-                        </div>
-                    </div>
-
-<!-- ClincooPay (metode aktif satu-satunya) -->
-                    <div class="space-y-3">
-                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">ClincooPay</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <label class="pay-method-card selected flex items-center justify-between p-4 border-2 border-gray-900 dark:border-white rounded-2xl w-full bg-gray-50 dark:bg-[#1a1a1a]" data-method="ClincooPay" onclick="selectPaymentMethod(this)">
-                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
-                                    <div class="relative w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
-                                        <img src="https://muzawwied.github.io/Wallet/logo.png" alt="ClincooPay" class="absolute inset-0 w-full h-full object-cover scale-[1.42]">
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ClincooPay</p>
-                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Isi saldo instan dari dompet ClincooPay kamu</p>
-                                    </div>
-                                </div>
-                                <div class="radio-indicator shrink-0"></div>
-                                <input type="radio" name="payment-method" value="ClincooPay" checked>
-                            </label>
                         </div>
                     </div>
 
