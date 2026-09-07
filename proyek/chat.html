@@ -226,6 +226,14 @@
             scrollbar-width: none;
         }
 
+        /* Banner kuota AI habis */
+        #quota-banner { background: #f9fafb; border: 1px solid #e5e7eb; }
+        #quota-banner p { color: #4b5563; }
+        #quota-retry-btn { background: #ffffff; border: 1px solid #d1d5db; color: #111827; }
+        body.dark-mode #quota-banner { background: #0a0a0a; border-color: #262626; }
+        body.dark-mode #quota-banner p { color: #9ca3af; }
+        body.dark-mode #quota-retry-btn { background: #000000; border-color: #444444; color: #ffffff; }
+        body.dark-mode #quota-retry-btn:hover { background: #1a1a1a; }
         /* Dark mode */
         body.dark-mode { background: #000000 !important; color: #ffffff !important; }
         .tool-task-text { color: #6b7280; }
@@ -375,6 +383,11 @@
 
     <footer class="fixed bottom-0 left-0 right-0 w-full bg-transparent px-4 py-4 z-20 pointer-events-none flex flex-col justify-end">
         <div class="w-full bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-4 sm:p-5 transition-all text-left border border-gray-100 pointer-events-auto max-w-4xl mx-auto">
+            <div id="quota-banner" class="hidden items-center gap-2.5 mb-2 rounded-2xl bg-gray-50 border border-gray-200 px-3.5 py-2.5">
+                <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path stroke-linecap="round" d="M8 10V7a4 4 0 018 0v3"></path></svg>
+                <p class="text-xs text-gray-600 flex-1 leading-snug">Kuota AI harian sedang habis — pesanmu aman di kolom ketik.</p>
+                <button type="button" id="quota-retry-btn" class="text-xs font-semibold text-gray-900 bg-white border border-gray-300 rounded-full px-3 py-1.5 hover:bg-gray-100 transition-colors shrink-0 cursor-pointer">Coba lagi</button>
+            </div>
             <div id="file-preview-container" class="hidden flex-nowrap overflow-x-auto hide-scrollbar gap-2 mb-2 w-full"></div>
             
             <textarea
@@ -1551,16 +1564,26 @@
         }
 
         const LOCK_SVG = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path stroke-linecap="round" d="M8 10V7a4 4 0 018 0v3"></path></svg>`;
+        const quotaBanner = document.getElementById('quota-banner');
+        const quotaRetryBtn = document.getElementById('quota-retry-btn');
         let quotaLocked = false;
         function setQuotaLock(locked) {
             quotaLocked = locked;
             if (quotaLocked) {
                 btnAction.innerHTML = LOCK_SVG;
                 btnAction.title = 'Kuota AI habis — klik untuk coba kirim ulang';
+                if (quotaBanner) { quotaBanner.classList.remove('hidden'); quotaBanner.classList.add('flex'); }
             } else {
                 btnAction.title = '';
+                if (quotaBanner) { quotaBanner.classList.add('hidden'); quotaBanner.classList.remove('flex'); }
                 toggleActionState(false);
             }
+        }
+        if (quotaRetryBtn) {
+            quotaRetryBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (quotaLocked && !isGenerating) { setQuotaLock(false); handleSubmit(); }
+            });
         }
         function toggleActionState(isGen) {
             isGenerating = isGen;
@@ -2356,7 +2379,7 @@
                 } catch (e) {
                     if (e.name !== 'AbortError') {
                         if (e.message === '__QUOTA__') {
-                            streamingBuffer = "Kuota AI Gemini sedang habis untuk saat ini (limit penggunaan harian). Pesanmu sudah dikembalikan ke kolom ketik — klik ikon gembok untuk mencoba kirim ulang, atau tunggu sebentar dan coba lagi.";
+                            streamingBuffer = "Kuota AI Gemini sedang habis untuk saat ini (limit penggunaan harian). Pesanmu sudah dikembalikan ke kolom ketik — ketuk **Coba lagi** di atas kolom ketik untuk mengirim ulang, atau tunggu beberapa saat.";
                             const lastUserIdx = messages.map(m => m.role).lastIndexOf('user');
                             if (lastUserIdx !== -1 && !chatInput.value.trim()) {
                                 chatInput.value = messages[lastUserIdx].text || '';
