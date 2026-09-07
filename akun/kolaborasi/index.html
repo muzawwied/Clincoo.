@@ -221,11 +221,7 @@
        Fungsi Dropdown Share (Undangan Instan)
        ======================================================== */
     function goUndangEmail() {
-        if (currentProject && currentProject.id) {
-            window.location.href = '../undang-email/?project=' + encodeURIComponent(currentProject.id) + '&project_name=' + encodeURIComponent(currentProject.title || '');
-        } else {
-            window.location.href = '../pilih-proyek-undang/';
-        }
+        window.location.href = '../pilih-proyek-undang/';
     }
 
     function toggleShareDropdown() {
@@ -307,49 +303,16 @@
         loadCollab();
     }
 
-    /* ========================================================
-       Fungsi Dropdown Pilih Proyek
-       ======================================================== */
-    function toggleProjectDropdown() {
-        const dropdown = document.getElementById('project-dropdown');
-        if (dropdown) dropdown.classList.toggle('hidden');
-    }
-
-    function closeProjectDropdown() {
-        const dropdown = document.getElementById('project-dropdown');
-        if (dropdown && !dropdown.classList.contains('hidden')) dropdown.classList.add('hidden');
-    }
-
     function selectProject(id, title) {
         currentProject = { id: String(id), title: title };
         try { localStorage.setItem('clincoo_collab_project', JSON.stringify(currentProject)); } catch (e) {}
-        closeProjectDropdown();
-        renderProjectUI();
+        var share = document.getElementById('share-dropdown-container');
+        if (share) share.style.display = '';
         showCollabSkeleton();
         loadCollab();
     }
 
-    function renderProjectUI() {
-        var nameEl = document.getElementById('selected-project-name');
-        if (nameEl) nameEl.innerText = currentProject ? currentProject.title : 'Pilih proyek…';
-        var share = document.getElementById('share-dropdown-container');
-        if (share) shareElToggle(share);
-    }
 
-    function shareElToggle(share) {
-        // Undangan hanya bisa dibuat bila proyek sudah dipilih
-        share.style.display = currentProject ? '' : 'none';
-        var btn = share.querySelector('button');
-        if (btn) btn.style.display = currentProject ? '' : 'none';
-    }
-
-    function projectMenuItem(p) {
-        const isSel = currentProject && String(currentProject.id) === String(p.id);
-        return '<button type="button" onclick="selectProject(\'' + esc(p.id) + '\', this.getAttribute(\'data-title\'))" data-title="' + esc(p.title || 'Proyek tanpa nama') + '" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center justify-between gap-2 transition-colors focus:outline-none">' +
-            '<span class="truncate">' + esc(p.title || 'Proyek tanpa nama') + '</span>' +
-            (isSel ? '<i data-lucide="check" class="w-4 h-4 text-gray-900 dark:text-white shrink-0"></i>' : '') +
-        '</button>';
-    }
 
     function loadProjects() {
         fetch(PROJECTS_API)
@@ -357,32 +320,21 @@
         .then(function(res) {
             projectsLoaded = true;
             var projects = (res && res.projects) || [];
-            var dd = document.getElementById('project-dropdown');
-            if (dd) {
-                dd.innerHTML = projects.length
-                    ? projects.map(projectMenuItem).join('')
-                    : '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Belum ada proyek. Buat proyek dulu di halaman Proyek.</div>';
-            }
-            if (!projects.length) { renderProjectUI(); renderCollab(); return; }
-            // Prioritas: ?project= di URL > pilihan tersimpan
+            if (!projects.length) { renderCollab(); return; }
+            // Prioritas: ?project= di URL > pilihan tersimpan > proyek pertama
             var params = new URLSearchParams(window.location.search);
-            var fromUrl = params.get('project');
+            var fromUrl = params.get('project') || params.get('id');
             var saved = null;
             try { saved = JSON.parse(localStorage.getItem('clincoo_collab_project') || 'null'); } catch (e) {}
             var pick = null;
             if (fromUrl) pick = projects.find(function(p) { return String(p.id) === String(fromUrl); });
             if (!pick && saved && saved.id) pick = projects.find(function(p) { return String(p.id) === String(saved.id); });
-            if (pick) {
-                selectProject(pick.id, pick.title);
-            } else {
-                renderProjectUI();
-                renderCollab();
-            }
+            if (!pick) pick = projects[0];
+            selectProject(pick.id, pick.title);
             if (window.lucide) try { lucide.createIcons(); } catch (e) {}
         })
         .catch(function() {
             projectsLoaded = true;
-            renderProjectUI();
             renderCollab();
         });
     }
@@ -527,12 +479,6 @@
        Global Event Listener (Tutup dropdown & popover di luar)
        ========================================================== */
     document.addEventListener('click', (e) => {
-        // Dropdown Pilih Proyek
-        const projectContainer = document.getElementById('project-select-container');
-        if (projectContainer && !projectContainer.contains(e.target)) {
-            closeProjectDropdown();
-        }
-
         // Dropdown Share
         const shareContainer = document.getElementById('share-dropdown-container');
         if (shareContainer && !shareContainer.contains(e.target)) {
@@ -651,12 +597,11 @@
         if (!list) return;
         clearCollabSkeleton();
         if (!currentProject) {
-            // Belum ada proyek terpilih: panduan memilih proyek
             list.innerHTML = projectsLoaded
                 ? '<div class="flex flex-col items-center justify-center py-16 px-4 text-center">' +
                     '<i data-lucide="folder" class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-4"></i>' +
-                    '<h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Pilih proyek dulu</h3>' +
-                    '<p class="text-sm text-gray-500 dark:text-gray-400">Pilih salah satu proyek Anda di atas untuk melihat dan mengundang anggota tim.</p>' +
+                    '<h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Belum ada proyek</h3>' +
+                    '<p class="text-sm text-gray-500 dark:text-gray-400">Buat proyek dulu di halaman Proyek untuk mulai berkolaborasi.</p>' +
                 '</div>'
                 : '<div id="collab-skeleton"><div class="flex flex-col items-center justify-center py-16 px-4 text-center"><span class="shimmer-bar shimmer-bar-md"></span><span class="shimmer-bar shimmer-bar-sm" style="width:180px"></span></div></div>';
             if (window.lucide) try { lucide.createIcons(); } catch (e) {}
