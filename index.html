@@ -866,7 +866,10 @@
                 const newPath = reverseRouteMap[pageId];
                 if (window.location.search !== newPath) {
                     try {
-                        window.history.pushState({ pageId: pageId }, "", newPath);
+                        // replaceState (bukan pushState): ganti tab TIDAK menambah entri
+                        // history. Sebelumnya tiap klik tab nambah entri sehingga tombol
+                        // kembali muter-muter lewat semua tab yang pernah diklik.
+                        window.history.replaceState({ pageId: pageId }, "", newPath);
                     } catch (e) {}
                 }
             }
