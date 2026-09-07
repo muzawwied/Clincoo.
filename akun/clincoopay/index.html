@@ -50,10 +50,21 @@
                         <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Buka aplikasi Wallet, lihat Profil, lalu salin 10 karakter ID Pengguna kamu.</p>
                     </div>
                     <p id="cp-id-error" class="text-xs text-red-500 hidden"></p>
-                    <button onclick="sendRequest()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Kirim Permintaan</button>
+                    <button id="cp-send-btn" onclick="sendRequest()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Kirim Permintaan</button>
                 </div>
                 <div class="rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 p-4">
                     <p class="text-[11px] md:text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Setelah kirim permintaan: konfirmasi di notifikasi aplikasi Wallet, lalu masukkan PIN wallet di sini. PIN tidak pernah disimpan Clincoo.</p>
+                </div>
+            </div>
+
+            <!-- STEP 0: MEMERIKSA KONEKSI -->
+            <div id="step-check" class="w-full otp-hidden">
+                <div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] p-6 text-center">
+                    <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center mx-auto">
+                        <svg class="animate-spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" class="text-gray-900 dark:text-white"></path></svg>
+                    </div>
+                    <p class="text-sm font-bold text-gray-900 dark:text-white mt-4">Memeriksa Koneksi…</p>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Sebentar, cek status dompet dulu.</p>
                 </div>
             </div>
 
@@ -85,7 +96,7 @@
                         <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Masukkan 6 digit PIN aplikasi Wallet kamu.</p>
                     </div>
                     <p id="cp-pin-error" class="text-xs text-red-500 hidden"></p>
-                    <button onclick="confirmPin()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Konfirmasi &amp; Hubungkan</button>
+                    <button id="cp-pin-btn" onclick="confirmPin()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Konfirmasi &amp; Hubungkan</button>
                 </div>
             </div>
 
@@ -103,7 +114,7 @@
                     </div>
                     <div class="space-y-2 pt-2">
                         <button onclick="location.href='../dompet/'" class="w-full py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Kembali ke Dompet</button>
-                        <button onclick="doUnlink()" class="w-full py-3 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 hover:border-gray-900 dark:hover:border-white transition-all">Putuskan Dompet</button>
+                        <button id="cp-unlink-btn" onclick="doUnlink()" class="w-full py-3 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 hover:border-gray-900 dark:hover:border-white transition-all">Putuskan Dompet</button>
                     </div>
                 </div>
             </div>
@@ -130,10 +141,24 @@
         var currentRequestId = null;
         var pollTimer = null;
 
+        // feedback loading tombol: ganti isi tombol jadi spinner + teks, disable sambil proses
+        function btnBusy(id, busy, busyText) {
+            var b = document.getElementById(id); if (!b) return;
+            if (busy) {
+                if (!b.dataset.orig) b.dataset.orig = b.innerHTML;
+                b.disabled = true; b.style.opacity = '0.7';
+                b.innerHTML = '<svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="display:inline-block;vertical-align:-3px;margin-right:6px"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>' + (busyText || 'Memproses…');
+            } else {
+                b.disabled = false; b.style.opacity = '';
+                if (b.dataset.orig) { b.innerHTML = b.dataset.orig; delete b.dataset.orig; }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             try { lucide.createIcons(); } catch (e) {}
-            showStep('step-id');
+            showStep('step-check');
             await loadStatus();
+            if (document.getElementById('step-check') && !document.getElementById('step-check').classList.contains('otp-hidden')) showStep('step-id');
         });
 
         function goBack() { window.location.href = '../topup/'; }
@@ -143,7 +168,7 @@
             return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
         }
         function showStep(id) {
-            ['step-id', 'step-wait', 'step-pin', 'step-done'].forEach(function (s) {
+            ['step-check', 'step-id', 'step-wait', 'step-pin', 'step-done'].forEach(function (s) {
                 document.getElementById(s).classList.toggle('otp-hidden', s !== id);
             });
         }
@@ -189,18 +214,22 @@
                 err.textContent = 'ID Wallet harus 10 karakter huruf/angka.';
                 err.classList.remove('hidden'); return;
             }
+            btnBusy('cp-send-btn', true, 'Mengirim…');
             try {
                 var res = await fetch(CP_API, { method: 'POST', headers: authHeaders(),
                     body: JSON.stringify({ action: 'connect_start', wallet_id: wid }) }).then(function (r) { return r.json(); });
                 if (!res.success) {
+                    btnBusy('cp-send-btn', false);
                     if (res.need_login) { location.href = '../auth.html'; return; }
                     err.textContent = res.error || 'Gagal mengirim permintaan.';
                     err.classList.remove('hidden'); return;
                 }
                 currentRequestId = res.request_id;
+                btnBusy('cp-send-btn', false);
                 showStep('step-wait');
                 startPolling();
             } catch (e) {
+                btnBusy('cp-send-btn', false);
                 err.textContent = 'Tidak dapat terhubung ke server ClincooPay.';
                 err.classList.remove('hidden');
             }
@@ -243,10 +272,12 @@
                 err.textContent = 'PIN harus 6 digit angka.';
                 err.classList.remove('hidden'); return;
             }
+            btnBusy('cp-pin-btn', true, 'Menghubungkan…');
             try {
                 var res = await fetch(CP_API, { method: 'POST', headers: authHeaders(),
                     body: JSON.stringify({ action: 'connect_finish', request_id: currentRequestId, pin: pin }) }).then(function (r) { return r.json(); });
                 if (!res.success) {
+                    btnBusy('cp-pin-btn', false);
                     err.textContent = res.error || 'PIN tidak cocok.';
                     err.classList.remove('hidden'); return;
                 }
@@ -254,14 +285,17 @@
                 showStep('step-done');
                 showModal('Dompet Terhubung', 'Saldo Clincoo kamu kini tersinkron otomatis dengan dompet ClincooPay ' + maskAddr(res.wallet_address) + '.');
             } catch (e) {
+                btnBusy('cp-pin-btn', false);
                 err.textContent = 'Tidak dapat terhubung ke server ClincooPay.';
                 err.classList.remove('hidden');
             }
         }
 
         async function doUnlink() {
+            btnBusy('cp-unlink-btn', true, 'Memutuskan…');
             try {
                 await fetch(CP_API, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ action: 'unlink' }) }).then(function (r) { return r.json(); });
+                btnBusy('cp-unlink-btn', false);
                 showModal('Dompet Diputuskan', 'Saldo Clincoo kembali berdiri sendiri dan tidak lagi tersinkron.');
                 document.getElementById('page-subtitle').textContent = 'Hubungkan dompet web Wallet kamu agar saldo Clincoo tersinkron otomatis.';
                 showStep('step-id');
