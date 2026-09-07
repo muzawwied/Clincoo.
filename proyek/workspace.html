@@ -430,7 +430,7 @@
       <div id="modal-standard-body" class="p-6">
         <div>
           <label id="input-modal-label" class="block text-sm font-medium text-gray-700 mb-1.5">Nama File</label>
-          <input type="text" id="modal-input-name" onkeydown="handleModalInputKeydown(event)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#273849] focus:border-transparent transition-all" placeholder="Misal: index.html" autocomplete="off">
+          <input type="text" id="modal-input-name" onkeydown="handleModalInputKeydown(event)" oninput="var _e=document.getElementById('input-modal-error'); if(_e) _e.classList.add('hidden');" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#273849] focus:border-transparent transition-all" placeholder="Misal: index.html" autocomplete="off">
           <p id="input-modal-error" class="text-xs text-red-500 mt-2 hidden">Nama tidak boleh kosong atau sudah ada.</p>
         </div>
       </div>
