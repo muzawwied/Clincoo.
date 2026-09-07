@@ -185,16 +185,8 @@
             });
         }
         function showModal(title, message, okIcon) {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-message').textContent = message;
-            try {
-                var w = document.getElementById('modal-icon-wrap');
-                w.className = 'w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto ' + (okIcon === false ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600');
-                lucide.createIcons();
-            } catch (e) {}
-            var m = document.getElementById('system-modal');
-            m.classList.remove('hidden'); m.classList.add('flex');
-        }
+        return;
+    }
         function closeModal() {
             var m = document.getElementById('system-modal');
             m.classList.add('hidden'); m.classList.remove('flex');

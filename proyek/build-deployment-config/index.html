@@ -217,7 +217,7 @@
         // Deploy ASLI: file workspace proyek -> Cloudflare Pages
         async function processDeploy() {
             const btn = document.getElementById('btn-process-deploy');
-            if (!pid()) { alert('Proyek belum dipilih.'); return; }
+            if (!pid()) { console.warn('Proyek belum dipilih.'); return; }
             if (deployState.deploying) return; // klik hanya sekali per sesi
             deployState.deploying = true;
             writeDeploySession({ status: 'deploying', started_at: Date.now() });
@@ -239,7 +239,7 @@
             } catch (err) {
                 deployState.deploying = false;
                 writeDeploySession({ status: 'failed' });
-                alert('Deploy gagal: ' + err.message);
+                console.warn('Deploy gagal: ' + err.message);
                 btn.innerHTML = `Jalankan Deploy`;
                 btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
             }

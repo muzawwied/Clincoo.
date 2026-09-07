@@ -661,31 +661,8 @@
         function formatNumberOnly(num) { return Number(num).toLocaleString('id-ID'); }
 
         function showModal(title, message) {
-            var iconWrap = document.getElementById('modal-icon-wrap');
-            var iconName = 'check-circle';
-            var bgClass = 'bg-emerald-50 text-emerald-600';
-            
-            var tLower = (title || '').toLowerCase();
-            if (tLower.includes('gagal') || tLower.includes('tidak valid')) {
-                iconName = 'alert-circle';
-                bgClass = 'bg-red-50 text-red-600';
-            } else if (tLower.includes('sandbox')) {
-                iconName = 'info';
-                bgClass = 'bg-amber-50 text-amber-600';
-            }
-            
-            if (iconWrap) {
-                iconWrap.className = 'w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto ' + bgClass;
-                iconWrap.innerHTML = '<i data-lucide="' + iconName + '" class="w-6 h-6"></i>';
-            }
-
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-message').textContent = message;
-            var modal = document.getElementById('system-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            try { lucide.createIcons(); } catch (e) {}
-        }
+        return;
+    }
 
         function closeModal() {
             var modal = document.getElementById('system-modal');

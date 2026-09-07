@@ -394,7 +394,7 @@
                 });
                 const data = await res.json();
                 loadRealDomainStatus();
-                if (data.error) alert('Domain belum terpasang di Cloudflare: ' + data.error);
+                if (data.error) console.warn('Domain belum terpasang di Cloudflare: ' + data.error);
             } catch (e) {}
         }
 

@@ -314,7 +314,7 @@
           fileObj = findFileObj(filename);
         }
       }
-      if (!fileObj) { alert('File tidak ditemukan.'); window.ClincooBack('../workspace/?id=' + encodeURIComponent(wsProjectId())); return; }
+      if (!fileObj) { console.warn('File tidak ditemukan.'); window.ClincooBack('../workspace/?id=' + encodeURIComponent(wsProjectId())); return; }
 
       const fileType = getFileType(filename);
       const ext = getFileExtension(filename);

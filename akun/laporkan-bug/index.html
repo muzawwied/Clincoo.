@@ -461,7 +461,7 @@
                 lucide.createIcons();
                 btn.disabled = false;
                 btn.classList.remove('opacity-80', 'cursor-not-allowed');
-                alert('Gagal mengirim laporan: ' + (err && err.message ? err.message : 'kesalahan jaringan') + '. Silakan coba lagi.');
+                console.warn('Gagal mengirim laporan: ' + (err && err.message ? err.message : 'kesalahan jaringan') + '. Silakan coba lagi.');
             }
         }
 

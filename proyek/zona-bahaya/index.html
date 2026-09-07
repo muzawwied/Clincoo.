@@ -162,11 +162,7 @@
   }
   function closeConfirm() { var m = document.getElementById('confirm-modal'); m.classList.add('hidden'); m.classList.remove('flex'); confirmCb = null; }
   function showStatus(title, msg, cb) {
-    document.getElementById('status-title').textContent = title;
-    document.getElementById('status-msg').textContent = msg;
-    statusCb = cb || null;
-    var m = document.getElementById('status-modal');
-    m.classList.remove('hidden'); m.classList.add('flex');
+      try { if (typeof cb === 'function') cb(); } catch (e) {}
   }
   async function postJSON(path, bodyObj) {
     var tok = localStorage.getItem('clincoo_auth_token') || '';

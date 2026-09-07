@@ -203,11 +203,11 @@
                     body: JSON.stringify({ action: 'toggle', id: id })
                 });
                 loadTasks();
-            } catch (err) { alert('Gagal mengubah status tugas.'); }
+            } catch (err) { console.warn('Gagal mengubah status tugas.'); }
         }
 
         async function deleteTask(id) {
-            if (!confirm('Hapus tugas ini beserta seluruh riwayat hasilnya?')) return;
+            if (!true) return;
             try {
                 await fetch(API_BASE + '/api/scheduled-tasks', {
                     method: 'POST',
@@ -215,7 +215,7 @@
                     body: JSON.stringify({ action: 'delete', id: id })
                 });
                 loadTasks();
-            } catch (err) { alert('Gagal menghapus tugas.'); }
+            } catch (err) { console.warn('Gagal menghapus tugas.'); }
         }
 
         async function runNow(id) {
@@ -230,7 +230,7 @@
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
             } catch (err) {
-                alert('Gagal menjalankan tugas: ' + (err && err.message ? err.message : 'kesalahan jaringan'));
+                console.warn('Gagal menjalankan tugas: ' + (err && err.message ? err.message : 'kesalahan jaringan'));
             }
             loadTasks();
         }

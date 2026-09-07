@@ -113,9 +113,9 @@
         async function saveNewPassword() {
             const pass = document.getElementById('new-pass').value;
             const confirm = document.getElementById('new-pass-confirm').value;
-            if (!token) { alert('Tautan tidak valid. Minta tautan baru dari halaman Lupa Kata Sandi.'); return; }
-            if (pass.length < 8) { alert('Kata sandi minimal 8 karakter.'); return; }
-            if (pass !== confirm) { alert('Kata sandi dan konfirmasi tidak cocok.'); return; }
+            if (!token) { console.warn('Tautan tidak valid. Minta tautan baru dari halaman Lupa Kata Sandi.'); return; }
+            if (pass.length < 8) { console.warn('Kata sandi minimal 8 karakter.'); return; }
+            if (pass !== confirm) { console.warn('Kata sandi dan konfirmasi tidak cocok.'); return; }
             const btn = document.getElementById('save-btn');
             btn.querySelector('.btn-text').textContent = 'Menyimpan...';
             btn.style.opacity = '0.7'; btn.disabled = true;
@@ -134,7 +134,7 @@
             } catch (err) {
                 btn.querySelector('.btn-text').textContent = 'Simpan Kata Sandi';
                 btn.style.opacity = '1'; btn.disabled = false;
-                alert(err && err.message ? err.message : 'Gagal menyimpan kata sandi baru.');
+                console.warn(err && err.message ? err.message : 'Gagal menyimpan kata sandi baru.');
             }
         }
     </script>

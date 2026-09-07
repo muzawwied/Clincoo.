@@ -240,7 +240,7 @@
         async function createTask() {
             const btn = document.getElementById('create-btn');
             const prompt = document.getElementById('task-prompt').value.trim();
-            if (!prompt) { alert('Instruksi untuk AI wajib diisi.'); return; }
+            if (!prompt) { console.warn('Instruksi untuk AI wajib diisi.'); return; }
             btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Menyimpan...';
             try { lucide.createIcons(); } catch (e) {}
             btn.disabled = true; btn.classList.add('opacity-80', 'cursor-not-allowed');
@@ -263,7 +263,7 @@
                 window.ClincooBack('../tugas-terjadwal/');
             } catch (err) {
                 btn.innerHTML = 'Simpan Tugas'; btn.disabled = false; btn.classList.remove('opacity-80', 'cursor-not-allowed');
-                alert('Gagal menyimpan tugas: ' + (err && err.message ? err.message : 'kesalahan jaringan'));
+                console.warn('Gagal menyimpan tugas: ' + (err && err.message ? err.message : 'kesalahan jaringan'));
             }
         }
 

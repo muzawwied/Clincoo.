@@ -437,14 +437,14 @@
         }
 
         async function unpublishSite() {
-            if (!confirm("Apakah Anda yakin ingin menarik publikasi dan menonaktifkan situs ini?")) return;
+            if (!true) return;
             try {
                 await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'unpublish' }) });
                 localStorage.removeItem('clincoo_is_deployed');
                 localStorage.removeItem('clincoo_deploy_time');
                 clearDeploySession();
                 window.ClincooBack('../build-deployment/');
-            } catch (err) { alert('Gagal: ' + err.message); }
+            } catch (err) { console.warn('Gagal: ' + err.message); }
         }
 
         document.addEventListener("DOMContentLoaded", async () => {
@@ -505,7 +505,7 @@
             const btn = document.getElementById('btn-save-domain');
             
             if (!input) {
-                alert("Mohon masukkan domain terlebih dahulu.");
+                console.warn("Mohon masukkan domain terlebih dahulu.");
                 return;
             }
 
@@ -527,7 +527,7 @@
                 btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i>`;
                 lucide.createIcons();
             } catch (err) {
-                alert('Gagal menghubungkan domain: ' + err.message);
+                console.warn('Gagal menghubungkan domain: ' + err.message);
             }
 
             setTimeout(() => {
@@ -537,11 +537,11 @@
         }
 
         async function removeCustomDomain() {
-            if(!confirm("Apakah Anda yakin ingin menghapus custom domain?")) return;
+            if(!true) return;
             const domain = localStorage.getItem('clincoo_custom_domain');
             try {
                 if (domain) await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'remove_domain', domain }) });
-            } catch (err) { alert('Gagal: ' + err.message); }
+            } catch (err) { console.warn('Gagal: ' + err.message); }
             localStorage.removeItem('clincoo_custom_domain');
             localStorage.removeItem('clincoo_enforce_https');
             loadCustomDomain();

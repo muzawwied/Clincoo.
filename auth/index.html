@@ -565,28 +565,8 @@
 
         // Fungsi Modal
         function showModal(title, message, type = 'success') {
-            var iconWrap = document.getElementById('modal-icon-wrap');
-            var iconName = 'check-circle';
-            var bgClass = 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
-            
-            var tLower = (title || '').toLowerCase();
-            if (tLower.includes('gagal') || tLower.includes('tidak valid') || type === 'error') {
-                iconName = 'alert-circle';
-                bgClass = 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400';
-            }
-            
-            if (iconWrap) {
-                iconWrap.className = 'w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto ' + bgClass;
-                iconWrap.innerHTML = '<i data-lucide="' + iconName + '" class="w-6 h-6"></i>';
-            }
-
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-message').textContent = message;
-            var modal = document.getElementById('system-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            try { lucide.createIcons(); } catch (e) {}
-        }
+        return;
+    }
 
         function closeModal() {
             var modal = document.getElementById('system-modal');
