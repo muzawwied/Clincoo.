@@ -260,7 +260,7 @@
                 });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-                location.href = '../tugas-terjadwal/';
+                window.ClincooBack('../tugas-terjadwal/');
             } catch (err) {
                 btn.innerHTML = 'Simpan Tugas'; btn.disabled = false; btn.classList.remove('opacity-80', 'cursor-not-allowed');
                 alert('Gagal menyimpan tugas: ' + (err && err.message ? err.message : 'kesalahan jaringan'));

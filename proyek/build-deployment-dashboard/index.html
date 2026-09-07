@@ -443,7 +443,7 @@
                 localStorage.removeItem('clincoo_is_deployed');
                 localStorage.removeItem('clincoo_deploy_time');
                 clearDeploySession();
-                window.location.href = '../build-deployment/';
+                window.ClincooBack('../build-deployment/');
             } catch (err) { alert('Gagal: ' + err.message); }
         }
 

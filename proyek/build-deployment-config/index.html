@@ -230,7 +230,7 @@
                 writeDeploySession({ status: 'done', pages_url: (res && res.pages_url) || deployState.pages_url || '', done_at: Date.now() });
                 btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span class="inline-block">Berhasil Deploy!</span>`;
                 lucide.createIcons();
-                window.location.href = '../build-deployment-dashboard/';
+                window.ClincooBack('../build-deployment-dashboard/');
                 setTimeout(() => {
                     btn.innerHTML = `Jalankan Deploy`;
                     btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";

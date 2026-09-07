@@ -215,7 +215,7 @@
           localStorage.setItem('clincoo_projects', JSON.stringify(list));
           if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
         } catch (e) {}
-        showStatus('Transfer berhasil', 'Proyek kini menjadi milik ' + email + '.', function () { window.location.href = homeUrl(); });
+        showStatus('Transfer berhasil', 'Proyek kini menjadi milik ' + email + '.', function () { window.ClincooBack(homeUrl()); });
       });
     });
 
@@ -244,7 +244,7 @@
           localStorage.setItem('clincoo_projects', JSON.stringify(list));
           if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
         } catch (e) {}
-        showStatus('Proyek dihapus', 'Semua data dan situs publish-an telah dihapus.', function () { window.location.href = homeUrl(); });
+        showStatus('Proyek dihapus', 'Semua data dan situs publish-an telah dihapus.', function () { window.ClincooBack(homeUrl()); });
       });
     });
   });

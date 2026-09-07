@@ -489,7 +489,7 @@
             if (window.ClincooAuth && window.ClincooAuth.logout) {
               window.ClincooAuth.logout();
             } else {
-              window.location.href = '../../';
+              window.ClincooBack('../../');
             }
           }, 1200);
         })

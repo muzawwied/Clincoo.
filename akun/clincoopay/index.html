@@ -161,7 +161,10 @@
             if (document.getElementById('step-check') && !document.getElementById('step-check').classList.contains('otp-hidden')) showStep('step-id');
         });
 
-        function goBack() { window.location.href = '../topup/'; }
+        function goBack() {
+            if (window.ClincooBack) { window.ClincooBack('../topup/'); return; }
+            if (history.length > 1) { history.back(); } else { location.replace('../topup/'); }
+        }
 
         function authHeaders() {
             var token = ''; try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}

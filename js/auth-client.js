@@ -128,7 +128,21 @@ try {
 
   var origFetch = window.fetch;
 
-  // Gate: buka halaman apa pun tanpa login -> langsung ke halaman auth
+  // Tombol kembali cerdas (fix loop A-B-A-B):
+// - datang dari halaman aplikasi ini -> history.back() beneran (TANPA entri baru)
+// - dibuka langsung/deep-link -> location.replace ke halaman induk (TANPA entri baru)
+// Sebelumnya beberapa tombol kembali pakai location.href = navigasi MAJU yang menambah
+// entri riwayat, sehingga bolak-balik klik kembali mantul antara dua halaman tanpa henti.
+window.ClincooBack = function (fallbackUrl) {
+  try {
+    var sameOrigin = document.referrer && new URL(document.referrer).origin === location.origin;
+    if (sameOrigin && history.length > 1) { window.history.back(); return; }
+  } catch (e) {}
+  if (fallbackUrl) { try { location.replace(fallbackUrl); return; } catch (e2) {} }
+  try { window.history.back(); } catch (e3) {}
+};
+
+// Gate: buka halaman apa pun tanpa login -> langsung ke halaman auth
   if (!isAuthPage && !getToken()) {
     try { location.replace(AUTH_URL + '?next=' + encodeURIComponent(location.href)); } catch (e) { location.replace(AUTH_URL); }
     return;

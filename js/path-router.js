@@ -75,31 +75,31 @@ const PathRouter = {
             if (segments.length >= 4) {
                 if (_isGitHubPages) {
                     const pid = this.getProjectId();
-                    window.location.href = _BASE + '/proyek/' + segments[2] + '/?id=' + encodeURIComponent(pid);
+                    window.ClincooBack(_BASE + '/proyek/' + segments[2] + '/?id=' + encodeURIComponent(pid));
                 } else {
-                    window.location.href = _BASE + '/' + segments.slice(0, 3).join('/');
+                    window.ClincooBack(_BASE + '/' + segments.slice(0, 3).join('/'));
                 }
             } else if (segments.length >= 3) {
                 if (_isGitHubPages) {
                     const pid = this.getProjectId();
-                    window.location.href = _BASE + '/proyek/workspace.html?id=' + encodeURIComponent(pid);
+                    window.ClincooBack(_BASE + '/proyek/workspace.html?id=' + encodeURIComponent(pid));
                 } else {
-                    window.location.href = _BASE + '/' + segments.slice(0, 2).join('/');
+                    window.ClincooBack(_BASE + '/' + segments.slice(0, 2).join('/'));
                 }
             } else if (segments.length >= 2) {
-                window.location.href = _BASE + '/';
+                window.ClincooBack(_BASE + '/');
             } else {
                 window.history.back();
             }
         } else if (segments[0] === 'profil') {
             if (segments.length >= 2) {
                 if (_isGitHubPages) {
-                    window.location.href = _BASE + '/akun/Profile/';
+                    window.ClincooBack(_BASE + '/akun/Profile/');
                 } else {
-                    window.location.href = _BASE + '/profil';
+                    window.ClincooBack(_BASE + '/profil');
                 }
             } else {
-                window.location.href = _BASE + '/';
+                window.ClincooBack(_BASE + '/');
             }
         } else {
             window.history.back();

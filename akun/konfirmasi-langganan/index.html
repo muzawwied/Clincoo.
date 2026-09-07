@@ -346,7 +346,7 @@
         alreadyActive = true;
         document.getElementById('pay-success').textContent = 'Paket ' + PLAN + ' sudah aktif di akun Anda.';
         document.getElementById('pay-success').classList.remove('hidden');
-        showFallback('Kembali ke Langganan', function(){ window.location.href = '../langganan/'; });
+        showFallback('Kembali ke Langganan', function(){ window.ClincooBack('../langganan/'); });
         return;
       }
 
@@ -367,7 +367,7 @@
           document.getElementById('pay-success').classList.remove('hidden');
           document.getElementById('pay-error').classList.add('hidden');
           setLabel('Berhasil!');
-          setTimeout(function(){ window.location.href = '../langganan/'; }, 900);
+          setTimeout(function(){ window.ClincooBack('../langganan/'); }, 900);
         } else if(res.status === 402){
           document.getElementById('pay-error-text').textContent = 'Saldo dompet tidak cukup. Butuh ' + fmtID(data.required || totalPrice) + ', saldo Anda ' + fmtID(data.balance || 0) + '.';
           document.getElementById('pay-error').classList.remove('hidden');
