@@ -159,19 +159,17 @@
         .orbit-ring { position: absolute; top: 50%; left: 50%; border-radius: 9999px; }
         .orbit-ring.back  { clip-path: inset(0 0 50% 0); }
         .orbit-ring.front { clip-path: inset(50% 0 0 0); }
-        .ring-a { width: 230px; height: 230px; margin: -115px 0 0 -115px; border: 1.5px dashed rgba(0,0,0,0.20); animation: ring-a-spin 16s ease-in-out infinite; }
-        body.dark-mode .ring-a { border-color: rgba(255,255,255,0.18); }
-        .ring-b { width: 172px; height: 172px; margin: -86px 0 0 -86px; border: 1px solid rgba(0,0,0,0.10); animation: ring-b-spin 22s linear infinite; }
-        body.dark-mode .ring-b { border-color: rgba(255,255,255,0.09); }
+        .ring-a { width: 230px; height: 230px; margin: -115px 0 0 -115px; border: 1.5px dashed rgba(0,0,0,0.30); animation: ring-a-spin 16s ease-in-out infinite; }
+        body.dark-mode .ring-a { border-color: rgba(255,255,255,0.30); }
+        .ring-b { width: 172px; height: 172px; margin: -86px 0 0 -86px; border: 1px solid rgba(0,0,0,0.14); animation: ring-b-spin 22s linear infinite; }
+        body.dark-mode .ring-b { border-color: rgba(255,255,255,0.14); }
         @keyframes ring-a-spin {
-            0%   { transform: rotateX(68deg) rotateZ(0deg); }
-            50%  { transform: rotateX(80deg) rotateZ(180deg); }
-            100% { transform: rotateX(68deg) rotateZ(360deg); }
+            0%, 100% { transform: rotateX(46deg) rotateZ(0deg); }
+            50%      { transform: rotateX(52deg) rotateZ(180deg); }
         }
         @keyframes ring-b-spin {
-            0%   { transform: rotateX(80deg) rotateZ(0deg); }
-            50%  { transform: rotateX(70deg) rotateZ(-180deg); }
-            100% { transform: rotateX(80deg) rotateZ(-360deg); }
+            0%, 100% { transform: rotateX(34deg) rotateZ(0deg); }
+            50%      { transform: rotateX(38deg) rotateZ(-180deg); }
         }
 
         /* Kartu mini melayang (ala Vercel marketing) */
