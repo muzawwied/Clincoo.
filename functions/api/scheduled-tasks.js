@@ -101,13 +101,32 @@ async function getGeminiKey(env) {
   } catch { return null; }
 }
 
+// Jaring pengaman: bersihkan sisa sintaks markdown agar aman tampil di email & notifikasi teks polos
+function cleanAiText(s) {
+  if (!s) return s;
+  let t = String(s);
+  t = t.replace(/```[a-zA-Z]*\n?([\s\S]*?)```/g, '$1');      // code fence -> isi saja
+  t = t.replace(/`([^`]+)`/g, '$1');                           // `kode` -> kode
+  t = t.replace(/^ {0,3}#{1,6}\s+(.*)$/gm, '$1');              // ## Judul -> Judul
+  t = t.replace(/\*\*(.+?)\*\*/g, '$1');                      // **tebal** -> tebal
+  t = t.replace(/__(.+?)__/g, '$1');                           // __tebal__ -> tebal
+  t = t.replace(/^ {0,3}(-{3,}|\*{3,}|_{3,})\s*$/gm, '');      // garis pemisah --- *** ___
+  t = t.replace(/^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?\s*$/gm, ''); // baris pemisah tabel md
+  t = t.replace(/\|/g, '  ');                                  // sisa pipe tabel -> spasi
+  t = t.replace(/^ {0,3}[-*]\s+/gm, '• ');                      // - item / * item -> • item
+  t = t.replace(/\*(.+?)\*/g, '$1');                           // sisa *miring* -> miring
+  t = t.replace(/(?<![a-zA-Z0-9])_(.+?)_(?![a-zA-Z0-9])/g, '$1'); // sisa _miring_ -> miring
+  t = t.replace(/\n{3,}/g, '\n\n').trim();
+  return t;
+}
+
 async function geminiText(apiKey, prompt) {
   for (const model of PREFERRED_MODELS) {
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify({ systemInstruction: { parts: [{ text: 'Anda asisten AI Clincoo, platform deploy Indonesia. Jalankan tugas terjadwal berikut dengan jawaban ringkas, padat, dan berguna dalam Bahasa Indonesia.' }] }, contents: [{ role: 'user', parts: [{ text: prompt }] }] })
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: 'Anda asisten AI Clincoo, platform deploy Indonesia. Jalankan tugas terjadwal berikut dengan jawaban ringkas, padat, dan berguna dalam Bahasa Indonesia. PENTING: jawab dalam teks polos (plain text) SAJA — jawaban ini akan tampil langsung di email dan notifikasi yang tidak merender markdown. JANGAN pakai tanda **tebal**, ## judul/heading, garis --- pemisah, backtick `kode`, atau tabel bergaris |. Kalau perlu daftar, gunakan format bernomor biasa (1. 2. 3.) atau baris teks biasa.' }] }, contents: [{ role: 'user', parts: [{ text: prompt }] }] })
       });
       if (!res.ok) continue;
       const data = await res.json();
@@ -116,6 +135,16 @@ async function geminiText(apiKey, prompt) {
     } catch (e) {}
   }
   return { error: 'Semua model gagal merespons' };
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+// Escape + jaga baris baru agar terbaca rapi di email HTML
+function toEmailHtml(s) {
+  return escHtml(s).replace(/\n/g, '<br>');
 }
 
 // ====== Eksekusi satu tugas ======
@@ -127,7 +156,7 @@ async function runTask(env, db, task) {
   } else {
     const r = await geminiText(apiKey, task.prompt);
     if (r.error) output = 'Gagal: ' + r.error;
-    else { output = r.text; model = r.model; ok = 1; }
+    else { output = cleanAiText(r.text); model = r.model; ok = 1; }
   }
   if (output.length > 4000) output = output.slice(0, 4000) + '…';
   try {
@@ -158,7 +187,7 @@ async function runTask(env, db, task) {
             'Tugas Terjadwal Selesai',
             user.name || '',
             `Tugas “${task.name || 'Tugas'}” baru saja dijalankan otomatis oleh Clincoo. Berikut hasilnya:`,
-            [['Hasil', output.length > 800 ? output.slice(0, 800) + '…' : output], ['Jadwal', task.when_description || (task.schedule_type === 'interval_minutes' ? 'setiap ' + (task.interval_minutes || 15) + ' menit' : 'setiap hari ' + (task.time_wib || '') + ' WIB')]],
+            [['Hasil', toEmailHtml(output.length > 800 ? output.slice(0, 800) + '…' : output)], ['Jadwal', escHtml(task.when_description || (task.schedule_type === 'interval_minutes' ? 'setiap ' + (task.interval_minutes || 15) + ' menit' : 'setiap hari ' + (task.time_wib || '') + ' WIB'))]],
             'Lihat tugas', 'https://clincoo.pages.dev/akun/tugas-terjadwal.html',
             'Email ini dikirim otomatis karena Anda mengaktifkan notifikasi email pada tugas ini.'
           )
