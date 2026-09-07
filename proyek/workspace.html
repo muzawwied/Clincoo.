@@ -13,14 +13,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -83,24 +75,6 @@
       animation: fadeIn 0.2s ease-out forwards;
     }
 
-    .CodeMirror {
-      width: 100% !important;
-      height: 100% !important;
-      font-family: 'Fira Code', monospace;
-      font-size: 14px;
-      background-color: transparent !important;
-    }
-    .cm-s-dracula.CodeMirror {
-      background-color: #12151c !important;
-      color: #f8f8f2 !important;
-    }
-    .cm-s-dracula .CodeMirror-gutters {
-      background-color: #151821 !important;
-      border-right: 1px solid #212733 !important;
-    }
-    .cm-s-dracula .CodeMirror-linenumber {
-      color: #4d5668 !important;
-    }
     /* Dark mode */
     body.dark-mode { background-color: #000000; color: #e0e0e0; }
     body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #f0f0f0; }
@@ -318,50 +292,7 @@
     </div>
   </div>
 
-  <div id="page-file-editor" class="page-view hidden w-full min-h-screen flex flex-col bg-[#141820] text-gray-200 font-sans fixed inset-0 z-50 overflow-hidden">
-    <div class="bg-[#1b202b] border-b border-[#2a303f] flex items-center px-4 h-12 flex-shrink-0 select-none justify-between">
-      <div class="flex items-center gap-3 min-w-0">
-        <button onclick="navigateBackFromEditor()" class="p-1.5 text-gray-400 hover:text-white rounded-lg transition-colors flex items-center gap-1.5 focus:outline-none" title="Kembali & Simpan Otomatis">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-          <span class="text-xs font-medium text-gray-300 hidden sm:inline">Kembali</span>
-        </button>
-        <div class="h-4 w-px bg-[#2a303f]"></div>
-        <div class="flex items-center gap-2 min-w-0">
-          <span id="editor-file-icon" class="flex-shrink-0"></span>
-          <span id="editor-filename-label" class="text-sm font-semibold text-gray-100 truncate">index.html</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="relative flex-1 flex overflow-hidden bg-[#12151c]">
-      <div id="editor-code-container" class="w-full h-full flex flex-1 overflow-hidden">
-        <textarea id="editor-code-textarea" class="hidden"></textarea>
-      </div>
-      <div id="editor-audio-container" class="hidden w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#12151c]">
-        <div class="w-full flex-1 flex flex-col items-center justify-center max-w-md">
-          <div class="w-28 h-28 rounded-full bg-[#1b202b] border-2 border-[#2d3547] flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-            <svg viewBox="0 0 24 24" class="w-14 h-14 text-red-500 ml-1" fill="currentColor">
-              <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/>
-            </svg>
-          </div>
-          <audio id="audio-player" controls class="w-full rounded-full shadow-lg focus:outline-none"></audio>
-        </div>
-      </div>
-      <div id="editor-video-container" class="hidden w-full h-full flex flex-col items-center justify-center p-6 text-center bg-black">
-        <div class="w-full flex-1 flex items-center justify-center max-w-4xl">
-          <video id="video-player" controls class="w-full max-h-[80vh] rounded-lg shadow-2xl focus:outline-none bg-black object-contain"></video>
-        </div>
-      </div>
-      <div id="editor-image-container" class="hidden w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#0d1017]">
-        <div class="w-full flex-1 flex items-center justify-center max-w-4xl">
-          <div class="p-2 bg-[#1b202b]/50 border border-[#2d3547]/50 rounded-xl shadow-2xl overflow-hidden flex items-center justify-center max-h-full">
-            <img id="image-preview" src="" alt="Preview" class="max-w-full max-h-[75vh] object-contain rounded-lg">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  
   <div id="notif-dropdown" class="fixed top-16 right-4 w-[calc(100vw-2rem)] sm:w-80 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-[90] origin-top-right">
     <div class="flex justify-between items-center mb-2 px-1">
       <span class="font-semibold text-sm text-gray-900">Notifikasi</span>
@@ -664,7 +595,6 @@
 
 
     let currentFolderPath = 'root';
-    let editingFileName = null;
     let projectFilesData = { 'root': [] };
     let modalAction = null;
     let itemBeingRenamed = null;
@@ -856,24 +786,7 @@
       return name.toLowerCase();
     }
 
-    let codeEditor = null;
-    function initCodeEditor() {
-      if (codeEditor) return;
-      const textarea = document.getElementById('editor-code-textarea');
-      if (textarea) {
-        codeEditor = CodeMirror.fromTextArea(textarea, {
-          lineNumbers: true,
-          theme: 'dracula',
-          mode: 'htmlmixed',
-          indentUnit: 4,
-          lineWrapping: true,
-          scrollbarStyle: 'native'
-        });
-      }
-    }
-
     const pageProjectDetail = document.getElementById('page-project-detail');
-    const pageFileEditor = document.getElementById('page-file-editor');
     const fileSearchInput = document.getElementById('file-search-input');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     const sidebarPopup = document.getElementById('sidebar-popup');
@@ -967,16 +880,9 @@
     });
 
     function showWorkspace() {
-      pageFileEditor.classList.add('hidden');
       pageProjectDetail.classList.remove('hidden');
       setTimeout(() => pageProjectDetail.classList.add('page-active'), 10);
       renderFileList();
-    }
-    
-    function showEditor() {
-      pageProjectDetail.classList.add('hidden');
-      pageProjectDetail.classList.remove('page-active');
-      pageFileEditor.classList.remove('hidden');
     }
 
     function openFolder(folderPath) {
@@ -1792,84 +1698,9 @@
     }
 
     function openFileInEditor(filename) {
-      editingFileName = filename;
-      const items = projectFilesData[currentFolderPath] || [];
-      const fileObj = items.find(i => i.type === 'file' && i.name === filename);
-      const fileType = getFileType(filename);
-      const ext = getFileExtension(filename);
-
-      const labelEl = document.getElementById('editor-filename-label');
-      const iconEl = document.getElementById('editor-file-icon');
-      if (labelEl) labelEl.textContent = filename;
-      if (iconEl) iconEl.innerHTML = getFileIcon(filename);
-
-      const codeContainer = document.getElementById('editor-code-container');
-      const audioContainer = document.getElementById('editor-audio-container');
-      const videoContainer = document.getElementById('editor-video-container');
-      const imageContainer = document.getElementById('editor-image-container');
-
-      codeContainer.classList.add('hidden'); audioContainer.classList.add('hidden');
-      videoContainer.classList.add('hidden'); imageContainer.classList.add('hidden');
-
-      const audioPlayer = document.getElementById('audio-player');
-      const videoPlayer = document.getElementById('video-player');
-      if (audioPlayer) audioPlayer.pause();
-      if (videoPlayer) videoPlayer.pause();
-
-      if (fileType === 'audio') {
-        audioContainer.classList.remove('hidden');
-        if (audioPlayer) { audioPlayer.src = fileObj && fileObj.content ? fileObj.content : ''; audioPlayer.load(); }
-      } else if (fileType === 'video') {
-        videoContainer.classList.remove('hidden');
-        if (videoPlayer) { videoPlayer.src = fileObj && fileObj.content ? fileObj.content : ''; videoPlayer.load(); }
-      } else if (fileType === 'image') {
-        imageContainer.classList.remove('hidden');
-        const img = document.getElementById('image-preview');
-        if (img) img.src = fileObj && fileObj.content ? fileObj.content : '';
-      } else {
-        codeContainer.classList.remove('hidden');
-        initCodeEditor();
-        let mode = 'htmlmixed';
-        if (ext === 'js' || ext === 'json' || ext === 'ts' || ext === 'jsx') mode = 'javascript';
-        else if (ext === 'css') mode = 'css';
-        else if (ext === 'py' || ext === 'python') mode = 'python';
-        if (codeEditor) {
-          codeEditor.setOption('mode', mode);
-          codeEditor.setValue(fileObj ? (fileObj.content || '') : '');
-          setTimeout(() => codeEditor.refresh(), 50);
-        }
-      }
-      showEditor();
+      window.location.href = 'workspace-editor.html?id=' + encodeURIComponent(wsProjectId()) +
+        '&folder=' + encodeURIComponent(currentFolderPath) + '&file=' + encodeURIComponent(filename);
     }
-
-    function navigateBackFromEditor() {
-      if (editingFileName) {
-        const fileType = getFileType(editingFileName);
-        if (fileType === 'code' && codeEditor) {
-          const codeContent = codeEditor.getValue();
-          const bytes = new Blob([codeContent]).size;
-          let sizeStr = '0,00 B';
-          if (bytes > 1024 * 1024) sizeStr = (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-          else if (bytes > 1024) sizeStr = (bytes / 1024).toFixed(1) + ' KB';
-          else if (bytes > 0) sizeStr = bytes + ' B';
-
-          if (!projectFilesData[currentFolderPath]) projectFilesData[currentFolderPath] = [];
-          const itemIndex = projectFilesData[currentFolderPath].findIndex(i => i.type === 'file' && i.name === editingFileName);
-          if (itemIndex !== -1) {
-            projectFilesData[currentFolderPath][itemIndex].content = codeContent;
-            projectFilesData[currentFolderPath][itemIndex].size = sizeStr;
-            saveData();
-          }
-        }
-        const audioPlayer = document.getElementById('audio-player');
-        if (audioPlayer) { audioPlayer.pause(); audioPlayer.src = ''; }
-        const videoPlayer = document.getElementById('video-player');
-        if (videoPlayer) { videoPlayer.pause(); videoPlayer.src = ''; }
-      }
-      editingFileName = null;
-      showWorkspace();
-    }
-
     // Initialize application
     window.onload = function() {
       loadWorkspaceFiles();
