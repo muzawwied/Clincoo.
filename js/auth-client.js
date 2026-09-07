@@ -1,11 +1,11 @@
 // Clincoo Auth Client — gate login + injeksi token ke semua API call
-// Wajib dimuat PERTAMA di semua halaman (kecuali akun/auth.html).
+// Wajib dimuat PERTAMA di semua halaman (kecuali halaman auth di /auth/).
 (function () {
   var TOKEN_KEY = 'clincoo_auth_token';
-  var isAuthPage = /akun\/auth\.html(\?|$)/.test(location.pathname + location.search);
+  var isAuthPage = /\/auth\/(index\.html)?(\?|$)|akun\/auth\.html(\?|$)/.test(location.pathname + location.search);
   var AUTH_URL = (location.hostname.indexOf('github.io') !== -1)
-    ? '/Clincoo./akun/auth.html'
-    : 'https://muzawwied.github.io/Clincoo./akun/auth.html';
+    ? '/Clincoo./auth/'
+    : 'https://muzawwied.github.io/Clincoo./auth/';
 
 // ===== NAMESPACE DATA PER AKUN =====
 // Semua kunci localStorage (kecuali clincoo_auth_*) otomatis diawali u<id>:

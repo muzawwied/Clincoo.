@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="../js/accent-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clincoo - Masuk & Daftar</title>
+    
+    <!-- Icon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E">
+    
+    <!-- Tailwind & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
+    <script src="https://unpkg.com/lucide@1.41.0"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #ffffff; 
+            transition: background-color 0.3s ease, color 0.3s ease; 
+        }
+        
+        /* Tema Gelap Dasar */
+        body.dark-mode { 
+            background-color: #050505; 
+            color: #e0e0e0; 
+        }
+        
+        /* Menghilangkan panah pada input number & auto-fill styling */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+        body.dark-mode input:-webkit-autofill {
+            -webkit-text-fill-color: #fff !important;
+        }
+
+        /* Animasi */
+        .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(8px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* Loader */
+        .loader {
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 2.5px solid #fff;
+            width: 18px;
+            height: 18px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        body.dark-mode .loader {
+            border: 2.5px solid rgba(0,0,0,0.2);
+            border-top: 2.5px solid #000;
+        }
+        .loader-lg {
+            border: 3px solid rgba(0,0,0,0.15);
+            border-radius: 50%;
+            border-top: 3px solid #000;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        body.dark-mode .loader-lg {
+            border: 3px solid rgba(255,255,255,0.25);
+            border-top: 3px solid #fff;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3 sm:p-6 selection:bg-gray-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
+    <!-- Script Deteksi Tema (Langsung dieksekusi agar tidak flash) -->
+    <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((t==="Sistem (Default)"||!t)&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+
+    <!-- Layar loading proses OAuth: halaman polos + icon loading, agar tidak flash ke form login -->
+    <div id="oauth-loading" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-black">
+        <span class="loader-lg"></span>
+    </div>
+
+    <!-- Kontainer Utama -->
+    <div class="w-full max-w-[700px] flex flex-col relative z-10 animate-fade-in mx-auto">
+        
+        <!-- Header Section -->
+        <div class="px-2 sm:px-8 pt-10 pb-6 text-center">
+            <div class="w-[72px] h-[72px] rounded-2xl mx-auto flex items-center justify-center mb-6 dark:border-white/5 bg-white dark:bg-[#0a0a0a]">
+                <!-- SVG Logo -->
+                 <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20width%3D%2232%22%20height%3D%2232%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="App Logo" class="w-[60px] h-[60px] rounded-full bg-white shadow-sm hover:scale-105 transition-transform">
+            </div>
+            <h1 id="page-title" class="font-extrabold text-3xl text-gray-900 dark:text-white tracking-tight font-['Space_Grotesk']">Masuk ke Clincoo</h1>
+            <p id="page-desc" class="text-sm text-gray-500 dark:text-gray-400 mt-2.5">Masuk untuk mengakses akun Anda</p>
+        </div>
+
+        <div class="px-2 sm:px-8 pb-10 relative">
+            
+            <!-- Tampilan Login -->
+            <div id="view-login" class="w-full animate-fade-in block">
+                <form id="form-login" class="space-y-5" onsubmit="handleAuth(event, 'login')">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Email</label>
+                        <input type="email" id="login-email" required placeholder="nama@email.com" class="w-full px-5 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-full text-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 transition-all duration-200">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Kata Sandi</label>
+                        <div class="relative group">
+                            <input type="password" id="login-pass" required placeholder="••••••••" class="w-full pl-5 pr-12 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-full text-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 transition-all duration-200">
+                            <!-- Hitbox tombol mata diperbesar agar mudah diklik -->
+                            <button type="button" onclick="togglePassword('login-pass', 'icon-login-pass')" class="absolute inset-y-0 right-1 flex items-center justify-center w-10 h-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors focus:outline-none">
+                                <i id="icon-login-pass" data-lucide="eye" class="w-[18px] h-[18px]"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-end pt-2.5 px-2">
+                            <a href="lupa-sandi.html" class="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Lupa sandi?</a>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" id="btn-login" class="w-full flex items-center justify-center gap-2 py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-full font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
+                            <span class="btn-text">Masuk Sekarang</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Pemisah -->
+                <div class="mt-8 mb-6 relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200 dark:border-white/10"></div>
+                    </div>
+                    <div class="relative flex justify-center text-[11px] uppercase tracking-wider font-bold">
+                        <span class="px-4 bg-white dark:bg-[#050505] text-gray-400 dark:text-gray-500">Atau masuk dengan</span>
+                    </div>
+                </div>
+
+                <!-- Social Login -->
+                <div class="grid grid-cols-2 gap-3 mb-8">
+                    <button type="button" class="flex items-center justify-center gap-2.5 py-3 px-5 bg-gray-50/80 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-full font-semibold text-sm transition-all active:scale-[0.97] dark:bg-white/[0.02] dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/[0.06]" onclick="startOAuth('google')">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Google
+                    </button>
+                    <button type="button" class="flex items-center justify-center gap-2.5 py-3 px-5 bg-gray-50/80 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-full font-semibold text-sm transition-all active:scale-[0.97] dark:bg-white/[0.02] dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/[0.06]" onclick="startOAuth('github')">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                        </svg>
+                        GitHub
+                    </button>
+                </div>
+
+                <!-- Navigasi Bawah -->
+                <div class="text-center pb-2">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Belum punya akun? <button type="button" onclick="switchView('register')" class="font-bold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer">Daftar sekarang</button></p>
+                </div>
+            </div>
+
+            <!-- Tampilan Daftar -->
+            <div id="view-register" class="w-full hidden">
+                <form id="form-register" class="space-y-5" onsubmit="handleAuth(event, 'register')">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Nama Lengkap</label>
+                        <input type="text" id="reg-name" required placeholder="John Doe" class="w-full px-5 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-full text-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 transition-all duration-200">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Email</label>
+                        <input type="email" id="reg-email" required placeholder="nama@email.com" class="w-full px-5 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-full text-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 transition-all duration-200">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Kata Sandi</label>
+                        <div class="relative group">
+                            <input type="password" id="reg-pass" required placeholder="Min. 8 karakter" minlength="8" class="w-full pl-5 pr-12 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-full text-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 transition-all duration-200">
+                            <button type="button" onclick="togglePassword('reg-pass', 'icon-reg-pass')" class="absolute inset-y-0 right-1 flex items-center justify-center w-10 h-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors focus:outline-none">
+                                <i id="icon-reg-pass" data-lucide="eye" class="w-[18px] h-[18px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Konfirmasi Sandi</label>
+                        <div class="relative group">
+                            <input type="password" id="reg-pass-confirm" required placeholder="Ulangi kata sandi" minlength="8" class="w-full pl-5 pr-12 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-full text-sm placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 transition-all duration-200">
+                            <button type="button" onclick="togglePassword('reg-pass-confirm', 'icon-reg-pass-confirm')" class="absolute inset-y-0 right-1 flex items-center justify-center w-10 h-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors focus:outline-none">
+                                <i id="icon-reg-pass-confirm" data-lucide="eye" class="w-[18px] h-[18px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start px-2 pt-1 pb-1">
+                        <div class="flex items-center h-5">
+                            <input id="terms" type="checkbox" required class="w-4 h-4 border border-gray-300 rounded bg-gray-50 dark:bg-white/[0.05] dark:border-white/10 accent-gray-900 dark:accent-white cursor-pointer transition-all">
+                        </div>
+                        <label for="terms" class="ml-3 text-[13px] font-medium text-gray-600 dark:text-gray-400 cursor-pointer leading-tight pt-[2px]">
+                            Saya menyetujui <a href="#" class="text-gray-900 dark:text-white hover:underline">Syarat & Ketentuan</a> serta <a href="#" class="text-gray-900 dark:text-white hover:underline">Kebijakan Privasi</a>.
+                        </label>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" id="btn-register" class="w-full flex items-center justify-center gap-2 py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-full font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
+                            <span class="btn-text">Buat Akun</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Pemisah -->
+                <div class="mt-8 mb-6 relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200 dark:border-white/10"></div>
+                    </div>
+                    <div class="relative flex justify-center text-[11px] uppercase tracking-wider font-bold">
+                        <span class="px-4 bg-white dark:bg-[#050505] text-gray-400 dark:text-gray-500">Atau daftar dengan</span>
+                    </div>
+                </div>
+
+                <!-- Social Register -->
+                <div class="grid grid-cols-2 gap-3 mb-8">
+                    <button type="button" class="flex items-center justify-center gap-2.5 py-3 px-5 bg-gray-50/80 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-full font-semibold text-sm transition-all active:scale-[0.97] dark:bg-white/[0.02] dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/[0.06]" onclick="startOAuth('google')">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Google
+                    </button>
+                    <button type="button" class="flex items-center justify-center gap-2.5 py-3 px-5 bg-gray-50/80 hover:bg-gray-100 border border-gray-200 text-gray-700 rounded-full font-semibold text-sm transition-all active:scale-[0.97] dark:bg-white/[0.02] dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/[0.06]" onclick="startOAuth('github')">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                        </svg>
+                        GitHub
+                    </button>
+                </div>
+
+                <!-- Navigasi Bawah -->
+                <div class="text-center pb-2">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Sudah punya akun? <button type="button" onclick="switchView('login')" class="font-bold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer">Masuk sekarang</button></p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer Teks Abu-abu -->
+        <div class="px-2 sm:px-8 py-2 text-center text-xs text-gray-400 dark:text-gray-600 border-t border-gray-100 dark:border-white/5 flex items-center justify-center gap-2">
+            <a href="#" class="hover:text-gray-600 dark:hover:text-gray-400 transition-colors">Syarat & Ketentuan</a>
+            <span>|</span>
+            <a href="#" class="hover:text-gray-600 dark:hover:text-gray-400 transition-colors">Privacy Policy</a>
+        </div>
+    </div>
+
+    <!-- Sistem Modal -->
+    <div id="system-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="bg-white dark:bg-[#111111] rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl border border-gray-100 dark:border-white/10 animate-fade-in text-center">
+            <div id="modal-icon-wrap" class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 mx-auto">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+            <h3 id="modal-title" class="text-lg font-bold text-gray-900 dark:text-white mb-2"></h3>
+            <p id="modal-message" class="text-sm text-gray-500 dark:text-gray-400 mb-7 leading-relaxed"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-sm active:scale-[0.98]">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            try { lucide.createIcons(); } catch (e) {}
+        });
+
+        // Fungsi Toggle Password
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            try { lucide.createIcons(); } catch (e) {}
+        }
+
+        // Logika untuk pindah tampilan Masuk / Daftar
+        function switchView(view) {
+            const viewLogin = document.getElementById('view-login');
+            const viewRegister = document.getElementById('view-register');
+            const pageTitle = document.getElementById('page-title');
+            const pageDesc = document.getElementById('page-desc');
+            
+            if (view === 'login') {
+                pageTitle.textContent = "Masuk ke Clincoo";
+                pageDesc.textContent = "Masuk untuk mengakses akun Anda";
+                
+                viewRegister.classList.add('hidden');
+                viewRegister.classList.remove('animate-fade-in');
+                
+                viewLogin.classList.remove('hidden');
+                void viewLogin.offsetWidth; // Force reflow
+                viewLogin.classList.add('animate-fade-in');
+            } else {
+                pageTitle.textContent = "Bergabung ke Clincoo";
+                pageDesc.textContent = "Buat akun Clincoo baru";
+
+                viewLogin.classList.add('hidden');
+                viewLogin.classList.remove('animate-fade-in');
+                
+                viewRegister.classList.remove('hidden');
+                void viewRegister.offsetWidth; // Force reflow
+                viewRegister.classList.add('animate-fade-in');
+            }
+        }
+
+        // ==== KONFIG AUTH ====
+        const API_BASE = 'https://clincoo-be2.pages.dev/api/auth';
+        const TOKEN_KEY = 'clincoo_auth_token';
+        const GITHUB_CLIENT_ID = 'Ov23ctIBGjQBolR5PS2C';
+
+        function saveSession(data) {
+            try {
+                localStorage.setItem(TOKEN_KEY, data.token);
+                // simpan user lebih dulu -> data profil di bawah otomatis masuk namespace akun
+                localStorage.setItem('clincoo_auth_user', JSON.stringify(data.user || {}));
+                localStorage.setItem('clincoo_fullname', data.user.name || '');
+                localStorage.setItem('clincoo_email', data.user.email || '');
+                if (data.user.avatar_url) localStorage.setItem('clincoo_profile_pic', data.user.avatar_url);
+            } catch (e) {}
+        }
+
+        // Handle aksi login & register (nyambung ke backend Clincoo)
+        async function handleAuth(event, action) {
+            event.preventDefault();
+
+            // Validasi khusus register
+            if (action === 'register') {
+                const pass = document.getElementById('reg-pass').value;
+                const passConfirm = document.getElementById('reg-pass-confirm').value;
+
+                if (pass !== passConfirm) {
+                    showModal('Pendaftaran Gagal', 'Kata sandi dan konfirmasi kata sandi tidak cocok.', 'error');
+                    return;
+                }
+            }
+
+            const btn = action === 'login' ? document.getElementById('btn-login') : document.getElementById('btn-register');
+            const btnText = btn.querySelector('.btn-text');
+            const originalText = btnText.innerText;
+
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loader"></span>';
+
+            try {
+                const body = action === 'login'
+                    ? { email: document.getElementById('login-email').value, password: document.getElementById('login-pass').value }
+                    : { name: document.getElementById('reg-name').value, email: document.getElementById('reg-email').value, password: document.getElementById('reg-pass').value };
+
+                const res = await fetch(API_BASE + (action === 'login' ? '/login' : '/register'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok || !data.token) throw new Error(data.error || 'Terjadi kesalahan, coba lagi.');
+
+                saveSession(data);
+                setTimeout(() => { window.location.href = '../index.html'; }, 400);
+            } catch (err) {
+                showModal(action === 'login' ? 'Login Gagal' : 'Pendaftaran Gagal', err.message, 'error');
+                btn.disabled = false;
+                btnText.innerText = originalText;
+            }
+        }
+
+        // Helper cookie untuk state OAuth (lebih tahan redirect lintas-domain daripada
+        // localStorage/sessionStorage di beberapa browser dengan anti bounce-tracking).
+        function setOauthStateCookie(val, provider) {
+            const payload = encodeURIComponent(JSON.stringify({ v: val, t: Date.now(), p: provider }));
+            document.cookie = 'clincoo_oauth_state=' + payload + '; Max-Age=900; Path=' + window.location.pathname + '; SameSite=Lax; Secure';
+        }
+        function getOauthStateCookie() {
+            const m = document.cookie.match(/(?:^|;\s*)clincoo_oauth_state=([^;]+)/);
+            return m ? decodeURIComponent(m[1]) : null;
+        }
+        function clearOauthStateCookie() {
+            document.cookie = 'clincoo_oauth_state=; Max-Age=0; Path=' + window.location.pathname + '; SameSite=Lax; Secure';
+        }
+
+        // ==== LOGIN SOSIAL (OAuth) ====
+        // redirect_uri WAJIB persis alamat terdaftar di GitHub OAuth App & Google Console.
+        // Halaman auth kini dilayani bersih di /auth/ (auth/index.html), tapi callback
+        // OAuth tetap diarahkan ke alamat lama yang terdaftar (akun/auth.html), yang
+        // kini cuma pengalih ke sini — jadi tidak perlu daftar ulang di Google/GitHub.
+        function oauthRedirectUri() {
+            return (location.hostname.indexOf('github.io') !== -1)
+                ? 'https://muzawwied.github.io/Clincoo./akun/auth.html'
+                : window.location.origin + window.location.pathname;
+        }
+        function startOAuth(provider) {
+            const redirectUri = oauthRedirectUri();
+            // State acak per sesi — cegah serangan login-CSRF (callback jahat memaksa
+            // korban login ke akun penyerang). Callback harus mengembalikan state ini.
+            const st = (crypto.randomUUID ? crypto.randomUUID() : ('s' + Date.now() + Math.random())).replace(/-/g, '');
+            // Cookie (bukan localStorage/sessionStorage) — beberapa browser (Samsung
+            // Internet, Firefox, Brave) punya fitur anti "bounce tracking" yang otomatis
+            // MENGHAPUS localStorage yang baru ditulis persis sebelum redirect ke domain
+            // lain (github.com/accounts.google.com), jadi state selalu hilang saat kembali.
+            // Cookie SameSite=Lax dikecualikan dari itu karena memang untuk alur ini.
+            // Payload menyimpan provider (p) juga -> deteksi provider saat callback,
+            // karena state sekarang acak, bukan literal 'github'/'google'.
+            setOauthStateCookie(st, provider);
+            if (provider === 'github') {
+                window.location.href = 'https://github.com/login/oauth/authorize?client_id=' + GITHUB_CLIENT_ID +
+                    '&scope=read:user%20user:email%20repo&state=' + st + '&redirect_uri=' + encodeURIComponent(redirectUri);
+            } else {
+                fetch(API_BASE + '/google')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.client_id) throw new Error(data.error || 'Client ID Google tidak tersedia.');
+                        window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + data.client_id +
+                            '&redirect_uri=' + encodeURIComponent(redirectUri) +
+                            '&response_type=code&scope=openid%20email%20profile&state=' + st + '&prompt=select_account';
+                    })
+                    .catch(err => showModal('Gagal Memulai Login Google', err.message, 'error'));
+            }
+        }
+
+        async function handleOAuthCallback(code, provider) {
+            const redirectUri = oauthRedirectUri();
+            window.history.replaceState({}, document.title, window.location.pathname);
+            try {
+                const res = await fetch(API_BASE + '/' + provider, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, redirect_uri: redirectUri })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.token) throw new Error(data.error || 'Login ' + provider + ' gagal.');
+                saveSession(data);
+                setTimeout(() => { window.location.href = '../index.html'; }, 400);
+            } catch (err) {
+                document.getElementById('oauth-loading').classList.add('hidden');
+                showModal('Login ' + (provider === 'github' ? 'GitHub' : 'Google') + ' Gagal', err.message, 'error');
+            }
+        }
+
+        // Handle callback OAuth & sesi aktif saat halaman dibuka
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const oauthError = params.get('error');
+            if (code) {
+                // Deteksi provider dari state tersimpan (cookie). Tanpa validasi blokir:
+                // selalu lanjut login, tanpa popup pemblokir.
+                const savedRaw = getOauthStateCookie();
+                let savedProvider = 'github';
+                try {
+                    const parsed = JSON.parse(savedRaw || 'null');
+                    if (parsed && parsed.p === 'google') savedProvider = 'google';
+                } catch (e) {}
+                clearOauthStateCookie();
+                document.getElementById('oauth-loading').classList.remove('hidden');
+                handleOAuthCallback(code, savedProvider);
+            } else if (oauthError) {
+                showModal('Login Dibatalkan', 'Proses login dibatalkan atau gagal. Silakan coba lagi.', 'error');
+            }
+
+            // Kalau sesi masih aktif, langsung ke beranda
+            (async () => {
+                try {
+                    const token = localStorage.getItem(TOKEN_KEY);
+                    if (!token) return;
+                    const res = await fetch(API_BASE + '/me', { headers: { 'Authorization': 'Bearer ' + token } });
+                    if (res.ok) {
+                        const d = await res.json();
+                        if (d.authenticated) window.location.replace('../index.html');
+                    } else {
+                        localStorage.removeItem(TOKEN_KEY);
+                    }
+                } catch (e) {}
+            })();
+        });
+
+        // Fungsi Modal
+        function showModal(title, message, type = 'success') {
+            var iconWrap = document.getElementById('modal-icon-wrap');
+            var iconName = 'check-circle';
+            var bgClass = 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+            
+            var tLower = (title || '').toLowerCase();
+            if (tLower.includes('gagal') || tLower.includes('tidak valid') || type === 'error') {
+                iconName = 'alert-circle';
+                bgClass = 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400';
+            }
+            
+            if (iconWrap) {
+                iconWrap.className = 'w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto ' + bgClass;
+                iconWrap.innerHTML = '<i data-lucide="' + iconName + '" class="w-6 h-6"></i>';
+            }
+
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            var modal = document.getElementById('system-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            try { lucide.createIcons(); } catch (e) {}
+        }
+
+        function closeModal() {
+            var modal = document.getElementById('system-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
