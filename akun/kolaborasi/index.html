@@ -303,6 +303,22 @@
         loadCollab();
     }
 
+    function collabCacheKey(pid) {
+        var u = null;
+        try { u = JSON.parse(localStorage.getItem('clincoo_auth_user') || 'null'); } catch (e) {}
+        return 'clincoo_collab_cache_' + (u && u.id ? u.id : 'anon') + '_' + pid;
+    }
+
+    function renderCollabCache(pid) {
+        var cc = null;
+        try { cc = JSON.parse(localStorage.getItem(collabCacheKey(pid)) || 'null'); } catch (e) {}
+        if (cc && Array.isArray(cc.members)) {
+            collabData.members = cc.members;
+            collabData.pending = cc.pending || [];
+            renderCollab();
+        }
+    }
+
     function selectProject(id, title) {
         currentProject = { id: String(id), title: title };
         try { localStorage.setItem('clincoo_collab_project', JSON.stringify(currentProject)); } catch (e) {}
@@ -310,6 +326,7 @@
         if (share) share.style.display = '';
         showCollabSkeleton();
         loadCollab();
+        renderCollabCache(currentProject.id);
     }
 
 
@@ -330,7 +347,15 @@
             if (fromUrl) pick = projects.find(function(p) { return String(p.id) === String(fromUrl); });
             if (!pick && saved && saved.id) pick = projects.find(function(p) { return String(p.id) === String(saved.id); });
             if (!pick) pick = projects[0];
-            selectProject(pick.id, pick.title);
+            if (currentProject && String(currentProject.id) === String(pick.id)) {
+                if (pick.title && currentProject.title !== pick.title) {
+                    currentProject.title = pick.title;
+                    var ne = document.getElementById('selected-project-name');
+                    if (ne) ne.innerText = pick.title;
+                }
+            } else {
+                selectProject(pick.id, pick.title);
+            }
             if (window.lucide) try { lucide.createIcons(); } catch (e) {}
         })
         .catch(function() {
@@ -646,8 +671,21 @@
 
     // Kartu "Pembaruan Hari Ini": jumlah aktivitas akun hari ini (zona WIB)
     var ACTIVITY_API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+    function actCountKey() {
+        var u = null;
+        try { u = JSON.parse(localStorage.getItem('clincoo_auth_user') || 'null'); } catch (e) {}
+        return 'clincoo_act_count_' + (u && u.id ? u.id : 'anon');
+    }
+    function wibToday() {
+        return new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10);
+    }
     function loadUpdatesToday() {
         var el = document.getElementById('stat-updates-today');
+        // Render instan dari cache hari ini
+        try {
+            var ac = JSON.parse(localStorage.getItem(actCountKey()) || 'null');
+            if (ac && ac.d === wibToday() && typeof ac.n === 'number' && el) el.innerText = ac.n;
+        } catch (e) {}
         fetch(ACTIVITY_API + '/activity?limit=100')
         .then(function(r) { return r.json(); })
         .then(function(res) {
@@ -660,6 +698,7 @@
                 return !isNaN(d.getTime()) && d.getTime() >= thr;
             }).length;
             if (el) el.innerText = count;
+            try { localStorage.setItem(actCountKey(), JSON.stringify({ n: count, d: wibToday() })); } catch (e) {}
         })
         .catch(function() { if (el) el.innerText = 0; });
     }
@@ -681,6 +720,7 @@
                 }
                 collabData.members = res.members || [];
                 collabData.pending = res.pending || [];
+                try { localStorage.setItem(collabCacheKey(currentProject.id), JSON.stringify({ members: collabData.members, pending: collabData.pending, t: Date.now() })); } catch (e) {}
             } else {
                 collabData.members = [];
                 collabData.pending = [];
@@ -693,6 +733,9 @@
     // Init: muat data kolaborasi; link lama ?invite= diredirect ke halaman undangan terpisah
     (function() {
         showCollabSkeleton();
+        var savedP = null;
+        try { savedP = JSON.parse(localStorage.getItem('clincoo_collab_project') || 'null'); } catch (e) {}
+        if (savedP && savedP.id) selectProject(savedP.id, savedP.title || '');
         loadProjects();
         loadUpdatesToday();
         var params = new URLSearchParams(window.location.search);

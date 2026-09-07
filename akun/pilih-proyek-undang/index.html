@@ -81,6 +81,11 @@
             window.location.href = '../kolaborasi/';
         }
 
+        function refreshIcons(attempt) {
+            try { if (window.lucide) { lucide.createIcons(); return; } } catch (e) {}
+            if ((attempt || 0) < 30) setTimeout(function () { refreshIcons((attempt || 0) + 1); }, 100);
+        }
+
         function esc(s) {
             return String(s || '').replace(/[&<>"']/g, function (c) {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -137,7 +142,7 @@
                         '<p class="text-base font-semibold text-gray-900">Belum ada proyek</p>' +
                         '<p class="text-sm text-gray-500 mt-1.5 max-w-xs">Buat proyek terlebih dahulu di halaman Proyek, lalu kembali ke sini untuk mengundang rekan tim.</p>' +
                     '</div>';
-                try { lucide.createIcons(); } catch (e) {}
+                refreshIcons()
                 return;
             }
             list.innerHTML = projects.map(function (p, i) {
@@ -155,7 +160,7 @@
                     '</span>' +
                 '</button>';
             }).join('');
-            try { lucide.createIcons(); } catch (e) {}
+            refreshIcons()
         }
 
         function selectProject(id, title) {
@@ -171,7 +176,7 @@
             var ctaText = document.getElementById('cta-text');
             if (ctaText) ctaText.innerText = 'Lanjut ke Email';
             var bar = document.getElementById('cta-bar');
-            if (bar) { bar.classList.remove('cta-hidden'); try { lucide.createIcons(); } catch (e) {} }
+            if (bar) { bar.classList.remove('cta-hidden'); refreshIcons() }
         }
 
         function confirmProject() {
