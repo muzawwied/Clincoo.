@@ -106,7 +106,37 @@
         .cube .f-top    { transform: rotateX(90deg) translateZ(65px); }
         .cube .f-bottom { transform: rotateX(-90deg) translateZ(65px); }
         @keyframes cube-spin { from { transform: rotateX(-18deg) rotateY(0deg); } to { transform: rotateX(-18deg) rotateY(360deg); } }
-        @media (prefers-reduced-motion: reduce) { .cube { animation: none; } }
+        @media (prefers-reduced-motion: reduce) { .cube, .cube-sm, .ring, .hero-dot { animation: none; } }
+
+        /* Kubus kecil pendamping */
+        .cube-sm { width: 56px; height: 56px; position: absolute; right: -110px; bottom: -80px; transform-style: preserve-3d; animation: cube-spin-sm 10s linear infinite; }
+        .cube-sm .face { border-width: 1px; border-radius: 10px; }
+        .cube-sm .f-front  { transform: rotateY(0deg) translateZ(28px); }
+        .cube-sm .f-back   { transform: rotateY(180deg) translateZ(28px); }
+        .cube-sm .f-left   { transform: rotateY(-90deg) translateZ(28px); }
+        .cube-sm .f-right  { transform: rotateY(90deg) translateZ(28px); }
+        .cube-sm .f-top    { transform: rotateX(90deg) translateZ(28px); }
+        .cube-sm .f-bottom { transform: rotateX(-90deg) translateZ(28px); }
+        @keyframes cube-spin-sm { from { transform: rotateX(-26deg) rotateY(0deg); } to { transform: rotateX(-26deg) rotateY(-360deg); } }
+
+        /* Cincin orbit 3D */
+        .ring { position: absolute; top: 50%; left: 50%; width: 230px; height: 230px; margin: -115px 0 0 -115px; border: 1.5px dashed rgba(0,0,0,0.20); border-radius: 9999px; transform: rotateX(72deg) rotateZ(0deg); animation: ring-spin 14s linear infinite; }
+        body.dark-mode .ring { border-color: rgba(255,255,255,0.18); }
+        @keyframes ring-spin { from { transform: rotateX(72deg) rotateZ(0deg); } to { transform: rotateX(72deg) rotateZ(360deg); } }
+
+        /* Titik-titik mengambang */
+        .hero-dot { position: absolute; border-radius: 9999px; background: rgba(0,0,0,0.30); }
+        body.dark-mode .hero-dot { background: rgba(255,255,255,0.32); }
+        .dot-1 { width: 8px; height: 8px; top: 18%; left: 16%; animation: float-y 7s ease-in-out infinite; }
+        .dot-2 { width: 5px; height: 5px; top: 30%; right: 20%; animation: float-y 9s ease-in-out infinite 1.2s; }
+        .dot-3 { width: 6px; height: 6px; bottom: 24%; left: 24%; animation: float-y 8s ease-in-out infinite 0.6s; }
+        .dot-4 { width: 4px; height: 4px; bottom: 32%; right: 26%; animation: float-y 10s ease-in-out infinite 2s; }
+        .dot-5 { width: 5px; height: 5px; top: 55%; left: 10%; animation: float-y 11s ease-in-out infinite 0.3s; }
+        @keyframes float-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+
+        /* Chip fitur */
+        .chip { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; padding: 6px 14px; border-radius: 9999px; border: 1px solid rgba(0,0,0,0.14); color: rgba(0,0,0,0.65); background: rgba(255,255,255,0.45); }
+        body.dark-mode .chip { border-color: rgba(255,255,255,0.14); color: rgba(255,255,255,0.60); background: rgba(255,255,255,0.03); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col lg:flex-row selection:bg-gray-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
@@ -201,15 +231,30 @@
 
         </div>
     </div>
+    </div>
 
     <!-- Panel Kanan: Visual 3D ala Cloudflare (hanya tampil di layar lebar) -->
     <div id="hero-panel" class="hidden lg:flex w-1/2 relative items-center justify-center overflow-hidden bg-gray-50/60 dark:bg-[#0a0a0a] border-l border-gray-200/80 dark:border-white/10">
         <div class="hero-grid absolute inset-0 opacity-70"></div>
         <div class="hero-glow absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full blur-3xl"></div>
         <div class="hero-glow2 absolute -bottom-40 -left-24 w-[420px] h-[420px] rounded-full blur-3xl"></div>
+        <div class="hero-dot dot-1"></div>
+        <div class="hero-dot dot-2"></div>
+        <div class="hero-dot dot-3"></div>
+        <div class="hero-dot dot-4"></div>
+        <div class="hero-dot dot-5"></div>
         <div class="relative z-10 flex flex-col items-center text-center px-12">
-            <div class="scene mb-10">
+            <div class="scene mb-12">
+                <div class="ring"></div>
                 <div class="cube">
+                    <div class="face f-front"></div>
+                    <div class="face f-back"></div>
+                    <div class="face f-left"></div>
+                    <div class="face f-right"></div>
+                    <div class="face f-top"></div>
+                    <div class="face f-bottom"></div>
+                </div>
+                <div class="cube-sm">
                     <div class="face f-front"></div>
                     <div class="face f-back"></div>
                     <div class="face f-left"></div>
@@ -220,6 +265,11 @@
             </div>
             <h2 class="font-['Space_Grotesk'] font-extrabold text-4xl text-gray-900 dark:text-white tracking-tight">Clincoo</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-3 max-w-xs leading-relaxed">Ruang kerja untuk membangun, mendeploy, dan berkolaborasi — semuanya dalam satu tempat.</p>
+            <div class="flex items-center justify-center gap-2 mt-6">
+                <span class="chip">Build</span>
+                <span class="chip">Deploy</span>
+                <span class="chip">Kolaborasi</span>
+            </div>
         </div>
     </div>
 
