@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
 <script src="../../js/auth-client.js"></script>
+  <script src="../../js/accent-init.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -220,7 +221,7 @@
             if (deployState.deploying) return; // klik hanya sekali per sesi
             deployState.deploying = true;
             writeDeploySession({ status: 'deploying', started_at: Date.now() });
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Mengunggah file workspace...</span>`;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Menyiapkan deploy...</span>`;
             btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
             lucide.createIcons();
             try {

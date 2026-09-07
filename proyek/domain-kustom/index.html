@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
   <script src="../../js/auth-client.js"></script>
+  <script src="../../js/accent-init.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +28,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
+    @keyframes domainShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .domain-shimmer { background: linear-gradient(90deg,#f9fafb 25%,#f3f4f6 50%,#f9fafb 75%) !important; background-size: 200% 100% !important; animation: domainShimmer 1.4s infinite; color: transparent !important; }
     body { font-family: 'Inter', sans-serif; }
     
     /* Menyembunyikan scrollbar di seluruh browser */
@@ -152,8 +155,8 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Domain kustom yang digunakan untuk situs produksi</p>
           </div>
           <div class="w-full sm:w-80">
-            <span id="cf-domain-status" class="inline-block text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-600">memuat…</span>
-            <input type="text" value="" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none" placeholder="contohdomain.com">
+            <span id="cf-domain-status" class="inline-block text-xs px-3 py-1 rounded-full font-semibold hidden"></span>
+            <input type="text" value="" id="custom-domain-input" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none domain-shimmer" placeholder="contohdomain.com" disabled>
           </div>
         </div>
 
@@ -214,18 +217,19 @@
               </thead>
               <tbody>
                 <tr class="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-[#0a0a0a]">
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">A</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-name">@</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-value">76.76.21.21</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">CNAME</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-name">www</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-value">situs-anda.pages.dev</td>
                 </tr>
                 <tr class="bg-white dark:bg-[#0a0a0a]">
                   <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">CNAME</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-name">www</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-value">clincoo-be2.pages.dev</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-name">@ (root)</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-value">situs-anda.pages.dev</td>
                 </tr>
               </tbody>
             </table>
           </div>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Untuk root domain (@): sebagian provider tidak menerima CNAME di root — gunakan fitur "CNAME Flattening" (Cloudflare) / "ALIAS" / "ANAME" dengan nilai yang sama. SSL otomatis aktif beberapa menit setelah DNS terverifikasi.</p>
         </div>
 
       </div>
@@ -332,6 +336,7 @@
             const data = await res.json();
             const settings = data.domain_settings ? JSON.parse(data.domain_settings) : {};
             const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
+            if (domainInput) { domainInput.classList.remove('domain-shimmer'); domainInput.disabled = false; }
             if (domainInput && settings.domain) domainInput.value = settings.domain;
             if (settings.redirect) {
                 selectPopoverOption('redirect', settings.redirect, settings.redirectLabel || 'Redirect ke domain utama');
@@ -341,22 +346,18 @@
         } catch(e) {}
     }
 
-    function updateDNSRecords(domain) {
+    function updateDNSRecords(domain, pagesUrl) {
+        // Cloudflare Pages: custom domain pakai CNAME ke <project>.pages.dev (TANPA A record IP).
+        // Nilai diambil real-time dari hasil deploy proyek (st.pages_url).
+        const target = (pagesUrl || '').replace('https://', '').replace(/\/$/, '') || 'situs-anda.pages.dev';
         const aName = document.getElementById('dns-a-name');
         const aValue = document.getElementById('dns-a-value');
         const cnameName = document.getElementById('dns-cname-name');
         const cnameValue = document.getElementById('dns-cname-value');
-        if (domain) {
-            if (aName) aName.textContent = '@';
-            if (aValue) aValue.textContent = '76.76.21.21';
-            if (cnameName) cnameName.textContent = 'www';
-            if (cnameValue) cnameValue.textContent = domain + ' -> clincoo-be2.pages.dev';
-        } else {
-            if (aName) aName.textContent = '@';
-            if (aValue) aValue.textContent = '76.76.21.21';
-            if (cnameName) cnameName.textContent = 'www';
-            if (cnameValue) cnameValue.textContent = 'clincoo-be2.pages.dev';
-        }
+        if (cnameName) cnameName.textContent = 'www';
+        if (cnameValue) cnameValue.textContent = target;
+        if (aName) aName.textContent = '@ (root)';
+        if (aValue) aValue.textContent = target;
     }
 
     // Save domain settings to D1
@@ -386,7 +387,7 @@
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
             const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
             try {
-                const res = await fetch('https://clincoo-be2.pages.dev/api/deploy', {
+                const res = await fetch('https://clincoo.pages.dev/api/deploy', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
                     body: JSON.stringify({ project_id: pid, action: 'add_domain', domain })
@@ -401,13 +402,13 @@
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
             const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
             try {
-                const res = await fetch('https://clincoo-be2.pages.dev/api/deploy?project_id=' + encodeURIComponent(pid), {
+                const res = await fetch('https://clincoo.pages.dev/api/deploy?project_id=' + encodeURIComponent(pid), {
                     headers: token ? { Authorization: 'Bearer ' + token } : {}
                 });
                 const st = await res.json();
-                const cnameValue = document.getElementById('dns-cname-value');
-                if (st.pages_url && cnameValue) cnameValue.textContent = st.pages_url.replace('https://', '');
+                if (st.pages_url) updateDNSRecords('', st.pages_url);
                 const badge = document.getElementById('cf-domain-status');
+                if (badge) badge.classList.remove('hidden');
                 if (badge) {
                     if ((st.domains || []).length) {
                         const d = st.domains[st.domains.length - 1];

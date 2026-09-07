@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
   <script src="../../js/auth-client.js"></script>
+  <script src="../../js/accent-init.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,6 +42,8 @@
       scrollbar-width: none;
     }
 
+    @keyframes secShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .sec-shimmer { background: linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%); background-size: 200% 100%; animation: secShimmer 1.4s infinite; border-radius: 8px; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-4px); }
       to { opacity: 1; transform: translateY(0); }
@@ -214,7 +217,11 @@
 
           <!-- Notifikasi keamanan real-time situs proyek (di-poll dari backend) -->
           <ul id="sec-events-list" class="space-y-0 text-sm">
-            <li id="sec-loading" class="flex items-center justify-center min-h-[240px] text-gray-500">Memuat…</li>
+            <li id="sec-loading" class="flex flex-col gap-3 min-h-[240px] py-2" aria-label="Memuat notifikasi">
+              <div class="flex items-start gap-3 p-3"><div class="sec-shimmer w-9 h-9 rounded-full shrink-0"></div><div class="flex-1 space-y-2"><div class="sec-shimmer h-3.5 w-3/4"></div><div class="sec-shimmer h-3 w-1/2"></div></div></div>
+              <div class="flex items-start gap-3 p-3"><div class="sec-shimmer w-9 h-9 rounded-full shrink-0"></div><div class="flex-1 space-y-2"><div class="sec-shimmer h-3.5 w-2/3"></div><div class="sec-shimmer h-3 w-2/5"></div></div></div>
+              <div class="flex items-start gap-3 p-3"><div class="sec-shimmer w-9 h-9 rounded-full shrink-0"></div><div class="flex-1 space-y-2"><div class="sec-shimmer h-3.5 w-4/5"></div><div class="sec-shimmer h-3 w-1/3"></div></div></div>
+            </li>
           </ul>
         </div>
       </div>
@@ -447,7 +454,10 @@
         if (li) li.remove();
         render(data);
       })
-      .catch(function(){});
+      .catch(function(){
+        var li = document.getElementById('sec-loading');
+        if (li) li.innerHTML = '<div class="w-full text-center text-xs text-gray-400 py-10">Gagal memuat notifikasi keamanan. Menunggu percobaan ulang otomatis…</div>';
+      });
   }
   load();
   setInterval(load, POLL_MS);

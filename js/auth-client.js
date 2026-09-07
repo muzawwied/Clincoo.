@@ -166,7 +166,7 @@ try {
     init = init || {};
     var url = '';
     try { url = typeof input === 'string' ? input : (input && input.url) || ''; } catch (e) {}
-    var isApi = url.indexOf('clincoo-be2.pages.dev/api') !== -1 || /^\/api\//.test(url) || /^https?:\/\/[^\/]*clincoo-be2\.pages\.dev\/api/.test(url);
+    var isApi = url.indexOf('clincoo-be2.pages.dev/api') !== -1 || url.indexOf('clincoo.pages.dev/api') !== -1 || /^\/api\//.test(url) || /^https?:\/\/[^\/]*clincoo-be2\.pages\.dev\/api/.test(url);
     var isAuthApi = url.indexOf('/api/auth/') !== -1;
     if (isApi && !isAuthApi) {
       try {
