@@ -297,19 +297,28 @@
         // localStorage/sessionStorage di beberapa browser dengan anti bounce-tracking).
         function setOauthStateCookie(val, provider) {
             const payload = encodeURIComponent(JSON.stringify({ v: val, t: Date.now(), p: provider }));
-            document.cookie = 'clincoo_oauth_state=' + payload + '; Max-Age=900; Path=' + window.location.pathname + '; SameSite=Lax; Secure';
+            document.cookie = 'clincoo_oauth_state=' + payload + '; Max-Age=900; Path=/; SameSite=Lax; Secure';
         }
         function getOauthStateCookie() {
             const m = document.cookie.match(/(?:^|;\s*)clincoo_oauth_state=([^;]+)/);
             return m ? decodeURIComponent(m[1]) : null;
         }
         function clearOauthStateCookie() {
-            document.cookie = 'clincoo_oauth_state=; Max-Age=0; Path=' + window.location.pathname + '; SameSite=Lax; Secure';
+            document.cookie = 'clincoo_oauth_state=; Max-Age=0; Path=/; SameSite=Lax; Secure';
         }
 
         // ==== LOGIN SOSIAL (OAuth) ====
+        // redirect_uri WAJIB persis alamat terdaftar di GitHub OAuth App & Google Console
+        // (akun/auth.html — kini pengalih ke auth/index.html). Dari halaman daftar,
+        // cookie state dibuat Path=/ supaya tetap terbaca di halaman auth saat callback.
+        function oauthRedirectUri() {
+            return (location.hostname.indexOf('github.io') !== -1)
+                ? 'https://muzawwied.github.io/Clincoo./akun/auth.html'
+                : window.location.origin + window.location.pathname;
+        }
+
         function startOAuth(provider) {
-            const redirectUri = window.location.origin + window.location.pathname;
+            const redirectUri = oauthRedirectUri();
             // State acak per sesi — cegah serangan login-CSRF (callback jahat memaksa
             // korban login ke akun penyerang). Callback harus mengembalikan state ini.
             const st = (crypto.randomUUID ? crypto.randomUUID() : ('s' + Date.now() + Math.random())).replace(/-/g, '');
@@ -338,7 +347,7 @@
         }
 
         async function handleOAuthCallback(code, provider) {
-            const redirectUri = window.location.origin + window.location.pathname;
+            const redirectUri = oauthRedirectUri();
             window.history.replaceState({}, document.title, window.location.pathname);
             try {
                 const res = await fetch(API_BASE + '/' + provider, {
