@@ -207,7 +207,7 @@
         }
 
         async function deleteTask(id) {
-            if (!true) return;
+            if (!confirm('Hapus tugas ini beserta seluruh riwayat hasilnya?')) return;
             try {
                 await fetch(API_BASE + '/api/scheduled-tasks', {
                     method: 'POST',

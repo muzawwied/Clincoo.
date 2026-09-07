@@ -437,7 +437,7 @@
         }
 
         async function unpublishSite() {
-            if (!true) return;
+            if (!confirm("Apakah Anda yakin ingin menarik publikasi dan menonaktifkan situs ini?")) return;
             try {
                 await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'unpublish' }) });
                 localStorage.removeItem('clincoo_is_deployed');
@@ -537,7 +537,7 @@
         }
 
         async function removeCustomDomain() {
-            if(!true) return;
+            if(!confirm("Apakah Anda yakin ingin menghapus custom domain?")) return;
             const domain = localStorage.getItem('clincoo_custom_domain');
             try {
                 if (domain) await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'remove_domain', domain }) });
