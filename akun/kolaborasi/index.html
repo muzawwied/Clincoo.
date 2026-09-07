@@ -134,7 +134,7 @@
                 
                 <!-- Dropdown Menu -->
                 <div id="share-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border border-gray-100 dark:border-[#222] py-1.5 z-50">
-                    <button onclick="window.location.href='../undang-email/'" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
+                    <button onclick="goUndangEmail()" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#222] flex items-center gap-3 transition-colors focus:outline-none">
                         <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>
                         <span>Undang via Email</span>
                     </button>
@@ -220,6 +220,14 @@
     /* ========================================================
        Fungsi Dropdown Share (Undangan Instan)
        ======================================================== */
+    function goUndangEmail() {
+        if (currentProject && currentProject.id) {
+            window.location.href = '../undang-email/?project=' + encodeURIComponent(currentProject.id) + '&project_name=' + encodeURIComponent(currentProject.title || '');
+        } else {
+            window.location.href = '../pilih-proyek-undang/';
+        }
+    }
+
     function toggleShareDropdown() {
         const menu = document.getElementById('share-dropdown-menu');
         menu.classList.toggle('hidden');
