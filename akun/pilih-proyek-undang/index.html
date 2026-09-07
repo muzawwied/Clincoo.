@@ -13,7 +13,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@1.41.0"></script>
-    <script src="https://unpkg.com/lucide@1.41.0"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -50,7 +49,7 @@
 
     <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
         <button onclick="goBack()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
-            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
         </button>
         <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Pilih Proyek</h1>
         <div class="w-10"></div>
@@ -68,7 +67,7 @@
     <div id="cta-bar" class="cta-bar cta-hidden fixed bottom-0 left-0 right-0 z-40">
         <div class="max-w-md mx-auto px-6 pb-6 pt-3 bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black">
             <button type="button" onclick="confirmProject()" id="cta-btn" class="w-full flex items-center justify-center gap-2 py-3.5 bg-gray-900 text-white rounded-full font-bold text-sm hover:bg-gray-800 transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 <span id="cta-text">Lanjut ke Email</span>
             </button>
         </div>
@@ -88,13 +87,29 @@
             });
         }
 
+        function projCacheKey() {
+            var u = null;
+            try { u = JSON.parse(localStorage.getItem('clincoo_auth_user') || 'null'); } catch (e) {}
+            return 'clincoo_pu_cache_' + (u && u.id ? u.id : 'anon');
+        }
+
         async function loadProjects() {
             var list = document.getElementById('project-list');
-            list.innerHTML = '<div class="flex flex-col gap-2.5">' +
-                '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
-                '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
-                '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
-            '</div>';
+
+            // 1) Render instan dari cache (kalau ada)
+            var cached = null;
+            try { cached = JSON.parse(localStorage.getItem(projCacheKey()) || 'null'); } catch (e) {}
+            if (cached && Array.isArray(cached.projects)) {
+                renderProjects(cached.projects);
+            } else {
+                list.innerHTML = '<div class="flex flex-col gap-2.5">' +
+                    '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
+                    '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
+                    '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
+                '</div>';
+            }
+
+            // 2) Refresh data terbaru di latar belakang
             try {
                 var res = await fetch(API_BASE + '/projects', {
                     method: 'POST',
@@ -103,9 +118,13 @@
                 });
                 var data = await res.json().catch(function () { return {}; });
                 if (!res.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
-                renderProjects((data && data.projects) || []);
+                var projects = (data && data.projects) || [];
+                renderProjects(projects);
+                try { localStorage.setItem(projCacheKey(), JSON.stringify({ projects: projects, t: Date.now() })); } catch (e) {}
             } catch (err) {
-                list.innerHTML = '<p class="text-sm text-red-500 py-6 text-center">Gagal memuat proyek: ' + esc(err.message) + '</p>';
+                if (!cached) {
+                    list.innerHTML = '<p class="text-sm text-red-500 py-6 text-center">Gagal memuat proyek: ' + esc(err.message) + '</p>';
+                }
             }
         }
 
