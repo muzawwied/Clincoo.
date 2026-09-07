@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hubungkan ClincooPay — Clincoo</title>
+    <meta name="robots" content="noindex">
+    <script src="/js/theme.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/js/path-router.js"></script>
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.25s ease-out; }
+        .otp-hidden { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-900 bg-white">
+    <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+
+    <div class="flex flex-col bg-white dark:bg-[#0a0a0a] min-h-screen w-full overflow-x-hidden">
+
+        <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
+            <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+        </header>
+
+        <main class="flex-1 w-full flex flex-col px-5 py-6" style="max-width: 28rem; margin: 0 auto;">
+            <div class="mb-6 w-full flex flex-col items-center text-center">
+                <div class="relative w-16 h-16 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-gray-200 dark:border-gray-700 mb-4">
+                    <img src="https://muzawwied.github.io/Wallet/logo.png" alt="ClincooPay" class="absolute inset-0 w-full h-full object-cover scale-[1.42]">
+                </div>
+                <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">ClincooPay</h2>
+                <p id="page-subtitle" class="text-sm text-gray-500 dark:text-gray-400 mt-1.5">Hubungkan dompet web Wallet kamu agar saldo Clincoo tersinkron otomatis.</p>
+            </div>
+
+            <!-- STEP 1: INPUT ID WALLET -->
+            <div id="step-id" class="w-full space-y-4 animate-fade-in">
+                <div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] p-5 space-y-4">
+                    <div>
+                        <label class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 block">ID Wallet</label>
+                        <input id="cp-wallet-id" type="text" maxlength="10" placeholder="Contoh: aYSRRPE5y" autocomplete="off"
+                            class="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] text-sm font-bold text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-900 dark:focus:border-white tracking-widest uppercase">
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Buka aplikasi Wallet, lihat Profil, lalu salin 10 karakter ID Pengguna kamu.</p>
+                    </div>
+                    <p id="cp-id-error" class="text-xs text-red-500 hidden"></p>
+                    <button onclick="sendRequest()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Kirim Permintaan</button>
+                </div>
+                <div class="rounded-2xl border border-dashed border-gray-200 dark:border-gray-800 p-4">
+                    <p class="text-[11px] md:text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Setelah kirim permintaan: konfirmasi di notifikasi aplikasi Wallet, lalu masukkan PIN wallet di sini. PIN tidak pernah disimpan Clincoo.</p>
+                </div>
+            </div>
+
+            <!-- STEP 2: MENUNGGU KONFIRMASI DI APLIKASI WALLET -->
+            <div id="step-wait" class="w-full space-y-5 otp-hidden">
+                <div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] p-6 text-center space-y-4">
+                    <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center mx-auto">
+                        <svg class="animate-spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" class="text-gray-900 dark:text-white"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white">Menunggu Konfirmasi</p>
+                        <p class="text-[11px] md:text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">Permintaan terkirim. Buka aplikasi <b>Wallet</b> kamu, masuk ke <b>Notifikasi</b>, lalu tekan <b>Konfirmasi</b> pada permintaan ClincooPay.</p>
+                    </div>
+                    <button onclick="cancelWait()" class="w-full py-3 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 hover:border-gray-900 dark:hover:border-white transition-all">Batalkan</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: INPUT PIN WALLET -->
+            <div id="step-pin" class="w-full space-y-4 otp-hidden">
+                <div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] p-5 space-y-4">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-3">
+                            <div class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"><i data-lucide="check" class="w-4 h-4"></i></div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Dompet sudah dikonfirmasi di aplikasi Wallet</p>
+                        </div>
+                        <label class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 block">PIN Wallet</label>
+                        <input id="cp-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off"
+                            class="w-full px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] text-center text-lg font-bold text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none focus:border-gray-900 dark:focus:border-white" style="letter-spacing: 0.6em;">
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Masukkan 6 digit PIN aplikasi Wallet kamu.</p>
+                    </div>
+                    <p id="cp-pin-error" class="text-xs text-red-500 hidden"></p>
+                    <button onclick="confirmPin()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Konfirmasi &amp; Hubungkan</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: TERHUBUNG -->
+            <div id="step-done" class="w-full space-y-4 otp-hidden">
+                <div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] p-6 text-center space-y-4">
+                    <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                        <i data-lucide="check-circle" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <p class="text-base font-bold text-gray-900 dark:text-white">Dompet Terhubung</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Terhubung ke <span id="cp-done-addr" class="font-semibold"></span></p>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white mt-3" id="cp-done-balance"></p>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Saldo Clincoo dan Wallet kini tersinkron otomatis.</p>
+                    </div>
+                    <div class="space-y-2 pt-2">
+                        <button onclick="location.href='../dompet/'" class="w-full py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">Kembali ke Dompet</button>
+                        <button onclick="doUnlink()" class="w-full py-3 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 hover:border-gray-900 dark:hover:border-white transition-all">Putuskan Dompet</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="system-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="bg-white dark:bg-[#121212] rounded-xl p-5 md:p-6 w-full max-w-sm relative z-10 shadow-xl border border-gray-100 dark:border-gray-800 animate-fade-in text-center">
+            <div id="modal-icon-wrap" class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 mx-auto">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+            <h3 id="modal-title" class="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2"></h3>
+            <p id="modal-message" class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-black rounded-lg font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm active:scale-95">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '';
+        const CP_API = API_BASE + '/api/clincoopay';
+        var currentRequestId = null;
+        var pollTimer = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try { lucide.createIcons(); } catch (e) {}
+            showStep('step-id');
+            await loadStatus();
+        });
+
+        function goBack() { window.location.href = '../topup/'; }
+
+        function authHeaders() {
+            var token = ''; try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
+            return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+        }
+        function showStep(id) {
+            ['step-id', 'step-wait', 'step-pin', 'step-done'].forEach(function (s) {
+                document.getElementById(s).classList.toggle('otp-hidden', s !== id);
+            });
+        }
+        function showModal(title, message, okIcon) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            try {
+                var w = document.getElementById('modal-icon-wrap');
+                w.className = 'w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto ' + (okIcon === false ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600');
+                lucide.createIcons();
+            } catch (e) {}
+            var m = document.getElementById('system-modal');
+            m.classList.remove('hidden'); m.classList.add('flex');
+        }
+        function closeModal() {
+            var m = document.getElementById('system-modal');
+            m.classList.add('hidden'); m.classList.remove('flex');
+        }
+        function maskAddr(a) { return a ? '0x…' + String(a).slice(-6) : ''; }
+        function fmtIDR(n) { return 'Rp ' + Number(n || 0).toLocaleString('id-ID'); }
+
+        async function loadStatus() {
+            try {
+                var st = await fetch(CP_API, { headers: authHeaders() }).then(function (r) { return r.json(); });
+                if (st.connected) {
+                    renderDone(st.wallet_address, st.wallet_balance);
+                    document.getElementById('page-subtitle').textContent = 'Dompet kamu sudah terhubung dan tersinkron dengan Clincoo.';
+                    showStep('step-done');
+                }
+            } catch (e) {}
+        }
+
+        function renderDone(addr, balance) {
+            document.getElementById('cp-done-addr').textContent = maskAddr(addr);
+            document.getElementById('cp-done-balance').textContent = balance == null ? '' : 'Saldo tersinkron: ' + fmtIDR(balance);
+        }
+
+        async function sendRequest() {
+            var wid = (document.getElementById('cp-wallet-id').value || '').trim();
+            var err = document.getElementById('cp-id-error');
+            err.classList.add('hidden');
+            if (!/^[A-Za-z0-9]{10}$/.test(wid)) {
+                err.textContent = 'ID Wallet harus 10 karakter huruf/angka.';
+                err.classList.remove('hidden'); return;
+            }
+            try {
+                var res = await fetch(CP_API, { method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ action: 'connect_start', wallet_id: wid }) }).then(function (r) { return r.json(); });
+                if (!res.success) {
+                    if (res.need_login) { location.href = '../auth.html'; return; }
+                    err.textContent = res.error || 'Gagal mengirim permintaan.';
+                    err.classList.remove('hidden'); return;
+                }
+                currentRequestId = res.request_id;
+                showStep('step-wait');
+                startPolling();
+            } catch (e) {
+                err.textContent = 'Tidak dapat terhubung ke server ClincooPay.';
+                err.classList.remove('hidden');
+            }
+        }
+
+        function startPolling() {
+            stopPolling();
+            pollTimer = setInterval(pollOnce, 3000);
+            pollOnce();
+        }
+        function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+        async function pollOnce() {
+            if (!currentRequestId) { stopPolling(); return; }
+            try {
+                var res = await fetch(CP_API, { method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ action: 'connect_status', request_id: currentRequestId }) }).then(function (r) { return r.json(); });
+                if (!res.success) return;
+                if (res.status === 'confirmed') {
+                    stopPolling();
+                    showStep('step-pin');
+                    document.getElementById('cp-pin').focus();
+                } else if (res.status === 'rejected') {
+                    stopPolling();
+                    showModal('Permintaan Ditolak', 'Kamu menolak permintaan ini di aplikasi Wallet. Kamu bisa mengirim permintaan baru kapan saja.', false);
+                    showStep('step-id');
+                } else if (res.status === 'expired') {
+                    stopPolling();
+                    showModal('Permintaan Kedaluwarsa', 'Permintaan konfirmasi kedaluwarsa (10 menit). Kirim permintaan baru.', false);
+                    showStep('step-id');
+                }
+            } catch (e) {}
+        }
+        function cancelWait() { stopPolling(); currentRequestId = null; showStep('step-id'); }
+
+        async function confirmPin() {
+            var pin = (document.getElementById('cp-pin').value || '').trim();
+            var err = document.getElementById('cp-pin-error');
+            err.classList.add('hidden');
+            if (!/^\d{6}$/.test(pin)) {
+                err.textContent = 'PIN harus 6 digit angka.';
+                err.classList.remove('hidden'); return;
+            }
+            try {
+                var res = await fetch(CP_API, { method: 'POST', headers: authHeaders(),
+                    body: JSON.stringify({ action: 'connect_finish', request_id: currentRequestId, pin: pin }) }).then(function (r) { return r.json(); });
+                if (!res.success) {
+                    err.textContent = res.error || 'PIN tidak cocok.';
+                    err.classList.remove('hidden'); return;
+                }
+                renderDone(res.wallet_address, res.wallet_balance);
+                showStep('step-done');
+                showModal('Dompet Terhubung', 'Saldo Clincoo kamu kini tersinkron otomatis dengan dompet ClincooPay ' + maskAddr(res.wallet_address) + '.');
+            } catch (e) {
+                err.textContent = 'Tidak dapat terhubung ke server ClincooPay.';
+                err.classList.remove('hidden');
+            }
+        }
+
+        async function doUnlink() {
+            try {
+                await fetch(CP_API, { method: 'POST', headers: authHeaders(), body: JSON.stringify({ action: 'unlink' }) }).then(function (r) { return r.json(); });
+                showModal('Dompet Diputuskan', 'Saldo Clincoo kembali berdiri sendiri dan tidak lagi tersinkron.');
+                document.getElementById('page-subtitle').textContent = 'Hubungkan dompet web Wallet kamu agar saldo Clincoo tersinkron otomatis.';
+                showStep('step-id');
+            } catch (e) {}
+        }
+    </script>
+</body>
+</html>
