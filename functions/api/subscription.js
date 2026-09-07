@@ -159,7 +159,7 @@ export async function onRequestPost({ request, env }) {
             await notifyEvent(db, user, {
               source: 'Langganan', type: 'subscription',
               message: 'Langganan ' + validPlan + ' (' + billing + ') berhasil diaktifkan. Total ' + formatIDR(totalPrice) + ' dipotong dari Saldo Dompet. Saldo sekarang ' + formatIDR(newBalance) + '.',
-              link: 'https://muzawwied.github.io/Clincoo./akun/langganan.html'
+              link: 'https://muzawwied.github.io/Clincoo./akun/langganan/'
             });
           } catch (e2) {}
           // Catat aktivitas langganan di halaman Aktivitas (per-akun)
@@ -184,7 +184,7 @@ export async function onRequestPost({ request, env }) {
                     ['Saldo Dompet Tersisa', formatIDR(newBalance)]
                   ],
                   'Lihat Detail Langganan',
-                  'https://muzawwied.github.io/Clincoo./akun/langganan.html',
+                  'https://muzawwied.github.io/Clincoo./akun/langganan/',
                   'Rincian langganan dapat dilihat di halaman Langganan pada akun Clincoo Anda.'
                 )
               });

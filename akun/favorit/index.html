@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="../../js/auth-client.js"></script>
+    <script src="../../js/accent-init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clincoo - Favorit</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
+    <script src="https://unpkg.com/lucide@1.41.0"></script>
+    <script src="https://unpkg.com/lucide@1.41.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        :root {
+            --accent-color: #000000;
+            --accent-hover: #1f2937;
+            --accent-text: #ffffff;
+        }
+
+        .bg-accent { background-color: var(--accent-color) !important; }
+        .text-accent { color: var(--accent-color) !important; }
+        .border-accent { border-color: var(--accent-color) !important; }
+        
+        body.dark-mode {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        body.dark-mode .bg-white {
+            background-color: #0a0a0a !important;
+        }
+        body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
+        body.dark-mode #sidebar-toggle,
+        body.dark-mode button[onclick="toggleSidebar()"],
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"],
+        body.dark-mode .header-glass button[onclick],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle svg,
+        body.dark-mode button[onclick="toggleSidebar()"] svg,
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"] svg,
+        body.dark-mode .header-glass button[onclick] svg,
+        body.dark-mode header button[onclick] svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle:hover,
+        body.dark-mode button[onclick="toggleSidebar()"]:hover,
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"]:hover,
+        body.dark-mode .header-glass button[onclick]:hover,
+        body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black {
+            color: #ffffff !important;
+        }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 {
+            color: #888888 !important;
+        }
+        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200 {
+            border-color: #222222 !important;
+        }
+        body.dark-mode .hover\:bg-gray-50:hover {
+            background-color: #0a0a0a !important;
+        }
+        body.dark-mode .bg-gray-50 {
+            background-color: #0a0a0a !important;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        body.dark-mode #system-modal .bg-white { background-color: #0a0a0a !important; }
+        body.dark-mode #system-modal .border-gray-100 { border-color: #222222 !important; }
+        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+        body.dark-mode .divide-gray-100 > * { border-color: #222222 !important; }
+        body.dark-mode .bg-gray-50 { background-color: #0a0a0a !important; }
+        body.dark-mode .text-gray-400 { color: #666666 !important; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #222222; }
+
+        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-black.text-white { color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
+        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-accent.text-white { color: #000000 !important; }
+        body.dark-mode .text-accent { color: #ffffff !important; }
+        body.dark-mode .border-accent { border-color: #ffffff !important; }
+    /* auto-dark-fix v1 */
+    body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
+    body.dark-mode .bg-gray-200 { background-color: #262626 !important; }
+    body.dark-mode .bg-gray-300 { background-color: #333333 !important; }
+    body.dark-mode .bg-gray-400 { background-color: #444444 !important; }
+    body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
+    body.dark-mode .border-gray-200\/50,
+    body.dark-mode .border-gray-200\/60,
+    body.dark-mode .border-gray-200\/70 { border-color: #222222 !important; }
+    body.dark-mode .border-gray-300 { border-color: #333333 !important; }
+    body.dark-mode .border-gray-400 { border-color: #444444 !important; }
+    body.dark-mode .bg-blue-50,
+    body.dark-mode .bg-blue-50\/50 { background-color: #0d1a26 !important; }
+    body.dark-mode .border-blue-100,
+    body.dark-mode .border-blue-200 { border-color: #1e3a52 !important; }
+    body.dark-mode .bg-red-50,
+    body.dark-mode .bg-red-50\/50 { background-color: #2a1414 !important; }
+    body.dark-mode .bg-red-100 { background-color: #3a1a1a !important; }
+    body.dark-mode .border-red-100,
+    body.dark-mode .border-red-200 { border-color: #4a2020 !important; }
+    body.dark-mode .bg-green-100 { background-color: #14301c !important; }
+    body.dark-mode .bg-white\/95 { background-color: rgba(10,10,10,0.95) !important; }
+    body.dark-mode .hover\:bg-gray-50:hover,
+    body.dark-mode .hover\:bg-gray-50\/50:hover,
+    body.dark-mode .hover\:bg-gray-50\/80:hover { background-color: #1a1a1a !important; }
+    body.dark-mode .hover\:bg-gray-100:hover { background-color: #262626 !important; }
+    body.dark-mode .hover\:bg-gray-200:hover,
+    body.dark-mode .hover\:bg-gray-200\/50:hover { background-color: #333333 !important; }
+    body.dark-mode .hover\:bg-blue-50:hover,
+    body.dark-mode .hover\:bg-blue-100:hover { background-color: #163247 !important; }
+    body.dark-mode .hover\:bg-red-50:hover,
+    body.dark-mode .hover\:bg-red-100:hover { background-color: #3a1a1a !important; }
+    body.dark-mode .hover\:border-gray-300:hover,
+    body.dark-mode .hover\:border-gray-400:hover,
+    body.dark-mode .hover\:border-gray-900:hover { border-color: #555555 !important; }
+    body.dark-mode .focus\:border-gray-400:focus,
+    body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
+    body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
+    body.dark-mode .option-popup {
+        background-color: #0a0a0a !important;
+        border-color: #222222 !important;
+        color: #ffffff !important;
+    }
+    body.dark-mode .option-popup button:hover {
+        background-color: #1a1a1a !important;
+    }
+    </style>
+    
+<!-- no-flash-v1 -->
+<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+</head>
+<body class="min-h-screen flex flex-col text-gray-900 pt-16">
+    <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
+    <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Favorit</h1>
+        <div class="w-10"></div>
+    </header>
+    <main class="flex-1 w-full px-4 pt-2 pb-8 flex flex-col">
+        <div id="favorit-list" class="flex flex-col gap-5 w-full"></div>
+        <div id="empty-state" class="flex flex-col items-center justify-center py-16 text-center" style="display:none">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="heart" class="w-10 h-10 text-gray-400"></i>
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">Belum ada template favorit</h3>
+            <p class="text-xs text-gray-500 mt-1 max-w-[250px]">Simpan template dari beranda lewat menu titik tiga pada kartu template, lalu template favoritmu akan tampil <a href="../../" class="text-blue-600 hover:underline">di sini</a>.</p>
+        </div>
+    </main><script src="../../js/templates-data.js"></script>
+    <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Favorit</h1>
+        <div class="w-10"></div>
+    </header>
+    <main class="flex-1 w-full px-4 pt-2 pb-8 flex flex-col">
+        <div id="favorit-list" class="flex flex-col gap-5 w-full"></div>
+        <div id="empty-state" class="flex flex-col items-center justify-center py-16 text-center" style="display:none">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="heart" class="w-10 h-10 text-gray-400"></i>
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">Belum ada template favorit</h3>
+            <p class="text-xs text-gray-500 mt-1 max-w-[250px]">Simpan template dari beranda lewat menu titik tiga pada kartu template, lalu template favoritmu akan tampil <a href="../../" class="text-blue-600 hover:underline">di sini</a>.</p>
+        </div>
+    </main><script src="../../js/templates-data.js"></script>
+    <script>
+        function toggleOption(btn, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.querySelectorAll('.option-popup').forEach(popup => {
+                if (popup !== btn.nextElementSibling) {
+                    popup.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                    popup.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                }
+            });
+            const popup = btn.nextElementSibling;
+            if (popup.classList.contains('opacity-100')) {
+                popup.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                popup.classList.add('opacity-0', 'invisible', 'translate-y-2');
+            } else {
+                popup.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+                popup.classList.add('opacity-100', 'visible', 'translate-y-0');
+            }
+        }
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.option-popup') && !e.target.closest('button[onclick^="toggleOption"]')) {
+                document.querySelectorAll('.option-popup').forEach(popup => {
+                    popup.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                    popup.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                });
+            }
+        });
+
+        function refreshFavoriteList() {
+            const list = document.getElementById('favorit-list');
+            const emptyState = document.getElementById('empty-state');
+            if (!list) return;
+            const favs = ClincooTemplates.getFavorites();
+            list.innerHTML = '';
+            favs.forEach(key => {
+                const t = ClincooTemplates.list[key];
+                if (!t) return;
+                const card = document.createElement('div');
+                card.className = 'w-full border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex flex-col gap-4 relative opacity-0 translate-y-2 transition-all';
+                card.innerHTML = `
+                    <div class="w-full aspect-video bg-[#F9FAFB] rounded-xl border border-gray-100 group-hover:border-gray-200 transition-colors overflow-hidden p-4">
+                        <img src="../../assets/templates/${key}.png" alt="Pratinjau ${t.name}" class="w-full h-full object-cover rounded-lg group-hover:scale-[1.02] transition-transform duration-300">
+                    </div>
+                    <div class="flex justify-between items-end gap-3 w-full">
+                        <div class="flex flex-col flex-1 overflow-hidden">
+                            <h3 class="font-semibold text-gray-900 text-base group-hover:text-black truncate">${t.name}</h3>
+                            <p class="text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">${t.desc}</p>
+                        </div>
+                        <div class="relative shrink-0">
+                            <button class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleOption(this, event)" aria-label="Opsi template">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+                            </button>
+                            <div class="option-popup absolute bottom-full right-0 mb-2 w-44 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-bottom-right">
+                                <button onclick="useTemplate('${key}', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Gunakan Template</button>
+                                <button onclick="previewTemplate('${key}', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Lihat Preview</button>
+                                <button onclick="ClincooTemplates.unfavorite('${key}', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">Hapus dari Favorit</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+                setTimeout(() => card.classList.remove('opacity-0', 'translate-y-2'), 50);
+            });
+            if (emptyState) emptyState.style.display = favs.length ? 'none' : 'flex';
+            try { lucide.createIcons(); } catch (e) {}
+        }
+        document.addEventListener('DOMContentLoaded', refreshFavoriteList);
+    </script>
+<script>
+(function(){
+  var seg=window.location.pathname.split('/').filter(Boolean);var path=(seg.pop()||'').replace(/\.html$/,'');
+  var links=document.querySelectorAll('.sidebar-nav-link');
+  links.forEach(function(link){
+    var href=link.getAttribute('href')||'';var hrefSeg=(href.split('?')[0].split('/').filter(Boolean).pop()||'').replace(/\.html$/,'');
+    if(hrefSeg===path){
+      link.classList.add('bg-gray-50','text-gray-900');
+      link.classList.remove('hover:bg-gray-50','text-gray-700');
+      var icon=link.querySelector('i');
+      if(icon){
+        icon.className=icon.className.replace('ph ph-','ph-fill ph-');
+        icon.classList.remove('text-gray-500');
+        icon.classList.add('text-gray-900');
+      }
+      var svg=link.querySelector('svg');
+      if(svg){
+        svg.classList.remove('text-gray-500');
+        svg.classList.add('text-gray-900');
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

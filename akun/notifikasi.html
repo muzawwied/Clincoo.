@@ -1,69 +1,11 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="../js/auth-client.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>Notifikasi — Clincoo</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
-    <script src="https://unpkg.com/lucide@1.41.0"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; transition: background-color 0.3s ease, color 0.3s ease; }
-        :root { --accent-color: #000000; --accent-hover: #1f2937; --accent-text: #ffffff; }
-        .bg-accent { background-color: var(--accent-color) !important; }
-        .text-accent { color: var(--accent-color) !important; }
-        .hover\:bg-accent-hover:hover { background-color: var(--accent-hover) !important; }
-        body.dark-mode { background-color: #000000; color: #ffffff; }
-        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
-        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800 { color: #ffffff !important; }
-        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600 { color: #b0b0b0 !important; }
-        body.dark-mode .text-gray-500 { color: #888888 !important; }
-        body.dark-mode .text-gray-400 { color: #666666 !important; }
-        body.dark-mode .border-gray-200, body.dark-mode .border-gray-100, body.dark-mode .border-gray-300 { border-color: #222222 !important; }
-        body.dark-mode .bg-gray-50 { background-color: #111111 !important; }
-        body.dark-mode .bg-gray-100 { background-color: #1a1a1a !important; }
-        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
-        body.dark-mode header h1, body.dark-mode header .text-gray-900 { color: #ffffff !important; }
-        body.dark-mode header button:hover { background-color: #1a1a1a !important; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
-    </style>
-<!-- no-flash-v1 -->
-<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+<meta charset="UTF-8">
+<title>Clincoo</title>
+<meta name="robots" content="noindex">
+<script>(function(){try{location.replace('notifikasi/' + location.search + location.hash);}catch(e){location.replace('notifikasi/');}})();</script>
+<noscript><meta http-equiv="refresh" content="0; url=notifikasi/"></noscript>
 </head>
-<body class="min-h-screen">
-    <script>try{var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var d=(t==="Gelap")||((t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(d)document.body.classList.add("dark-mode");var a=localStorage.getItem("clincoo_accent")||"Hitam (Default)";var am={"Hitam (Default)":{m:"#000000",h:"#1f2937"},Biru:{m:"#2563eb",h:"#1d4ed8"},Hijau:{m:"#059669",h:"#047857"},Ungu:{m:"#9333ea",h:"#7e22ce"},Merah:{m:"#dc2626",h:"#b91c1c"}};var c=am[a]||am["Hitam (Default)"];document.documentElement.style.setProperty("--accent-color",c.m);document.documentElement.style.setProperty("--accent-hover",c.h);}catch(e){}</script>
-
-    <!-- Header -->
-    <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
-        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
-            <i data-lucide="arrow-left" class="w-5 h-5"></i>
-        </button>
-        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Notifikasi</h1>
-        <div class="w-10"></div>
-    </header>
-    <!-- Content -->
-    <main class="max-w-3xl mx-auto px-5 pt-6 pb-10">
-        <div class="mb-4">
-            <h2 class="text-lg font-bold text-gray-900 tracking-tight">Semua notifikasi</h2>
-        </div>
-        <div id="notif-full-list">
-            <div class="text-center py-12">
-                <p class="text-[15px] text-gray-500">Memuat notifikasi...</p>
-            </div>
-        </div>
-    </main>
-
-    <script src="../js/notifications.js"></script>
-    <script src="../js/path-router.js"></script>
-    <script>try { lucide.createIcons(); } catch (e) {}</script>
-</body>
+<body style="background:#fff;"></body>
 </html>

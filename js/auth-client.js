@@ -196,9 +196,9 @@ try {
   // milik akun ini"). Solusi: begitu halaman proyek/ dimuat, ID dari URL (paling dipercaya)
   // dipatch ke semua link sesama halaman proyek/ supaya klik selanjutnya selalu bawa ?id=
   // yang benar, tidak bergantung urutan tab.
-  var PROJECT_PAGES = ['chat.html', 'workspace.html', 'environment.html', 'keamanan.html',
-    'pengaturan.html', 'umum.html', 'build-deployment.html', 'domain-kustom.html',
-    'keamanan-https.html', 'visibilitas-akses.html', 'integrasi-webhook.html', 'zona-bahaya.html'];
+  var PROJECT_PAGES = ['chat', 'workspace', 'environment', 'keamanan',
+    'pengaturan', 'umum', 'build-deployment', 'build-deployment-config', 'build-deployment-dashboard', 'domain-kustom',
+    'keamanan-https', 'visibilitas-akses', 'integrasi-webhook', 'zona-bahaya', 'workspace-editor'];
 
   function patchProjectLinks() {
     if (!isAuthPage && location.pathname.indexOf('/proyek/') !== -1) {
@@ -211,7 +211,8 @@ try {
         for (var i = 0; i < anchors.length; i++) {
           var href = anchors[i].getAttribute('href') || '';
           var bare = href.split('?')[0];
-          if (PROJECT_PAGES.indexOf(bare) !== -1) {
+          var bareKey = (bare.split('/').filter(Boolean).pop() || '').replace(/\.html$/, '');
+          if (PROJECT_PAGES.indexOf(bareKey) !== -1) {
             anchors[i].setAttribute('href', bare + '?id=' + encodeURIComponent(pid));
           }
         }

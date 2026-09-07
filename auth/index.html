@@ -13,6 +13,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@1.41.0"></script>
+    <script src="https://unpkg.com/lucide@1.41.0"></script>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,7 +124,7 @@
                             </button>
                         </div>
                         <div class="flex justify-end pt-2.5 px-2">
-                            <a href="lupa-sandi.html" class="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Lupa sandi?</a>
+                            <a href="lupa-sandi/" class="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Lupa sandi?</a>
                         </div>
                     </div>
 
@@ -165,7 +166,7 @@
 
                 <!-- Navigasi Bawah -->
                 <div class="text-center pb-2">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Belum punya akun? <a href="../akun/daftar.html" class="font-bold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Daftar sekarang</a></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Belum punya akun? <a href="../akun/daftar/" class="font-bold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Daftar sekarang</a></p>
                 </div>
             </div>
 
@@ -256,7 +257,7 @@
                 if (!res.ok || !data.token) throw new Error(data.error || 'Terjadi kesalahan, coba lagi.');
 
                 saveSession(data);
-                setTimeout(() => { window.location.href = '../index.html'; }, 400);
+                setTimeout(() => { window.location.href = '../index/'; }, 400);
             } catch (err) {
                 showModal(action === 'login' ? 'Login Gagal' : 'Pendaftaran Gagal', err.message, 'error');
                 btn.disabled = false;
@@ -280,7 +281,7 @@
 
         // ==== LOGIN SOSIAL (OAuth) ====
         // redirect_uri WAJIB persis alamat terdaftar di GitHub OAuth App & Google Console.
-        // Halaman auth kini dilayani bersih di /auth/ (auth/index.html), tapi callback
+        // Halaman auth kini dilayani bersih di /auth/ (auth/index/), tapi callback
         // OAuth tetap diarahkan ke alamat lama yang terdaftar (akun/auth.html), yang
         // kini cuma pengalih ke sini — jadi tidak perlu daftar ulang di Google/GitHub.
         function oauthRedirectUri() {
@@ -329,7 +330,7 @@
                 const data = await res.json();
                 if (!res.ok || !data.token) throw new Error(data.error || 'Login ' + provider + ' gagal.');
                 saveSession(data);
-                setTimeout(() => { window.location.href = '../index.html'; }, 400);
+                setTimeout(() => { window.location.href = '../index/'; }, 400);
             } catch (err) {
                 document.getElementById('oauth-loading').classList.add('hidden');
                 showModal('Login ' + (provider === 'github' ? 'GitHub' : 'Google') + ' Gagal', err.message, 'error');
@@ -365,7 +366,7 @@
                     const res = await fetch(API_BASE + '/me', { headers: { 'Authorization': 'Bearer ' + token } });
                     if (res.ok) {
                         const d = await res.json();
-                        if (d.authenticated) window.location.replace('../index.html');
+                        if (d.authenticated) window.location.replace('../index/');
                     } else {
                         localStorage.removeItem(TOKEN_KEY);
                     }

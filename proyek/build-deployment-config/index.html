@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<script src="../../js/auth-client.js"></script>
+<script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Clincoo - Pengaturan Deploy</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Clincoo - Pengaturan Deploy</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f9;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Dark Mode Configuration */
+        body.dark-mode { background-color: #000000; color: #ffffff; }
+        body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+        
+        /* Header Buttons Dark Mode */
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode header button[onclick] svg { stroke: #ffffff !important; }
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode header button[onclick]:hover { background-color: #1a1a1a !important; border-color: rgba(255,255,255,0.7) !important; }
+        
+        /* Typography & Borders Dark Mode */
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black { color: #ffffff !important; }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 { color: #888888 !important; }
+        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200, body.dark-mode .border-gray-300 { border-color: #222222 !important; }
+        body.dark-mode header { background-color: #000000 !important; border-color: #222222 !important; }
+        body.dark-mode .bg-\[#f7f7f9\], body.dark-mode .bg-gray-50 { background-color: #000000 !important; }
+        body.dark-mode .bg-gray-100 { background-color: #111111 !important; }
+        body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover { background-color: #1a1a1a !important; }
+        
+        /* Inputs & Buttons Custom Dark Mode */
+        body.dark-mode input[type="text"], body.dark-mode .custom-select-trigger, body.dark-mode .dropdown-menu { background-color: #0a0a0a; color: #ffffff; border-color: #222222; }
+        body.dark-mode input[type="text"]:focus { border-color: #222222; }
+        body.dark-mode .bg-black.text-white { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #dddddd !important; }
+        body.dark-mode .custom-domain-btn { background-color: #111111 !important; color: #ffffff !important; border-color: #444444 !important; }
+        body.dark-mode .custom-domain-btn:hover { background-color: #222222 !important; }
+
+        /* Animation Utilities */
+        .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Shimmer Loading Effect */
+        .shimmer {
+            background: #f6f7f8;
+            background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 100%; 
+            display: inline-block;
+            position: relative;
+            animation-duration: 1.5s;
+            animation-fill-mode: forwards; 
+            animation-iteration-count: infinite;
+            animation-name: placeholderShimmer;
+            animation-timing-function: linear;
+            border-radius: 4px;
+        }
+        
+        body.dark-mode .shimmer {
+            background: #111;
+            background-image: linear-gradient(to right, #111 0%, #222 20%, #111 40%, #111 100%);
+        }
+
+        @keyframes placeholderShimmer {
+            0% { background-position: -468px 0; }
+            100% { background-position: 468px 0; }
+        }
+
+        /* Hide scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-900 pt-16 relative">
+    <script>
+        (function(){
+            var t=localStorage.getItem("clincoo_theme");
+            var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+            if(isDark){document.body.classList.add("dark-mode");}
+        })();
+    </script>
+    
+    <header class="bg-[#f7f7f9] flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
+        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Deployment</h1>
+        <div class="w-10"></div>
+    </header>
+
+    <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 relative overflow-x-hidden">
+                <!-- VIEW 2: Halaman Konfigurasi (Flat) -->
+        <div id="view-config" class="flex flex-col gap-8 fade-in max-w-xl mx-auto w-full pt-4">
+            <div class="mb-2">
+                <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Pengaturan Deploy</h2>
+                <p class="text-sm text-gray-500 mt-2">Tentukan sumber dan lingkungan tujuan untuk rilis ini.</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Dropdown: Branch -->
+                <div class="relative w-full">
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Pilih Branch</label>
+                    <div class="custom-select-trigger flex items-center justify-between w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'branch', ['main', 'staging', 'development'])">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="git-branch" class="w-4 h-4 text-gray-500"></i>
+                            <span id="label-branch" class="font-medium">main</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Dropdown: Environment -->
+                <div class="relative w-full">
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Lingkungan Tujuan</label>
+                    <div class="custom-select-trigger flex items-center justify-between w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'env', ['Production Server', 'Preview / Staging'])">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="server" class="w-4 h-4 text-gray-500"></i>
+                            <span id="label-env" class="font-medium">Production Server</span>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-4 pt-6 border-t border-gray-200">
+                <button id="btn-process-deploy" onclick="processDeploy()" class="flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2">
+                    Jalankan Deploy
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Render Icons Awal
+        lucide.createIcons();
+
+        // ===================== DEPLOY ASLI (Cloudflare Pages) =====================
+        const API = 'https://clincoo-be2.pages.dev/api'; // deploy engine (satu backend & satu D1 dgn auth/files)
+        const pid = () => localStorage.getItem('clincoo_current_project_id') || '';
+        let deployState = { pages_url: '', pollTimer: null, domainTimer: null, deploying: false };
+
+        // ===================== SESI DEPLOY (klik deploy cukup sekali) =====================
+        // Sesi per proyek tersimpan di localStorage: halaman langsung membuka dashboard
+        // situs yang sudah dideploy tanpa harus menekan tombol Deploy lagi.
+        const DEPLOY_SESSION_KEY = 'clincoo_deploy_session';
+        function readDeploySession() {
+            try {
+                const ses = JSON.parse(localStorage.getItem(DEPLOY_SESSION_KEY) || 'null');
+                return (ses && ses.project_id && ses.project_id === pid()) ? ses : null;
+            } catch (e) { return null; }
+        }
+        function writeDeploySession(patch) {
+            try {
+                const cur = readDeploySession() || { project_id: pid() };
+                localStorage.setItem(DEPLOY_SESSION_KEY, JSON.stringify(Object.assign(cur, patch)));
+            } catch (e) {}
+        }
+        function clearDeploySession() {
+            try { localStorage.removeItem(DEPLOY_SESSION_KEY); } catch (e) {}
+        }
+
+        async function apiFetch(path, opts = {}) {
+            const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+            const res = await fetch(API + path, {
+                ...opts,
+                headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...(opts.headers || {}) }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+            return data;
+        }
+
+        function timeAgoIso(iso) {
+            if (!iso) return 'baru saja';
+            const t = new Date(iso + (iso.endsWith('Z') ? '' : 'Z')).getTime();
+            return timeAgo(t);
+        }
+
+        async function fetchStatus() {
+            return apiFetch('/deploy?project_id=' + encodeURIComponent(pid()));
+        }
+
+        // Deploy ASLI: file workspace proyek -> Cloudflare Pages
+        async function processDeploy() {
+            const btn = document.getElementById('btn-process-deploy');
+            if (!pid()) { alert('Proyek belum dipilih.'); return; }
+            if (deployState.deploying) return; // klik hanya sekali per sesi
+            deployState.deploying = true;
+            writeDeploySession({ status: 'deploying', started_at: Date.now() });
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Mengunggah file workspace...</span>`;
+            btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
+            lucide.createIcons();
+            try {
+                const res = await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid() }) });
+                deployState.deploying = false;
+                writeDeploySession({ status: 'done', pages_url: (res && res.pages_url) || deployState.pages_url || '', done_at: Date.now() });
+                btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span class="inline-block">Berhasil Deploy!</span>`;
+                lucide.createIcons();
+                window.location.href = '../build-deployment-dashboard/';
+                setTimeout(() => {
+                    btn.innerHTML = `Jalankan Deploy`;
+                    btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
+                    btn.disabled = false;
+                }, 1000);
+            } catch (err) {
+                deployState.deploying = false;
+                writeDeploySession({ status: 'failed' });
+                alert('Deploy gagal: ' + err.message);
+                btn.innerHTML = `Jalankan Deploy`;
+                btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
+            }
+        }
+
+    </script>
+</body>
+</html>

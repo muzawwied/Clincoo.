@@ -121,7 +121,7 @@ export async function onRequestPost({ request, env }) {
           nres.notif = await notifyEvent(db, user, {
             source: 'Dompet', type: 'wallet',
             message: 'Top up ' + formatIDR(parsedAmount) + ' via ' + (method || 'Xendit') + ' berhasil. Saldo sekarang ' + formatIDR(balance) + '.',
-            link: 'https://muzawwied.github.io/Clincoo./akun/dompet.html'
+            link: 'https://muzawwied.github.io/Clincoo./akun/dompet/'
           });
         } catch (e) { nres.notifErr = String(e && e.message || e); }
         if (user && user.email) {
@@ -140,7 +140,7 @@ export async function onRequestPost({ request, env }) {
                   ['Order ID', orderId]
                 ],
                 'Lihat Riwayat Dompet',
-                'https://muzawwied.github.io/Clincoo./akun/dompet.html',
+                'https://muzawwied.github.io/Clincoo./akun/dompet/',
                 'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
               )
             });
@@ -205,14 +205,14 @@ export async function onRequestPost({ request, env }) {
         await notifyEvent(db, user, {
           source: 'Dompet', type: 'wallet',
           message: 'Kirim ' + formatIDR(amount) + ' ke ' + targetLabel + ' berhasil. Saldo sekarang ' + formatIDR(newBalance) + '.',
-          link: 'https://muzawwied.github.io/Clincoo./akun/dompet.html'
+          link: 'https://muzawwied.github.io/Clincoo./akun/dompet/'
         });
       } catch (e) {}
       try {
         await notifyEvent(db, target, {
           source: 'Dompet', type: 'wallet',
           message: 'Anda menerima ' + formatIDR(amount) + ' dari ' + senderLabel + '. Saldo sekarang ' + formatIDR(recvBalance) + '.',
-          link: 'https://muzawwied.github.io/Clincoo./akun/dompet.html'
+          link: 'https://muzawwied.github.io/Clincoo./akun/dompet/'
         });
       } catch (e) {}
 
@@ -233,7 +233,7 @@ export async function onRequestPost({ request, env }) {
                 ['ID Transaksi', txIdIn]
               ],
               'Lihat Riwayat Dompet',
-              'https://muzawwied.github.io/Clincoo./akun/dompet.html',
+              'https://muzawwied.github.io/Clincoo./akun/dompet/',
               'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
             )
           });

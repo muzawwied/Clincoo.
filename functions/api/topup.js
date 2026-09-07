@@ -210,7 +210,7 @@ async function creditTopup(env, order) {
       nres.notif = await notifyEvent(db, owner, {
         source: 'Dompet', type: 'wallet',
         message: 'Top up ' + formatIDR(order.amount) + ' via ' + (order.method || 'Xendit') + ' berhasil. Saldo sekarang ' + formatIDR(balance) + '.',
-        link: 'https://muzawwied.github.io/Clincoo./akun/dompet.html'
+        link: 'https://muzawwied.github.io/Clincoo./akun/dompet/'
       });
     } catch (e) {}
     if (owner.email) {
@@ -228,7 +228,7 @@ async function creditTopup(env, order) {
               ['Order ID', order.id]
             ],
             'Lihat Riwayat Dompet',
-            'https://muzawwied.github.io/Clincoo./akun/dompet.html',
+            'https://muzawwied.github.io/Clincoo./akun/dompet/',
             'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
           )
         });

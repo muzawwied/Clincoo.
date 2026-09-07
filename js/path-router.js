@@ -57,9 +57,9 @@ const PathRouter = {
         if (_isGitHubPages) {
             // GitHub Pages: use pages/xxx.html?id=projectId
             if (subpath) {
-                return _BASE + '/proyek/' + subpath + '.html?id=' + encodeURIComponent(projectId);
+                return _BASE + '/proyek/' + subpath + '/?id=' + encodeURIComponent(projectId);
             }
-            return _BASE + '/proyek/workspace.html?id=' + encodeURIComponent(projectId);
+            return _BASE + '/proyek/workspace/?id=' + encodeURIComponent(projectId);
         }
         // Cloudflare Pages: clean URLs
         return _BASE + '/workspace/' + projectId + (subpath ? '/' + subpath : '');
@@ -75,7 +75,7 @@ const PathRouter = {
             if (segments.length >= 4) {
                 if (_isGitHubPages) {
                     const pid = this.getProjectId();
-                    window.location.href = _BASE + '/proyek/' + segments[2] + '.html?id=' + encodeURIComponent(pid);
+                    window.location.href = _BASE + '/proyek/' + segments[2] + '/?id=' + encodeURIComponent(pid);
                 } else {
                     window.location.href = _BASE + '/' + segments.slice(0, 3).join('/');
                 }
@@ -94,7 +94,7 @@ const PathRouter = {
         } else if (segments[0] === 'profil') {
             if (segments.length >= 2) {
                 if (_isGitHubPages) {
-                    window.location.href = _BASE + '/akun/Profile.html';
+                    window.location.href = _BASE + '/akun/Profile/';
                 } else {
                     window.location.href = _BASE + '/profil';
                 }
@@ -131,11 +131,11 @@ const PathRouter = {
         let linkMap;
         if (_isGitHubPages) {
             linkMap = {
-                'workspace': _BASE + '/proyek/workspace.html?id=' + encodeURIComponent(projectId),
-                'chat': _BASE + '/proyek/chat.html?id=' + encodeURIComponent(projectId),
-                'pengaturan': _BASE + '/proyek/pengaturan.html?id=' + encodeURIComponent(projectId),
-                'environment': _BASE + '/proyek/environment.html?id=' + encodeURIComponent(projectId),
-                'keamanan': _BASE + '/proyek/keamanan.html?id=' + encodeURIComponent(projectId),
+                'workspace': _BASE + '/proyek/workspace/?id=' + encodeURIComponent(projectId),
+                'chat': _BASE + '/proyek/chat/?id=' + encodeURIComponent(projectId),
+                'pengaturan': _BASE + '/proyek/pengaturan/?id=' + encodeURIComponent(projectId),
+                'environment': _BASE + '/proyek/environment/?id=' + encodeURIComponent(projectId),
+                'keamanan': _BASE + '/proyek/keamanan/?id=' + encodeURIComponent(projectId),
             };
         } else {
             linkMap = {
