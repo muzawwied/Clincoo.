@@ -1513,8 +1513,50 @@
         const input = document.getElementById('import-zip-input');
         if (input) input.click();
       } else if (type === 'github') {
-        openCreateModal('github');
+        checkPlanThenOpenGithub();
       }
+    }
+
+    // Impor repository GitHub = fitur paket Pro ke atas; Starter melihat daftar paket
+    async function checkPlanThenOpenGithub() {
+      let plan = 'Starter';
+      try {
+        const apiBase = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
+        const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+        const res = await fetch(apiBase + '/subscription', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+        if (res.ok) { const d = await res.json(); if (d && d.plan) plan = d.plan; }
+      } catch (e) {}
+      if (plan === 'Starter') { showUpgradePlansModal(); return; }
+      openCreateModal('github');
+    }
+
+    function showUpgradePlansModal() {
+      if (document.getElementById('upgrade-plans-modal')) return;
+      var m = document.createElement('div');
+      m.id = 'upgrade-plans-modal';
+      var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+      var row = function(name, price, desc, hot) {
+        return '<div class="flex items-center justify-between px-4 py-3 rounded-xl border ' + (hot ? 'border-gray-900 bg-gray-50' : 'border-gray-100') + '">' +
+          '<div><p class="text-sm font-semibold text-gray-900">' + name + (hot ? ' <span class="text-[10px] font-bold text-white bg-gray-900 px-1.5 py-0.5 rounded ml-1 align-middle">POPULER</span>' : '') + '</p>' +
+          '<p class="text-[11px] text-gray-500 mt-0.5">' + desc + '</p></div>' +
+          '<p class="text-sm font-bold text-gray-900 whitespace-nowrap">' + price + '</p></div>';
+      };
+      m.innerHTML =
+        '<div class="fixed inset-0 z-[95] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
+        '<div class="bg-white rounded-2xl w-full max-w-sm px-5 pt-5 pb-4">' +
+        '<h3 class="text-base font-semibold text-gray-900 text-center">Impor repository GitHub</h3>' +
+        '<p class="text-sm text-gray-500 mt-1.5 text-center leading-snug px-2">Fitur ini tersedia mulai paket Pro. Paket kamu saat ini: Starter (Gratis).</p>' +
+        '<div class="flex flex-col gap-2 mt-4">' +
+        row('Starter', 'Gratis', '3 proyek · 1 kolaborator · tanpa impor repo', false) +
+        row('Pro', '49K/bln', '10 proyek · 5 kolaborator · impor repo GitHub', true) +
+        row('Bisnis', '129K/bln', '50 proyek · 20 kolaborator · deploy tanpa batas', false) +
+        '</div>' +
+        '<a href="' + base + '/akun/langganan/upgrade/" class="mt-4 block w-full py-2.5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors text-center">Lihat Paket &amp; Upgrade</a>' +
+        '<button id="upgrade-plans-close" class="mt-2 w-full py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors">Nanti saja</button>' +
+        '</div></div>';
+      document.body.appendChild(m);
+      var btn = m.querySelector('#upgrade-plans-close');
+      if (btn) btn.addEventListener('click', function () { m.remove(); });
     }
 
     function handleImportFiles(e) {
