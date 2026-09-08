@@ -118,7 +118,9 @@
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </button>
         <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Pengaturan Umum</h1>
-        <div class="w-10"></div>
+        <div class="w-10 flex items-center justify-end">
+            <div id="save-indicator" class="flex items-center opacity-0 transition-opacity duration-300"></div>
+        </div>
     </header>
 
     <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-4 pb-20 relative">
@@ -128,10 +130,11 @@
             <div class="py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="min-w-0 flex-1">
                     <h4 class="text-base font-bold text-gray-900 tracking-tight">Nama Aplikasi</h4>
-                    <p class="text-sm text-gray-500 mt-1">Identitas utama aplikasi yang berjalan di server</p>
+                    <p class="text-sm text-gray-500 mt-1">Nama ini menentukan subdomain situs saat deploy pertama</p>
                 </div>
                 <div class="w-full sm:w-80">
                     <input type="text" id="input-app-name" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors" placeholder="Masukkan nama aplikasi">
+                    <p id="app-name-preview" class="text-xs text-gray-400 mt-1.5"></p>
                 </div>
             </div>
 
@@ -169,7 +172,7 @@
                     <h4 class="text-base font-bold text-gray-900 tracking-tight">Mode Pemeliharaan</h4>
                     <p class="text-sm text-gray-500 mt-1">Tutup sementara akses publik dan tampilkan halaman pemeliharaan</p>
                 </div>
-                <button type="button" onclick="toggleSwitch('maintenance')" class="relative flex-shrink-0 cursor-pointer focus:outline-none">
+                <button type="button" onclick="onMaintenanceToggle('maintenance')" class="relative flex-shrink-0 cursor-pointer focus:outline-none">
                     <div id="maintenance-bg" class="w-11 h-6 bg-gray-200 dark:bg-gray-800 rounded-full transition-colors duration-200 ease-in-out"></div>
                     <div id="maintenance-knob" class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out"></div>
                 </button>
@@ -195,20 +198,45 @@
         const pid = () => localStorage.getItem('clincoo_current_project_id') || '';
         const authHeaders = () => { const t = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; return t ? { Authorization: 'Bearer ' + t } : {}; };
 
+        // ---- Indikator simpan realtime di header: loading -> centang -> hilang ----
+        let _indTimer = null;
+        function setIndicator(state) {
+            const el = document.getElementById('save-indicator');
+            if (!el) return;
+            const icons = {
+                saving: '<i data-lucide="loader-2" class="w-4 h-4 text-gray-500 animate-spin"></i>',
+                saved: '<i data-lucide="check" class="w-4 h-4 text-gray-700"></i>',
+                error: '<i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i>'
+            };
+            el.innerHTML = icons[state] || '';
+            try { lucide.createIcons(); } catch (e) {}
+            el.classList.remove('opacity-0');
+            clearTimeout(_indTimer);
+            if (state !== 'saving') _indTimer = setTimeout(function () { el.classList.add('opacity-0'); }, 1500);
+        }
+
+        // Nilai terakhir yang tersimpan di server (untuk deteksi perubahan)
+        const savedVals = { app_name: '', app_desc: '' };
+
         async function loadUmum() {
             try {
                 const res = await fetch(API + '/project-settings?project_id=' + encodeURIComponent(pid()), { headers: authHeaders() });
                 const data = await res.json();
                 if (data.error) return;
                 const st = data;
-                if (st.app_name) document.getElementById('input-app-name').value = st.app_name;
-                if (st.app_desc) document.getElementById('input-app-desc').value = st.app_desc;
+                const nameEl = document.getElementById('input-app-name');
+                const descEl = document.getElementById('input-app-desc');
+                // jangan menimpa kalau user sedang mengetik (race saat load lambat)
+                if (st.app_name && document.activeElement !== nameEl) { nameEl.value = st.app_name; savedVals.app_name = st.app_name; }
+                if (st.app_desc && document.activeElement !== descEl) { descEl.value = st.app_desc; savedVals.app_desc = st.app_desc; }
                 if (st.runtime) { const l = document.getElementById('label-runtime'); if (l) l.textContent = st.runtime; }
                 if (st.maintenance === 'true') toggleSwitch('maintenance');
             } catch (e) {}
+            updateNamePreview();
         }
 
         async function saveUmum(updates) {
+            setIndicator('saving');
             try {
                 const res = await fetch(API + '/project-settings', {
                     method: 'POST',
@@ -216,23 +244,53 @@
                     body: JSON.stringify({ project_id: pid(), ...updates })
                 });
                 const data = await res.json();
-                if (data.error) { showModal('Gagal', data.error); return false; }
+                if (data.error) { setIndicator('error'); return false; }
+                setIndicator('saved');
                 return true;
-            } catch (e) { showModal('Gagal', 'Tidak dapat menyimpan: ' + e.message); return false; }
+            } catch (e) { setIndicator('error'); return false; }
         }
 
-        ['input-app-name', 'input-app-desc'].forEach(id => {
-            const el = document.getElementById(id);
-            el.addEventListener('blur', async () => {
-                if (el.value.trim() === '' || el.value === el.defaultValue) return;
-                const key = id === 'input-app-name' ? 'app_name' : 'app_desc';
-                const ok = await saveUmum({ [key]: el.value.trim() });
-                if (ok && key === 'app_name') {
-                    const slug = el.value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-                    showModal('Nama aplikasi disimpan', 'Nama akan dipakai sebagai subdomain saat deploy pertama: ' + (slug || '-') + '.pages.dev');
-                }
+        // ---- Preview subdomain (aturan slug sama persis dengan deploy.js di backend) ----
+        function slugifyName(v) {
+            return String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        }
+        function updateNamePreview() {
+            const pv = document.getElementById('app-name-preview');
+            if (!pv) return;
+            const v = (document.getElementById('input-app-name').value || '').trim();
+            if (!v) { pv.textContent = ''; return; }
+            pv.textContent = 'Deploy pertama: ' + ('cno-be2' + slugifyName(v)).slice(0, 60) + '.pages.dev';
+        }
+
+        // ---- Auto-save realtime (debounce 700ms, langsung simpan saat blur) ----
+        const _saveTimers = {};
+        function doSave(key, value) {
+            saveUmum({ [key]: value }).then(function (ok) { if (ok) savedVals[key] = value; });
+        }
+        [['input-app-name', 'app_name'], ['input-app-desc', 'app_desc']].forEach(function (pair) {
+            const el = document.getElementById(pair[0]), key = pair[1];
+            el.addEventListener('input', function () {
+                updateNamePreview();
+                const v = el.value.trim();
+                clearTimeout(_saveTimers[key]);
+                if (v === savedVals[key]) return;
+                _saveTimers[key] = setTimeout(function () { doSave(key, v); }, 700);
+            });
+            el.addEventListener('blur', function () {
+                const v = el.value.trim();
+                clearTimeout(_saveTimers[key]);
+                if (v === savedVals[key]) return;
+                doSave(key, v);
             });
         });
+
+        // ---- Mode pemeliharaan: simpan setiap di-toggle (dulu tidak pernah tersimpan) ----
+        function onMaintenanceToggle(idPrefix) {
+            toggleSwitch(idPrefix);
+            const bg = document.getElementById(idPrefix + '-bg');
+            const on = bg.classList.contains('bg-black');
+            saveUmum({ maintenance: on ? 'true' : 'false' });
+        }
 
         loadUmum();
 
