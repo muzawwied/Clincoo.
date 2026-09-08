@@ -5,7 +5,7 @@
   var isAuthPage = /\/auth\/(index\.html)?(\?|$)|akun\/auth\.html(\?|$)/.test(location.pathname + location.search);
   var AUTH_URL = (location.hostname.indexOf('github.io') !== -1)
     ? '/Clincoo./auth/'
-    : 'https://muzawwied.github.io/Clincoo./auth/';
+    : '/auth/';
 
 // ===== NAMESPACE DATA PER AKUN =====
 // Semua kunci localStorage (kecuali clincoo_auth_*) otomatis diawali u<id>:
