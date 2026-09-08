@@ -252,7 +252,8 @@
         lucide.createIcons();
 
         // ===================== DEPLOY ASLI (Cloudflare Pages) =====================
-        const API = 'https://clincoo-be2.pages.dev/api'; // deploy engine (satu backend & satu D1 dgn auth/files)
+        // Deploy engine: same-origin di Cloudflare Pages; clincoo-be2 hanya untuk frontend GitHub Pages (tanpa Functions).
+        const API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
         const pid = () => localStorage.getItem('clincoo_current_project_id') || '';
         let deployState = { pages_url: '', pollTimer: null, domainTimer: null, deploying: false };
 
