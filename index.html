@@ -1017,6 +1017,20 @@
                 if (stored) projects = JSON.parse(stored);
             } catch(e) {}
 
+            // Bersihin nama proyek yang ketiban pesan error kuota AI (biar balik ke nama template/asli)
+            let dirty = false;
+            projects.forEach(function(p) {
+                if (p && p.aiName && /^(kuota ai|maaf, terjadi kesalahan|maaf, terjadi)/i.test(p.aiName.trim())) {
+                    delete p.aiName; delete p.aiDesc; dirty = true;
+                }
+            });
+            if (dirty) {
+                try {
+                    localStorage.setItem('clincoo_projects', JSON.stringify(projects));
+                    if (typeof pushProjectsToServer === 'function') pushProjectsToServer(projects);
+                } catch(e) {}
+            }
+
             const homeList = document.getElementById('home-projects-list');
             const allList = document.getElementById('all-projects-list');
 

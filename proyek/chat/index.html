@@ -1629,8 +1629,10 @@
                             if (stored) projects = JSON.parse(stored);
                             const projIndex = projects.findIndex(p => p.id === projectId);
                             if (projIndex !== -1) {
-                                if (!projects[projIndex].aiName) {
-                                    const firstLine = finishedMsg.text.split('\n')[0].substring(0, 50);
+                                const firstLine = finishedMsg.text.split('\n')[0].substring(0, 50);
+                                // pesan error/kuota AI jangan disimpen jadi nama proyek
+                                const badName = /^(kuota ai|maaf, terjadi kesalahan|maaf, terjadi)/i.test(firstLine.trim());
+                                if (!projects[projIndex].aiName && !badName) {
                                     projects[projIndex].aiName = firstLine;
                                     projects[projIndex].aiDesc = finishedMsg.text.substring(0, 120);
                                     projects[projIndex].updatedAt = new Date().toISOString();
