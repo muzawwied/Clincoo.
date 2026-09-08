@@ -239,7 +239,7 @@ var ClincooTemplates = (function () {
     var imgWrap = document.createElement('div');
     imgWrap.className = 'w-full aspect-video bg-gray-50 rounded-xl overflow-hidden';
     var img = document.createElement('img');
-    img.src = IMG_BASE + key + '.png?v=2';
+    img.src = IMG_BASE + key + '.webp?v=2';
     img.alt = 'Pratinjau ' + t.name;
     img.className = 'w-full h-full object-cover';
     imgWrap.appendChild(img);
