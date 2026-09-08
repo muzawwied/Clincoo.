@@ -6,4 +6,4 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "clincoo-db"
-database_id = "49b6fed3-a237-46e3-ab2b-b0de31cc862b"
+database_id = "2c3ef715-b117-4aa6-8108-0948c9646132"
