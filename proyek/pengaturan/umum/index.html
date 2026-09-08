@@ -119,7 +119,7 @@
         </button>
         <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Pengaturan Umum</h1>
         <div class="w-10 flex items-center justify-end">
-            <div id="save-indicator" class="flex items-center opacity-0 transition-opacity duration-300"></div>
+            <div id="save-indicator" onclick="savePending()" title="Simpan perubahan" class="flex items-center justify-center w-8 h-8 rounded-full cursor-pointer opacity-0 transition-opacity duration-300 hover:bg-gray-100 dark:hover:bg-gray-800"></div>
         </div>
     </header>
 
@@ -198,25 +198,34 @@
         const pid = () => localStorage.getItem('clincoo_current_project_id') || '';
         const authHeaders = () => { const t = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; return t ? { Authorization: 'Bearer ' + t } : {}; };
 
-        // ---- Indikator simpan realtime di header: loading -> centang -> hilang ----
-        let _indTimer = null;
+        // ---- Tombol simpan di pojok kanan header ----
+        // Ada perubahan -> icon centang muncul. Diklik -> loading. Tersimpan -> icon hilang.
+        const pending = {};              // perubahan yang belum disimpan
+        const savedVals = { app_name: '', app_desc: '', runtime: '', maintenance: 'false' };
+        let _saving = false;
+
         function setIndicator(state) {
             const el = document.getElementById('save-indicator');
             if (!el) return;
             const icons = {
+                dirty: '<i data-lucide="check" class="w-5 h-5 text-gray-900 dark:text-white"></i>',
                 saving: '<i data-lucide="loader-2" class="w-4 h-4 text-gray-500 animate-spin"></i>',
-                saved: '<i data-lucide="check" class="w-4 h-4 text-gray-700"></i>',
                 error: '<i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i>'
             };
-            el.innerHTML = icons[state] || '';
-            try { lucide.createIcons(); } catch (e) {}
-            el.classList.remove('opacity-0');
-            clearTimeout(_indTimer);
-            if (state !== 'saving') _indTimer = setTimeout(function () { el.classList.add('opacity-0'); }, 1500);
+            if (state) {
+                el.innerHTML = icons[state] || '';
+                try { lucide.createIcons(); } catch (e) {}
+                el.classList.remove('opacity-0');
+            } else {
+                el.classList.add('opacity-0');
+            }
         }
 
-        // Nilai terakhir yang tersimpan di server (untuk deteksi perubahan)
-        const savedVals = { app_name: '', app_desc: '' };
+        function markPending(key, value) {
+            if (savedVals[key] === value) delete pending[key];
+            else pending[key] = value;
+            setIndicator(Object.keys(pending).length ? 'dirty' : null);
+        }
 
         async function loadUmum() {
             try {
@@ -229,26 +238,47 @@
                 // jangan menimpa kalau user sedang mengetik (race saat load lambat)
                 if (st.app_name && document.activeElement !== nameEl) { nameEl.value = st.app_name; savedVals.app_name = st.app_name; }
                 if (st.app_desc && document.activeElement !== descEl) { descEl.value = st.app_desc; savedVals.app_desc = st.app_desc; }
-                if (st.runtime) { const l = document.getElementById('label-runtime'); if (l) l.textContent = st.runtime; }
-                if (st.maintenance === 'true') toggleSwitch('maintenance');
+                if (st.runtime) { savedVals.runtime = st.runtime; const l = document.getElementById('label-runtime'); if (l) l.textContent = st.runtime; }
+                if (st.maintenance) { savedVals.maintenance = st.maintenance; if (st.maintenance === 'true') toggleSwitch('maintenance'); }
             } catch (e) {}
             updateNamePreview();
         }
 
-        async function saveUmum(updates) {
+        async function savePending() {
+            if (_saving) return;
+            const keys = Object.keys(pending);
+            if (!keys.length) { setIndicator(null); return; }
+            _saving = true;
             setIndicator('saving');
             try {
                 const res = await fetch(API + '/project-settings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', ...authHeaders() },
-                    body: JSON.stringify({ project_id: pid(), ...updates })
+                    body: JSON.stringify({ project_id: pid(), ...pending })
                 });
                 const data = await res.json();
                 if (data.error) { setIndicator('error'); return false; }
-                setIndicator('saved');
+                keys.forEach(function (k) { savedVals[k] = pending[k]; delete pending[k]; });
+                setIndicator(null); // tersimpan -> icon hilang
                 return true;
             } catch (e) { setIndicator('error'); return false; }
+            finally { _saving = false; }
         }
+
+        // Pengaman: refresh / tutup tab saat masih ada perubahan -> tetap tersimpan
+        function flushPending() {
+            if (!Object.keys(pending).length) return;
+            try {
+                fetch(API + '/project-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                    body: JSON.stringify({ project_id: pid(), ...pending }),
+                    keepalive: true
+                });
+            } catch (e) {}
+        }
+        window.addEventListener('pagehide', flushPending);
+        document.addEventListener('visibilitychange', function () { if (document.hidden) flushPending(); });
 
         // ---- Preview subdomain (aturan slug sama persis dengan deploy.js di backend) ----
         function slugifyName(v) {
@@ -262,34 +292,21 @@
             pv.textContent = 'Deploy pertama: ' + ('cno-be2' + slugifyName(v)).slice(0, 60) + '.pages.dev';
         }
 
-        // ---- Auto-save realtime (debounce 700ms, langsung simpan saat blur) ----
-        const _saveTimers = {};
-        function doSave(key, value) {
-            saveUmum({ [key]: value }).then(function (ok) { if (ok) savedVals[key] = value; });
-        }
+        // ---- Perubahan input hanya menandai pending (simpan via tombol centang) ----
         [['input-app-name', 'app_name'], ['input-app-desc', 'app_desc']].forEach(function (pair) {
             const el = document.getElementById(pair[0]), key = pair[1];
             el.addEventListener('input', function () {
                 updateNamePreview();
-                const v = el.value.trim();
-                clearTimeout(_saveTimers[key]);
-                if (v === savedVals[key]) return;
-                _saveTimers[key] = setTimeout(function () { doSave(key, v); }, 700);
-            });
-            el.addEventListener('blur', function () {
-                const v = el.value.trim();
-                clearTimeout(_saveTimers[key]);
-                if (v === savedVals[key]) return;
-                doSave(key, v);
+                markPending(key, el.value.trim());
             });
         });
 
-        // ---- Mode pemeliharaan: simpan setiap di-toggle (dulu tidak pernah tersimpan) ----
+        // ---- Mode pemeliharaan: tandai pending saat di-toggle ----
         function onMaintenanceToggle(idPrefix) {
             toggleSwitch(idPrefix);
             const bg = document.getElementById(idPrefix + '-bg');
             const on = bg.classList.contains('bg-black');
-            saveUmum({ maintenance: on ? 'true' : 'false' });
+            markPending('maintenance', on ? 'true' : 'false');
         }
 
         loadUmum();
@@ -355,7 +372,7 @@
                 label.textContent = value;
             }
             closeAllDropdowns();
-            if (targetId === 'runtime') saveUmum({ runtime: value });
+            if (targetId === 'runtime') markPending('runtime', value);
         }
 
         function toggleSwitch(idPrefix) {
