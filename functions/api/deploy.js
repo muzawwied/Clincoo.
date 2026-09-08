@@ -5,7 +5,8 @@
 // action 'add_domain'/'remove_domain' = kelola domain kustom; GET = status situs.
 
 import { getProjectTables } from './_tables.js';
-import { guardProject } from './user-scope.js';
+import { guardProject, currentUser } from './user-scope.js';
+import { getEffectivePlan, getMonthlyDeployCount, bumpMonthlyDeployCount } from './plan-helpers.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -234,6 +235,16 @@ export async function onRequestPost({ request, env }) {
       return json({ success: true, action: body.action, domain });
     }
 
+    // Kuota deploy per paket langganan (Starter 2x/bln, Pro 25x/bln, Bisnis tanpa batas)
+    const user = await currentUser(env, request);
+    const planInfo = await getEffectivePlan(db, user);
+    if (planInfo.limits.deployLimit !== null && planInfo.limits.deployLimit !== undefined) {
+      const used = await getMonthlyDeployCount(db, user && user.id);
+      if (used >= planInfo.limits.deployLimit) {
+        return json({ error: 'Kuota deploy paket ' + planInfo.plan + ' habis: maksimal ' + planInfo.limits.deployLimit + ' deploy per bulan (sudah terpakai ' + used + '). Upgrade paket di halaman Langganan untuk deploy lagi.', upgrade_needed: true, plan: planInfo.plan, limit: planInfo.limits.deployLimit, used: used }, 402);
+      }
+    }
+
     const files = await readFiles(db, T.files, projectId);
     if (!files.length) {
       return json({ error: 'Workspace proyek masih kosong — tidak ada file untuk dideploy. Buat file dulu di halaman Workspace.' }, 400);
@@ -301,6 +312,7 @@ export async function onRequestPost({ request, env }) {
 
     await db.prepare(`INSERT INTO ${T.deployLogs} (project_id, status, url, message, created_at) VALUES (?, 'success', ?, ?, datetime('now'))`)
       .bind(projectId, pagesUrl, 'deploy ' + files.length + ' file ke ' + name).run();
+    await bumpMonthlyDeployCount(db, user && user.id);
 
     return json({
       success: true,

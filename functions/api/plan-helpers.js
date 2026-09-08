@@ -5,10 +5,32 @@
 // otomatis turun ke Starter supaya limit tidak bisa "numpang" selamanya.
 
 export const PLAN_LIMITS = {
-  Starter: { projectLimit: 3, collaboratorLimit: 1 },
-  Pro: { projectLimit: 10, collaboratorLimit: 5 },
-  Bisnis: { projectLimit: 50, collaboratorLimit: 20 }
+  // deployLimit = deploy web per bulan per akun; null = tanpa batas
+  Starter: { projectLimit: 3, collaboratorLimit: 1, deployLimit: 2 },
+  Pro: { projectLimit: 10, collaboratorLimit: 5, deployLimit: 25 },
+  Bisnis: { projectLimit: 50, collaboratorLimit: 20, deployLimit: null }
 };
+
+// Kuota deploy bulanan disimpan di tabel `subscription` (key per-akun per-bulan)
+export async function getMonthlyDeployCount(db, userId) {
+  try {
+    if (!db || !userId) return 0;
+    const key = 'u' + userId + ':deploys_' + new Date().toISOString().slice(0, 7);
+    const row = await db.prepare('SELECT value FROM subscription WHERE key = ?').bind(key).first();
+    return parseInt(row && row.value, 10) || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+export async function bumpMonthlyDeployCount(db, userId) {
+  try {
+    if (!db || !userId) return;
+    const key = 'u' + userId + ':deploys_' + new Date().toISOString().slice(0, 7);
+    await db.prepare('INSERT INTO subscription (key, value) VALUES (?, 1) ON CONFLICT(key) DO UPDATE SET value = CAST(value AS INTEGER) + 1')
+      .bind(key).run();
+  } catch (e) {}
+}
 
 export async function getEffectivePlan(db, user) {
   const fallback = { plan: 'Starter', limits: PLAN_LIMITS.Starter, expiredFrom: null };

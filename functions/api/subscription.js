@@ -16,9 +16,9 @@ export async function onRequestOptions() {
 }
 
 const PLANS = {
-  'Starter': { price: 0, projectLimit: 3, storageLimit: 5, bandwidthLimit: 10, collaboratorLimit: 1 },
-  'Pro': { price: 49000, projectLimit: 10, storageLimit: 50, bandwidthLimit: 100, collaboratorLimit: 5 },
-  'Bisnis': { price: 129000, projectLimit: 50, storageLimit: 200, bandwidthLimit: 500, collaboratorLimit: 20 }
+  'Starter': { price: 0, projectLimit: 3, storageLimit: 5, bandwidthLimit: 10, collaboratorLimit: 1, deployLimit: 2 },
+  'Pro': { price: 49000, projectLimit: 10, storageLimit: 50, bandwidthLimit: 100, collaboratorLimit: 5, deployLimit: 25 },
+  'Bisnis': { price: 129000, projectLimit: 50, storageLimit: 200, bandwidthLimit: 500, collaboratorLimit: 20, deployLimit: null }
 };
 
 export async function onRequestGet({ request, env }) {
@@ -86,6 +86,7 @@ export async function onRequestGet({ request, env }) {
       storageLimit: planInfo.storageLimit,
       bandwidthLimit: planInfo.bandwidthLimit,
       collaboratorLimit: planInfo.collaboratorLimit,
+      deployLimit: planInfo.deployLimit,
       projectCount,
       storageUsed: parseFloat(data.storage_used || '0'),
       bandwidthUsed: parseFloat(data.bandwidth_used || '0'),
