@@ -212,22 +212,6 @@
     body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
     body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
 
-        /* Desktop: grup pengaturan jadi kartu 2 kolom (mobile tetap list polos) */
-        @media (min-width: 1024px) {
-            .profile-card {
-                background-color: #ffffff;
-                border: 1px solid #f3f4f6;
-                border-radius: 1rem;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-                overflow: hidden;
-                padding-bottom: 0.25rem;
-            }
-            body.dark-mode .profile-card {
-                background-color: #0a0a0a;
-                border-color: #222222;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-            }
-        }
     </style>
     <script>
         // Tampilkan section profile (satu-satunya section di halaman ini)
@@ -272,8 +256,8 @@
             <input type="file" id="profile-pic-input" class="hidden" accept="image/*">
         </div>
                 <div class="w-full grid grid-cols-1 lg:grid-cols-2 lg:gap-6 items-start">
-            <div class="profile-card flex flex-col">
-                <h3 class="px-6 pt-1 lg:pt-5 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Akun</h3>
+            <div class="flex flex-col">
+                <h3 class="px-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Akun</h3>
                 <div class="flex flex-col w-full">
                     <a href="../aktivitas/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="rotate-ccw-clock" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
@@ -301,8 +285,8 @@
                         </div>
                     </a>                </div>
             </div>
-            <div class="profile-card flex flex-col">
-                <h3 class="px-6 pt-1 lg:pt-5 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Tampilan</h3>
+            <div class="flex flex-col">
+                <h3 class="hidden lg:block px-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Tampilan</h3>
                 <div class="flex flex-col w-full relative">
                     <div class="relative w-full">
                         <button id="theme-dropdown-btn" class="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors active:bg-gray-100 group cursor-pointer">
@@ -362,7 +346,7 @@
                         </div>
                     </div>
                 </div>
-                <h3 class="px-6 pt-6 lg:pt-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Lainnya</h3>
+                <h3 class="hidden lg:block pt-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Lainnya</h3>
                 <div class="flex flex-col w-full">
                     <a href="../kolaborasi/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="user-plus" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
