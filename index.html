@@ -211,6 +211,10 @@
     body.dark-mode .focus\:border-gray-400:focus,
     body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
     body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
+    /* daftar template dilebarkan keluar container (kiri-kanan) di layar lebar */
+    @media (min-width: 768px) {
+        #tpl-section { width: calc(100% + 72px); margin-left: -36px; margin-right: -36px; }
+    }
 </style>
     <script>
         // Early route detection - prevents flash of home page on refresh
@@ -330,8 +334,8 @@
             </div>
             <div id="home-projects-list" class="flex items-center gap-4 overflow-x-auto hide-scrollbar pb-2 pt-1 w-full"></div>
         </div>
-        <div class="w-full mt-28">
-            <div class="mb-4 px-1">
+        <div id="tpl-section" class="w-full mt-28">
+            <div class="mb-4">
                 <h2 class="text-lg font-bold text-gray-900 tracking-tight">Jelajahi template</h2>
             </div>
             <div class="flex flex-col gap-5 w-full">
