@@ -21,7 +21,25 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #ffffff;
+            position: relative;
             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        /* BG hero: hanya dari balik header sampai di atas judul 'Proyek terbaru' */
+        #hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70vh;
+            z-index: -1;
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.92) 60%, #ffffff 100%), url('assets/backgrounds/bg-light-morning.png');
+            background-size: cover;
+            background-position: top center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+        }
+        body.dark-mode #hero-bg {
+            background-image: linear-gradient(180deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.9) 60%, #000000 100%), url('assets/backgrounds/bg-dark-night.png');
         }
         :root {
             --accent-color: #000000;
@@ -242,6 +260,7 @@
 <script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 pt-20">
+    <div id="hero-bg"></div>
     <script>try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||(t==='Sistem (Default)'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.body.classList.add('dark-mode');var a=localStorage.getItem('clincoo_accent')||'Hitam (Default)';var am={'Hitam (Default)':{m:'#000000',h:'#1f2937'},'Biru':{m:'#2563eb',h:'#1d4ed8'},'Hijau':{m:'#059669',h:'#047857'},'Ungu':{m:'#9333ea',h:'#7e22ce'},'Merah':{m:'#dc2626',h:'#b91c1c'}};var c=am[a]||am['Hitam (Default)'];document.documentElement.style.setProperty('--accent-color',c.m);document.documentElement.style.setProperty('--accent-hover',c.h);}catch(e){}</script>
     <header id="main-header" class="bg-white flex justify-between items-center p-2 fixed top-0 w-full z-50 transition-transform duration-300">
         <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('page-home')">
@@ -327,7 +346,7 @@
                 </button>
             </div>
         </div>
-        <div class="w-full mt-28">
+        <div id="section-proyek-terbaru" class="w-full mt-28">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold text-gray-900 tracking-tight">Proyek terbaru</h2>
                 <a href="akun/proyek/" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
@@ -1270,5 +1289,32 @@
     </div>
   </div>
 </div>
+
+<script>
+/* BG hero: tinggi area gambar menyesuaikan posisi judul 'Proyek terbaru'.
+   Gambar tampil hanya di halaman home, dari balik header sampai tepat di atas judul. */
+(function(){
+    var heroBg = document.getElementById('hero-bg');
+    var homePage = document.getElementById('page-home');
+    var section = document.getElementById('section-proyek-terbaru');
+    function updateHeroBg(){
+        if(!heroBg) return;
+        var onHome = homePage && !homePage.classList.contains('hidden');
+        if(!onHome || !section){ heroBg.style.display = 'none'; return; }
+        heroBg.style.display = 'block';
+        var top = section.getBoundingClientRect().top + window.scrollY;
+        heroBg.style.height = Math.max(top - 16, 320) + 'px';
+    }
+    window.addEventListener('load', updateHeroBg);
+    window.addEventListener('resize', updateHeroBg);
+    document.addEventListener('DOMContentLoaded', updateHeroBg);
+    if(homePage){
+        try { new MutationObserver(updateHeroBg).observe(homePage, { attributes: true, attributeFilter: ['class'] }); } catch(e){}
+    }
+    /* re-hitung setelah render konten dinamis */
+    setTimeout(updateHeroBg, 300);
+    setTimeout(updateHeroBg, 1200);
+})();
+</script>
 </body>
 </html>
