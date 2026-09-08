@@ -287,7 +287,7 @@
                         <i data-lucide="gem" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <div class="flex flex-col items-start">
                             <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Langganan</span>
-                            <span class="text-[12px] text-gray-500 mt-0.5">Go</span>
+                            <span id="menu-plan-sub" class="text-[12px] text-gray-500 mt-0.5">Starter</span>
                         </div>
                     </a>                  
                 </div>
@@ -500,6 +500,16 @@
                 }
             }
         }
+        // Subtext menu Langganan = nama paket aktif (bukan teks statis)
+        async function refreshMenuPlanSub() {
+            try {
+                const d = await fetch('https://clincoo-be2.pages.dev/api/subscription').then(function(r){ return r.json(); });
+                const el = document.getElementById('menu-plan-sub');
+                if (el && d && d.plan) el.textContent = d.plan;
+            } catch (e) {}
+        }
+        refreshMenuPlanSub();
+
         async function refreshProfileFromD1() {
             try {
                 const d = await fetch('https://clincoo-be2.pages.dev/api/account-profile').then(function(r){ return r.json(); });
