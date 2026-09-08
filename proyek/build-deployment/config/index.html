@@ -212,6 +212,14 @@
             const btn = document.getElementById('btn-process-deploy');
             if (!pid()) { console.warn('Proyek belum dipilih.'); return; }
             if (deployState.deploying) return; // klik hanya sekali per sesi
+            // Nama aplikasi wajib sebelum deploy pertama — menentukan subdomain situs
+            if (!window.__appNameOk) {
+                try {
+                    const st = await apiFetch('/project-settings?project_id=' + encodeURIComponent(pid()));
+                    if (!st || !st.app_name) { openAppNameModal(); return; }
+                    window.__appNameOk = true;
+                } catch (e) { window.__appNameOk = true; } // jangan blokir deploy bila cek gagal
+            }
             deployState.deploying = true;
             writeDeploySession({ status: 'deploying', started_at: Date.now() });
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Menyiapkan deploy...</span>`;
@@ -239,5 +247,58 @@
         }
 
     </script>
+    <!-- Modal: nama aplikasi wajib sebelum deploy pertama (menentukan subdomain) -->
+    <div id="appname-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeAppNameModal()"></div>
+        <div class="bg-white dark:bg-[#0a0a0a] rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl border border-gray-100 dark:border-gray-800">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Nama aplikasi belum diisi</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">Nama ini dipakai sebagai subdomain saat deploy pertama.<br><span id="appname-sub" class="font-medium text-gray-400"></span></p>
+            <input id="appname-input" type="text" placeholder="Masukkan nama aplikasi" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-white focus:outline-none focus:border-black mb-4" oninput="updateAppNameSub()" onkeydown="if(event.key==='Enter'){event.preventDefault();saveAppName();}">
+            <div class="flex gap-2">
+                <button onclick="closeAppNameModal()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Nanti</button>
+                <button id="btn-save-appname" onclick="saveAppName()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity">Simpan &amp; Deploy</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function slugifyName(v) {
+        return String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    }
+    function updateAppNameSub() {
+        const v = (document.getElementById('appname-input').value || '').trim();
+        const el = document.getElementById('appname-sub');
+        el.textContent = v ? ('Deploy pertama: ' + ('cno-be2' + slugifyName(v)).slice(0, 60) + '.pages.dev') : '';
+    }
+    function openAppNameModal() {
+        const m = document.getElementById('appname-modal');
+        m.classList.remove('hidden'); m.classList.add('flex');
+        updateAppNameSub();
+        setTimeout(function () { document.getElementById('appname-input').focus(); }, 50);
+    }
+    function closeAppNameModal() {
+        const m = document.getElementById('appname-modal');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+    async function saveAppName() {
+        const inp = document.getElementById('appname-input');
+        const btn = document.getElementById('btn-save-appname');
+        const v = (inp.value || '').trim();
+        if (!v) { inp.focus(); return; }
+        btn.disabled = true;
+        btn.textContent = 'Menyimpan...';
+        try {
+            await apiFetch('/project-settings', { method: 'POST', body: JSON.stringify({ project_id: pid(), app_name: v }) });
+            window.__appNameOk = true;
+            closeAppNameModal();
+            processDeploy(); // lanjut deploy setelah nama tersimpan
+        } catch (err) {
+            console.warn('Gagal simpan nama aplikasi: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Simpan & Deploy';
+        }
+    }
+</script>
 </body>
 </html>

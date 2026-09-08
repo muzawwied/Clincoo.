@@ -100,7 +100,19 @@
     body.dark-mode .focus\:border-gray-400:focus,
     body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
     body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
-</style>
+        /* Shimmer skeleton saat data server loading */
+        .skel { position: relative; overflow: hidden; background-color: #f3f4f6; }
+        .skel::after {
+            content: '';
+            position: absolute; inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent);
+            animation: clincoo-shimmer 1.4s ease infinite;
+        }
+        @keyframes clincoo-shimmer { 100% { transform: translateX(100%); } }
+        body.dark-mode .skel { background-color: #1a1a1a; }
+        body.dark-mode .skel::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent); }
+    </style>
 <!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
 <script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
@@ -134,6 +146,7 @@
                 </div>
                 <div class="w-full sm:w-80">
                     <input type="text" id="input-app-name" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors" placeholder="Masukkan nama aplikasi">
+                    <div id="skel-app-name" class="skel hidden w-full h-[42px] rounded-xl"></div>
                     <p id="app-name-preview" class="text-xs text-gray-400 mt-1.5"></p>
                 </div>
             </div>
@@ -146,6 +159,7 @@
                 </div>
                 <div class="w-full sm:w-80">
                     <textarea rows="3" id="input-app-desc" class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-black transition-colors resize-none" placeholder="Contoh: Aplikasi web utama..."></textarea>
+                    <div id="skel-app-desc" class="skel hidden w-full h-[76px] rounded-xl"></div>
                 </div>
             </div>
 
@@ -156,13 +170,14 @@
                     <p class="text-sm text-gray-500 mt-1">Engine utama yang digunakan untuk menjalankan aplikasi ini</p>
                 </div>
                 <div class="w-full sm:w-80 relative">
-                    <div class="custom-select-trigger flex items-center justify-between w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'runtime', ['Node.js 20.x (LTS)', 'Node.js 18.x', 'Python 3.11', 'PHP 8.2', 'Static HTML/JS/CSS'])">
+                    <div id="runtime-trigger" class="custom-select-trigger flex items-center justify-between w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'runtime', ['Node.js 20.x (LTS)', 'Node.js 18.x', 'Python 3.11', 'PHP 8.2', 'Static HTML/JS/CSS'])">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <i data-lucide="cpu" class="w-4 h-4 text-gray-500 shrink-0"></i>
                             <span id="label-runtime" class="font-medium truncate">Node.js 20.x (LTS)</span>
                         </div>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200 pointer-events-none shrink-0"></i>
                     </div>
+                    <div id="skel-runtime" class="skel hidden w-full h-[46px] rounded-xl"></div>
                 </div>
             </div>
 
@@ -172,10 +187,11 @@
                     <h4 class="text-base font-bold text-gray-900 tracking-tight">Mode Pemeliharaan</h4>
                     <p class="text-sm text-gray-500 mt-1">Tutup sementara akses publik dan tampilkan halaman pemeliharaan</p>
                 </div>
-                <button type="button" onclick="onMaintenanceToggle('maintenance')" class="relative flex-shrink-0 cursor-pointer focus:outline-none">
+                <button type="button" id="maintenance-toggle-btn" onclick="onMaintenanceToggle('maintenance')" class="relative flex-shrink-0 cursor-pointer focus:outline-none">
                     <div id="maintenance-bg" class="w-11 h-6 bg-gray-200 dark:bg-gray-800 rounded-full transition-colors duration-200 ease-in-out"></div>
                     <div id="maintenance-knob" class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out"></div>
                 </button>
+                <div id="skel-maintenance" class="skel hidden w-11 h-6 rounded-full"></div>
             </div>
 
         </div>
@@ -252,6 +268,19 @@
             updateNamePreview();
         })();
 
+        // ---- Shimmer: hanya saat belum ada cache (kunjungan pertama), sampai data server datang ----
+        function showSkeletons(on) {
+            ['skel-app-name', 'skel-app-desc', 'skel-runtime', 'skel-maintenance'].forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', !on);
+            });
+            ['input-app-name', 'input-app-desc', 'runtime-trigger', 'maintenance-toggle-btn'].forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', on);
+            });
+        }
+        if (!Object.keys(readCache()).length) showSkeletons(true);
+
         async function loadUmum() {
             try {
                 const res = await fetch(API + '/project-settings?project_id=' + encodeURIComponent(pid()), { headers: authHeaders() });
@@ -268,6 +297,7 @@
                 writeCache({ app_name: st.app_name || '', app_desc: st.app_desc || '', runtime: st.runtime || '', maintenance: st.maintenance || 'false' });
             } catch (e) {}
             updateNamePreview();
+            showSkeletons(false);
         }
 
         async function savePending() {

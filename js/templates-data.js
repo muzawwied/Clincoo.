@@ -201,7 +201,16 @@ var ClincooTemplates = (function () {
       }).catch(function () {});
     } catch (e) {}
 
-    // 4) Buka workspace — websitenya sudah jadi
+    // 4) Nama aplikasi proyek = nama template (dipakai sebagai subdomain saat deploy pertama)
+    try {
+      fetch(API_BASE + '/project-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: pid, app_name: t.name })
+      }).catch(function () {});
+    } catch (e) {}
+
+    // 5) Buka workspace — websitenya sudah jadi
     try { localStorage.setItem('clincoo_current_project_id', pid); } catch (e) {}
     window.location.href = WS_URL + '?id=' + pid;
   }
