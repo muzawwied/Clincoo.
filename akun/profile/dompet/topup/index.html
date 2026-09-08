@@ -188,11 +188,10 @@
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ClincooPay</p>
-                                    <p id="clincoopay-desc" class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Saldo tersinkron otomatis dari dompet Wallet</p>
+                                    <p id="clincoopay-desc" class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Memuat…</p>
                                 </div>
-                                <span id="clincoopay-status" class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-white dark:bg-white/10 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">…</span>
+                                <div id="clincoopay-cta" class="shrink-0"></div>
                             </div>
-                            <div id="clincoopay-connect" class="px-3.5 pb-3.5"></div>
                             <input type="hidden" name="payment-method" value="ClincooPay">
                         </div>
                         <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
@@ -526,36 +525,27 @@
         function cpMask(addr) { return addr ? '0x…' + String(addr).slice(-6) : ''; }
 
         async function cpLoad() {
-            var el = document.getElementById('clincoopay-connect');
-            if (!el) return;
-            var pill = document.getElementById('clincoopay-status');
-            el.innerHTML = '<div class="flex items-center justify-between gap-3 pt-2.5 border-t border-gray-200 dark:border-gray-700/60"><span class="text-xs text-gray-400">Memuat status dompet…</span></div>';
+            var desc = document.getElementById('clincoopay-desc');
+            var cta = document.getElementById('clincoopay-cta');
+            if (!desc && !cta) return;
+            if (desc) desc.textContent = 'Memuat…';
+            if (cta) cta.innerHTML = '';
             try {
                 var st = await fetch(API_BASE + '/api/clincoopay', { headers: cpAuthHeaders() }).then(function(r) { return r.json(); });
                 cpConnected = !!st.connected;
-                if (pill) {
-                    pill.textContent = st.connected ? 'Terhubung' : 'Belum terhubung';
-                    pill.className = st.connected
-                        ? 'shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-500/20'
-                        : 'shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-white dark:bg-white/10 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700';
-                }
                 if (st.connected) {
                     var bal = (st.wallet_balance == null) ? '…' : Number(st.wallet_balance).toLocaleString('id-ID');
-                    var desc = document.getElementById('clincoopay-desc');
                     if (desc) desc.innerHTML = 'Tersinkron · <span class="font-bold text-gray-900 dark:text-white">' + bal + '</span>';
-                    el.innerHTML =
-                        '<div class="flex items-center justify-end pt-2.5 border-t border-gray-200 dark:border-gray-700/60">' +
-                        '<button type="button" onclick="cpUnlink()" class="shrink-0 text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors">Putuskan</button>' +
-                        '</div>';
+                    if (cta) cta.innerHTML =
+                        '<button type="button" onclick="cpUnlink()" class="px-3.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:text-red-500 hover:border-red-300 dark:hover:border-red-500/40 transition-all">Putuskan</button>';
                 } else {
-                    el.innerHTML =
-                        '<div class="flex items-center justify-between gap-3 pt-2.5 border-t border-gray-200 dark:border-gray-700/60">' +
-                        '<p class="text-xs text-gray-500 dark:text-gray-400 truncate">Hubungkan dompet Wallet — saldo tersinkron otomatis.</p>' +
-                        '<button type="button" onclick="location.href=\'clincoopay/\'" class="shrink-0 px-3.5 py-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-black text-[11px] font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">Hubungkan</button>' +
-                        '</div>';
+                    if (desc) desc.textContent = 'Dompet Wallet belum terhubung';
+                    if (cta) cta.innerHTML =
+                        '<button type="button" onclick="location.href=\'clincoopay/\'" class="px-3.5 py-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-black text-[11px] font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">Hubungkan</button>';
                 }
             } catch (e) {
-                el.innerHTML = '<p class="text-[11px] md:text-xs text-gray-500 pt-2.5 border-t border-gray-200 dark:border-gray-700/60">Gagal memuat status ClincooPay.</p>';
+                if (desc) desc.textContent = 'Gagal memuat status ClincooPay.';
+                if (cta) cta.innerHTML = '';
             }
         }
 
