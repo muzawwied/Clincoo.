@@ -535,11 +535,11 @@
                 cpConnected = !!st.connected;
                 if (st.connected) {
                     var bal = (st.wallet_balance == null) ? '…' : Number(st.wallet_balance).toLocaleString('id-ID');
-                    if (desc) desc.innerHTML = 'Tersinkron · <span class="font-bold text-gray-900 dark:text-white">' + bal + '</span>';
+                    if (desc) desc.innerHTML = 'Saldo · <span class="font-bold text-gray-900 dark:text-white">' + bal + '</span>';
                     if (cta) cta.innerHTML =
                         '<button type="button" onclick="cpUnlink()" class="px-3.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:text-red-500 hover:border-red-300 dark:hover:border-red-500/40 transition-all">Putuskan</button>';
                 } else {
-                    if (desc) desc.textContent = 'Dompet Wallet belum terhubung';
+                    if (desc) desc.textContent = 'Clincoo wallet';
                     if (cta) cta.innerHTML =
                         '<button type="button" onclick="location.href=\'clincoopay/\'" class="px-3.5 py-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-black text-[11px] font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">Hubungkan</button>';
                 }
