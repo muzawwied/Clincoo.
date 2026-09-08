@@ -265,10 +265,19 @@
   <script>
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     const sidebarPopup = document.getElementById('sidebar-popup');
-    let isSidebarOpen = false;
+    // Sidebar: di desktop pertama kali dibuka terbuka; refresh mengikuti keadaan terakhir
+    let isSidebarOpen = (function () {
+      try {
+        const saved = localStorage.getItem('clincoo_sidebar_open');
+        if (saved === '1') return true;
+        if (saved === '0') return false;
+      } catch (e) {}
+      return window.innerWidth >= 1024; // default pertama kali: terbuka di desktop
+    })();
 
     function toggleSidebar() {
       isSidebarOpen = !isSidebarOpen;
+      try { localStorage.setItem('clincoo_sidebar_open', isSidebarOpen ? '1' : '0'); } catch (e) {}
       if (isSidebarOpen) {
         sidebarOverlay.classList.remove('hidden');
         setTimeout(() => {
@@ -282,6 +291,18 @@
           sidebarOverlay.classList.add('hidden');
         }, 300);
       }
+    }
+
+    // Terapkan keadaan awal (tersimpan/default) tanpa animasi slide
+    if (isSidebarOpen) {
+      sidebarPopup.style.transition = 'none';
+      sidebarOverlay.style.transition = 'none';
+      sidebarOverlay.classList.remove('hidden', 'opacity-0');
+      sidebarPopup.classList.remove('-translate-x-full');
+      requestAnimationFrame(function () {
+        sidebarPopup.style.transition = '';
+        sidebarOverlay.style.transition = '';
+      });
     }
 
         function toggleNotifications(e) {
