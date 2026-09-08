@@ -262,7 +262,7 @@
                         <i data-lucide="rotate-ccw-clock" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Aktivitas</span>
                     </a>
-                    <a href="../personal/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="../profile/personal/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="user" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Personal</span>
                     </a>
@@ -279,7 +279,7 @@
             <div>
                 <h3 class="px-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Pengaturan</h3>
                 <div class="flex flex-col w-full">
-                    <a href="../upgrade/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="../langganan/upgrade/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="crown" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Upgrade plan</span>
                     </a>
@@ -360,7 +360,7 @@
                         <i data-lucide="user-plus" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Kolaborasi</span>
                     </a>
-                    <a href="../kontrol-data/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="../profile/kontrol-data/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="sliders-horizontal" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Kontrol data</span>
                     </a>
@@ -456,7 +456,7 @@
             }
         } catch(e) {}
 
-        // Sync name and email from localStorage (shared with ../personal/)
+        // Sync name and email from localStorage (shared with ../profile/personal/)
         try {
             const savedName = localStorage.getItem('clincoo_fullname');
             const savedEmail = localStorage.getItem('clincoo_email');

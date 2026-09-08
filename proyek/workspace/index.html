@@ -237,10 +237,10 @@
           <button class="tab-btn border-black text-black whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none" aria-current="page">
             Kode
           </button> 
-          <a href="../keamanan/" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+          <a href="../pengaturan/keamanan/" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
             Keamanan
           </a>
-          <a href="../environment/" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
+          <a href="../pengaturan/environment/" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
             Environment
           </a>
           <a href="../pengaturan/" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center transition-colors focus:outline-none">
@@ -1710,7 +1710,7 @@
     }
 
     function openFileInEditor(filename) {
-      window.location.href = '../workspace-editor/?id=' + encodeURIComponent(wsProjectId()) +
+      window.location.href = '../workspace/editor/?id=' + encodeURIComponent(wsProjectId()) +
         '&folder=' + encodeURIComponent(currentFolderPath) + '&file=' + encodeURIComponent(filename);
     }
     // Initialize application

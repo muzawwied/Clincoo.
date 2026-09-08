@@ -134,8 +134,8 @@ const PathRouter = {
                 'workspace': _BASE + '/proyek/workspace/?id=' + encodeURIComponent(projectId),
                 'chat': _BASE + '/proyek/chat/?id=' + encodeURIComponent(projectId),
                 'pengaturan': _BASE + '/proyek/pengaturan/?id=' + encodeURIComponent(projectId),
-                'environment': _BASE + '/proyek/environment/?id=' + encodeURIComponent(projectId),
-                'keamanan': _BASE + '/proyek/keamanan/?id=' + encodeURIComponent(projectId),
+                'environment': _BASE + '/proyek/pengaturan/environment/?id=' + encodeURIComponent(projectId),
+                'keamanan': _BASE + '/proyek/pengaturan/keamanan/?id=' + encodeURIComponent(projectId),
             };
         } else {
             linkMap = {
