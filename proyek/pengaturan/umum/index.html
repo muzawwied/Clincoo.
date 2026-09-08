@@ -227,6 +227,31 @@
             setIndicator(Object.keys(pending).length ? 'dirty' : null);
         }
 
+        // ---- Cache lokal per proyek: nilai tampil instan saat refresh (tanpa flash placeholder) ----
+        const _cacheKey = 'clincoo_umum_' + (pid() || 'default');
+        function readCache() { try { return JSON.parse(localStorage.getItem(_cacheKey) || '{}'); } catch (e) { return {}; } }
+        function writeCache(patch) {
+            try { localStorage.setItem(_cacheKey, JSON.stringify(Object.assign(readCache(), patch))); } catch (e) {}
+        }
+
+        // Set posisi toggle maintenance secara idempoten (aman dipanggil berkali-kali)
+        function setMaintenance(on) {
+            const bg = document.getElementById('maintenance-bg');
+            if (!bg) return;
+            const isOn = bg.classList.contains('bg-black');
+            if (on !== isOn) toggleSwitch('maintenance');
+        }
+
+        // Hydrate seketika dari cache sebelum data server datang
+        (function hydrateFromCache() {
+            const c = readCache();
+            if (c.app_name) document.getElementById('input-app-name').value = c.app_name;
+            if (c.app_desc) document.getElementById('input-app-desc').value = c.app_desc;
+            if (c.runtime) { const l = document.getElementById('label-runtime'); if (l) l.textContent = c.runtime; }
+            if (c.maintenance === 'true') setMaintenance(true);
+            updateNamePreview();
+        })();
+
         async function loadUmum() {
             try {
                 const res = await fetch(API + '/project-settings?project_id=' + encodeURIComponent(pid()), { headers: authHeaders() });
@@ -239,7 +264,8 @@
                 if (st.app_name && document.activeElement !== nameEl) { nameEl.value = st.app_name; savedVals.app_name = st.app_name; }
                 if (st.app_desc && document.activeElement !== descEl) { descEl.value = st.app_desc; savedVals.app_desc = st.app_desc; }
                 if (st.runtime) { savedVals.runtime = st.runtime; const l = document.getElementById('label-runtime'); if (l) l.textContent = st.runtime; }
-                if (st.maintenance) { savedVals.maintenance = st.maintenance; if (st.maintenance === 'true') toggleSwitch('maintenance'); }
+                if (st.maintenance) { savedVals.maintenance = st.maintenance; setMaintenance(st.maintenance === 'true'); }
+                writeCache({ app_name: st.app_name || '', app_desc: st.app_desc || '', runtime: st.runtime || '', maintenance: st.maintenance || 'false' });
             } catch (e) {}
             updateNamePreview();
         }
@@ -258,7 +284,9 @@
                 });
                 const data = await res.json();
                 if (data.error) { setIndicator('error'); return false; }
-                keys.forEach(function (k) { savedVals[k] = pending[k]; delete pending[k]; });
+                const patch = {};
+                keys.forEach(function (k) { savedVals[k] = pending[k]; patch[k] = pending[k]; delete pending[k]; });
+                writeCache(patch);
                 setIndicator(null); // tersimpan -> icon hilang
                 return true;
             } catch (e) { setIndicator('error'); return false; }
