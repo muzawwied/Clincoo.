@@ -173,14 +173,13 @@
     </header>
     <main class="flex-1 w-full pr-6 pt-2 flex flex-col">
 
-        <div id="activity-list" class="flex flex-col divide-y divide-gray-100">
-            <div id="empty-state" style="display:none" class="flex flex-col items-center justify-center py-16 text-center">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                    <i data-lucide="history" class="w-10 h-10 text-gray-400"></i>
-                </div>
-                <h3 class="text-sm font-bold text-gray-900">Belum ada aktivitas</h3>
-                <p class="text-xs text-gray-500 mt-1 max-w-[250px]">Aktivitas sistem dan log pengguna pada sesi ini akan muncul di sini.</p>
+        <div id="activity-list" class="flex flex-col divide-y divide-gray-100"></div>
+        <div id="empty-state" style="display:none" class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="history" class="w-10 h-10 text-gray-400"></i>
             </div>
+            <h3 class="text-sm font-bold text-gray-900">Belum ada aktivitas</h3>
+            <p class="text-xs text-gray-500 mt-1 max-w-[250px]">Aktivitas sistem dan log pengguna pada sesi ini akan muncul di sini.</p>
         </div>
     </main>
 
@@ -249,7 +248,8 @@
             const activities = data.activities || [];
             clearActivitySkeleton();
             if (activities.length === 0) {
-              document.getElementById('empty-state').style.display = 'flex';
+              const es = document.getElementById('empty-state');
+              if (es) es.style.display = 'flex';
               return;
             }
             const iconMap = {
@@ -272,7 +272,8 @@
           } catch (e) {
             console.error('Failed to load activities:', e);
             clearActivitySkeleton();
-            document.getElementById('empty-state').style.display = 'flex';
+            const es = document.getElementById('empty-state');
+            if (es) es.style.display = 'flex';
           }
         }
 
