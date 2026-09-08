@@ -94,7 +94,7 @@ const PathRouter = {
         } else if (segments[0] === 'profil') {
             if (segments.length >= 2) {
                 if (_isGitHubPages) {
-                    window.ClincooBack(_BASE + '/akun/Profile/');
+                    window.ClincooBack(_BASE + '/akun/profile/');
                 } else {
                     window.ClincooBack(_BASE + '/profil');
                 }
