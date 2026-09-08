@@ -81,6 +81,8 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
+<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
+<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
 <body class="min-h-screen flex items-center justify-center p-3 sm:p-6 selection:bg-gray-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
     <!-- Script Deteksi Tema (Langsung dieksekusi agar tidak flash) -->

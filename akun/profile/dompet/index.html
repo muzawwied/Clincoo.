@@ -155,6 +155,8 @@
     body.dark-mode .skel-dot { background-color: #141414 !important; border-color: #222222 !important; }
     </style>
     <script src="/js/path-router.js"></script>
+<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
+<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 bg-white">
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>

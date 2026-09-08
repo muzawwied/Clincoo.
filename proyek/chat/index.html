@@ -336,8 +336,8 @@
         body.dark-mode header { background-color: #000000 !important; }
     </style>
     
-<!-- no-flash-v1 -->
-<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
+<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden selection:bg-gray-200">
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>

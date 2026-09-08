@@ -160,8 +160,8 @@
       if (isDark) document.documentElement.classList.add('dark-mode');
     })();
   </script>
-<!-- no-flash-v1 -->
-<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
+<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 </head>
 <body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-white">
   <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
@@ -529,11 +529,15 @@
       
       if (isDark) {
         document.body.classList.remove('dark-mode');
+        document.documentElement.style.background='';
+        document.documentElement.style.colorScheme='light';
         localStorage.setItem('clincoo_theme', 'Terang');
         bg.classList.replace('bg-blue-500', 'bg-gray-200');
         knob.classList.remove('translate-x-5');
       } else {
         document.body.classList.add('dark-mode');
+        document.documentElement.style.background='#0a0a0a';
+        document.documentElement.style.colorScheme='dark';
         localStorage.setItem('clincoo_theme', 'Gelap');
         bg.classList.replace('bg-gray-200', 'bg-blue-500');
         knob.classList.add('translate-x-5');

@@ -140,8 +140,8 @@
       document.documentElement.style.setProperty('--accent-hover',c.h);
     })();
   </script>
-<!-- no-flash-v1 -->
-<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#000000';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
+<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 <style>
 .clincoo-shimmer{position:relative;overflow:hidden;display:inline-block;min-width:4.5rem;min-height:1.4em;color:transparent!important;background:#e5e7eb;border-radius:8px;-webkit-user-select:none;user-select:none;vertical-align:middle}
 .clincoo-shimmer::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);animation:clincoo-shimmer 1.3s infinite}
