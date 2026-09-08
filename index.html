@@ -39,7 +39,7 @@
             pointer-events: none;
         }
         body.dark-mode #hero-bg {
-            background-image: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.68) 60%, #000000 100%), url('assets/backgrounds/bg-dark-night.webp');
+            background-image: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.68) 60%, #000000 100%), url('assets/backgrounds/bg-dark-night2.webp');
         }
         /* konten halaman selalu di atas lapisan BG hero */
         .page-view { position: relative; z-index: 1; }
@@ -261,7 +261,7 @@
 <!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
 <script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
     <link rel="preload" as="image" href="assets/backgrounds/bg-light-morning.webp">
-    <link rel="preload" as="image" href="assets/backgrounds/bg-dark-night.webp">
+    <link rel="preload" as="image" href="assets/backgrounds/bg-dark-night2.webp">
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 pt-20">
     <div id="hero-bg"></div>
