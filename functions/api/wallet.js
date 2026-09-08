@@ -188,7 +188,7 @@ export async function onRequestPost({ request, env }) {
       const amount = Math.floor(parseFloat(body.amount));
       const note = String(body.note || '').slice(0, 140);
       if (!toEmail || toEmail.indexOf('@') < 1) return j({ error: 'Email penerima tidak valid' }, 400);
-      if (!amount || amount < 1000) return j({ error: 'Minimal kirim saldo Rp 1.000' }, 400);
+      if (!amount || amount < 1000) return j({ error: 'Minimal kirim saldo 1.000' }, 400);
       if (String(user.email || '').toLowerCase() === toEmail) return j({ error: 'Tidak bisa mengirim ke akun sendiri' }, 400);
       const target = await getUserByEmail(db, toEmail);
       if (!target) return j({ error: 'Akun penerima tidak ditemukan. Pastikan email sudah terdaftar di Clincoo.' }, 404);

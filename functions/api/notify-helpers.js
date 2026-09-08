@@ -4,8 +4,8 @@ import { rowScope } from './user-scope.js';
 
 export function formatIDR(n) {
   const v = Number(n);
-  if (!isFinite(v)) return 'Rp 0';
-  return 'Rp ' + v.toLocaleString('id-ID');
+  if (!isFinite(v)) return '0';
+  return v.toLocaleString('id-ID');
 }
 
 // Ambil secret dari env Pages atau tabel env_vars D1 (key global = project_id NULL)

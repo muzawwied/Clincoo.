@@ -192,7 +192,7 @@
             m.classList.add('hidden'); m.classList.remove('flex');
         }
         function maskAddr(a) { return a ? '0x…' + String(a).slice(-6) : ''; }
-        function fmtIDR(n) { return 'Rp ' + Number(n || 0).toLocaleString('id-ID'); }
+        function fmtIDR(n) { return Number(n || 0).toLocaleString('id-ID'); }
 
         async function loadStatus() {
             try {

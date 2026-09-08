@@ -188,7 +188,7 @@
                     <p class="text-xs text-gray-500 mt-1">Untuk profesional dan kreator aktif.</p>
                 </div>
                 <div class="mb-6 flex items-baseline">
-                    <span class="text-3xl font-extrabold tracking-tight text-gray-900">Rp 49K</span>
+                    <span class="text-3xl font-extrabold tracking-tight text-gray-900">49K</span>
                     <span class="text-sm font-medium text-gray-500 ml-1">/bln</span>
                 </div>
                 <ul class="flex flex-col gap-4 mb-8 flex-1">
@@ -209,7 +209,7 @@
                         <span>Dukungan email 24/7</span>
                     </li>
                 </ul>
-                <button id="btn-pro" onclick="openModal('Pro', 'Rp 49.000')" class="w-full py-3.5 bg-accent text-white hover:bg-accent-hover rounded-xl font-semibold text-sm transition-all shadow-md active:scale-95 cursor-pointer">
+                <button id="btn-pro" onclick="openModal('Pro', '49.000')" class="w-full py-3.5 bg-accent text-white hover:bg-accent-hover rounded-xl font-semibold text-sm transition-all shadow-md active:scale-95 cursor-pointer">
                     Upgrade ke Pro
                 </button>
             </div>
@@ -220,7 +220,7 @@
                     <p class="text-xs text-gray-500 mt-1">Untuk tim dan operasi skala besar.</p>
                 </div>
                 <div class="mb-6 flex items-baseline">
-                    <span class="text-3xl font-extrabold tracking-tight text-gray-900">Rp 129K</span>
+                    <span class="text-3xl font-extrabold tracking-tight text-gray-900">129K</span>
                     <span class="text-sm font-medium text-gray-500 ml-1">/bln</span>
                 </div>
                 <ul class="flex flex-col gap-4 mb-8 flex-1">
@@ -241,7 +241,7 @@
                         <span>Manajer akun prioritas</span>
                     </li>
                 </ul>
-                <button id="btn-bisnis" onclick="openModal('Bisnis', 'Rp 129.000')" class="w-full py-3.5 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm transition-all cursor-pointer">
+                <button id="btn-bisnis" onclick="openModal('Bisnis', '129.000')" class="w-full py-3.5 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm transition-all cursor-pointer">
                     Mulai Bisnis
                 </button>
             </div>
@@ -322,12 +322,12 @@
             btnPro.innerText = 'Upgrade ke Pro';
             btnPro.className = btnProClasses;
             btnPro.disabled = false;
-            btnPro.onclick = () => openModal('Pro', 'Rp 49.000');
+            btnPro.onclick = () => openModal('Pro', '49.000');
 
             btnBisnis.innerText = 'Mulai Bisnis';
             btnBisnis.className = btnDefaultClasses;
             btnBisnis.disabled = false;
-            btnBisnis.onclick = () => openModal('Bisnis', 'Rp 129.000');
+            btnBisnis.onclick = () => openModal('Bisnis', '129.000');
 
             if (currentActivePlan === 'Starter') {
                 btnStarter.innerText = 'Paket Saat Ini';

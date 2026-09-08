@@ -283,8 +283,8 @@
         setVal('stat-kolaborator', (d.collaboratorCount || 0) + ' / ' + (d.collaboratorLimit || 0));
 
         const price = d.price || 0;
-        const bulanan = price > 0 ? 'Bulanan - Rp ' + fmtID(price) + '/bulan' : 'Bulanan - Gratis';
-        const tahunan = price > 0 ? 'Tahunan - Rp ' + fmtID(price * 12) + '/tahun' : 'Tahunan - Gratis';
+        const bulanan = price > 0 ? 'Bulanan - ' + fmtID(price) + '/bulan' : 'Bulanan - Gratis';
+        const tahunan = price > 0 ? 'Tahunan - ' + fmtID(price * 12) + '/tahun' : 'Tahunan - Gratis';
         const opts = document.getElementById('billing-options');
         if(opts){
             opts.innerHTML =

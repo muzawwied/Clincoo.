@@ -267,7 +267,7 @@
     const SUB_API = 'https://clincoo-be2.pages.dev/api/subscription';
     const WALLET_API = 'https://clincoo-be2.pages.dev/api/wallet';
     const PRICES = { 'Starter': 0, 'Pro': 49000, 'Bisnis': 129000 };
-    const fmtID = function(n){ return 'Rp ' + Number(n).toLocaleString('id-ID'); };
+    const fmtID = function(n){ return Number(n).toLocaleString('id-ID'); };
 
     const params = new URLSearchParams(window.location.search);
     const PLAN = params.get('plan') || 'Starter';

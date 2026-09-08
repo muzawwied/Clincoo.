@@ -188,7 +188,7 @@
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ClincooPay</p>
-                                    <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Saldo tersinkron otomatis dari dompet Wallet</p>
+                                    <p id="clincoopay-desc" class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Saldo tersinkron otomatis dari dompet Wallet</p>
                                 </div>
                                 <span id="clincoopay-status" class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-white dark:bg-white/10 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">…</span>
                             </div>
@@ -359,9 +359,9 @@
 
                 <!-- PIN Keypad Display -->
                 <div class="flex flex-col items-center justify-center py-6 mb-4 w-full">
-                    <p id="keypad-display" class="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter">Rp 0</p>
+                    <p id="keypad-display" class="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter">0</p>
                     <div class="mt-4 bg-gray-100 dark:bg-gray-800/80 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700">
-                        <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Minimal pengisian Rp 10.000</p>
+                        <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Minimal pengisian 10.000</p>
                     </div>
                 </div>
 
@@ -459,7 +459,7 @@
 
         function renderKeypadDisplay() {
             var display = document.getElementById('keypad-display');
-            if (display) display.textContent = 'Rp ' + formatNumberOnly(parseInt(keypadAmount || '0', 10));
+            if (display) display.textContent = formatNumberOnly(parseInt(keypadAmount || '0', 10));
         }
 
         function resetKeypad() {
@@ -509,7 +509,7 @@
                     showModal('Top Up Gagal', res.error || 'Gagal memproses ClincooPay.');
                     return;
                 }
-                showModal('Top Up Berhasil', 'Saldo Rp ' + Number(selectedNominalAmount).toLocaleString('id-ID') + ' berhasil masuk lewat ClincooPay.');
+                showModal('Top Up Berhasil', 'Saldo ' + Number(selectedNominalAmount).toLocaleString('id-ID') + ' berhasil masuk lewat ClincooPay.');
                 setTimeout(function() { closeTopUpPage(); }, 1200);
             } catch (e) {
                 showModal('Gagal', 'Tidak dapat terhubung ke server ClincooPay.');
@@ -540,10 +540,11 @@
                         : 'shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-white dark:bg-white/10 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700';
                 }
                 if (st.connected) {
-                    var bal = (st.wallet_balance == null) ? '…' : 'Rp ' + Number(st.wallet_balance).toLocaleString('id-ID');
+                    var bal = (st.wallet_balance == null) ? '…' : Number(st.wallet_balance).toLocaleString('id-ID');
+                    var desc = document.getElementById('clincoopay-desc');
+                    if (desc) desc.innerHTML = 'Tersinkron · <span class="font-bold text-gray-900 dark:text-white">' + bal + '</span>';
                     el.innerHTML =
-                        '<div class="flex items-center justify-between gap-3 pt-2.5 border-t border-gray-200 dark:border-gray-700/60">' +
-                        '<p class="text-xs text-gray-500 dark:text-gray-400 truncate">Tersinkron · <span class="font-bold text-gray-900 dark:text-white">' + bal + '</span></p>' +
+                        '<div class="flex items-center justify-end pt-2.5 border-t border-gray-200 dark:border-gray-700/60">' +
                         '<button type="button" onclick="cpUnlink()" class="shrink-0 text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors">Putuskan</button>' +
                         '</div>';
                 } else {
@@ -577,7 +578,7 @@
 
         async function processTopUp() {
             if (!selectedNominalAmount || selectedNominalAmount < 10000) {
-                showModal('Nominal Tidak Valid', 'Minimal isi saldo adalah Rp 10.000. Ketik jumlahnya di keyboard di atas.');
+                showModal('Nominal Tidak Valid', 'Minimal isi saldo adalah 10.000. Ketik jumlahnya di keyboard di atas.');
                 return;
             }
             var methodEl = document.querySelector('input[name="payment-method"]:checked');
