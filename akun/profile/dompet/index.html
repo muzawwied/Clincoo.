@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="../../../js/auth-client.js"></script>
-    <script src="../../../js/accent-init.js"></script>
+  <script src="../../../../js/auth-client.js"></script>
+    <script src="../../../../js/accent-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Clincoo - Dompet Saldo</title>
+    <title>Clincoo - Isi Saldo</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -159,42 +159,237 @@
 <body class="min-h-screen flex flex-col text-gray-900 bg-white">
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
 
-    <div id="page-dompet" class="flex flex-col min-h-screen w-full">
-        <header class="bg-white flex justify-between items-center px-3 py-2 fixed top-0 w-full z-40 transition-colors">
-        <button onclick="history.back()" class="top-2 left-5 w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 hover:bg-gray-100 transition-all cursor-pointer text-gray-700 hover:text-black">
-            <i data-lucide="arrow-left" class="w-5 h-5"></i>
-        </button>
-        <h1 class="font-extrabold text-lg text-gray-900 tracking-tight">Dompet Saldo</h1>
-        <div class="w-10"></div>
-    </header>
-        <main class="flex-1 w-full flex flex-col space-y-8 pt-20 pb-8">
-            <section class="flex flex-col items-center justify-center space-y-4 pt-6 pb-2 px-4 w-full">
-                <span class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Saldo Clincoo</span>
-                <div class="py-1 flex flex-col items-center w-full">
-                    <div class="flex items-center justify-center gap-1.5">
-                        <span id="balance-skeleton" class="shimmer-bar" style="height:2rem; width:170px;"></span>
-                        <span class="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 font-['Space_Grotesk'] hidden" id="display-balance">0</span>
-                        <button onclick="openTopUpPage()" title="Isi Saldo" class="p-2 rounded-full text-gray-900 hover:text-gray-600 transition-all focus:outline-none shrink-0 flex items-center justify-center">
-                            <i data-lucide="plus" class="w-8 h-8"></i>
-                        </button>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-5 text-center max-w-sm leading-relaxed px-4">Dapat digunakan untuk semua pembayaran instan layanan Clincoo tanpa biaya admin.</p>
-                </div>
-            </section>
 
-            <section class="space-y-4 pt-4 w-full">
-                <div class="px-5"><h2 class="text-base font-bold text-gray-900 tracking-tight">Riwayat Transaksi</h2></div>
-                <div id="transaction-list" class="flex flex-col w-full border-t border-gray-100"></div>
-                <div id="empty-history" class="hidden flex-col items-center justify-center py-12 text-center w-full">
-                    <div class="mb-4">
-                        <i data-lucide="history" class="w-16 h-16 text-gray-300 dark:text-gray-600 stroke-[1.5]"></i>
-                    </div>
-                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Belum ada transaksi</h3>
-                    <p class="text-xs text-gray-500 mt-1 max-w-[220px]">Riwayat pengisian dan penggunaan saldo akan muncul di sini.</p>
+        <div id="page-topup" class="flex flex-col bg-white min-h-screen w-full overflow-x-hidden">
+        
+        <!-- STEP 1: PAYMENT METHOD -->
+        <div id="step-method" class="flex flex-col w-full min-h-screen overflow-y-auto">
+            <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
+                <button onclick="closeTopUpPage()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+            </header>
+            <main class="flex-1 w-full flex flex-col px-5 py-6">
+                <div class="mb-6 w-full">
+                    <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Isi Saldo</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5">Pilih metode pembayaran untuk mengisi dompet Anda.</p>
                 </div>
-            </section>
+                
+                <div class="space-y-6 w-full pb-4" id="payment-methods-list">
+                    
+                    <!-- Instant Payment -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">Pembayaran Instan</h4>
+                        <!-- ClincooPay (metode aktif satu-satunya) -->
+                        <label class="pay-method-card selected flex items-center justify-between p-4 border-2 border-gray-900 dark:border-white rounded-2xl w-full bg-gray-50 dark:bg-[#1a1a1a]" data-method="ClincooPay" onclick="selectPaymentMethod(this)">
+                            <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                <div class="relative w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                    <img src="https://muzawwied.github.io/Wallet/logo.png" alt="ClincooPay" class="absolute inset-0 w-full h-full object-cover scale-[1.42]">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ClincooPay</p>
+                                    <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Isi saldo instan dari dompet ClincooPay kamu</p>
+                                </div>
+                            </div>
+                            <div class="radio-indicator shrink-0"></div>
+                            <input type="radio" name="payment-method" value="ClincooPay" checked>
+                        </label>
 
-        </main>
+                        <!-- Panel koneksi ClincooPay (login dompet web Wallet) -->
+                        <div id="clincoopay-connect" class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] p-4"></div>
+                        <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                            <div class="flex items-center space-x-3.5 flex-1 min-w-0 mr-2">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                    <img src="../../../assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">QRIS</p>
+                                    <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Gopay, OVO, Dana, BCA Mobile, dll</p>
+                                </div>
+                            </div>
+                            <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                        </div>
+                    </div>
+
+                    <!-- E-Wallet -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">E-Wallet</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="../../../assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">GoPay</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Gojek e-wallet</p>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                            </div>
+                            
+                            <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="../../../assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">DANA</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Dompet digital</p>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                            </div>
+                            
+                            <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="../../../assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">OVO</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">OVO e-wallet</p>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                            </div>
+                            
+                            <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="../../../assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ShopeePay</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Shopee e-wallet</p>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                            </div>
+                            
+                            <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="../../../assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">LinkAja</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">BUMN e-wallet</p>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Virtual Account -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">Virtual Account</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="../../../assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">BCA</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Virtual Account</p>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                            </div>
+                            
+                            <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="../../../assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">Mandiri</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Virtual Account</p>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                            </div>
+                            
+                            <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="../../../assets/bank-logos/bri-logo.png" alt="BRI" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">BRI</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Virtual Account</p>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                            </div>
+                            
+                            <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0 mr-2">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
+                                        <img src="../../../assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">BNI</p>
+                                        <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Virtual Account</p>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
+                            </div>
+                        </div>
+
+                                        </div>
+                </div>
+                <div class="pt-4 pb-8 w-full mt-auto">
+                    <button onclick="goToStep2()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Lanjut ke Nominal</button>
+                </div>
+            </main>
+        </div>
+
+        <!-- STEP 2: AMOUNT KEYPAD -->
+        <div id="step-amount" class="hidden flex-col w-full min-h-screen overflow-y-auto">
+            <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
+                <button onclick="goToStep1()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+            </header>
+
+            <main class="flex-1 w-full flex flex-col px-5 py-6">
+                <div class="flex flex-col items-center mb-4 w-full mt-2">
+                    <h2 class="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight text-center">Nominal Top Up</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5 text-center">Tentukan jumlah saldo yang ingin diisi</p>
+                </div>
+
+                <!-- PIN Keypad Display -->
+                <div class="flex flex-col items-center justify-center py-6 mb-4 w-full">
+                    <p id="keypad-display" class="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter">Rp 0</p>
+                    <div class="mt-4 bg-gray-100 dark:bg-gray-800/80 px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700">
+                        <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Minimal pengisian Rp 10.000</p>
+                    </div>
+                </div>
+
+                <!-- Custom Web Keypad -->
+                <div class="grid grid-cols-3 gap-3 w-full max-w-md mx-auto select-none">
+                    <button onclick="pressKey('1')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">1</button>
+                    <button onclick="pressKey('2')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">2</button>
+                    <button onclick="pressKey('3')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">3</button>
+                    <button onclick="pressKey('4')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">4</button>
+                    <button onclick="pressKey('5')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">5</button>
+                    <button onclick="pressKey('6')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">6</button>
+                    <button onclick="pressKey('7')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">7</button>
+                    <button onclick="pressKey('8')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">8</button>
+                    <button onclick="pressKey('9')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">9</button>
+                    <button onclick="pressKey('000')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">000</button>
+                    <button onclick="pressKey('0')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all active:scale-95">0</button>
+                    <button onclick="pressKey('back')" class="w-full py-4 rounded-xl text-lg font-bold bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-white text-gray-900 dark:text-white transition-all flex items-center justify-center active:scale-95"><i data-lucide="delete" class="w-5 h-5 mx-auto"></i></button>
+                </div>
+
+                <div id="confirm-action-container" class="pt-4 pb-8 w-full mt-auto hidden animate-fade-in">
+                    <button onclick="processTopUp()" class="w-full py-4 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-all shadow-lg active:scale-[0.98]">Konfirmasi</button>
+                </div>
+            </main>
+        </div>
     </div>
 
     <div id="system-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
@@ -207,155 +402,263 @@
             <p id="modal-message" class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed"></p>
             <button onclick="closeModal()" class="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-black rounded-lg font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm active:scale-95">Tutup</button>
         </div>
-    </div>
 
     <script>
-        // Backend API — hosted on Cloudflare Pages
         const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '';
-        const WALLET_API_URL = API_BASE + '/api/wallet';
         var TOPUP_API = API_BASE + '/api/topup';
-        let currentBalance = 0;
+        let selectedNominalAmount = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
             try { lucide.createIcons(); } catch (e) {}
-            showWalletSkeleton();
-            await initWalletFromD1();
-            renderBalance();
-            renderTransactions();
+            resetKeypad();
+            goToStep1();
         });
 
-        function showWalletSkeleton() {
-            const list = document.getElementById('transaction-list');
-            list.innerHTML = '';
-            const skel = document.createElement('div');
-            skel.id = 'wallet-skeleton';
-            for (let i = 0; i < 6; i++) {
-                skel.innerHTML += `
-                  <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-                    <div class="flex items-center gap-3">
-                      <div class="skel-dot w-10 h-10 rounded-full bg-gray-50 border border-gray-100 shrink-0"></div>
-                      <div class="space-y-2">
-                        <span class="shimmer-bar shimmer-bar-md"></span>
-                        <span class="shimmer-bar shimmer-bar-sm" style="width:150px;"></span>
-                      </div>
-                    </div>
-                    <span class="shimmer-bar shimmer-bar-sm shrink-0"></span>
-                  </div>`;
-            }
-            list.appendChild(skel);
-        }
-        function clearWalletSkeleton() {
-            const skel = document.getElementById('wallet-skeleton');
-            if (skel) skel.remove();
+        
+        
+        function closeTopUpPage() { window.ClincooBack('../'); }
+
+        
+        function goToStep1() {
+            var stepMethod = document.getElementById('step-method');
+            var stepAmount = document.getElementById('step-amount');
+            if (stepMethod) { stepMethod.classList.remove('hidden'); stepMethod.classList.add('flex'); }
+            if (stepAmount) { stepAmount.classList.add('hidden'); stepAmount.classList.remove('flex'); }
         }
 
-        async function initWalletFromD1() {
-            try {
-                const res = await fetch(WALLET_API_URL).then(r => r.json());
-                currentBalance = res.balance || 0;
-            } catch(e) {}
-        }
-
-        function formatNumberOnly(num) { return Number(num).toLocaleString('id-ID'); }
-
-        function getMethodLogo(method) {
-            var m = (method || '').toLowerCase();
-            if (m.includes('qris')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-100 dark:border-gray-700"><img src="../../assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain"></div>';
-            if (m.includes('bca')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200"><img src="../../assets/bank-logos/bca-wikimedia.svg" alt="BCA" class="w-full h-full object-contain"></div>';
-            if (m.includes('mandiri')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200"><img src="../../assets/bank-logos/mandiri-wikimedia.svg" alt="Mandiri" class="w-full h-full object-contain"></div>';
-            if (m.includes('bri')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200"><img src="../../assets/bank-logos/bri-logo.png" alt="BRI" class="w-full h-full object-contain"></div>';
-            if (m.includes('bni')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-200"><img src="../../assets/bank-logos/bni-wikimedia.svg" alt="BNI" class="w-full h-full object-contain"></div>';
-            if (m.includes('gopay')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-100 dark:border-gray-700"><img src="../../assets/ewallet-logos/gopay.svg" alt="GoPay" class="w-full h-full object-contain"></div>';
-            if (m.includes('dana')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-100 dark:border-gray-700"><img src="../../assets/ewallet-logos/dana.png" alt="DANA" class="w-full h-full object-contain"></div>';
-            if (m.includes('ovo')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-100 dark:border-gray-700"><img src="../../assets/ewallet-logos/ovo.svg" alt="OVO" class="w-full h-full object-contain"></div>';
-            if (m.includes('shopee')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-100 dark:border-gray-700"><img src="../../assets/shopeepay-logo.svg" alt="ShopeePay" class="w-full h-full object-contain"></div>';
-            if (m.includes('linkaja')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white border border-gray-100 dark:border-gray-700"><img src="../../assets/ewallet-logos/linkaja.svg" alt="LinkAja" class="w-full h-full object-contain"></div>';
-            if (m.includes('dompet')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="wallet" class="w-5 h-5 text-white dark:text-black"></i></div>';
-            if (m.includes('sub')) return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-gray-900 dark:bg-white"><i data-lucide="crown" class="w-5 h-5 text-white dark:text-black"></i></div>';
-            
-            return '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-gray-100 dark:bg-gray-800"><i data-lucide="credit-card" class="w-5 h-5 text-gray-500"></i></div>';
-        }
-
-        async function renderBalance() {
-            try {
-                const res = await fetch(WALLET_API_URL).then(r => r.json());
-                currentBalance = res.balance || 0;
-            } catch(e) {}
-            const balSkeleton = document.getElementById('balance-skeleton');
-            if (balSkeleton) balSkeleton.remove();
-            const balEl = document.getElementById('display-balance');
-            balEl.classList.remove('hidden');
-            balEl.textContent = formatNumberOnly(currentBalance);
-        }
-
-        async function getTransactions() {
-            try {
-                const res = await fetch(WALLET_API_URL + '?action=transactions').then(r => r.json());
-                return res.transactions || [];
-            } catch(e) { return []; }
-        }
-
-        async function renderTransactions() {
-            const container = document.getElementById('transaction-list');
-            const emptyState = document.getElementById('empty-history');
-            const allTxs = await getTransactions();
-            clearWalletSkeleton();
-            if (allTxs.length === 0) {
-                emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
-                emptyState.style.display = '';
-                try { lucide.createIcons(); } catch (e) {}
+        function goToStep2() {
+            // ClincooPay = hubungkan dompet: pindah ke halaman auth ClincooPay (bukan input nominal).
+            // Kalau sudah terhubung, saldo sudah tersinkron — tidak perlu isi saldo.
+            var el = document.querySelector('input[name="payment-method"]:checked');
+            if (el && el.value === 'ClincooPay') {
+                if (cpConnected) {
+                    showModal('Saldo Sudah Terhubung', 'Saldo ClincooPay dan saldo Clincoo kamu sudah tersinkron otomatis. Tidak perlu isi saldo — cukup isi dari aplikasi Wallet.');
+                } else {
+                    window.location.href = 'clincoopay/';
+                }
                 return;
             }
-            emptyState.classList.add('hidden');
-            emptyState.classList.remove('flex');
-            emptyState.style.display = 'none';
-            
-            var methodDisplayMap = {
-                'qris': 'QRIS', 'gopay': 'GoPay', 'ovo': 'OVO', 'dana': 'DANA', 'shopeepay': 'ShopeePay', 'linkaja': 'LinkAja',
-                'bca': 'BCA VA', 'mandiri': 'Mandiri VA', 'bri': 'BRI VA', 'bni': 'BNI VA'
-            };
-
-            container.innerHTML = allTxs.map(function(tx) {
-                var isIn = tx.type === 'in';
-                var logo = getMethodLogo(tx.method);
-                var txMethodRaw = (tx.method || '').toLowerCase();
-                var displayMethodName = methodDisplayMap[txMethodRaw] || tx.method || '';
-                var amountColor = isIn ? 'text-emerald-600' : 'text-gray-900 dark:text-white';
-                var sign = isIn ? '+' : '-';
-                var dateStr = '';
-                if (tx.created_at) {
-                    try {
-                        dateStr = new Date(tx.created_at.replace(' ', 'T') + 'Z').toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-                    } catch(e) { dateStr = tx.created_at; }
-                }
-                return '<div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">' +
-                    '<div class="flex items-center gap-3">' + logo +
-                    '<div><p class="text-sm font-semibold text-gray-900 dark:text-white">' + (tx.title || 'Transaksi') + '</p>' +
-                    '<p class="text-xs text-gray-500 mt-0.5">' + displayMethodName + (dateStr ? ' - ' + dateStr : '') + '</p></div></div>' +
-                    '<span class="text-sm font-bold ' + amountColor + '">' + sign + ' ' + formatNumberOnly(tx.amount) + '</span></div>';
-            }).join('');
+            var stepMethod = document.getElementById('step-method');
+            var stepAmount = document.getElementById('step-amount');
+            if (stepMethod) { stepMethod.classList.add('hidden'); stepMethod.classList.remove('flex'); }
+            if (stepAmount) { stepAmount.classList.remove('hidden'); stepAmount.classList.add('flex'); }
             try { lucide.createIcons(); } catch (e) {}
         }
 
-        var _lastTxSnapshot = '';
-        async function refreshWalletLive() {
-            renderBalance();
-            try {
-                const txs = await getTransactions();
-                const snapshot = JSON.stringify(txs.map(function(t) { return t.id + '|' + t.amount + '|' + t.type + '|' + t.created_at; }));
-                if (snapshot !== _lastTxSnapshot) {
-                    _lastTxSnapshot = snapshot;
-                    await renderTransactions();
+        var keypadAmount = '';
+
+        function pressKey(k) {
+            if (k === 'back') {
+                keypadAmount = keypadAmount.slice(0, -1);
+            } else {
+                if (keypadAmount === '0') keypadAmount = '';
+                if ((keypadAmount + k).replace(/^0+/, '').length <= 9) {
+                    keypadAmount = (keypadAmount + k).replace(/^0+/, '');
                 }
-            } catch(e) {}
+            }
+            selectedNominalAmount = parseInt(keypadAmount || '0', 10);
+            renderKeypadDisplay();
+            toggleConfirmButton();
         }
-        var _walletLiveTimer = setInterval(refreshWalletLive, 5000);
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) { refreshWalletLive(); }
+
+        function renderKeypadDisplay() {
+            var display = document.getElementById('keypad-display');
+            if (display) display.textContent = 'Rp ' + formatNumberOnly(parseInt(keypadAmount || '0', 10));
+        }
+
+        function resetKeypad() {
+            keypadAmount = '';
+            selectedNominalAmount = 0;
+            renderKeypadDisplay();
+            toggleConfirmButton();
+        }
+
+        function toggleConfirmButton() {
+            var btnContainer = document.getElementById('confirm-action-container');
+            if (btnContainer) {
+                if (selectedNominalAmount > 0) {
+                    btnContainer.classList.remove('hidden');
+                } else {
+                    btnContainer.classList.add('hidden');
+                }
+            }
+        }
+
+        function selectPaymentMethod(labelEl) {
+            document.querySelectorAll('.pay-method-card').forEach(function(card) {
+                card.classList.remove('selected', 'border-2', 'border-gray-900', 'dark:border-white', 'bg-gray-50', 'dark:bg-[#1a1a1a]');
+                card.classList.add('border', 'border-gray-200', 'dark:border-gray-800', 'bg-white', 'dark:bg-[#0a0a0a]');
+            });
+            labelEl.classList.add('selected', 'border-2', 'border-gray-900', 'dark:border-white', 'bg-gray-50', 'dark:bg-[#1a1a1a]');
+            labelEl.classList.remove('border', 'border-gray-200', 'dark:border-gray-800', 'bg-white', 'dark:bg-[#0a0a0a]');
+            var radio = labelEl.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        }
+
+        async function processClincooPay() {
+            if (cpConnected) {
+                showModal('Saldo Sudah Terhubung', 'Saldo ClincooPay dan saldo Clincoo kamu sudah tersinkron otomatis. Tidak perlu isi saldo — cukup isi dari aplikasi Wallet.');
+                return;
+            }
+            var token = '';
+            try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
+            try {
+                var res = await fetch(API_BASE + '/api/wallet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ action: 'add_transaction', title: 'Top Up ClincooPay', amount: selectedNominalAmount, type: 'in', method: 'ClincooPay' })
+                }).then(function(r) { return r.json(); });
+                if (!res.success) {
+                    if (res.need_login) { showModal('Sesi Berakhir', 'Silakan masuk ulang, lalu coba isi saldo kembali.'); return; }
+                    showModal('Top Up Gagal', res.error || 'Gagal memproses ClincooPay.');
+                    return;
+                }
+                showModal('Top Up Berhasil', 'Saldo Rp ' + Number(selectedNominalAmount).toLocaleString('id-ID') + ' berhasil masuk lewat ClincooPay.');
+                setTimeout(function() { closeTopUpPage(); }, 1200);
+            } catch (e) {
+                showModal('Gagal', 'Tidak dapat terhubung ke server ClincooPay.');
+            }
+        }
+
+        // ===== ClincooPay: hubungkan/putuskan dompet web Wallet (mirroring saldo 2 arah) =====
+        var cpConnected = false;
+        function cpAuthHeaders() {
+            var token = '';
+            try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
+            return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+        }
+        function cpMask(addr) { return addr ? '0x…' + String(addr).slice(-6) : ''; }
+
+        async function cpLoad() {
+            var el = document.getElementById('clincoopay-connect');
+            if (!el) return;
+            el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:4px 0"><svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="color:#9ca3af"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span style="font-size:11px;color:#9ca3af">Memuat…</span></div>';
+            try {
+                var st = await fetch(API_BASE + '/api/clincoopay', { headers: cpAuthHeaders() }).then(function(r) { return r.json(); });
+                cpConnected = !!st.connected;
+                if (st.connected) {
+                    var bal = (st.wallet_balance == null) ? '…' : 'Rp ' + Number(st.wallet_balance).toLocaleString('id-ID');
+                    el.innerHTML =
+                        '<div class="flex items-center justify-between gap-3">' +
+                        '<div class="flex items-center space-x-3 min-w-0">' +
+                        '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-gray-800">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-900 dark:text-white"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' +
+                        '</div>' +
+                        '<div class="min-w-0">' +
+                        '<p class="text-sm font-bold text-gray-900 dark:text-white truncate">Terhubung ke ' + cpMask(st.wallet_address) + '</p>' +
+                        '<p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Saldo tersinkron: ' + bal + '</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '<button type="button" onclick="cpUnlink()" class="shrink-0 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 hover:border-gray-900 dark:hover:border-white hover:text-gray-900 dark:hover:text-white transition-all">Putuskan</button>' +
+                        '</div>';
+                } else {
+                    el.innerHTML =
+                        '<div class="flex items-center justify-between gap-3">' +
+                        '<div class="min-w-0">' +
+                        '<p class="text-sm font-bold text-gray-900 dark:text-white">Dompet Belum Terhubung</p>' +
+                        '<p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Hubungkan dompet web Wallet agar saldo Clincoo tersinkron otomatis.</p>' +
+                        '</div>' +
+                        '<button type="button" onclick="location.href=\'clincoopay/\'" class="shrink-0 px-4 py-2.5 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-black text-xs font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">Hubungkan</button>' +
+                        '</div>';
+                }
+            } catch (e) {
+                el.innerHTML = '<p class="text-[11px] md:text-xs text-gray-500">Gagal memuat status ClincooPay.</p>';
+            }
+        }
+
+        async function cpUnlink() {
+            try {
+                await fetch(API_BASE + '/api/clincoopay', {
+                    method: 'POST',
+                    headers: cpAuthHeaders(),
+                    body: JSON.stringify({ action: 'unlink' })
+                }).then(function(r) { return r.json(); });
+                showModal('Dompet Diputuskan', 'Saldo Clincoo kembali berdiri sendiri dan tidak lagi tersinkron.');
+                cpLoad();
+            } catch (e) {}
+        }
+
+        cpLoad();
+
+        var XENDIT_METHOD_MAP = { 'QRIS Instant': 'qris', 'LinkAja': 'linkaja', 'GoPay': 'gopay', 'OVO': 'ovo', 'DANA': 'dana', 'ShopeePay': 'shopeepay', 'BCA Virtual Account': 'bca', 'Mandiri Virtual Account': 'mandiri', 'BRI Virtual Account': 'bri', 'BNI Virtual Account': 'bni' };
+        var topupPollTimer = null;
+
+        async function processTopUp() {
+            if (!selectedNominalAmount || selectedNominalAmount < 10000) {
+                showModal('Nominal Tidak Valid', 'Minimal isi saldo adalah Rp 10.000. Ketik jumlahnya di keyboard di atas.');
+                return;
+            }
+            var methodEl = document.querySelector('input[name="payment-method"]:checked');
+            var method = methodEl ? methodEl.value : 'ClincooPay';
+            if (method === 'ClincooPay') { return processClincooPay(); }
+            var channel = XENDIT_METHOD_MAP[method] || 'qris';
+            try {
+                var payerEmail = ''; try { payerEmail = localStorage.getItem('clincoo_email') || ''; } catch(e) {}
+                var payerToken = ''; try { payerToken = localStorage.getItem('clincoo_auth_token') || ''; } catch(e) {}
+                var res = await fetch(TOPUP_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + payerToken },
+                    body: JSON.stringify({ action: 'create', amount: selectedNominalAmount, method: channel })
+                }).then(function(r) { return r.json(); });
+                if (!res.success) {
+                    var msg = (res.error === 'payment_not_configured')
+                        ? 'Payment gateway belum dikonfigurasi. Setel XENDIT_SECRET_KEY di Cloudflare Pages > Settings > Environment variables.'
+                        : (res.message || res.error || 'Gagal membuat transaksi.');
+                    showModal('Top Up Gagal', msg);
+                    return;
+                }
+                window.open(res.invoice_url, '_blank');
+                pollTopUpStatus(res.order_id, channel);
+            } catch(e) {
+                showModal('Gagal', 'Tidak dapat terhubung ke server pembayaran.');
+            }
+        }
+
+        function pollTopUpStatus(orderId, channel) {
+            stopTopUpPoll();
+            var attempts = 0;
+            var checking = false; // cegah tick tumpang tindih (race condition) jika request sebelumnya belum selesai
+            topupPollTimer = setInterval(async function() {
+                if (checking) return;
+                checking = true;
+                attempts++;
+                try {
+                    var data = await fetch(TOPUP_API + '?action=status&order_id=' + encodeURIComponent(orderId), {
+                        method: 'GET',
+                        headers: { 'Authorization': 'Bearer ' + (function(){ try { return localStorage.getItem('clincoo_auth_token') || ''; } catch(e) { return ''; } })() }
+                    }).then(function(r) { return r.json(); });
+                    if (data.status === 'paid') {
+                        stopTopUpPoll();
+                        closeTopUpPage();
+                        // Notifikasi top up sudah dikirim server (wallet.js add_transaction) saat saldo dikreditkan —
+                        // jangan kirim lagi dari sini (dulu bikin notif dobel & saldo "NaN" karena field respons tidak lengkap).
+                        return;
+                    }
+                    if (data.status === 'failed') {
+                        stopTopUpPoll();
+                        showModal('Pembayaran Tidak Selesai', 'Transaksi kedaluwarsa atau dibatalkan.');
+                        return;
+                    }
+                } catch(err) {
+                } finally {
+                    checking = false;
+                }
+                if (attempts > 300) stopTopUpPoll();
+            }, 3000);
+        }
+
+        function stopTopUpPoll() {
+            if (topupPollTimer) { clearInterval(topupPollTimer); topupPollTimer = null; }
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.name === 'payment-method') {
+                var card = e.target.closest('.pay-method-card');
+                if (card) selectPaymentMethod(card);
+            }
         });
 
-        function openTopUpPage() { window.location.href = 'topup/'; }
+        function formatNumberOnly(num) { return Number(num).toLocaleString('id-ID'); }
 
         function showModal(title, message) {
         return;
@@ -366,120 +669,6 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
-    </script>
-
-    <!-- Modal Kirim Saldo -->
-    <div id="modal-kirim" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 backdrop-blur-sm px-4" onclick="if(event.target===this) closeKirimModal()">
-        <div class="bg-white dark:bg-[#0a0a0a] dark:text-white rounded-3xl w-full max-w-md p-6 border border-gray-100 dark:border-[#222]">
-            <div class="flex items-center justify-between mb-5">
-                <h3 class="text-base font-bold text-gray-900 dark:text-white">Kirim Saldo</h3>
-                <button type="button" onclick="closeKirimModal()" class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-50 dark:bg-[#111] border border-gray-100 dark:border-[#222] hover:bg-gray-100 dark:hover:bg-[#1a1a1a] transition-all text-gray-700 dark:text-gray-300">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-semibold text-gray-500 mb-1.5 block">Email penerima (akun Clincoo)</label>
-                    <input id="kirim-email" type="email" inputmode="email" placeholder="nama@email.com" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#222] text-sm text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-gray-500">
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-gray-500 mb-1.5 block">Nominal (min Rp 1.000)</label>
-                    <input id="kirim-amount" type="number" inputmode="numeric" min="1000" placeholder="10000" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#222] text-sm text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-gray-500">
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-gray-500 mb-1.5 block">Catatan (opsional)</label>
-                    <input id="kirim-note" type="text" maxlength="140" placeholder="Untuk apa saldo ini" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#222] text-sm text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-gray-500">
-                </div>
-                <p id="kirim-balance-info" class="text-xs text-gray-400"></p>
-                <button type="button" onclick="submitKirim()" id="kirim-submit" class="w-full py-3.5 rounded-full bg-gray-900 text-white dark:bg-white dark:text-black text-sm font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">
-                    Kirim Sekarang
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Terima Saldo -->
-    <div id="modal-terima" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 backdrop-blur-sm px-4" onclick="if(event.target===this) closeTerimaModal()">
-        <div class="bg-white dark:bg-[#0a0a0a] dark:text-white rounded-3xl w-full max-w-md p-6 border border-gray-100 dark:border-[#222]">
-            <div class="flex items-center justify-between mb-5">
-                <h3 class="text-base font-bold text-gray-900 dark:text-white">Terima Saldo</h3>
-                <button type="button" onclick="closeTerimaModal()" class="w-9 h-9 flex items-center justify-center rounded-full bg-gray-50 dark:bg-[#111] border border-gray-100 dark:border-[#222] hover:bg-gray-100 dark:hover:bg-[#1a1a1a] transition-all text-gray-700 dark:text-gray-300">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">Bagikan email akun Clincoo Anda untuk menerima saldo dari pengguna lain, atau isi saldo langsung lewat ClincooPay.</p>
-            <div class="flex items-center gap-2 p-3.5 rounded-2xl bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#222] mb-4">
-                <div id="terima-email" class="flex-1 text-sm font-semibold text-gray-900 dark:text-white truncate">...</div>
-                <button type="button" onclick="copyOwnEmail()" class="px-3.5 py-2 rounded-full bg-gray-900 text-white dark:bg-white dark:text-black text-xs font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shrink-0">Salin</button>
-            </div>
-            <button type="button" onclick="closeTerimaModal(); openTopUpPage();" class="w-full py-3.5 rounded-full bg-gray-900 text-white dark:bg-white dark:text-black text-sm font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">
-                Isi Saldo (ClincooPay)
-            </button>
-        </div>
-    </div>
-
-    <script>
-    function openKirimModal() {
-        document.getElementById('kirim-email').value = '';
-        document.getElementById('kirim-amount').value = '';
-        document.getElementById('kirim-note').value = '';
-        document.getElementById('kirim-balance-info').textContent = 'Saldo Anda: Rp ' + formatNumberOnly(currentBalance);
-        var m = document.getElementById('modal-kirim');
-        m.classList.remove('hidden'); m.classList.add('flex');
-        try { lucide.createIcons(); } catch (e) {}
-    }
-    function closeKirimModal() {
-        var m = document.getElementById('modal-kirim');
-        m.classList.add('hidden'); m.classList.remove('flex');
-    }
-    function openTerimaModal() {
-        var myEmail = '';
-        try { myEmail = localStorage.getItem('clincoo_email') || ''; } catch (e) {}
-        document.getElementById('terima-email').textContent = myEmail || 'Email tidak ditemukan — login ulang.';
-        var m = document.getElementById('modal-terima');
-        m.classList.remove('hidden'); m.classList.add('flex');
-        try { lucide.createIcons(); } catch (e) {}
-    }
-    function closeTerimaModal() {
-        var m = document.getElementById('modal-terima');
-        m.classList.add('hidden'); m.classList.remove('flex');
-    }
-    function copyOwnEmail() {
-        var text = document.getElementById('terima-email').textContent.trim();
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).catch(function() { window.prompt('Salin email Anda:', text); });
-        } else { window.prompt('Salin email Anda:', text); }
-    }
-    async function submitKirim() {
-        var email = document.getElementById('kirim-email').value.trim();
-        var amount = parseInt(document.getElementById('kirim-amount').value, 10);
-        var note = document.getElementById('kirim-note').value.trim();
-        var token = ''; try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
-        var btn = document.getElementById('kirim-submit');
-        if (!email || email.indexOf('@') < 1) { showModal('Kirim Gagal', 'Masukkan email penerima yang valid.'); return; }
-        if (!amount || amount < 1000) { showModal('Kirim Gagal', 'Minimal kirim saldo Rp 1.000.'); return; }
-        if (amount > currentBalance) { showModal('Kirim Gagal', 'Saldo tidak cukup. Saldo Anda Rp ' + formatNumberOnly(currentBalance) + '.'); return; }
-        btn.disabled = true; btn.textContent = 'Mengirim...';
-        try {
-            var res = await fetch(WALLET_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ action: 'transfer', to_email: email, amount: amount, note: note })
-            }).then(function(r) { return r.json(); });
-            if (res.success) {
-                currentBalance = res.balance;
-                closeKirimModal();
-                showModal('Kirim Berhasil', 'Saldo Rp ' + formatNumberOnly(amount) + ' berhasil dikirim ke ' + (res.to || email) + '.');
-                renderBalance(); renderTransactions();
-            } else {
-                showModal('Kirim Gagal', res.error || 'Transaksi gagal. Coba lagi.');
-            }
-        } catch (e) {
-            showModal('Kirim Gagal', 'Tidak dapat terhubung ke server.');
-        } finally {
-            btn.disabled = false; btn.textContent = 'Kirim Sekarang';
-        }
-    }
     </script>
 </body>
 </html>
