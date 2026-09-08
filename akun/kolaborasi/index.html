@@ -624,11 +624,12 @@
         if (!list) return;
         clearCollabSkeleton();
         if (!currentProject) {
+            // Empty state anggota (bukan proyek) — sesuai permintaan pemilik
             list.innerHTML = projectsLoaded
                 ? '<div class="flex flex-col items-center justify-center py-16 px-4 text-center">' +
-                    '<i data-lucide="folder" class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-4"></i>' +
-                    '<h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Belum ada proyek</h3>' +
-                    '<p class="text-sm text-gray-500 dark:text-gray-400">Buat proyek dulu di halaman Proyek untuk mulai berkolaborasi.</p>' +
+                    '<i data-lucide="users" class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-4"></i>' +
+                    '<h3 class="text-[15px] font-medium text-gray-900 dark:text-white mb-1.5">Belum ada anggota tim</h3>' +
+                    '<p class="text-sm text-gray-500 dark:text-gray-400">Undang rekan tim untuk mulai berkolaborasi di proyek ini.</p>' +
                 '</div>'
                 : '<div id="collab-skeleton"><div class="flex flex-col items-center justify-center py-16 px-4 text-center"><span class="shimmer-bar shimmer-bar-md"></span><span class="shimmer-bar shimmer-bar-sm" style="width:180px"></span></div></div>';
             if (window.lucide) try { lucide.createIcons(); } catch (e) {}
