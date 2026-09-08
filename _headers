@@ -24,6 +24,10 @@
 /*.jpg
   Cache-Control: public, max-age=31536000, immutable
 
+# Thumbnail template bisa berubah (sync otomatis) — wajib revalidasi
+/assets/templates/*
+  Cache-Control: public, max-age=300, must-revalidate
+
 # HTML should always revalidate
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
