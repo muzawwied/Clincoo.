@@ -13,6 +13,26 @@ const _BASE = _isGHPages ? '/Clincoo.' : '';
 const PROJECTS_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/projects';
 let _pushTimer = null;
 
+// Modal batas proyek per paket langganan (server menolak sinkronisasi karena limit)
+function showPlanLimitModal(d) {
+    if (!d || !d.upgrade_needed) return;
+    if (document.getElementById('plan-limit-modal')) return;
+    var m = document.createElement('div');
+    m.id = 'plan-limit-modal';
+    var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+    m.innerHTML =
+        '<div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
+        '<div class="bg-white rounded-2xl w-full max-w-xs px-5 pt-5 pb-4 text-center">' +
+        '<h3 class="text-base font-semibold text-gray-900">Batas proyek paket ' + esc(d.plan || 'Starter') + '</h3>' +
+        '<p class="text-sm text-gray-500 mt-1.5 leading-snug px-1">Paket kamu hanya bisa menyimpan maksimal <span class="font-semibold text-gray-700">' + (d.limit || 0) + ' proyek</span>. Proyek baru tetap tersimpan di perangkat ini, tapi tidak tersinkron ke akun.</p>' +
+        '<a href="' + base + '/akun/langganan/upgrade/" class="mt-4 block w-full py-2.5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">Upgrade Paket</a>' +
+        '<button id="plan-limit-close" class="mt-2 w-full py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors">Nanti saja</button>' +
+        '</div></div>';
+    document.body.appendChild(m);
+    var btn = m.querySelector('#plan-limit-close');
+    if (btn) btn.addEventListener('click', function () { m.remove(); });
+}
+
 function pushProjectsToServer(projects) {
     if (_pushTimer) clearTimeout(_pushTimer);
     _pushTimer = setTimeout(function () {
@@ -21,6 +41,8 @@ function pushProjectsToServer(projects) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'replace_all', projects: projects })
+            }).then(function (res) {
+                if (!res.ok) return res.json().then(function (d) { showPlanLimitModal(d); }).catch(function () {});
             }).catch(function () {});
         } catch (e) {}
     }, 700);
