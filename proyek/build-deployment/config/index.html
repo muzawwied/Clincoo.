@@ -245,7 +245,7 @@
                 writeDeploySession({ status: 'done', pages_url: (res && res.pages_url) || deployState.pages_url || '', done_at: Date.now() });
                 btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span class="inline-block">Berhasil Deploy!</span>`;
                 lucide.createIcons();
-                window.ClincooBack('../build-deployment-dashboard/');
+                window.ClincooBack('../dashboard/?id=' + encodeURIComponent(pid()));
                 setTimeout(() => {
                     btn.innerHTML = `Jalankan Deploy`;
                     btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
@@ -255,6 +255,7 @@
                 deployState.deploying = false;
                 writeDeploySession({ status: 'failed' });
                 console.warn('Deploy gagal: ' + err.message);
+                showDeployErrorModal(err);
                 btn.innerHTML = `Jalankan Deploy`;
                 btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
             }
@@ -276,6 +277,26 @@
     </div>
 
 <script>
+    // Modal error deploy (termasuk kuota habis) — senada dgn halaman dashboard deployment
+    function showDeployErrorModal(err) {
+        var msg = (err && err.message) ? String(err.message) : '';
+        if (document.getElementById('deploy-error-modal')) return;
+        var m = document.createElement('div');
+        m.id = 'deploy-error-modal';
+        var isQuota = msg.indexOf('Kuota deploy') !== -1;
+        var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+        m.innerHTML =
+            '<div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
+            '<div class="bg-white rounded-2xl w-full max-w-xs px-5 pt-5 pb-4 text-center">' +
+            '<h3 class="text-base font-semibold text-gray-900">' + (isQuota ? 'Kuota deploy habis' : 'Deploy gagal') + '</h3>' +
+            '<p class="text-sm text-gray-500 mt-1.5 leading-snug px-1">' + (isQuota ? msg.replace('Upgrade paket di halaman Langganan untuk deploy lagi.', '').trim() : (msg || 'Terjadi kesalahan tak terduga. Coba lagi.')) + '</p>' +
+            (isQuota ? '<a href="' + base + '/akun/langganan/upgrade/" class="mt-4 block w-full py-2.5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">Upgrade Paket</a>' : '') +
+            '<button id="deploy-error-close" class="mt-2 w-full py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors">' + (isQuota ? 'Nanti saja' : 'Tutup') + '</button>' +
+            '</div></div>';
+        document.body.appendChild(m);
+        var btn = m.querySelector('#deploy-error-close');
+        if (btn) btn.addEventListener('click', function () { m.remove(); });
+    }
     function slugifyName(v) {
         return String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     }
@@ -308,6 +329,7 @@
             processDeploy(); // lanjut deploy setelah nama tersimpan
         } catch (err) {
             console.warn('Gagal simpan nama aplikasi: ' + err.message);
+            showDeployErrorModal(err);
         } finally {
             btn.disabled = false;
             btn.textContent = 'Simpan & Deploy';
