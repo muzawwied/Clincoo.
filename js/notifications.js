@@ -102,10 +102,8 @@ function renderNotifDropdown() {
         var ts = notifTime(n);
         let timeStr = ts ? new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
         const type = n.type || 'info';
-        const iconPath = notifIcons[type] || notifIcons.info;
         const color = notifColors[type] || notifColors.info;
         html += '<div class="flex items-start gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer' + (n.read ? ' opacity-60' : '') + '" onclick="handleNotifClick(' + n.id + ')">' +
-            '<div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background:' + color + '15"><svg class="w-3.5 h-3.5" style="color:' + color + '" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">' + iconPath + '</svg></div>' +
             '<div class="flex-1 min-w-0"><p class="text-xs text-gray-600">' + esc(n.message) + '</p>' +
             '<div class="flex items-center gap-1.5 mt-0.5"><span class="text-[10px] font-medium" style="color:' + color + '">' + esc(n.source || '') + '</span>' +
             '<span class="text-[10px] text-gray-400">' + timeStr + '</span></div></div></div>';

@@ -509,12 +509,11 @@
         for (let n of notifs.slice(0, 5)) {
             let timeStr = new Date(n.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
             const type = n.type || 'info';
-            const iconPath = notifIcons[type] || notifIcons.info;
             const color = notifColors[type] || notifColors.info;
             const item = document.createElement('div');
             item.className = 'flex items-start gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer' + (n.read ? ' opacity-60' : '');
             item.onclick = function() { handleNotifClick(n); };
-            item.innerHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background:' + color + '15"><svg class="w-3.5 h-3.5" style="color:' + color + '" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">' + iconPath + '</svg></div><div class="flex-1 min-w-0"><p class="text-xs text-gray-600">' + n.message + '</p><div class="flex items-center gap-1.5 mt-0.5"><span class="text-[10px] font-medium" style="color:' + color + '">' + (n.source || '') + '</span><span class="text-[10px] text-gray-400">' + timeStr + '</span></div></div>';
+            item.innerHTML = '<div class="flex-1 min-w-0"><p class="text-xs text-gray-600">' + n.message + '</p><div class="flex items-center gap-1.5 mt-0.5"><span class="text-[10px] font-medium" style="color:' + color + '">' + (n.source || '') + '</span><span class="text-[10px] text-gray-400">' + timeStr + '</span></div></div>';
             listContainer.appendChild(item);
         }
 
@@ -784,6 +783,7 @@
                     notifBtn.setAttribute('aria-expanded', 'true');
                     notifMenu.classList.remove('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
                     notifMenu.classList.add('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+                    markAllNotifsRead();
                 } else {
                     notifBtn.setAttribute('aria-expanded', 'false');
                     notifMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
