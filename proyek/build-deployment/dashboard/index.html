@@ -552,6 +552,14 @@
             try {
                 await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'add_domain', domain: input }) });
                 localStorage.setItem('clincoo_custom_domain', input);
+                // Sinkron ke project-settings agar halaman domain-kustom ikut menampilkan domain ini
+                try {
+                    const cur = await apiFetch('/project-settings?project_id=' + encodeURIComponent(pid())).catch(() => ({}));
+                    let s = {};
+                    try { s = (cur.domain_settings ? JSON.parse(cur.domain_settings) : {}) || {}; } catch (e) { s = {}; }
+                    s.domain = input;
+                    await apiFetch('/project-settings', { method: 'POST', body: JSON.stringify({ project_id: pid(), domain_settings: JSON.stringify(s) }) });
+                } catch (e) {}
                 if(localStorage.getItem('clincoo_enforce_https') === null) {
                     localStorage.setItem('clincoo_enforce_https', 'true');
                 }
@@ -578,6 +586,14 @@
             } catch (err) { console.warn('Gagal: ' + err.message); }
             localStorage.removeItem('clincoo_custom_domain');
             localStorage.removeItem('clincoo_enforce_https');
+            // Hapus juga dari project-settings supaya halaman domain-kustom ikut bersih
+            try {
+                const cur = await apiFetch('/project-settings?project_id=' + encodeURIComponent(pid())).catch(() => ({}));
+                let s = {};
+                try { s = (cur.domain_settings ? JSON.parse(cur.domain_settings) : {}) || {}; } catch (e) { s = {}; }
+                delete s.domain;
+                await apiFetch('/project-settings', { method: 'POST', body: JSON.stringify({ project_id: pid(), domain_settings: JSON.stringify(s) }) });
+            } catch (e) {}
             loadCustomDomain();
         }
 
