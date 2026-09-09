@@ -340,6 +340,7 @@
   
     // API base: same-origin di Cloudflare Pages; be2 hanya utk GitHub Pages (konsisten dgn js/api.js)
     const DEPLOY_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+    let lastPagesUrl = ''; // URL <project>.pages.dev asli dari hasil deploy (untuk nilai record DNS)
 
     // Load domain settings from D1
     async function loadDomainSettings() {
@@ -403,7 +404,7 @@
                 body: JSON.stringify({ project_id: pid, domain_settings: JSON.stringify(settings) })
             });
             await ClincooAPI.logActivity('domain_updated', 'Domain: ' + settings.domain);
-            updateDNSRecords(settings.domain);
+            updateDNSRecords('', lastPagesUrl); // nilai record = URL deploy asli, bukan placeholder
             if (settings.domain) attachDomainToPages(settings.domain);
         } catch(e) {}
     }
@@ -432,7 +433,14 @@
             });
             const st = await res.json().catch(() => ({}));
             if (!res.ok || st.error) throw new Error(st.error || ('HTTP ' + res.status));
-            if (st.pages_url) updateDNSRecords('', st.pages_url);
+            if (st.pages_url) { lastPagesUrl = st.pages_url; updateDNSRecords('', st.pages_url); }
+            // Sumber sebenarnya: domain yang terpasang di Cloudflare (dipasang dari halaman deployment).
+            // Bila input masih kosong, isi otomatis dari data Cloudflare.
+            const attached = (st.domains || []).length ? st.domains[st.domains.length - 1] : null;
+            if (attached && attached.name) {
+                const input = document.querySelector('input[placeholder="contohdomain.com"]');
+                if (input && !input.value.trim()) { input.value = attached.name; }
+            }
             const badge = document.getElementById('cf-domain-status');
             if (badge) badge.classList.remove('hidden');
             if (badge) {
