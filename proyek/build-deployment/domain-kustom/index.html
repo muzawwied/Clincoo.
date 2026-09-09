@@ -338,12 +338,15 @@
       }
     }
   
+    // API base: same-origin di Cloudflare Pages; be2 hanya utk GitHub Pages (konsisten dgn js/api.js)
+    const DEPLOY_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+
     // Load domain settings from D1
     async function loadDomainSettings() {
         try {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
             const _tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
-            const res = await fetch('https://clincoo-be2.pages.dev/api/project-settings?project_id=' + encodeURIComponent(pid),
+            const res = await fetch(DEPLOY_API_BASE + '/project-settings?project_id=' + encodeURIComponent(pid),
                 { headers: _tok ? { Authorization: 'Bearer ' + _tok } : {} });
             const data = await res.json();
             const settings = data.domain_settings ? JSON.parse(data.domain_settings) : {};
@@ -355,7 +358,16 @@
             }
             updateDNSRecords(settings.domain || '');
             loadRealDomainStatus();
-        } catch(e) {}
+        } catch(e) {
+            // Jangan biarkan input tetap terkunci bila backend gagal — tampilkan penyebabnya
+            const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
+            if (domainInput) { domainInput.classList.remove('domain-shimmer'); domainInput.disabled = false; }
+            const badge = document.getElementById('cf-domain-status');
+            if (badge) {
+                badge.textContent = 'Gagal memuat: ' + (e && e.message ? e.message : 'backend tidak terjangkau');
+                badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold bg-red-100 text-red-700';
+            }
+        }
     }
 
     function updateDNSRecords(domain, pagesUrl) {
@@ -385,7 +397,7 @@
         try {
             const pid = localStorage.getItem('clincoo_current_project_id') || '';
             const _tok2 = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
-            await fetch('https://clincoo-be2.pages.dev/api/project-settings', {
+            await fetch(DEPLOY_API_BASE + '/project-settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...(_tok2 ? { Authorization: 'Bearer ' + _tok2 } : {}) },
                 body: JSON.stringify({ project_id: pid, domain_settings: JSON.stringify(settings) })
@@ -394,45 +406,52 @@
             updateDNSRecords(settings.domain);
             if (settings.domain) attachDomainToPages(settings.domain);
         } catch(e) {}
+    }
 
-        async function attachDomainToPages(domain) {
-            const pid = localStorage.getItem('clincoo_current_project_id') || '';
-            const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
-            try {
-                const res = await fetch('https://clincoo.pages.dev/api/deploy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
-                    body: JSON.stringify({ project_id: pid, action: 'add_domain', domain })
-                });
-                const data = await res.json();
-                loadRealDomainStatus();
-                if (data.error) console.warn('Domain belum terpasang di Cloudflare: ' + data.error);
-            } catch (e) {}
-        }
+    async function attachDomainToPages(domain) {
+        const pid = localStorage.getItem('clincoo_current_project_id') || '';
+        const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+        try {
+            const res = await fetch(DEPLOY_API_BASE + '/deploy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+                body: JSON.stringify({ project_id: pid, action: 'add_domain', domain })
+            });
+            const data = await res.json();
+            loadRealDomainStatus();
+            if (data.error) console.warn('Domain belum terpasang di Cloudflare: ' + data.error);
+        } catch (e) {}
+    }
 
-        async function loadRealDomainStatus() {
-            const pid = localStorage.getItem('clincoo_current_project_id') || '';
-            const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
-            try {
-                const res = await fetch('https://clincoo.pages.dev/api/deploy?project_id=' + encodeURIComponent(pid), {
-                    headers: token ? { Authorization: 'Bearer ' + token } : {}
-                });
-                const st = await res.json();
-                if (st.pages_url) updateDNSRecords('', st.pages_url);
-                const badge = document.getElementById('cf-domain-status');
-                if (badge) badge.classList.remove('hidden');
-                if (badge) {
-                    if ((st.domains || []).length) {
-                        const d = st.domains[st.domains.length - 1];
-                        const active = d.status === 'active';
-                        badge.textContent = active ? 'Domain aktif di Cloudflare' : 'Menunggu verifikasi DNS (' + (d.status || 'pending') + ')';
-                        badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold ' + (active ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700 animate-pulse');
-                    } else {
-                        badge.textContent = 'Domain belum terhubung ke Cloudflare';
-                        badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-600';
-                    }
+    async function loadRealDomainStatus() {
+        const pid = localStorage.getItem('clincoo_current_project_id') || '';
+        const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+        try {
+            const res = await fetch(DEPLOY_API_BASE + '/deploy?project_id=' + encodeURIComponent(pid), {
+                headers: token ? { Authorization: 'Bearer ' + token } : {}
+            });
+            const st = await res.json().catch(() => ({}));
+            if (!res.ok || st.error) throw new Error(st.error || ('HTTP ' + res.status));
+            if (st.pages_url) updateDNSRecords('', st.pages_url);
+            const badge = document.getElementById('cf-domain-status');
+            if (badge) badge.classList.remove('hidden');
+            if (badge) {
+                if ((st.domains || []).length) {
+                    const d = st.domains[st.domains.length - 1];
+                    const active = d.status === 'active';
+                    badge.textContent = active ? 'Domain aktif di Cloudflare' : 'Menunggu verifikasi DNS (' + (d.status || 'pending') + ')';
+                    badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold ' + (active ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700 animate-pulse');
+                } else {
+                    badge.textContent = 'Domain belum terhubung ke Cloudflare';
+                    badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-600';
                 }
-            } catch (e) {}
+            }
+        } catch (e) {
+            const badge = document.getElementById('cf-domain-status');
+            if (badge) {
+                badge.textContent = 'Gagal memuat status: ' + (e && e.message ? e.message : 'backend tidak terjangkau');
+                badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold bg-red-100 text-red-700';
+            }
         }
     }
 
@@ -448,6 +467,8 @@
         const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
         if (domainInput) domainInput.addEventListener('blur', saveDomainSettings);
         loadDomainSettings();
+        // Refresh real-time: poll status deploy & domain tiap 20 detik
+        setInterval(loadRealDomainStatus, 20000);
     });
 
 </script>
