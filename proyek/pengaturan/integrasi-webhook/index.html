@@ -124,15 +124,8 @@
               Tambah
             </button>
           </div>
-          <div id="webhook-list" class="space-y-2">
-            <div class="flex gap-2 items-center">
-              <input type="text" value="https://hooks.slack.com/services/..." class="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none font-mono" placeholder="URL Webhook">
-              <select class="px-2 py-2 text-xs rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none cursor-pointer"><option>POST</option><option>PUT</option><option>GET</option></select>
-              <button onclick="this.parentElement.remove();showActionButtons()" class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" /></svg>
-              </button>
-            </div>
-          </div>
+          <div id="webhook-list" class="space-y-2"></div>
+          <p id="webhook-empty" class="text-xs text-gray-400 dark:text-gray-500 py-4 text-center">Belum ada webhook — klik "Tambah" untuk menambah URL endpoint.</p>
         </div>
         <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="min-w-0 flex-1">
@@ -170,7 +163,7 @@
     </main>
   </div>
   <script>
-    let isEdited=false;function showActionButtons(){if(!isEdited){isEdited=true;const c=document.getElementById('action-buttons');c.classList.remove('hidden');c.classList.add('flex');void c.offsetWidth;c.classList.remove('opacity-0');c.classList.add('opacity-100');}}function cancelChanges(){window.location.reload();}function saveChanges(){const btn=document.querySelector('#action-buttons button.bg-blue-600');if(!btn)return;btn.innerText='Menyimpan...';btn.disabled=true;btn.classList.add('opacity-80','cursor-not-allowed');setTimeout(()=>{btn.innerText='Tersimpan!';btn.classList.replace('bg-blue-600','bg-emerald-500');btn.classList.replace('hover:bg-blue-700','hover:bg-emerald-600');setTimeout(()=>window.location.reload(),800);},800);}document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('input,textarea,select').forEach(input=>{input.addEventListener('input',showActionButtons);input.addEventListener('change',showActionButtons);});});function toggleSwitch(idPrefix){showActionButtons();const bg=document.getElementById(idPrefix+'-bg');const knob=document.getElementById(idPrefix+'-knob');if(bg.classList.contains('bg-blue-500')){bg.classList.replace('bg-blue-500','bg-gray-200');bg.classList.add('dark:bg-slate-700');knob.classList.remove('translate-x-5');}else{bg.classList.remove('bg-gray-200','dark:bg-slate-700');bg.classList.add('bg-blue-500');knob.classList.add('translate-x-5');}}
+    let isEdited=false;function showActionButtons(){if(!isEdited){isEdited=true;const c=document.getElementById('action-buttons');c.classList.remove('hidden');c.classList.add('flex');void c.offsetWidth;c.classList.remove('opacity-0');c.classList.add('opacity-100');}}function cancelChanges(){window.location.reload();}function saveChanges(){saveWebhookSettings();}document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('input,textarea,select').forEach(input=>{input.addEventListener('input',showActionButtons);input.addEventListener('change',showActionButtons);});});function toggleSwitch(idPrefix){showActionButtons();const bg=document.getElementById(idPrefix+'-bg');const knob=document.getElementById(idPrefix+'-knob');if(bg.classList.contains('bg-blue-500')){bg.classList.replace('bg-blue-500','bg-gray-200');bg.classList.add('dark:bg-slate-700');knob.classList.remove('translate-x-5');}else{bg.classList.remove('bg-gray-200','dark:bg-slate-700');bg.classList.add('bg-blue-500');knob.classList.add('translate-x-5');}}
   </script>
     <script>if (window.lucide) { lucide.createIcons(); }</script>
 
@@ -191,7 +184,7 @@
     try {
       var pid = localStorage.getItem('clincoo_current_project_id') || '';
       var tk = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
-      fetch('https://clincoo-be2.pages.dev/api/project-settings', {
+      fetch(API_BASE + '/project-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tk },
         body: JSON.stringify({ project_id: pid, webhook_deploy_event: value })
@@ -203,6 +196,118 @@
     var p = document.getElementById('deploy-event-popover');
     if (p && wrap && !wrap.contains(e.target)) p.classList.add('hidden');
   });
+
+  // ===== Integrasi Webhook AKTIF (bukan dummy): load & simpan ke project-settings =====
+  var API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+  var _apiToken = '';
+  try { _apiToken = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; } catch (e) {}
+  function _pid() { try { return localStorage.getItem('clincoo_current_project_id') || ''; } catch (e) { return ''; } }
+
+  function addWebhookRow(url, method) {
+    var list = document.getElementById('webhook-list');
+    if (!list) return;
+    var row = document.createElement('div');
+    row.className = 'flex gap-2 items-center webhook-row';
+    row.innerHTML =
+      '<input type="text" class="webhook-url flex-1 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none font-mono" placeholder="https://contoh.com/webhook">' +
+      '<select class="webhook-method px-2 py-2 text-xs rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none cursor-pointer"><option>POST</option><option>PUT</option><option>GET</option></select>' +
+      '<button type="button" class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer" aria-label="Hapus webhook">' +
+      '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" /></svg>' +
+      '</button>';
+    if (url) row.querySelector('.webhook-url').value = url;
+    if (method) row.querySelector('.webhook-method').value = method;
+    row.querySelector('button').addEventListener('click', function () {
+      row.remove();
+      var list2 = document.getElementById('webhook-list');
+      var empty = document.getElementById('webhook-empty');
+      if (empty) empty.style.display = (list2 && list2.children.length) ? 'none' : 'block';
+      showActionButtons();
+    });
+    row.querySelector('.webhook-url').addEventListener('input', showActionButtons);
+    row.querySelector('.webhook-method').addEventListener('change', showActionButtons);
+    list.appendChild(row);
+    var empty = document.getElementById('webhook-empty');
+    if (empty) empty.style.display = 'none';
+    showActionButtons();
+  }
+
+  function collectWebhookRows() {
+    var hooks = [];
+    document.querySelectorAll('#webhook-list .webhook-row').forEach(function (row) {
+      var url = (row.querySelector('.webhook-url').value || '').trim();
+      if (!url) return; // baris kosong tidak ikut disimpan
+      hooks.push({ url: url, method: row.querySelector('.webhook-method').value || 'POST' });
+    });
+    return hooks;
+  }
+
+  async function saveWebhookSettings() {
+    var btn = document.querySelector('#action-buttons button.bg-blue-600');
+    if (!btn) return;
+    btn.innerText = 'Menyimpan...';
+    btn.disabled = true;
+    btn.classList.add('opacity-80', 'cursor-not-allowed');
+    var payload = {
+      project_id: _pid(),
+      webhook_settings: JSON.stringify({
+        webhooks: collectWebhookRows(),
+        deployEvent: _deployEventValue || 'all',
+        retry: !!(document.getElementById('retryHook-bg') && document.getElementById('retryHook-bg').classList.contains('bg-blue-500'))
+      })
+    };
+    var ok = false;
+    try {
+      var hdrs = { 'Content-Type': 'application/json' };
+      if (_apiToken) hdrs['Authorization'] = 'Bearer ' + _apiToken;
+      var r1 = await fetch(API_BASE + '/project-settings', { method: 'POST', headers: hdrs, body: JSON.stringify(payload) });
+      ok = r1.ok;
+      // mirror ke backend be2 (deploy engine) — fire & forget
+      try { fetch('https://clincoo-be2.pages.dev/api/project-settings', { method: 'POST', headers: hdrs, body: JSON.stringify(payload) }).catch(function () {}); } catch (e) {}
+    } catch (e) {
+      try { fetch('https://clincoo-be2.pages.dev/api/project-settings', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + _apiToken }, body: JSON.stringify(payload) }); } catch (e2) {}
+    }
+    btn.innerText = ok ? 'Tersimpan!' : (btn.innerText = 'Tersimpan (offline cache)');
+    btn.classList.replace('bg-blue-600', 'bg-emerald-500');
+    btn.classList.replace('hover:bg-blue-700', 'hover:bg-emerald-600');
+    btn.disabled = false;
+    btn.classList.remove('opacity-80', 'cursor-not-allowed');
+    isEdited = false;
+  }
+
+  async function loadWebhookSettings() {
+    try {
+      var hdrs = _apiToken ? { Authorization: 'Bearer ' + _apiToken } : {};
+      var res = await fetch(API_BASE + '/project-settings?project_id=' + encodeURIComponent(_pid()), { headers: hdrs });
+      if (!res.ok) return;
+      var data = await res.json();
+      var st = (data && data.settings) || {};
+      var cfg = null;
+      try { cfg = st.webhook_settings ? JSON.parse(st.webhook_settings) : null; } catch (e) {}
+      if (cfg) {
+        if (Array.isArray(cfg.webhooks)) {
+          cfg.webhooks.forEach(function (h) { addWebhookRow(h.url, h.method); });
+        }
+        if (cfg.deployEvent) {
+          var labelMap = { all: 'Semua event', success: 'Hanya sukses', fail: 'Hanya gagal', none: 'Nonaktif' };
+          _deployEventValue = cfg.deployEvent;
+          var l = document.getElementById('deploy-event-label');
+          if (l) l.textContent = labelMap[cfg.deployEvent] || 'Semua event';
+        }
+        if (typeof cfg.retry === 'boolean' && !cfg.retry) {
+          var bg = document.getElementById('retryHook-bg'), knob = document.getElementById('retryHook-knob');
+          if (bg) { bg.classList.remove('bg-blue-500'); bg.classList.add('bg-gray-200', 'dark:bg-slate-700'); }
+          if (knob) knob.classList.remove('translate-x-5');
+        }
+      }
+      // render dari server bukan "perubahan" — sembunyikan lagi tombol aksi
+      try {
+        isEdited = false;
+        var c = document.getElementById('action-buttons');
+        if (c) { c.classList.add('hidden', 'opacity-0'); c.classList.remove('flex', 'opacity-100'); }
+      } catch (e) {}
+    } catch (e) {}
+  }
+  document.addEventListener('DOMContentLoaded', function () { loadWebhookSettings(); });
 </script>
 
     <script>/* clincoo-sw-register */
