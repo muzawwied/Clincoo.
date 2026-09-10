@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<script src="../../js/loading-state.js?v=1"></script>
+<script src="../../js/loading-state.js?v=2"></script>
   <script src="../../js/auth-client.js?v=2"></script>
   <script src="../../js/accent-init.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
@@ -816,17 +816,14 @@
     const fileSearchInput = document.getElementById('file-search-input');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     const sidebarPopup = document.getElementById('sidebar-popup');
-    // Sidebar: terbuka otomatis HANYA di desktop (layar >= 1024px).
-    // Di mobile selalu tertutup saat halaman dibuka — status tersimpan diabaikan,
-    // karena di layar kecil sidebar menutupi konten. Bisa dibuka manual via tombol.
+    // Sidebar: di desktop pertama kali dibuka terbuka; refresh mengikuti keadaan terakhir
     let isSidebarOpen = (function () {
-      if (window.innerWidth < 1024) return false; // mobile: selalu tertutup di awal
       try {
         const saved = localStorage.getItem('clincoo_sidebar_open');
         if (saved === '1') return true;
         if (saved === '0') return false;
       } catch (e) {}
-      return true; // desktop: terbuka secara default
+      return window.innerWidth >= 1024; // default pertama kali: terbuka di desktop
     })();
 
     function toggleSidebar() {
