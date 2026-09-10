@@ -1668,8 +1668,7 @@
           '<button id="upc-prev" class="absolute left-0 top-1/2 -translate-y-1/2 -ml-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>' +
           '<button id="upc-next" class="absolute right-0 top-1/2 -translate-y-1/2 -mr-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>' +
         '</div>' +
-        '<div class="flex items-center justify-center gap-2 mt-3">' + dots + '</div>' +
-        '<button id="upgrade-plans-close" class="mt-3 w-full py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors">Nanti saja</button>' +
+        '<div class="flex items-center justify-center gap-2 mt-4">' + dots + '</div>' +
         '</div></div>';
       document.body.appendChild(m);
       try { lucide.createIcons(); } catch (e) {}
@@ -1705,7 +1704,6 @@
         sx = null;
       });
 
-      m.querySelector('#upgrade-plans-close').addEventListener('click', function () { m.remove(); });
       m.querySelector('#upgrade-plans-x').addEventListener('click', function () { m.remove(); });
       m.firstElementChild.addEventListener('click', function (e) { if (e.target === m.firstElementChild) m.remove(); });
       render();
