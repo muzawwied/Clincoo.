@@ -191,11 +191,11 @@
 
             <!-- Popover Menu Panel -->
             <div id="redirect-popover" class="hidden absolute left-0 right-0 mt-1.5 w-full bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl z-50 py-1 transition-all duration-150 transform opacity-0 scale-95 origin-top">
-              <button type="button" onclick="selectPopoverOption('redirect', 'redirect', 'Redirect ke domain utama')" class="popover-item w-full px-3.5 py-2.5 text-xs sm:text-sm text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-900 dark:text-white transition-colors cursor-pointer" data-value="redirect">
+              <button type="button" onclick="selectPopoverOption('redirect', 'redirect', 'Redirect ke domain utama'); saveDomainSettings()" class="popover-item w-full px-3.5 py-2.5 text-xs sm:text-sm text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-900 dark:text-white transition-colors cursor-pointer" data-value="redirect">
                 <span>Redirect ke domain utama</span>
                 <svg class="h-4 w-4 text-blue-600 dark:text-blue-400 popover-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
               </button>
-              <button type="button" onclick="selectPopoverOption('redirect', 'none', 'Tidak ada redirect')" class="popover-item w-full px-3.5 py-2.5 text-xs sm:text-sm text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-900 dark:text-white transition-colors cursor-pointer" data-value="none">
+              <button type="button" onclick="selectPopoverOption('redirect', 'none', 'Tidak ada redirect'); saveDomainSettings()" class="popover-item w-full px-3.5 py-2.5 text-xs sm:text-sm text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-900 dark:text-white transition-colors cursor-pointer" data-value="none">
                 <span>Tidak ada redirect</span>
                 <svg class="h-4 w-4 text-blue-600 dark:text-blue-400 popover-check hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
               </button>
@@ -418,8 +418,12 @@
         const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
         const redirectLabel = document.getElementById('redirect-selected-text');
         const redirectHidden = document.getElementById('redirect-value');
+        // Jika data domain belum termuat (input masih shimmer), pakai nilai cache —
+        // jangan menimpa domain yang tersimpan dengan string kosong.
+        var _domVal = domainInput && !domainInput.classList.contains('domain-shimmer') ? domainInput.value : '';
+        if (!_domVal) { try { var _c = readDomainCache(); if (_c && _c.domain) _domVal = _c.domain; } catch (e) {} }
         const settings = {
-            domain: domainInput ? domainInput.value : '',
+            domain: _domVal,
             redirect: redirectHidden ? redirectHidden.value : 'redirect',
             redirectLabel: redirectLabel ? redirectLabel.textContent.trim() : 'Redirect ke domain utama'
         };
