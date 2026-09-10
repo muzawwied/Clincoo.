@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="id" class="h-full w-full overflow-hidden">
 <head>
-<script src="../../../js/loading-state.js?v=3"></script>
   <script src="../../../js/auth-client.js?v=2"></script>
   <script src="../../../js/accent-init.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
@@ -283,7 +282,7 @@
 
   </div>
 
-    <div id="notif-dropdown" class="fixed top-16 right-4 w-[calc(100vw-2rem)] sm:w-80 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-[90] origin-top-right">
+    <div id="notif-dropdown" class="fixed top-16 right-4 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-[90] origin-top-right">
     <div class="flex justify-between items-center mb-2 px-1">
       <span class="font-semibold text-sm text-gray-900">Notifikasi</span>
       <a href="../../../akun/notifikasi/" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
@@ -445,7 +444,7 @@
         parent.innerHTML = '<div class="flex flex-col gap-2 mb-2"><div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div></div>';
         return;
       }
-      let html = '<div class="flex flex-col gap-1 max-h-72 overflow-y-auto">';
+      let html = '<div class="flex flex-col gap-1 max-h-48 overflow-y-auto">';
       for (let n of notifs.slice(0, 5)) {
         const isUnread = !n.read;
         const linkAttr = n.link ? ' onclick="window.location.href=\'' + escapeNotifHtml(n.link) + '\'"' : '';
