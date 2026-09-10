@@ -1574,44 +1574,138 @@
 
     // Impor repository GitHub = fitur paket Pro ke atas; Starter melihat daftar paket
     async function checkPlanThenOpenGithub() {
-      let plan = 'Starter';
+      let plan = 'Starter', sub = null;
       try {
         const apiBase = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
         const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
-        const res = await fetch(apiBase + '/subscription', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
-        if (res.ok) { const d = await res.json(); if (d && d.plan) plan = d.plan; }
+        const res = await fetch(apiBase + '/subscription', { cache: 'no-store', headers: token ? { Authorization: 'Bearer ' + token } : {} });
+        if (res.ok) { const d = await res.json(); if (d && d.plan) plan = d.plan; sub = d; }
       } catch (e) {}
-      if (plan === 'Starter') { showUpgradePlansModal(); return; }
+      if (plan === 'Starter') { showUpgradePlansModal(sub); return; }
       openCreateModal('github');
     }
 
-    function showUpgradePlansModal() {
+        function showUpgradePlansModal(sub) {
       if (document.getElementById('upgrade-plans-modal')) return;
       var m = document.createElement('div');
       m.id = 'upgrade-plans-modal';
       var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
-      var row = function(name, price, desc, hot) {
-        return '<div class="flex items-center justify-between px-4 py-3 rounded-xl border ' + (hot ? 'border-gray-900 bg-gray-50' : 'border-gray-100') + '">' +
-          '<div><p class="text-sm font-semibold text-gray-900">' + name + (hot ? ' <span class="text-[10px] font-bold text-white bg-gray-900 px-1.5 py-0.5 rounded ml-1 align-middle">POPULER</span>' : '') + '</p>' +
-          '<p class="text-[11px] text-gray-500 mt-0.5">' + desc + '</p></div>' +
-          '<p class="text-sm font-bold text-gray-900 whitespace-nowrap">' + price + '</p></div>';
+      var current = (sub && sub.plan) ? sub.plan : 'Starter';
+      var AC = 'var(--accent-color, #000000)';
+      var upUrl = base + '/akun/langganan/upgrade/';
+
+      var plans = [
+        { name: 'Starter', tagline: 'Untuk individu yang baru memulai.', price: 'Gratis', per: '', hot: false,
+          items: [
+            ['Hingga 3 proyek aktif', true],
+            ['1 kolaborator per proyek', true],
+            ['Chat AI di setiap proyek', true],
+            ['3 template proyek siap pakai', true],
+            ['Tugas terjadwal & notifikasi', true],
+            ['Deploy web 2x per bulan', true],
+            ['Kolaborasi tim lebih besar', false],
+            ['Impor repository GitHub', false]
+          ] },
+        { name: 'Pro', tagline: 'Untuk profesional dan kreator aktif.', price: '49K', per: '/bln', hot: true,
+          items: [
+            ['Hingga 10 proyek aktif', true],
+            ['Hingga 5 kolaborator per proyek', true],
+            ['Semua fitur Starter: chat AI, template & tugas terjadwal', true],
+            ['Deploy web hingga 25x per bulan', true],
+            ['Impor repository GitHub ke workspace', true]
+          ] },
+        { name: 'Bisnis', tagline: 'Untuk tim dan operasi skala besar.', price: '129K', per: '/bln', hot: false,
+          items: [
+            ['Semua fitur Pro', true],
+            ['Hingga 50 proyek aktif', true],
+            ['Hingga 20 kolaborator per proyek', true],
+            ['Kontrol akses & keamanan proyek lanjutan', true],
+            ['Deploy web tanpa batas', true]
+          ] }
+      ];
+
+      var card = function (p) {
+        var isCurrent = (p.name === current);
+        var list = p.items.map(function (it) {
+          return '<li class="flex items-start gap-2.5 text-[13px] ' + (p.hot ? 'text-gray-900 font-medium' : (it[1] ? 'text-gray-700' : 'text-gray-400 opacity-70')) + '">' +
+            (it[1]
+              ? '<i data-lucide="' + (p.hot ? 'check-circle-2' : 'check') + '" class="w-4 h-4 shrink-0 ' + (p.hot ? 'text-accent' : 'text-gray-900') + '"></i>'
+              : '<i data-lucide="minus" class="w-4 h-4 shrink-0"></i>') +
+            '<span>' + it[0] + '</span></li>';
+        }).join('');
+        var btn;
+        if (isCurrent) {
+          btn = '<div class="w-full py-3 bg-gray-50 text-gray-500 border border-gray-200 rounded-xl font-semibold text-sm text-center cursor-not-allowed">Paket Saat Ini</div>';
+        } else if (p.hot) {
+          btn = '<a href="' + upUrl + '" class="block w-full py-3 text-white rounded-xl font-semibold text-sm text-center transition-all shadow-md active:scale-95" style="background:' + AC + ';">Upgrade ke ' + p.name + '</a>';
+        } else {
+          btn = '<a href="' + upUrl + '" class="block w-full py-3 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm text-center transition-all">Mulai ' + p.name + '</a>';
+        }
+        return '<div class="w-full shrink-0 px-1"><div class="bg-white border ' + (p.hot ? 'border-2 shadow-xl' : 'border-gray-200') + ' rounded-3xl p-5 flex flex-col relative text-left" style="' + (p.hot ? 'border-color:' + AC + ';' : '') + '">' +
+          (p.hot ? '<div class="absolute top-0 right-0 text-white text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider" style="background:' + AC + ';">Paling Populer</div>' : '') +
+          '<div class="mb-4 ' + (p.hot ? 'mt-2' : '') + '"><h3 class="text-lg font-bold text-gray-900" ' + (p.hot ? 'style="color:' + AC + ';"' : '') + '>' + p.name + '</h3>' +
+          '<p class="text-xs text-gray-500 mt-0.5">' + p.tagline + '</p></div>' +
+          '<div class="mb-4 flex items-baseline"><span class="text-2xl font-extrabold tracking-tight text-gray-900">' + p.price + '</span><span class="text-xs font-medium text-gray-500 ml-1">' + p.per + '</span></div>' +
+          '<ul class="flex flex-col gap-3 mb-5 flex-1">' + list + '</ul>' + btn + '</div></div>';
       };
+
+      var slides = plans.map(card).join('');
+      var dots = plans.map(function (p, i) {
+        return '<button class="upc-dot rounded-full transition-all duration-200" data-i="' + i + '" style="width:6px;height:6px;background:#d1d5db;"></button>';
+      }).join('');
+
       m.innerHTML =
         '<div class="fixed inset-0 z-[95] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
         '<div class="bg-white rounded-2xl w-full max-w-sm px-5 pt-5 pb-4">' +
         '<h3 class="text-base font-semibold text-gray-900 text-center">Impor repository GitHub</h3>' +
-        '<p class="text-sm text-gray-500 mt-1.5 text-center leading-snug px-2">Fitur ini tersedia mulai paket Pro. Paket kamu saat ini: Starter (Gratis).</p>' +
-        '<div class="flex flex-col gap-2 mt-4">' +
-        row('Starter', 'Gratis', '3 proyek · 1 kolaborator · tanpa impor repo', false) +
-        row('Pro', '49K/bln', '10 proyek · 5 kolaborator · impor repo GitHub', true) +
-        row('Bisnis', '129K/bln', '50 proyek · 20 kolaborator · deploy tanpa batas', false) +
+        '<p class="text-sm text-gray-500 mt-1.5 text-center leading-snug px-2">Fitur ini tersedia mulai paket Pro. Paket kamu saat ini: <b>' + current + '</b>.</p>' +
+        '<div class="relative mt-4">' +
+          '<div id="upc-viewport" class="overflow-hidden rounded-2xl" style="touch-action:pan-y;">' +
+            '<div id="upc-track" class="flex transition-transform duration-300 ease-out">' + slides + '</div>' +
+          '</div>' +
+          '<button id="upc-prev" class="absolute left-0 top-1/2 -translate-y-1/2 -ml-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>' +
+          '<button id="upc-next" class="absolute right-0 top-1/2 -translate-y-1/2 -mr-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>' +
         '</div>' +
-        '<a href="' + base + '/akun/langganan/upgrade/" class="mt-4 block w-full py-2.5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors text-center">Lihat Paket &amp; Upgrade</a>' +
-        '<button id="upgrade-plans-close" class="mt-2 w-full py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors">Nanti saja</button>' +
+        '<div class="flex items-center justify-center gap-2 mt-3">' + dots + '</div>' +
+        '<button id="upgrade-plans-close" class="mt-3 w-full py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors">Nanti saja</button>' +
         '</div></div>';
       document.body.appendChild(m);
-      var btn = m.querySelector('#upgrade-plans-close');
-      if (btn) btn.addEventListener('click', function () { m.remove(); });
+      try { lucide.createIcons(); } catch (e) {}
+
+      var track = m.querySelector('#upc-track');
+      var dotsEls = m.querySelectorAll('.upc-dot');
+      var idx = 1;
+      function render() {
+        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+        dotsEls.forEach(function (d, i) {
+          var on = (i === idx);
+          d.style.width = on ? '18px' : '6px';
+          d.style.background = on ? 'var(--accent-color, #000000)' : '#d1d5db';
+        });
+      }
+      function go(i) { idx = (i + plans.length) % plans.length; render(); }
+      m.querySelector('#upc-prev').addEventListener('click', function () { go(idx - 1); });
+      m.querySelector('#upc-next').addEventListener('click', function () { go(idx + 1); });
+      dotsEls.forEach(function (d) { d.addEventListener('click', function () { go(parseInt(d.dataset.i, 10)); }); });
+
+      var vp = m.querySelector('#upc-viewport'), sx = null, dx = 0;
+      vp.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; dx = 0; track.style.transition = 'none'; }, { passive: true });
+      vp.addEventListener('touchmove', function (e) {
+        if (sx === null) return;
+        dx = e.touches[0].clientX - sx;
+        var max = vp.offsetWidth * (plans.length - 1);
+        var base = -Math.min(Math.max(idx * vp.offsetWidth + dx, -30), max + 30);
+        track.style.transform = 'translateX(' + base + 'px)';
+      }, { passive: true });
+      vp.addEventListener('touchend', function () {
+        track.style.transition = '';
+        if (Math.abs(dx) > 40) go(dx < 0 ? idx + 1 : idx - 1); else render();
+        sx = null;
+      });
+
+      m.querySelector('#upgrade-plans-close').addEventListener('click', function () { m.remove(); });
+      m.firstElementChild.addEventListener('click', function (e) { if (e.target === m.firstElementChild) m.remove(); });
+      render();
     }
 
     function handleImportFiles(e) {
