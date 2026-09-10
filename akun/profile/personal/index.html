@@ -264,7 +264,7 @@
       <!-- Floating Save/Cancel Action Bar -->
       <div id="action-buttons" class="mt-8 pt-6 border-t border-gray-200 hidden justify-end gap-3 opacity-0 transition-opacity duration-300">
         <button type="button" onclick="cancelChanges()" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">Batal</button>
-        <button type="button" onclick="saveChanges()" class="px-5 py-2 text-sm font-medium text-white bg-black hover:bg-gray-800 rounded-lg shadow-sm transition-colors focus:outline-none cursor-pointer">Simpan Perubahan</button>
+        <button type="button" onclick="saveChanges()" class="px-5 py-2 text-sm font-medium text-white bg-black hover:bg-gray-800 rounded-lg shadow-sm transition-colors focus:outline-none cursor-pointer inline-flex items-center justify-center">Simpan</button>
       </div>
     </main>
 
@@ -403,11 +403,16 @@
         async function saveChanges() {
             const btn = document.querySelector('#action-buttons button.bg-black');
             if (!btn) return;
-            
-            btn.innerText = 'Menyimpan...';
+
+            // Kunci lebar tombol agar tidak "loncat" saat teks diganti icon
+            try { btn.style.minWidth = btn.offsetWidth + 'px'; } catch(e) {}
+
+            // Teks "Simpan" hilang — hanya icon loading (versi baru)
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>';
             btn.disabled = true;
             btn.classList.add('opacity-80', 'cursor-not-allowed');
-            
+            try { lucide.createIcons(); } catch(e) {}
+
             // Update display name if input changed
             const nameInput = document.getElementById('input-fullname');
             const displayName = document.getElementById('user-display-name');
@@ -415,12 +420,15 @@
                 displayName.innerText = nameInput.value;
                 try { localStorage.setItem('clincoo_fullname', nameInput.value); } catch(e) {}
             }
-            await syncProfileToD1(); // tunggu benar2 tersimpan ke D1 baru tampil "Tersimpan"
+            await syncProfileToD1(); // tunggu benar2 tersimpan ke D1
 
-            btn.innerText = 'Tersimpan!';
+            // Selesai — langsung tersimpan: icon centang sekejap lalu refresh
+            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
             btn.classList.replace('bg-black', 'bg-emerald-500');
             btn.classList.replace('hover:bg-gray-800', 'hover:bg-emerald-600');
-            setTimeout(() => window.location.reload(), 800);
+            btn.classList.remove('opacity-80', 'cursor-not-allowed');
+            try { lucide.createIcons(); } catch(e) {}
+            setTimeout(() => window.location.reload(), 500);
         }
 
         // Photo Upload Handling — dikompres (maks 512px, JPEG) supaya selalu tersimpan ke D1
