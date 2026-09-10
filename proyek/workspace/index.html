@@ -1591,7 +1591,6 @@
       m.id = 'upgrade-plans-modal';
       var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
       var current = (sub && sub.plan) ? sub.plan : 'Starter';
-      var AC = 'var(--accent-color, #000000)';
       var upUrl = base + '/akun/langganan/upgrade/';
 
       var plans = [
@@ -1637,13 +1636,13 @@
         if (isCurrent) {
           btn = '<div class="w-full py-3 bg-gray-50 text-gray-500 border border-gray-200 rounded-xl font-semibold text-sm text-center cursor-not-allowed">Paket Saat Ini</div>';
         } else if (p.hot) {
-          btn = '<a href="' + upUrl + '" class="block w-full py-3 text-white rounded-xl font-semibold text-sm text-center transition-all shadow-md active:scale-95" style="background:' + AC + ';">Upgrade ke ' + p.name + '</a>';
+          btn = '<a href="' + upUrl + '" class="block w-full py-3 bg-accent rounded-xl font-semibold text-sm text-center transition-all shadow-md active:scale-95">Upgrade ke ' + p.name + '</a>';
         } else {
           btn = '<a href="' + upUrl + '" class="block w-full py-3 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm text-center transition-all">Mulai ' + p.name + '</a>';
         }
-        return '<div class="w-full shrink-0 px-0.5"><div class="bg-white border ' + (p.hot ? 'border-2 shadow-xl' : 'border-gray-200') + ' rounded-3xl p-4 sm:p-5 flex flex-col relative text-left" style="' + (p.hot ? 'border-color:' + AC + ';' : '') + '">' +
-          (p.hot ? '<div class="absolute top-0 right-0 text-white text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider" style="background:' + AC + ';">Paling Populer</div>' : '') +
-          '<div class="mb-4 ' + (p.hot ? 'mt-2' : '') + '"><h3 class="text-lg font-bold text-gray-900" ' + (p.hot ? 'style="color:' + AC + ';"' : '') + '>' + p.name + '</h3>' +
+        return '<div class="w-full shrink-0 px-0.5"><div class="bg-white border ' + (p.hot ? 'border-2 border-accent shadow-xl' : 'border-gray-200') + ' rounded-3xl p-4 sm:p-5 flex flex-col relative text-left">' +
+          (p.hot ? '<div class="absolute top-0 right-0 bg-accent text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">Paling Populer</div>' : '') +
+          '<div class="mb-4 ' + (p.hot ? 'mt-2' : '') + '"><h3 class="text-lg font-bold text-gray-900 ' + (p.hot ? 'text-accent' : '') + '">' + p.name + '</h3>' +
           '<p class="text-xs text-gray-500 mt-0.5">' + p.tagline + '</p></div>' +
           '<div class="mb-4 flex items-baseline"><span class="text-2xl font-extrabold tracking-tight text-gray-900">' + p.price + '</span><span class="text-xs font-medium text-gray-500 ml-1">' + p.per + '</span></div>' +
           '<ul class="flex flex-col gap-2.5 mb-4 flex-1">' + list + '</ul>' + btn + '</div></div>';
@@ -1653,6 +1652,15 @@
       var dots = plans.map(function (p, i) {
         return '<button class="upc-dot rounded-full transition-all duration-200" data-i="' + i + '" style="width:6px;height:6px;background:#d1d5db;"></button>';
       }).join('');
+
+      var css = document.createElement('style');
+      css.textContent =
+        '#upgrade-plans-modal .text-accent{color:var(--accent-color,#000000);} ' +
+        '#upgrade-plans-modal .bg-accent{background-color:var(--accent-color,#000000);color:#ffffff;} ' +
+        '#upgrade-plans-modal .border-accent{border-color:var(--accent-color,#000000);} ' +
+        'body.dark-mode #upgrade-plans-modal .text-accent{color:#ffffff !important;} ' +
+        'body.dark-mode #upgrade-plans-modal .bg-accent{background-color:#ffffff !important;color:#000000 !important;} ' +
+        'body.dark-mode #upgrade-plans-modal .border-accent{border-color:#ffffff !important;}';
 
       m.innerHTML =
         '<div class="fixed inset-0 z-[95] overflow-y-auto p-3 sm:p-4" style="background:rgba(0,0,0,0.45)">' +
@@ -1670,6 +1678,7 @@
         '</div>' +
         '<div class="flex items-center justify-center gap-2 mt-4">' + dots + '</div>' +
         '</div></div>';
+      document.body.appendChild(css);
       document.body.appendChild(m);
       try { lucide.createIcons(); } catch (e) {}
 
@@ -1681,7 +1690,8 @@
         dotsEls.forEach(function (d, i) {
           var on = (i === idx);
           d.style.width = on ? '18px' : '6px';
-          d.style.background = on ? 'var(--accent-color, #000000)' : '#d1d5db';
+          d.style.background = on ? '' : '#d1d5db';
+          d.classList.toggle('bg-accent', on);
         });
       }
       function go(i) { idx = (i + plans.length) % plans.length; render(); }
@@ -1694,9 +1704,10 @@
       vp.addEventListener('touchmove', function (e) {
         if (sx === null) return;
         dx = e.touches[0].clientX - sx;
-        var max = vp.offsetWidth * (plans.length - 1);
-        var base = -Math.min(Math.max(idx * vp.offsetWidth + dx, -30), max + 30);
-        track.style.transform = 'translateX(' + base + 'px)';
+        var w = vp.offsetWidth;
+        var lo = -(w * (plans.length - 1)) - 30;
+        var trackX = Math.min(Math.max(-(idx * w) + dx, lo), 30);
+        track.style.transform = 'translateX(' + trackX + 'px)';
       }, { passive: true });
       vp.addEventListener('touchend', function () {
         track.style.transition = '';
