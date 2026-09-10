@@ -69,9 +69,11 @@ async function getSetting(db, table, projectId, key) {
 }
 
 async function setSetting(db, table, projectId, key, value) {
+  // Tabel project_settings per-proyek hanya punya kolom (project_id, key, value) —
+  // JANGAN pakai updated_at/ON CONFLICT, itu membuat insert GAGAL SENYAP
+  // (pages_project & last_deploy_by tidak pernah tersimpan).
   try {
-    await db.prepare(`INSERT INTO ${table} (project_id, key, value, updated_at) VALUES (?, ?, ?, datetime('now'))
-      ON CONFLICT(project_id, key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`)
+    await db.prepare(`INSERT OR REPLACE INTO ${table} (project_id, key, value) VALUES (?, ?, ?)`)
       .bind(projectId, key, String(value)).run();
   } catch (e) {}
 }
