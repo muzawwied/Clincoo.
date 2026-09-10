@@ -68,6 +68,35 @@ async function getSetting(db, table, projectId, key) {
   } catch (e) { return null; }
 }
 
+// Integrasi Webhook aktif: kirim event deploy ke endpoint yang tersimpan di project-settings.
+// Format webhook_settings: { webhooks:[{url,method}], deployEvent:'all|success|fail|none', retry:bool }
+async function fireWebhooks(db, table, projectId, status, payload) {
+  try {
+    const raw = await getSetting(db, table, projectId, 'webhook_settings');
+    if (!raw) return;
+    let cfg; try { cfg = JSON.parse(raw); } catch (e) { return; }
+    const evFilter = cfg.deployEvent || 'all';
+    if (evFilter === 'none') return;
+    if (evFilter !== 'all' && evFilter !== status) return;
+    const hooks = Array.isArray(cfg.webhooks) ? cfg.webhooks.filter(h => h && h.url) : [];
+    if (!hooks.length) return;
+    const attempts = cfg.retry ? 2 : 1;
+    await Promise.all(hooks.slice(0, 10).map(async h => {
+      for (let a = 0; a < attempts; a++) {
+        try {
+          const method = (h.method === 'GET' || h.method === 'PUT') ? h.method : 'POST';
+          await fetch(h.url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: method === 'GET' ? undefined : JSON.stringify(payload)
+          });
+          break; // terkirim — tidak perlu retry
+        } catch (e) { /* coba lagi bila retry aktif */ }
+      }
+    }));
+  } catch (e) { /* webhook tidak boleh membatalkan deploy */ }
+}
+
 async function setSetting(db, table, projectId, key, value) {
   // Tabel project_settings per-proyek hanya punya kolom (project_id, key, value) —
   // JANGAN pakai updated_at/ON CONFLICT, itu membuat insert GAGAL SENYAP
@@ -319,6 +348,9 @@ export async function onRequestPost({ request, env }) {
       const msg = depData && depData.errors && depData.errors[0] ? depData.errors[0].message : ('HTTP ' + depRes.status);
       await db.prepare(`INSERT INTO ${T.deployLogs} (project_id, status, url, message, created_at) VALUES (?, 'failed', '', ?, datetime('now'))`)
         .bind(projectId, 'deploy gagal: ' + msg).run();
+      await fireWebhooks(db, T.projectSettings, projectId, 'fail', {
+        event: 'deploy.failed', project_id: projectId, pages_project: name, error: msg, at: new Date().toISOString()
+      });
       return json({ error: 'Cloudflare menolak deployment: ' + msg }, 500);
     }
     const dep = depData.result || {};
@@ -327,6 +359,9 @@ export async function onRequestPost({ request, env }) {
       .bind(projectId, pagesUrl, 'deploy ' + files.length + ' file ke ' + name).run();
     await bumpMonthlyDeployCount(db, user && user.id);
     try { await setSetting(db, T.projectSettings, projectId, 'last_deploy_by', (user && (user.name || user.email)) || 'pengguna'); } catch (e) {}
+    await fireWebhooks(db, T.projectSettings, projectId, 'success', {
+      event: 'deploy.success', project_id: projectId, pages_project: name, pages_url: pagesUrl, file_count: files.length, at: new Date().toISOString()
+    });
 
     return json({
       success: true,
