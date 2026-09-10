@@ -1573,16 +1573,39 @@
     }
 
     // Impor repository GitHub = fitur paket Pro ke atas; Starter melihat daftar paket
+    // Cache langganan (key sama dgn halaman Upgrade/Konfirmasi — saling terpakai)
+    var SUB_CACHE_KEY = 'clincoo_subscription_cache';
+    var SUB_CACHE_TTL = 5 * 60 * 1000;
+    function readSubCache() { try { return JSON.parse(localStorage.getItem(SUB_CACHE_KEY) || 'null') || null; } catch (e) { return null; } }
+    function writeSubCache(d) { try { localStorage.setItem(SUB_CACHE_KEY, JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {} }
+
     async function checkPlanThenOpenGithub() {
-      let plan = 'Starter', sub = null;
+      const apiBase = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
+      const cached = readSubCache();
+      const fresh = cached && cached.plan && (Date.now() - (cached.ts || 0)) < SUB_CACHE_TTL;
+      // jalur cepat: cache masih segar -> popup/modal langsung tampil tanpa nunggu server
+      if (fresh) {
+        if (cached.plan !== 'Starter') { openCreateModal('github'); return; }
+        showUpgradePlansModal({ plan: cached.plan, billingCycle: cached.billingCycle });
+      } else {
+        showUpgradePlansModal(null); // tampil instan dulu (default Starter), data disegarkan di bawah
+      }
+      // revalidasi di background: cache diperbarui & popup dikoreksi bila paket berubah
       try {
-        const apiBase = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
         const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
         const res = await fetch(apiBase + '/subscription', { cache: 'no-store', headers: token ? { Authorization: 'Bearer ' + token } : {} });
-        if (res.ok) { const d = await res.json(); if (d && d.plan) plan = d.plan; sub = d; }
+        if (res.ok) {
+          const d = await res.json();
+          if (d && d.plan) {
+            writeSubCache(d);
+            if (d.plan !== 'Starter') {
+              var m0 = document.getElementById('upgrade-plans-modal');
+              if (m0) m0.remove();
+              openCreateModal('github');
+            }
+          }
+        }
       } catch (e) {}
-      if (plan === 'Starter') { showUpgradePlansModal(sub); return; }
-      openCreateModal('github');
     }
 
         function showUpgradePlansModal(sub) {
@@ -1591,7 +1614,10 @@
       m.id = 'upgrade-plans-modal';
       var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
       var current = (sub && sub.plan) ? sub.plan : 'Starter';
-      var upUrl = base + '/akun/langganan/upgrade/';
+      var billing = (sub && sub.billingCycle) ? sub.billingCycle : 'Bulanan';
+      var checkoutUrl = function (name, cyc) {
+        return base + '/akun/langganan/upgrade/konfirmasi/?plan=' + encodeURIComponent(name) + '&billing=' + encodeURIComponent(cyc || billing);
+      };
 
       var plans = [
         { name: 'Starter', tagline: 'Untuk individu yang baru memulai.', price: 'Gratis', per: '', hot: false,
@@ -1636,9 +1662,9 @@
         if (isCurrent) {
           btn = '<div class="w-full py-3 bg-gray-50 text-gray-500 border border-gray-200 rounded-xl font-semibold text-sm text-center cursor-not-allowed">Paket Saat Ini</div>';
         } else if (p.hot) {
-          btn = '<a href="' + upUrl + '" class="block w-full py-3 bg-accent rounded-xl font-semibold text-sm text-center transition-all shadow-md active:scale-95">Upgrade ke ' + p.name + '</a>';
+          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-accent rounded-xl font-semibold text-sm text-center transition-all shadow-md active:scale-95">Upgrade ke ' + p.name + '</a>';
         } else {
-          btn = '<a href="' + upUrl + '" class="block w-full py-3 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm text-center transition-all">Mulai ' + p.name + '</a>';
+          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm text-center transition-all">Mulai ' + p.name + '</a>';
         }
         return '<div class="w-full shrink-0 px-0.5"><div class="bg-white border ' + (p.hot ? 'border-2 border-accent shadow-xl' : 'border-gray-200') + ' rounded-3xl p-4 sm:p-5 flex flex-col relative text-left">' +
           (p.hot ? '<div class="absolute top-0 right-0 bg-accent text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">Paling Populer</div>' : '') +
