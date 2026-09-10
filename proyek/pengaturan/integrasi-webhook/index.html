@@ -53,6 +53,7 @@
     body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background-color: #0a0a0a; color: #ffffff; border-color: #222222; }
     body.dark-mode input:focus, body.dark-mode select:focus, body.dark-mode textarea:focus { border-color: #222222; outline: none; }
     body.dark-mode header { background-color: #000000 !important; }
+    body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
   /* auto-dark-fix v1 */
     body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
     body.dark-mode .bg-gray-200 { background-color: #262626 !important; }
@@ -157,7 +158,7 @@
       </div>
       <div id="action-buttons" class="mt-8 pt-6 border-t border-gray-200 dark:border-slate-700/60 hidden justify-end gap-3 opacity-0 transition-opacity duration-300">
         <button type="button" onclick="cancelChanges()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">Batal</button>
-        <button type="button" onclick="saveChanges()" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors focus:outline-none">Simpan Perubahan</button>
+        <button type="button" onclick="saveChanges()" class="px-5 py-2 text-sm font-medium text-white bg-black hover:bg-gray-800 rounded-lg shadow-sm transition-colors focus:outline-none cursor-pointer">Simpan Perubahan</button>
       </div>
     </main>
   </div>
@@ -241,7 +242,7 @@
   }
 
   async function saveWebhookSettings() {
-    var btn = document.querySelector('#action-buttons button.bg-blue-600');
+    var btn = document.querySelector('#action-buttons button.bg-black');
     if (!btn) return;
     btn.innerText = 'Menyimpan...';
     btn.disabled = true;
@@ -266,8 +267,8 @@
       try { fetch('https://clincoo-be2.pages.dev/api/project-settings', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + _apiToken }, body: JSON.stringify(payload) }); } catch (e2) {}
     }
     btn.innerText = ok ? 'Tersimpan!' : (btn.innerText = 'Tersimpan (offline cache)');
-    btn.classList.replace('bg-blue-600', 'bg-emerald-500');
-    btn.classList.replace('hover:bg-blue-700', 'hover:bg-emerald-600');
+    btn.classList.replace('bg-black', 'bg-emerald-500');
+    btn.classList.replace('hover:bg-gray-800', 'hover:bg-emerald-600');
     btn.disabled = false;
     btn.classList.remove('opacity-80', 'cursor-not-allowed');
     isEdited = false;

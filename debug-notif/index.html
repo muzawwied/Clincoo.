@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DEBUG notif — Clincoo</title>
+  <meta name="robots" content="noindex">
+  <script>window.__dbg = { errors: [], fetches: [] };</script>
+  <script src="../../js/auth-client.js?v=2"></script>
+  <script>
+    (function () {
+      window.onerror = function (msg, src, line, col) {
+        window.__dbg.errors.push(msg + ' @ ' + (src || '').split('/').pop() + ':' + line);
+      };
+      var of = window.fetch;
+      window.fetch = function (input, init) {
+        var url = typeof input === 'string' ? input : (input && input.url) || '';
+        if (url.indexOf('/api/') !== -1) {
+          window.__dbg.fetches.push(((init && init.method) || 'GET') + ' ' + url.replace('https://clincoo-be2.pages.dev', ''));
+          var p = of.apply(this, arguments);
+          p.then(function (r) { window.__dbg.fetches[window.__dbg.fetches.length - 1] += ' -> ' + r.status; },
+                  function (e) { window.__dbg.fetches[window.__dbg.fetches.length - 1] += ' -> REJECT'; });
+          return p;
+        }
+        return of.apply(this, arguments);
+      };
+    })();
+  </script>
+</head>
+<body style="background:#111;color:#eee;font:12px/1.5 monospace;padding:12px;white-space:pre-wrap">
+  <div>DEBUG NOTIF - tunggu 5 detik...</div>
+  <div id="out" style="margin-top:8px;border-top:1px solid #444;padding-top:8px"></div>
+  <script src="../../js/notifications.js"></script>
+  <script>
+    setTimeout(function () {
+      var o = [];
+      var tk = '';
+      try { tk = localStorage.getItem('clincoo_auth_token') ? 'ADA (' + String(localStorage.getItem('clincoo_auth_token')).slice(0, 8) + '...)' : 'KOSONG'; } catch (e) { tk = 'ERR ' + e.message; }
+      o.push('TOKEN: ' + tk);
+      o.push('LOCATION: ' + location.pathname);
+      try { o.push('d1Notifs: ' + (typeof d1Notifs !== 'undefined' ? d1Notifs.length : 'UNDEFINED')); } catch (e) { o.push('d1Notifs: ERR ' + e.message); }
+      var el = document.getElementById('notif-full-list');
+      o.push('#notif-full-list: ' + (el ? 'ADA, innerHTML.len=' + el.innerHTML.length : 'TIDAK ADA'));
+      var hasEmpty = (document.body.innerText.indexOf('Belum ada notifikasi') !== -1);
+      o.push('teks-empty-state: ' + (hasEmpty ? 'ADA' : 'tidak ada'));
+      o.push('ERRORS (' + window.__dbg.errors.length + '):');
+      window.__dbg.errors.slice(0, 8).forEach(function (e2) { o.push('  ' + e2); });
+      o.push('FETCHES (' + window.__dbg.fetches.length + '):');
+      window.__dbg.fetches.slice(0, 12).forEach(function (f) { o.push('  ' + f); });
+      document.getElementById('out').textContent = o.join('\n');
+    }, 5000);
+  </script>
+</body>
+</html>
