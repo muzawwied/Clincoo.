@@ -1,11 +1,16 @@
-/* Clincoo service worker — PWA (v1) */
-var CACHE = 'clincoo-v1';
+/* Clincoo service worker — PWA + cache aset CDN (lucide, fonts, tailwind) v2 */
+var CACHE = 'clincoo-v2';
 var PRECACHE = [
   './manifest.json',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/icon-maskable-512.png',
   './assets/og-image.jpg'
+];
+// CDN statis yang aman di-cache — icon lucide, fonts, dan library tampil instan
+var CDN_HOSTS = [
+  'unpkg.com', 'cdn.tailwindcss.com', 'fonts.googleapis.com', 'fonts.gstatic.com',
+  'cdnjs.cloudflare.com', 'esm.sh', 'cdn.jsdelivr.net'
 ];
 
 self.addEventListener('install', function (e) {
@@ -20,12 +25,40 @@ self.addEventListener('activate', function (e) {
   );
 });
 
+function isCdnAsset(url) {
+  for (var i = 0; i < CDN_HOSTS.length; i++) {
+    if (url.hostname === CDN_HOSTS[i] || url.hostname.endsWith('.' + CDN_HOSTS[i])) return true;
+  }
+  return false;
+}
+
+// stale-while-revalidate: tampilkan dari cache SEGERA (icon/halaman cepat tampil),
+// perbarui di latar belakang untuk kunjungan berikutnya.
+function swr(req) {
+  return caches.match(req).then(function (cached) {
+    var fresh = fetch(req).then(function (res) {
+      if (res && (res.status === 200 || res.type === 'opaque')) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function (c) { c.put(req, copy); });
+      }
+      return res;
+    }).catch(function () { return cached; });
+    return cached || fresh;
+  });
+}
+
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
   var url = new URL(req.url);
-  if (url.origin !== location.origin) return;          // cross-origin: lewati
-  if (url.pathname.indexOf('/api/') !== -1) return;   // backend/functions: selalu network
+
+  // aset CDN (lucide, fonts, tailwind, cdnjs): cache-first — icon tampil seketika
+  if (url.origin !== location.origin && isCdnAsset(url)) {
+    e.respondWith(swr(req));
+    return;
+  }
+  if (url.origin !== location.origin) return;   // cross-origin lain (mis. API be2): lewati
+  if (url.pathname.indexOf('/api/') !== -1) return; // backend/functions: selalu network
 
   if (req.mode === 'navigate') {
     // halaman: network-first, fallback cache saat offline
@@ -41,17 +74,6 @@ self.addEventListener('fetch', function (e) {
     return;
   }
 
-  // aset statis (css/js/img/font): stale-while-revalidate
-  e.respondWith(
-    caches.match(req).then(function (cached) {
-      var fresh = fetch(req).then(function (res) {
-        if (res && res.status === 200) {
-          var copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        }
-        return res;
-      }).catch(function () { return cached; });
-      return cached || fresh;
-    })
-  );
+  // aset statis lokal (css/js/img/font): stale-while-revalidate
+  e.respondWith(swr(req));
 });
