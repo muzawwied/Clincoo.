@@ -365,6 +365,33 @@
             }).catch(() => {});
         }
         
+        // Render state FINAL dari data server: hijau + link + waktu + deployer + domain.
+        // Dipakai saat situs SUDAH aktif (langsung tampil, tanpa lewat fase kuning) dan saat polling selesai.
+        function showDeployedState(st) {
+            const dep = st.last_deployment;
+            const ok = dep && ['success', 'active'].includes(dep.status);
+            const indicator = document.getElementById('live-indicator');
+            const shimmer = document.getElementById('link-shimmer');
+            const link = document.getElementById('deployed-link');
+            const timeLabel = document.getElementById('time-ago-label');
+            const visitBtn = document.getElementById('btn-visit-site');
+            indicator.className = 'w-2.5 h-2.5 rounded-full ' + (ok ? 'bg-green-500' : 'bg-red-500');
+            shimmer.style.display = 'none';
+            link.style.display = 'inline-block';
+            deployState.pages_url = st.pages_url || (ok ? (dep.url || '') : '');
+            if (ok) writeDeploySession({ status: 'done', pages_url: deployState.pages_url, done_at: Date.now() });
+            link.textContent = deployState.pages_url || 'gagal dideploy';
+            link.href = deployState.pages_url || '#';
+            timeLabel.innerText = ok ? timeAgoIso(dep.created) : 'deploy gagal';
+            visitBtn.disabled = !ok;
+            if (ok) {
+                visitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                visitBtn.onclick = () => window.open(deployState.pages_url, '_blank');
+            }
+            setDeployedBy(st.last_deploy_by || (ok ? '' : null));
+            renderRealDomains(st.domains || []);
+        }
+
         function startDeploySimulation() {
             const indicator = document.getElementById('live-indicator');
             const shimmer = document.getElementById('link-shimmer');
@@ -391,22 +418,7 @@
                 const done = ['success', 'active', 'failed', 'canceled'].includes(dep.status);
                 if (done || tries > 30) {
                     clearInterval(deployState.pollTimer);
-                    const ok = ['success', 'active'].includes(dep.status);
-                    indicator.className = 'w-2.5 h-2.5 rounded-full ' + (ok ? 'bg-green-500' : 'bg-red-500');
-                    shimmer.style.display = 'none';
-                    link.style.display = 'inline-block';
-                    deployState.pages_url = st.pages_url || (ok ? dep.url : '');
-                    if (ok) writeDeploySession({ status: 'done', pages_url: deployState.pages_url, done_at: Date.now() });
-                    link.textContent = deployState.pages_url || 'gagal dideploy';
-                    link.href = deployState.pages_url || '#';
-                    timeLabel.innerText = ok ? timeAgoIso(dep.created) : 'deploy gagal';
-                    setDeployedBy(st.last_deploy_by || (ok ? '' : null));
-                    visitBtn.disabled = !ok;
-                    if (ok) {
-                        visitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                        visitBtn.onclick = () => window.open(deployState.pages_url, '_blank');
-                    }
-                    renderRealDomains(st.domains || []);
+                    showDeployedState(st);
                 }
             }, 4000);
         }
@@ -501,6 +513,9 @@
             loadCustomDomain();
             try {
                 const st = await fetchStatus();
+                if (st && st.last_deployment && ['success', 'active'].includes(st.last_deployment.status)) {
+                    showDeployedState(st); return;
+                }
                 if (st && (st.last_deployment || (st.domains || []).length)) { startDeploySimulation(); return; }
             } catch (e) {}
             const ses = readDeploySession();

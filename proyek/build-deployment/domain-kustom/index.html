@@ -167,8 +167,8 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Domain kustom yang digunakan untuk situs produksi</p>
           </div>
           <div class="w-full sm:w-80">
-            <span id="cf-domain-status" class="inline-block text-xs px-3 py-1 rounded-full font-semibold hidden"></span>
             <input type="text" value="" id="custom-domain-input" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none domain-shimmer" placeholder="contohdomain.com" disabled>
+            <p id="cf-domain-status" class="text-xs mt-1.5 hidden"></p>
           </div>
         </div>
 
@@ -365,8 +365,8 @@
             if (domainInput) { domainInput.classList.remove('domain-shimmer'); domainInput.disabled = false; }
             const badge = document.getElementById('cf-domain-status');
             if (badge) {
-                badge.textContent = 'Gagal memuat: ' + (e && e.message ? e.message : 'backend tidak terjangkau');
-                badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold bg-red-100 text-red-700';
+                badge.textContent = 'Gagal memuat data';
+                badge.className = 'text-xs mt-1.5 font-medium text-red-600 dark:text-red-400';
             }
         }
     }
@@ -439,7 +439,11 @@
             const attached = (st.domains || []).length ? st.domains[st.domains.length - 1] : null;
             if (attached && attached.name) {
                 const input = document.querySelector('input[placeholder="contohdomain.com"]');
-                if (input && !input.value.trim()) { input.value = attached.name; }
+                // Cloudflare (halaman deployment) = sumber kebenaran; tapi jangan menimpa saat user sedang mengetik
+                if (input && input.value.trim() !== attached.name && !input.dataset.dirty) {
+                    input.value = attached.name;
+                    updateDNSRecords(attached.name, lastPagesUrl);
+                }
             }
             const badge = document.getElementById('cf-domain-status');
             if (badge) badge.classList.remove('hidden');
@@ -447,18 +451,18 @@
                 if ((st.domains || []).length) {
                     const d = st.domains[st.domains.length - 1];
                     const active = d.status === 'active';
-                    badge.textContent = active ? 'Domain aktif di Cloudflare' : 'Menunggu verifikasi DNS (' + (d.status || 'pending') + ')';
-                    badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold ' + (active ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700 animate-pulse');
+                    badge.textContent = active ? 'Domain aktif' : 'Menunggu verifikasi DNS';
+                    badge.className = 'text-xs mt-1.5 font-medium ' + (active ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400');
                 } else {
-                    badge.textContent = 'Domain belum terhubung ke Cloudflare';
-                    badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold bg-gray-100 text-gray-600';
+                    badge.textContent = 'Domain belum terhubung';
+                    badge.className = 'text-xs mt-1.5 font-medium text-red-600 dark:text-red-400';
                 }
             }
         } catch (e) {
             const badge = document.getElementById('cf-domain-status');
             if (badge) {
-                badge.textContent = 'Gagal memuat status: ' + (e && e.message ? e.message : 'backend tidak terjangkau');
-                badge.className = 'inline-block text-xs px-3 py-1 rounded-full font-semibold bg-red-100 text-red-700';
+                badge.textContent = 'Gagal memuat status';
+                badge.className = 'text-xs mt-1.5 font-medium text-red-600 dark:text-red-400';
             }
         }
     }
@@ -473,7 +477,10 @@
     // Save on domain input blur
     document.addEventListener('DOMContentLoaded', function() {
         const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
-        if (domainInput) domainInput.addEventListener('blur', saveDomainSettings);
+        if (domainInput) {
+            domainInput.addEventListener('input', function () { domainInput.dataset.dirty = '1'; });
+            domainInput.addEventListener('blur', function () { saveDomainSettings(); delete domainInput.dataset.dirty; });
+        }
         loadDomainSettings();
         // Refresh real-time: poll status deploy & domain tiap 20 detik
         setInterval(loadRealDomainStatus, 20000);
