@@ -327,17 +327,19 @@
     const sidebarPopup = document.getElementById('sidebar-popup');
     // Sidebar: di desktop pertama kali dibuka terbuka; refresh mengikuti keadaan terakhir
     let isSidebarOpen = (function () {
+      // Mobile: sidebar SELALU mulai tertutup, hanya dibuka manual via toggle.
+      if (window.innerWidth < 1024) return false;
       try {
         const saved = localStorage.getItem('clincoo_sidebar_open');
         if (saved === '1') return true;
         if (saved === '0') return false;
       } catch (e) {}
-      return window.innerWidth >= 1024; // default pertama kali: terbuka di desktop
+      return true; // desktop pertama kali: terbuka
     })();
 
     function toggleSidebar() {
       isSidebarOpen = !isSidebarOpen;
-      try { localStorage.setItem('clincoo_sidebar_open', isSidebarOpen ? '1' : '0'); } catch (e) {}
+      try { if (window.innerWidth >= 1024) localStorage.setItem('clincoo_sidebar_open', isSidebarOpen ? '1' : '0'); } catch (e) {}
       if (isSidebarOpen) {
         sidebarOverlay.classList.remove('hidden');
         setTimeout(() => {
@@ -352,6 +354,18 @@
         }, 300);
       }
     }
+
+    // Klik menu di sidebar -> tutup sidebar popup (drawer), lalu navigasi berjalan normal
+    document.querySelectorAll('.sidebar-nav-link').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (!isSidebarOpen) return;
+        isSidebarOpen = false;
+        try { if (window.innerWidth >= 1024) localStorage.setItem('clincoo_sidebar_open', '0'); } catch (e) {}
+        sidebarOverlay.classList.add('opacity-0');
+        sidebarPopup.classList.add('-translate-x-full');
+        setTimeout(function () { sidebarOverlay.classList.add('hidden'); }, 300);
+      });
+    });
 
     // Terapkan keadaan awal (tersimpan/default) tanpa animasi slide
     if (isSidebarOpen) {

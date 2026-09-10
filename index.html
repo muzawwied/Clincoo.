@@ -1118,14 +1118,8 @@
             if (proj) {
                 // Riwayat dimuat dari D1 di halaman chat, prompt lama tidak di-replay
                 localStorage.setItem('clincoo_current_project_id', id);
-                // Proyek template (punya file web siap pakai) langsung buka workspace
-                let hasWorkspaceFiles = false;
-                try { hasWorkspaceFiles = !!localStorage.getItem('clincoo_workspace_files_' + id); } catch(e) {}
-                if (proj.template || hasWorkspaceFiles) {
-                    window.location.href = 'proyek/workspace/?id=' + id;
-                } else {
-                    window.location.href = 'proyek/chat/?id=' + id;
-                }
+                // Klik proyek dari halaman utama: SELALU langsung ke workspace
+                window.location.href = 'proyek/workspace/?id=' + id;
             }
         }
         var _pendingDeleteId = null;
