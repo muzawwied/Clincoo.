@@ -180,7 +180,17 @@
   }
   function closeConfirm() { var m = document.getElementById('confirm-modal'); m.classList.add('hidden'); m.classList.remove('flex'); confirmCb = null; }
   function showStatus(title, msg, cb) {
-      try { if (typeof cb === 'function') cb(); } catch (e) {}
+      document.getElementById('status-title').textContent = title;
+      document.getElementById('status-msg').textContent = msg;
+      statusCb = (typeof cb === 'function') ? cb : null;
+      var m = document.getElementById('status-modal');
+      m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  function goHome() {
+      try {
+          if (typeof window.ClincooBack === 'function') { window.ClincooBack(homeUrl()); return; }
+      } catch (e) {}
+      location.href = homeUrl();
   }
   async function postJSON(path, bodyObj) {
     var tok = localStorage.getItem('clincoo_auth_token') || '';
@@ -206,9 +216,10 @@
       if (busy || !confirmCb) return;
       var cb = confirmCb; confirmCb = null;
       var okBtn = document.getElementById('confirm-ok');
+      var okLabel = okBtn.textContent;
       okBtn.textContent = 'Memproses...';
       busy = true;
-      Promise.resolve(cb()).finally(function () { busy = false; closeConfirm(); okBtn.textContent = 'Ya'; });
+      Promise.resolve(cb()).finally(function () { busy = false; closeConfirm(); okBtn.textContent = okLabel; });
     });
     document.getElementById('status-ok').addEventListener('click', function () {
       var m = document.getElementById('status-modal'); m.classList.add('hidden'); m.classList.remove('flex');
@@ -229,7 +240,7 @@
           localStorage.setItem('clincoo_projects', JSON.stringify(list));
           if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
         } catch (e) {}
-        showStatus('Transfer berhasil', 'Proyek kini menjadi milik ' + email + '.', function () { window.ClincooBack(homeUrl()); });
+        showStatus('Transfer berhasil', 'Proyek kini menjadi milik ' + email + '.', function () { goHome(); });
       });
     });
 
@@ -258,7 +269,7 @@
           localStorage.setItem('clincoo_projects', JSON.stringify(list));
           if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
         } catch (e) {}
-        showStatus('Proyek dihapus', 'Semua data dan situs publish-an telah dihapus.', function () { window.ClincooBack(homeUrl()); });
+        goHome();
       });
     });
   });
