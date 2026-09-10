@@ -136,11 +136,13 @@
             }
 
             // 2) Refresh data terbaru di latar belakang
+            //    /projects: GET = daftar proyek (POST hanya utk upsert/delete) + wajib Bearer token
             try {
+                var tok = '';
+                try { tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; } catch (e) {}
                 var res = await fetch(API_BASE + '/projects', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'list' })
+                    method: 'GET',
+                    headers: tok ? { Authorization: 'Bearer ' + tok } : {}
                 });
                 var data = await res.json().catch(function () { return {}; });
                 if (!res.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
