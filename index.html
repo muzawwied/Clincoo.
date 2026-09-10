@@ -301,7 +301,7 @@
         <div class="flex items-center gap-1">
             <div class="relative">
                 <button id="notif-btn" class="flex items-center justify-center p-2 hover:opacity-70 transition-opacity cursor-pointer" aria-label="Notifications" aria-expanded="false">
-                    <svg class="w-7 h-7 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="w-[22px] h-[22px] text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                     </svg>
                 </button>
@@ -316,8 +316,8 @@
                 </div>
             </div>
             <a href="akun/Profile/" class="flex items-center justify-center p-2 hover:opacity-70 transition-opacity cursor-pointer" aria-label="User Profile">
-                <svg class="w-7 h-7 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                <svg class="w-[22px] h-[22px] text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21a8 8 0 0 0-16 0"></path>
                 </svg>
             </a>
         </div>
@@ -714,17 +714,8 @@
         if (motEl) {
             motEl.textContent = motivations[Math.floor(Math.random() * motivations.length)];
         }
-        let i = 0;
-        function type() {
-            if (el && i < text.length) {
-                el.innerHTML += text.charAt(i);
-                i++;
-                setTimeout(type, 100);
-            } else if(el) {
-                el.classList.add("typing");
-            }
-        }
-        if (el) type();
+        // Tampil langsung tanpa animasi typing — halaman sudah punya loading state sendiri
+        if (el) { el.textContent = text; el.classList.remove("typing"); }
         const addBtn = document.getElementById('add-btn');
         const addIcon = document.getElementById('add-icon');
         const uploadMenu = document.getElementById('upload-menu');
@@ -966,29 +957,7 @@
         fetchD1Notifications();
         setInterval(fetchD1Notifications, 30000);
         
-        // Create login notification once per day
-        (function() {
-            try {
-                var today = new Date().toISOString().slice(0, 10);
-                var lastLogin = localStorage.getItem('clincoo_last_login_notif');
-                if (lastLogin !== today) {
-                    localStorage.setItem('clincoo_last_login_notif', today);
-                    var userAgent = navigator.userAgent;
-                    var device = /Mobile|Android|iPhone/.test(userAgent) ? 'Perangkat Mobile' : 'Desktop';
-                    var browser = /Chrome/.test(userAgent) ? 'Chrome' : /Firefox/.test(userAgent) ? 'Firefox' : /Safari/.test(userAgent) ? 'Safari' : 'Browser';
-                    fetch(NOTIF_API, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            source: 'Akun', 
-                            message: 'Login berhasil dari ' + device + ' (' + browser + ')',
-                            type: 'login',
-                            link: ''
-                        })
-                    }).then(function() { setTimeout(fetchD1Notifications, 1500); });
-                }
-            } catch(e) {}
-        })();
+        // Notif login dihilangkan — tidak dibuat otomatis lagi
         function usePrompt(promptText) {
             const textarea = document.getElementById('main-prompt-input');
             if (textarea) {
@@ -1117,7 +1086,7 @@
                     '<p class="text-[13px] text-gray-500 mt-0.5 truncate">'+desc.substring(0, 60)+'</p>' +
                     '<p class="text-sm text-gray-400 mt-1">'+timeAgo(proj.updatedAt)+'</p></div>' +
                     '<div class="relative flex-shrink-0"><button class="p-2 text-gray-400 hover:text-black rounded-lg transition-colors" onclick="toggleOption(this, event)"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>' +
-                    '<div class="option-popup absolute top-full right-0 mt-2 w-40 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-top-right">' +
+                    '<div class="option-popup absolute top-full right-0 mt-2 w-40 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-top-right" onclick="event.stopPropagation()">' +
                     '<button class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" onclick="openProject(\''+proj.id+'\')">Lanjutkan</button>' +
                     '<button class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" onclick="duplicateProject(\''+proj.id+'\')">Duplikat</button>' +
                     '<button class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" onclick="shareProject(\''+proj.id+'\')">Bagikan</button>' +
