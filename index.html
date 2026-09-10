@@ -551,7 +551,8 @@
         if (!parent) return;
 
         if (notifs.length === 0) {
-            parent.innerHTML = '<div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div><a href="https://muzawwied.github.io/Clincoo./akun/notifikasi/" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>';
+            // Sudah ada "Lihat Semua" di header dropdown — jangan diulang di bawah
+            parent.innerHTML = '<div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div>';
             return;
         }
 
