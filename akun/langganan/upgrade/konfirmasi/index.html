@@ -382,6 +382,7 @@
         });
         const data = await res.json();
         if(res.ok && data.success){
+          try { localStorage.setItem('clincoo_subscription_cache', JSON.stringify({ plan: PLAN, billingCycle: BILLING, ts: Date.now() })); } catch(e) {}
           document.getElementById('pay-success').textContent = 'Berhasil! Paket ' + PLAN + ' (' + BILLING + ') sekarang aktif.';
           document.getElementById('pay-success').classList.remove('hidden');
           document.getElementById('pay-error').classList.add('hidden');
