@@ -84,12 +84,22 @@ async function getCreds(db) {
 
 // Nama project Pages untuk proyek ini: pakai yang tersimpan (stabil), kalau belum ada
 // turunkan dari app_name (subdomain saat deploy pertama) dengan fallback ke project_id.
+// Suffix unik per proyek: dua akun BERBEDA yang memakai template sama (app_name sama)
+// tidak boleh berakhir di project Pages yang sama — deployment satu sama lain akan bocor
+// (status + link publik saling terlihat / saling menimpa). Hash pendek project_id memastikan unik.
+function projHash(projectId) {
+  let h = 5381;
+  const s = String(projectId || '');
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return h.toString(36).padStart(5, '0').slice(-5);
+}
+
 async function resolvePagesName(db, table, projectId) {
   const stored = await getSetting(db, table, projectId, 'pages_project');
   if (stored) return stored;
   const appName = await getSetting(db, table, projectId, 'app_name');
   const slug = slugify(appName) || slugify(projectId) || 'app';
-  return ('cno-be2' + slug).slice(0, 60);
+  return ('cno-be2' + slug + '-' + projHash(projectId)).slice(0, 60);
 }
 
 // Lihat project Pages tanpa membuat baru (8000007 = belum ada).
@@ -178,7 +188,8 @@ export async function onRequestGet({ request, env }) {
       logs = results || [];
     } catch (e) {}
 
-    return json({ pages_project: name, pages_url: pagesUrl, last_deployment: last, domains, logs });
+    const lastDeployBy = await getSetting(db, T.projectSettings, projectId, 'last_deploy_by');
+    return json({ pages_project: name, pages_url: pagesUrl, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, api_rev: 'uniq1' });
   } catch (err) {
     return json({ error: err.message }, 500);
   }
@@ -313,6 +324,7 @@ export async function onRequestPost({ request, env }) {
     await db.prepare(`INSERT INTO ${T.deployLogs} (project_id, status, url, message, created_at) VALUES (?, 'success', ?, ?, datetime('now'))`)
       .bind(projectId, pagesUrl, 'deploy ' + files.length + ' file ke ' + name).run();
     await bumpMonthlyDeployCount(db, user && user.id);
+    try { await setSetting(db, T.projectSettings, projectId, 'last_deploy_by', (user && (user.name || user.email)) || 'pengguna'); } catch (e) {}
 
     return json({
       success: true,

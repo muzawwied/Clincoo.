@@ -305,10 +305,18 @@
     function slugifyName(v) {
         return String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     }
+    // Hash pendek project_id — HARUS identik dgn projHash() di functions/api/deploy.js
+    // supaya preview subdomain = nama Pages project yang benar-benar dibuat backend.
+    function projHash5(pid) {
+        let h = 5381;
+        const s = String(pid || '');
+        for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+        return h.toString(36).padStart(5, '0').slice(-5);
+    }
     function updateAppNameSub() {
         const v = (document.getElementById('appname-input').value || '').trim();
         const el = document.getElementById('appname-sub');
-        el.textContent = v ? ('Deploy pertama: ' + ('cno-be2' + slugifyName(v)).slice(0, 60) + '.pages.dev') : '';
+        el.textContent = v ? ('Deploy pertama: ' + ('cno-be2' + slugifyName(v) + '-' + projHash5(pid())).slice(0, 60) + '.pages.dev') : '';
     }
     function openAppNameModal() {
         const m = document.getElementById('appname-modal');
