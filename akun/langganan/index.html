@@ -326,6 +326,8 @@
             subData = await res.json();
             if(!subData || subData.error) throw new Error(subData ? subData.error : 'no data');
             fillSubscription(subData);
+            // Simpan cache plan — halaman Upgrade bisa tampil instan dgn data yang sama
+            try { localStorage.setItem('clincoo_subscription_cache', JSON.stringify({ plan: subData.plan || 'Starter', billingCycle: subData.billingCycle || 'Bulanan', ts: Date.now() })); } catch(e) {}
         } catch(e) {
             console.error('Gagal memuat langganan:', e);
             fillSubscription({ plan: 'Starter', projectCount: 0, projectLimit: 3, storageUsed: 0, storageLimit: 5, bandwidthUsed: 0, bandwidthLimit: 10, collaboratorCount: 0, collaboratorLimit: 1, price: 0, billingCycle: 'Bulanan', nextBillingDate: new Date(Date.now() + 30 * 86400000).toISOString(), paymentMethod: 'Saldo Dompet' });
