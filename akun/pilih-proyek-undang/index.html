@@ -32,6 +32,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <style>
+        @keyframes projFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        .proj-item { animation: projFadeIn .35s ease both; }
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; transition: background-color 0.3s ease, color 0.3s ease; }
         body.dark-mode { background-color: #000000; color: #ffffff; }
         body.dark-mode .bg-white { background-color: #0a0a0a !important; }
@@ -116,26 +118,36 @@
         function projCacheKey() {
             var u = null;
             try { u = JSON.parse(localStorage.getItem('clincoo_auth_user') || 'null'); } catch (e) {}
-            return 'clincoo_pu_cache_' + (u && u.id ? u.id : 'anon');
+            // v2: cache lama pernah tersimpan KOSONG karena bug request lama — dibuang
+            return 'clincoo_pu_cache_v2_' + (u && u.id ? u.id : 'anon');
+        }
+
+        function skeletonList() {
+            return '<div class="flex flex-col gap-2.5">' +
+                '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
+                '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
+                '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
+            '</div>';
         }
 
         async function loadProjects() {
             var list = document.getElementById('project-list');
+            var t0 = Date.now();
 
-            // 1) Render instan dari cache (kalau ada)
+            // 1) Render instan HANYA dari cache segar (maks 5 menit) dan berisi proyek —
+            //    cache lama yang pernah tersimpan kosong diabaikan supaya skeleton tetap tampil
             var cached = null;
             try { cached = JSON.parse(localStorage.getItem(projCacheKey()) || 'null'); } catch (e) {}
-            if (cached && Array.isArray(cached.projects)) {
+            var cacheFresh = !!(cached && Array.isArray(cached.projects) && cached.projects.length &&
+                (Date.now() - (cached.t || 0)) < 5 * 60 * 1000);
+            if (cacheFresh) {
                 renderProjects(cached.projects);
             } else {
-                list.innerHTML = '<div class="flex flex-col gap-2.5">' +
-                    '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
-                    '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
-                    '<div class="h-16 rounded-2xl border border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0f0f0f] animate-pulse"></div>' +
-                '</div>';
+                // Tampilkan animasi loading (skeleton) selama data asli diambil
+                list.innerHTML = skeletonList();
             }
 
-            // 2) Refresh data terbaru di latar belakang
+            // 2) Ambil data real-time dari server
             //    /projects: GET = daftar proyek (POST hanya utk upsert/delete) + wajib Bearer token
             try {
                 var tok = '';
@@ -147,10 +159,15 @@
                 var data = await res.json().catch(function () { return {}; });
                 if (!res.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
                 var projects = (data && data.projects) || [];
+                // Skeleton minimal terlihat 600ms supaya animasi tidak berkedip sekejap
+                var elapsed = Date.now() - t0;
+                if (!cacheFresh && elapsed < 600) {
+                    await new Promise(function (r) { setTimeout(r, 600 - elapsed); });
+                }
                 renderProjects(projects);
                 try { localStorage.setItem(projCacheKey(), JSON.stringify({ projects: projects, t: Date.now() })); } catch (e) {}
             } catch (err) {
-                if (!cached) {
+                if (!cacheFresh) {
                     list.innerHTML = '<p class="text-sm text-red-500 py-6 text-center">Gagal memuat proyek: ' + esc(err.message) + '</p>';
                 }
             }
@@ -169,7 +186,7 @@
                 return;
             }
             list.innerHTML = projects.map(function (p, i) {
-                return '<button type="button" id="proj-' + esc(p.id) + '" onclick="selectProject(\'' + esc(p.id) + '\', this.getAttribute(\'data-title\'))" data-title="' + esc(p.title || 'Proyek tanpa nama') + '" ' +
+                return '<button type="button" id="proj-' + esc(p.id) + '" style="animation-delay:' + Math.min(i * 60, 360) + 'ms" onclick="selectProject(\'' + esc(p.id) + '\', this.getAttribute(\'data-title\'))" data-title="' + esc(p.title || 'Proyek tanpa nama') + '" ' +
                     'class="proj-item w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl border border-gray-200 dark:border-[#222] bg-white dark:bg-[#0a0a0a] text-left transition-all cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 focus:outline-none">' +
                     '<span class="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#151515] flex items-center justify-center shrink-0">' +
                         '<i data-lucide="folder" class="w-[18px] h-[18px] text-gray-500 dark:text-gray-400"></i>' +
