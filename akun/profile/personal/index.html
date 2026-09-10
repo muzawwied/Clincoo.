@@ -422,10 +422,8 @@
             }
             await syncProfileToD1(); // tunggu benar2 tersimpan ke D1
 
-            // Selesai — langsung tersimpan: icon centang sekejap lalu refresh
-            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
-            btn.classList.replace('bg-black', 'bg-emerald-500');
-            btn.classList.replace('hover:bg-gray-800', 'hover:bg-emerald-600');
+            // Selesai — langsung tersimpan: icon centang (bg tetap hitam, bukan hijau) lalu refresh
+            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-white"></i>';
             btn.classList.remove('opacity-80', 'cursor-not-allowed');
             try { lucide.createIcons(); } catch(e) {}
             setTimeout(() => window.location.reload(), 500);
