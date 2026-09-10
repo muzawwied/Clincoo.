@@ -816,14 +816,17 @@
     const fileSearchInput = document.getElementById('file-search-input');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     const sidebarPopup = document.getElementById('sidebar-popup');
-    // Sidebar: di desktop pertama kali dibuka terbuka; refresh mengikuti keadaan terakhir
+    // Sidebar: terbuka otomatis HANYA di desktop (layar >= 1024px).
+    // Di mobile selalu tertutup saat halaman dibuka — status tersimpan diabaikan,
+    // karena di layar kecil sidebar menutupi konten. Bisa dibuka manual via tombol.
     let isSidebarOpen = (function () {
+      if (window.innerWidth < 1024) return false; // mobile: selalu tertutup di awal
       try {
         const saved = localStorage.getItem('clincoo_sidebar_open');
         if (saved === '1') return true;
         if (saved === '0') return false;
       } catch (e) {}
-      return window.innerWidth >= 1024; // default pertama kali: terbuka di desktop
+      return true; // desktop: terbuka secara default
     })();
 
     function toggleSidebar() {
