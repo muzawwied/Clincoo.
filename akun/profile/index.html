@@ -28,11 +28,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@1.41.0"></script>
-    <script src="https://unpkg.com/lucide@1.41.0"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <style>
+        @keyframes menuPop { from { opacity: 0; transform: translateY(-6px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        #theme-dropdown-menu, #accent-dropdown-menu { animation: menuPop .18s cubic-bezier(.2,.7,.3,1); transform-origin: top center; }
         body {
             font-family: 'Inter', sans-serif;
             background-color: #ffffff;
@@ -278,25 +279,25 @@
             <div class="flex flex-col">
                 <h3 class="px-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Akun</h3>
                 <div class="flex flex-col w-full">
-                    <a href="../aktivitas/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="../aktivitas/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="rotate-ccw-clock" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Aktivitas</span>
-                    </a>                    <a href="../profile/personal/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    </a>                    <a href="../profile/personal/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="user" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Personal</span>
-                    </a>                    <a href="dompet/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    </a>                    <a href="dompet/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="wallet" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Dompet</span>
-                    </a>                    <a href="../favorit/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    </a>                    <a href="../favorit/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="heart" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Favorit</span>
                     </a>                </div>
                 <h3 class="px-6 pt-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Pengaturan</h3>
                 <div class="flex flex-col w-full">
-                    <a href="../langganan/upgrade/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="../langganan/upgrade/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="crown" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Upgrade plan</span>
-                    </a>                    <a href="../langganan/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    </a>                    <a href="../langganan/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="gem" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                                                 <div class="flex flex-col items-start">
                             <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Langganan</span>
@@ -308,7 +309,7 @@
                 <h3 class="px-6 pt-6 md:pt-0 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Tampilan</h3>
                 <div class="flex flex-col w-full relative">
                     <div class="relative w-full">
-                        <button id="theme-dropdown-btn" class="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors active:bg-gray-100 group cursor-pointer">
+                        <button id="theme-dropdown-btn" class="w-full flex items-center justify-between px-6 py-2.5 hover:bg-gray-50 transition-colors group cursor-pointer">
                             <div class="flex items-center">
                                 <i data-lucide="sun" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                                 <div class="flex flex-col items-start">
@@ -331,7 +332,7 @@
                         </div>
                     </div>
                     <div class="relative w-full">
-                        <button id="accent-dropdown-btn" class="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors active:bg-gray-100 group cursor-pointer">
+                        <button id="accent-dropdown-btn" class="w-full flex items-center justify-between px-6 py-2.5 hover:bg-gray-50 transition-colors group cursor-pointer">
                             <div class="flex items-center">
                                 <i data-lucide="paint-bucket" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                                 <div class="flex flex-col items-start">
@@ -367,19 +368,19 @@
                 </div>
                 <h3 class="px-6 pt-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Lainnya</h3>
                 <div class="flex flex-col w-full">
-                    <a href="../kolaborasi/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    <a href="../kolaborasi/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="user-plus" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Kolaborasi</span>
-                    </a>                    <a href="../profile/kontrol-data/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    </a>                    <a href="../profile/kontrol-data/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="sliders-horizontal" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Kontrol data</span>
-                    </a>                    <a href="../laporkan-bug/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    </a>                    <a href="../laporkan-bug/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="bug" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Laporkan bug</span>
-                    </a>                    <a href="../tugas-terjadwal/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    </a>                    <a href="../tugas-terjadwal/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="calendar-clock" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Tugas terjadwal</span>
-                    </a>                    <a href="../tentang/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
+                    </a>                    <a href="../tentang/" class="w-full flex items-center px-6 py-2.5 hover:bg-gray-50 transition-colors group">
                         <i data-lucide="info" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Tentang</span>
                     </a>                </div>

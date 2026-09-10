@@ -1672,7 +1672,8 @@
             renderMessages();
         }
 
-        const GEMINI_PROXY_URL = 'https://clincoo.pages.dev/api/chat'; // proxy kuota AI per-user (25/hari user gratis, 500/hari admin)
+        const TOOL_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+        const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clincoo (kuota 25/hari user gratis, 500/hari admin)
 
         // ===== WORKSPACE FILE/FOLDER CRUD (shared store with ../workspace/) =====
         // Kunci workspace per-proyek — sama dengan pola per-chat (lsChatKey), murni localStorage tanpa D1.
@@ -2025,7 +2026,7 @@
             return { success: true, query: query, total: matches.length, items: matches.slice(0, 100) };
         }
 
-        function executeWorkspaceTool(name, args) {
+        async function executeWorkspaceTool(name, args) {
             try {
                 switch (name) {
                     case 'list_items': return wsListItems(args);
@@ -2035,11 +2036,118 @@
                     case 'rename_item': return wsRenameItem(args);
                     case 'delete_item': return wsDeleteItem(args);
                     case 'search_items': return wsSearchItems(args);
+                    case 'run_command': return await toolRunCommand(args);
+                    case 'read_web_page': return await toolReadWebPage(args);
+                    case 'web_search': return await toolWebSearch(args);
+                    case 'rename_project': return await toolRenameProject(args);
+                    case 'deploy_project': return await toolDeployProject(args);
+                    case 'add_env_var': return await toolAddEnvVar(args);
+                    case 'list_env_vars': return await toolListEnvVars(args);
                     default: return { success: false, error: 'Tool tidak dikenal: ' + name };
                 }
             } catch (e) {
                 return { success: false, error: 'Gagal menjalankan tool: ' + (e && e.message ? e.message : String(e)) };
             }
+        }
+
+        // ===== TOOL SUPER: sandbox CLI, web reader/search, aksi proyek =====
+        async function toolRunCommand(args) {
+            const cmd = args && args.command ? String(args.command) : '';
+            if (!cmd) return { success: false, error: 'Parameter command wajib.' };
+            let CodeInterpreter;
+            try {
+                const e2bModule = await import('https://esm.sh/@e2b/code-interpreter?bundle&target=es2022');
+                CodeInterpreter = e2bModule.CodeInterpreter || e2bModule.default?.CodeInterpreter;
+            } catch (e) { return { success: false, error: 'Gagal memuat modul sandbox eksekusi kode.' }; }
+            if (!CodeInterpreter) return { success: false, error: 'Sandbox eksekusi kode tidak tersedia.' };
+            let e2bKey = '';
+            try {
+                const keyRes = await fetch(TOOL_API_BASE + '/api/e2b');
+                if (keyRes.ok) { const kj = await keyRes.json(); e2bKey = kj.apiKey || ''; }
+            } catch (e) {}
+            if (!e2bKey) return { success: false, error: 'Sandbox eksekusi kode belum dikonfigurasi.' };
+            const sandbox = await CodeInterpreter.create({ apiKey: e2bKey });
+            try {
+                const exe = await sandbox.commands.run(cmd);
+                return {
+                    success: !exe.exitCode,
+                    command: cmd,
+                    stdout: String(exe.stdout || '').slice(0, 3800),
+                    stderr: String(exe.stderr || (exe.error ? exe.error.message : '')).slice(0, 1500)
+                };
+            } finally {
+                try { await sandbox.close(); } catch (e) {}
+            }
+        }
+
+        async function toolReadWebPage(args) {
+            const url = args && args.url ? String(args.url) : '';
+            if (!/^https?:\/\//i.test(url)) return { success: false, error: 'Parameter url wajib (http/https).' };
+            const res = await fetch(TOOL_API_BASE + '/api/jina', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'read', query: url }) });
+            const d = await res.json();
+            if (!res.ok) return { success: false, error: d.error || 'Gagal membaca halaman web.' };
+            return { success: true, url: url, content: String(d.text || '').slice(0, 3800) };
+        }
+
+        async function toolWebSearch(args) {
+            const query = args && args.query ? String(args.query) : '';
+            if (!query) return { success: false, error: 'Parameter query wajib.' };
+            const res = await fetch(TOOL_API_BASE + '/api/jina', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'search', query: query }) });
+            const d = await res.json();
+            if (!res.ok) return { success: false, error: d.error || 'Pencarian web gagal.' };
+            let results = d.data && Array.isArray(d.data) ? d.data : [];
+            results = results.slice(0, 6).map(function(r) { return { title: r.title || '', url: r.url || '', snippet: String(r.content || r.description || '').slice(0, 300) }; });
+            return { success: true, query: query, results: results };
+        }
+
+        async function toolRenameProject(args) {
+            const newName = args && args.new_name ? String(args.new_name).trim() : '';
+            if (!newName) return { success: false, error: 'Parameter new_name wajib.' };
+            const pid = currentProjectId;
+            if (!pid) return { success: false, error: 'Tidak ada proyek aktif. Buka proyek dulu dari daftar proyek.' };
+            const listRes = await fetch(TOOL_API_BASE + '/api/projects');
+            const d = await listRes.json();
+            if (!listRes.ok) return { success: false, error: d.error || 'Gagal mengambil daftar proyek.' };
+            const list = Array.isArray(d.projects) ? d.projects : [];
+            const proj = list.find(function(x) { return String(x.id) === String(pid); });
+            if (!proj) return { success: false, error: 'Proyek aktif tidak ditemukan pada akun Anda.' };
+            const upRes = await fetch(TOOL_API_BASE + '/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'upsert', project: Object.assign({}, proj, { title: newName }) }) });
+            const ud = await upRes.json();
+            if (!upRes.ok || ud.error) return { success: false, error: ud.error || 'Gagal mengganti nama proyek.' };
+            return { success: true, old_title: proj.title, new_title: newName, project_id: pid };
+        }
+
+        async function toolDeployProject() {
+            const pid = currentProjectId;
+            if (!pid) return { success: false, error: 'Tidak ada proyek aktif. Buka proyek dulu dari daftar proyek.' };
+            const res = await fetch(TOOL_API_BASE + '/api/deploy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_id: pid }) });
+            const d = await res.json();
+            if (!res.ok || d.error) return { success: false, error: d.error || 'Deploy gagal.' };
+            const url = (d.deployment && d.deployment.url) || d.pages_url || '';
+            return { success: true, url: url, pages_project: d.pages_project || '', file_count: d.fileCount || 0, message: 'Situs berhasil di-deploy' + (url ? ' ke ' + url : '') + '.' };
+        }
+
+        async function toolAddEnvVar(args) {
+            const key = args && args.key ? String(args.key).trim().toUpperCase() : '';
+            const value = args && args.value !== undefined ? String(args.value) : '';
+            const isSecret = !!(args && args.is_secret);
+            if (!key || !value) return { success: false, error: 'Parameter key dan value wajib.' };
+            const pid = currentProjectId;
+            if (!pid) return { success: false, error: 'Tidak ada proyek aktif.' };
+            const res = await fetch(TOOL_API_BASE + '/api/env-vars', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_id: pid, key: key, value: value, is_secret: isSecret ? 1 : 0 }) });
+            const d = await res.json();
+            if (!res.ok || d.error) return { success: false, error: d.error || 'Gagal menyimpan variable.' };
+            return { success: true, key: key, is_secret: isSecret };
+        }
+
+        async function toolListEnvVars() {
+            const pid = currentProjectId;
+            if (!pid) return { success: false, error: 'Tidak ada proyek aktif.' };
+            const res = await fetch(TOOL_API_BASE + '/api/env-vars?project_id=' + encodeURIComponent(pid));
+            const d = await res.json();
+            if (!res.ok) return { success: false, error: d.error || 'Gagal mengambil environment variable.' };
+            const vars = (d.env_vars || []).map(function(v) { return { key: v.key, value: v.is_secret ? '(tersembunyi)' : v.value }; });
+            return { success: true, env_vars: vars };
         }
         // ===== END WORKSPACE CRUD =====
         const PREFERRED_MODELS = [
@@ -2290,7 +2398,7 @@
                 const formattedDate = now.toLocaleDateString('id-ID', options);
                 const timeContext = `\n\n[INFO SISTEM (REAL-TIME)]: Saat ini adalah ${formattedDate}. Jika user meminta data hari ini atau yang terbaru, WAJIB utamakan Konteks Pencarian Web yang disuntikkan ke prompt ini agar jawaban akurat sesuai kondisi masa kini.`;
                 
-                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clincoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clincoo, AI asisten Clincoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clincoo.\n\nGAYA JAWABAN SUPERAGENT: Jawab CEPAT dan LANGSUNG ke inti — kalimat pertama langsung menjawab pertanyaan, bukan basa-basi. Ringkas dan padat: cukup penjelasan yang diperlukan, tanpa pengulangan. Untuk tugas teknis, langsung kerjakan (pakai tools tanpa diminta dua kali) dan tunjukkan hasilnya. Ramah tapi tidak bertele-tele.';
+                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nTOOLS SUPER (WAJIB dipakai aktif, bukan sekadar teori): run_command (jalankan CLI/sandbox Python untuk hitung, test, atau verifikasi kode — sandbox terisolasi, tempel isi file yang dibutuhkan langsung di kode), read_web_page (baca isi URL jadi markdown), web_search (cari info terbaru/real-time di web), rename_project (ganti nama proyek aktif), deploy_project (publish situs proyek aktif ke internet), add_env_var (tambah/ubah env var proyek), list_env_vars (lihat env var proyek). Gunakan run_command untuk verifikasi perhitungan/kode sebelum menjawab final, web_search/read_web_page untuk pertanyaan yang butuh data terkini, dan deploy_project saat user ingin situsnya online — JANGAN menyuruh user klik tombol deploy manual kalau kamu bisa melakukannya sendiri.\n\nATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clincoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clincoo, AI asisten Clincoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clincoo.\n\nGAYA JAWABAN SUPERAGENT: Jawab CEPAT dan LANGSUNG ke inti — kalimat pertama langsung menjawab pertanyaan, bukan basa-basi. Ringkas dan padat: cukup penjelasan yang diperlukan, tanpa pengulangan. Untuk tugas teknis, langsung kerjakan (pakai tools tanpa diminta dua kali) dan tunjukkan hasilnya. Ramah tapi tidak bertele-tele.';
                 
                 try {
                     const apiMessages = [
@@ -2367,17 +2475,17 @@
                         });
                         apiMessagesWithTools.push({ role: 'assistant', content: assistantToolParts });
 
-                        const functionResponses = resultJson.tool_calls.map(function(tc) {
+                        const functionResponses = await Promise.all(resultJson.tool_calls.map(async function(tc) {
                             const result = (tc.result !== undefined && tc.result !== null)
                                 ? tc.result
-                                : executeWorkspaceTool(tc.name, tc.args || {});
+                                : await executeWorkspaceTool(tc.name, tc.args || {});
                             const ok = !(result && typeof result === 'object' && result.error);
                             let resultText = '';
                             try { resultText = (typeof result === 'string') ? result : JSON.stringify(result, null, 2); } catch(e) { resultText = String(result); }
                             if (resultText && resultText.length > 4000) resultText = resultText.slice(0, 4000) + '\n… (dipotong)';
                             aiMsgObj.toolCalls.push({ name: tc.name, args: tc.args || {}, ok: ok, result: resultText });
                             return { type: 'function_response', name: tc.name, result: result };
-                        });
+                        }));
                         apiMessagesWithTools.push({ role: 'user', content: functionResponses });
                         // Tampilkan progres eksekusi tugas secara langsung ke chat (mirip kartu "Ran command")
                         renderMessages();
@@ -2402,7 +2510,7 @@
                 } catch (e) {
                     if (e.name !== 'AbortError') {
                         if (e.message === '__QUOTA__') {
-                            streamingBuffer = "Kuota AI Gemini sedang habis untuk saat ini (limit penggunaan harian). Pesanmu sudah dikembalikan ke kolom ketik — ketuk **Coba lagi** di atas kolom ketik untuk mengirim ulang, atau tunggu beberapa saat.";
+                            streamingBuffer = "Kuota AI Clincoo hari ini sudah habis. Pesanmu sudah dikembalikan ke kolom ketik — ketuk **Coba lagi** di atas kolom ketik untuk mengirim ulang, atau tunggu reset kuota besok.";
                             const lastUserIdx = messages.map(m => m.role).lastIndexOf('user');
                             if (lastUserIdx !== -1 && !chatInput.value.trim()) {
                                 chatInput.value = messages[lastUserIdx].text || '';

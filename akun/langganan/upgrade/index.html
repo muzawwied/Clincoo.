@@ -28,7 +28,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@1.41.0"></script>
-    <script src="https://unpkg.com/lucide@1.41.0"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -309,19 +308,8 @@
         let subData = null;
 
 
-        // Load current plan from D1
-        function showButtonShimmer() {
-            ['btn-starter', 'btn-pro', 'btn-bisnis'].forEach(function(id) {
-                const b = document.getElementById(id);
-                if (b) {
-                    b.classList.add('clincoo-shimmer');
-                    b.disabled = true;
-                    b.onclick = null;
-                    b.innerText = 'Memuat...';
-                }
-            });
-        }
-
+        // Load current plan from D1 — tombol dirender langsung dari HTML default,
+        // tanpa shimmer; updateUI() menyempurnakan status begitu data D1 tiba.
         async function loadSubscription() {
             try {
                 const res = await fetch(SUB_API);
@@ -392,8 +380,7 @@
             }
         }
 
-        // Load on page open (shimmer dulu, data nyusul dari D1)
-        showButtonShimmer();
+        // Load on page open — data D1 langsung dirender tanpa shimmer
         loadSubscription();
     </script>
 <script>
