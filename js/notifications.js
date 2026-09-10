@@ -175,23 +175,8 @@ function handleNotifClick(id) {
     if (n.link) { window.location.href = n.link; }
 }
 
-function createLoginNotification() {
-    try {
-        var today = new Date().toISOString().slice(0, 10);
-        var lastLogin = localStorage.getItem('clincoo_last_login_notif');
-        if (lastLogin !== today) {
-            localStorage.setItem('clincoo_last_login_notif', today);
-            var userAgent = navigator.userAgent;
-            var device = /Mobile|Android|iPhone/.test(userAgent) ? 'Perangkat Mobile' : 'Desktop';
-            var browser = /Chrome/.test(userAgent) ? 'Chrome' : /Firefox/.test(userAgent) ? 'Firefox' : /Safari/.test(userAgent) ? 'Safari' : 'Browser';
-            fetch(NOTIF_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ source: 'Akun', message: 'Login berhasil dari ' + device + ' (' + browser + ')', type: 'login', link: '' })
-            }).then(function() { setTimeout(fetchD1Notifications, 1500); });
-        }
-    } catch(e) {}
-}
+// Notif login dihilangkan sesuai permintaan — tidak dibuat otomatis lagi.
+function createLoginNotification() { return; }
 
 if (typeof window !== 'undefined') {
     pruneLocalNotifs();
