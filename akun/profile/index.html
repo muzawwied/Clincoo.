@@ -255,7 +255,7 @@
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 pt-20">
     <script>try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||(t==='Sistem (Default)'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.body.classList.add('dark-mode');var a=localStorage.getItem('clincoo_accent')||'Hitam (Default)';var am={'Hitam (Default)':{m:'#000000',h:'#1f2937'},'Biru':{m:'#2563eb',h:'#1d4ed8'},'Hijau':{m:'#059669',h:'#047857'},'Ungu':{m:'#9333ea',h:'#7e22ce'},'Merah':{m:'#dc2626',h:'#b91c1c'}};var c=am[a]||am['Hitam (Default)'];document.documentElement.style.setProperty('--accent-color',c.m);document.documentElement.style.setProperty('--accent-hover',c.h);}catch(e){}</script>
-    <main id="page-profile" class="page-view hidden flex-1 w-full max-w-2xl lg:max-w-5xl mx-auto pb-12 flex-col justify-start relative">
+    <main id="page-profile" class="page-view hidden flex-1 w-full max-w-2xl md:max-w-5xl mx-auto pb-12 flex-col justify-start relative">
         <button onclick="window.location.href='../../'" class="fixed top-3 left-3 w-10 h-10 flex items-center justify-center rounded-full bg-white backdrop-blur border border-gray-100 shadow-sm hover:bg-gray-50 transition-all cursor-pointer text-gray-700 hover:text-black z-50" aria-label="Kembali">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </button>
@@ -274,7 +274,7 @@
             </div>
             <input type="file" id="profile-pic-input" class="hidden" accept="image/*">
         </div>
-                <div class="w-full grid grid-cols-1 lg:grid-cols-2 lg:gap-6 items-start">
+                <div class="w-full grid grid-cols-1 md:grid-cols-2 md:gap-6 items-start">
             <div class="flex flex-col">
                 <h3 class="px-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Akun</h3>
                 <div class="flex flex-col w-full">
@@ -291,7 +291,7 @@
                         <i data-lucide="heart" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
                         <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Favorit</span>
                     </a>                </div>
-                <h3 class="px-6 pt-6 lg:pt-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Pengaturan</h3>
+                <h3 class="px-6 pt-6 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Pengaturan</h3>
                 <div class="flex flex-col w-full">
                     <a href="../langganan/upgrade/" class="w-full flex items-center px-6 py-3.5 hover:bg-gray-50 transition-colors active:bg-gray-100 group">
                         <i data-lucide="crown" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
@@ -305,7 +305,7 @@
                     </a>                </div>
             </div>
             <div class="flex flex-col">
-                <h3 class="px-6 pt-6 lg:pt-0 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Tampilan</h3>
+                <h3 class="px-6 pt-6 md:pt-0 text-[12px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Tampilan</h3>
                 <div class="flex flex-col w-full relative">
                     <div class="relative w-full">
                         <button id="theme-dropdown-btn" class="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors active:bg-gray-100 group cursor-pointer">
