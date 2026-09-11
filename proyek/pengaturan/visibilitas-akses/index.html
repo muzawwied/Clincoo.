@@ -155,26 +155,108 @@
   <script src="../../../js/api.js"></script>
   
   <script>
-    if (typeof window.ClincooAPI === 'undefined') {
-      window.ClincooAPI = {
-        getSecurity: async () => ({ settings: { ddos: '1', indexSearch: '1' } }),
-        updateSecurity: async (key, value) => { console.log(`Mock updateSecurity: ${key} = ${value}`); }
-      };
+    // ================================================================
+    // Visibilitas & Akses — penyimpanan REAL-TIME:
+    // localStorage 'clincoo_<projectId>_visibility' (instan) + D1 project_settings
+    // key 'visibility_settings' (sinkron antar device). Deploy membaca setelan ini:
+    // - mode 'password'  -> situs digerbangi _worker.js (auth password sebelum masuk)
+    // - indexSearch = 0  -> header X-Robots-Tag: noindex disuntik saat deploy
+    // ================================================================
+    const VIS_PID = localStorage.getItem('clincoo_current_project_id') || '';
+    const VIS_LKEY = 'clincoo_' + VIS_PID + '_visibility';
+    const VIS_MODE_LABEL = { public: 'Publik (Semua orang)', private: 'Privat (Hanya anggota)', password: 'Dilindungi Password' };
+    const VIS_LABEL_MODE = { 'Publik (Semua orang)': 'public', 'Privat (Hanya anggota)': 'private', 'Dilindungi Password': 'password' };
+    let visState = { mode: 'public', pass_hash: '', indexSearch: 1, ddos: 1 };
+    let _visSaveTimer = null;
+
+    function visApiBase() {
+      if (typeof API_BASE !== 'undefined' && API_BASE) return API_BASE;
+      return location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api';
+    }
+    function visAuthHeaders(extra) {
+      const hdr = Object.assign({}, extra || {});
+      const tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+      if (tok) hdr['Authorization'] = 'Bearer ' + tok;
+      return hdr;
+    }
+    async function sha256hexClient(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
     async function loadAccessSettings() {
+      // 1) Instan dari localStorage
       try {
-        const data = await ClincooAPI.getSecurity();
-        const settings = data.settings || {};
-        if (settings.ddos === '0') {
-          const ddosBg = document.getElementById('ddos-bg');
-          if (ddosBg) { ddosBg.classList.replace('bg-blue-500', 'bg-gray-200'); ddosBg.classList.add('dark:bg-slate-700'); document.getElementById('ddos-knob').classList.remove('translate-x-5'); }
-        }
-        if (settings.indexSearch === '0') {
-          const isBg = document.getElementById('indexSearch-bg');
-          if (isBg) { isBg.classList.replace('bg-blue-500', 'bg-gray-200'); isBg.classList.add('dark:bg-slate-700'); document.getElementById('indexSearch-knob').classList.remove('translate-x-5'); }
+        const loc = JSON.parse(localStorage.getItem(VIS_LKEY) || 'null');
+        if (loc) { visState = Object.assign(visState, loc); paintVisUI(); }
+      } catch (e) {}
+      // 2) Segar dari server (sumber kebenaran)
+      try {
+        const res = await fetch(visApiBase() + '/project-settings?project_id=' + encodeURIComponent(VIS_PID), { headers: visAuthHeaders() });
+        const data = await res.json();
+        if (data && data.visibility_settings) {
+          const srv = JSON.parse(data.visibility_settings);
+          visState = Object.assign(visState, srv);
+          try { localStorage.setItem(VIS_LKEY, JSON.stringify(visState)); } catch (e) {}
+          paintVisUI();
         }
       } catch (e) { console.error('Access settings load failed:', e); }
+    }
+
+    function paintToggle(idPrefix, on) {
+      const bg = document.getElementById(idPrefix + '-bg');
+      const knob = document.getElementById(idPrefix + '-knob');
+      if (!bg || !knob) return;
+      if (on) {
+        bg.classList.remove('bg-gray-200', 'dark:bg-slate-700');
+        bg.classList.add('bg-blue-500');
+        knob.classList.add('translate-x-5');
+      } else {
+        bg.classList.replace('bg-blue-500', 'bg-gray-200');
+        bg.classList.add('dark:bg-slate-700');
+        knob.classList.remove('translate-x-5');
+      }
+    }
+    function paintVisUI() {
+      const label = document.getElementById('label-visibility');
+      if (label) label.textContent = VIS_MODE_LABEL[visState.mode] || VIS_MODE_LABEL.public;
+      const passSection = document.getElementById('password-section');
+      const passInput = document.getElementById('password-input');
+      if (passSection) {
+        if (visState.mode === 'password') passSection.classList.remove('collapsed');
+        else passSection.classList.add('collapsed');
+      }
+      if (passInput) {
+        passInput.value = '';
+        passInput.placeholder = visState.pass_hash ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (tersimpan \u2014 ketik untuk ganti)' : 'Masukkan password';
+      }
+      paintToggle('indexSearch', visState.indexSearch === 1);
+      paintToggle('ddos', visState.ddos === 1);
+    }
+
+    function queueVisSave() {
+      try { localStorage.setItem(VIS_LKEY, JSON.stringify(visState)); } catch (e) {}
+      if (_visSaveTimer) clearTimeout(_visSaveTimer);
+      _visSaveTimer = setTimeout(async function () {
+        try {
+          await fetch(visApiBase() + '/project-settings', {
+            method: 'POST',
+            headers: visAuthHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ project_id: VIS_PID, visibility_settings: JSON.stringify(visState) })
+          });
+        } catch (e) { console.error('Gagal menyimpan setelan visibilitas:', e); }
+      }, 600);
+    }
+
+    // Password: simpan HASH-nya (bukan plaintext). Deploy menyematkan hash ke gerbang situs.
+    const _passInput = document.getElementById('password-input');
+    if (_passInput) {
+      _passInput.addEventListener('input', async function () {
+        const v = _passInput.value;
+        if (!v) return; // dikosongkan -> hash lama dipertahankan
+        visState.pass_hash = await sha256hexClient('clincoo-gate:' + v);
+        queueVisSave();
+      });
     }
     loadAccessSettings();
   </script>
@@ -183,18 +265,12 @@
     function toggleSwitch(idPrefix){
       const bg=document.getElementById(idPrefix+'-bg');
       const knob=document.getElementById(idPrefix+'-knob');
-      if(bg.classList.contains('bg-blue-500')){
-        bg.classList.replace('bg-blue-500','bg-gray-200');
-        bg.classList.add('dark:bg-slate-700');
-        knob.classList.remove('translate-x-5');
-      }else{
-        bg.classList.remove('bg-gray-200','dark:bg-slate-700');
-        bg.classList.add('bg-blue-500');
-        knob.classList.add('translate-x-5');
-      }
-      
-      // Auto-save logic can be triggered here if needed
-      // console.log(`${idPrefix} toggled`);
+      const turnOn=!bg.classList.contains('bg-blue-500');
+      paintToggle(idPrefix, turnOn);
+      // Simpan state real-time (indexSearch = izin indeks mesin pencari; ddos = proteksi Cloudflare)
+      if (idPrefix === 'indexSearch') visState.indexSearch = turnOn ? 1 : 0;
+      if (idPrefix === 'ddos') visState.ddos = turnOn ? 1 : 0;
+      queueVisSave();
     }
 
     // Custom Dropdown Logic
@@ -277,6 +353,14 @@
                     }
                 }
             }
+            // Simpan mode visibilitas real-time
+            if (targetId === 'visibility' && typeof visState !== 'undefined') {
+                visState.mode = VIS_LABEL_MODE[value] || 'public';
+                if (visState.mode === 'password' && !visState.pass_hash) {
+                    // belum ada password -> tetap tersimpan, tapi gerbang baru aktif setelah password diisi
+                }
+                queueVisSave();
+            }
         }
         closeAllDropdowns();
     }
@@ -284,16 +368,9 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Initialize icons
       lucide.createIcons();
-      
-      // Ensure UI state matches default label on load
-      const visibilityLabel = document.getElementById('label-visibility');
-      if(visibilityLabel) {
-         const initialVal = visibilityLabel.textContent.trim();
-         const passSection = document.getElementById('password-section');
-         if(initialVal !== 'Dilindungi Password' && passSection) {
-             passSection.classList.add('collapsed');
-         }
-      }
+      // UI digambar dari data tersimpan (paintVisUI dipanggil loadAccessSettings)
+      const passSection = document.getElementById('password-section');
+      if (passSection) passSection.classList.add('collapsed');
     });
   </script>
 
