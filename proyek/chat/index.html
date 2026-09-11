@@ -259,8 +259,8 @@
         body.dark-mode .tool-task-text.err { color: #f87171 !important; }
 
         /* Kartu dropdown "Menjalankan Tugas" */
-        .toolcalls-card { border: none; border-radius: 12px; background: #f9fafb; overflow: hidden; }
-        body.dark-mode .toolcalls-card { border: none; background: #0a0a0a; }
+        .toolcalls-card { border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; overflow: hidden; }
+        body.dark-mode .toolcalls-card { border-color: #262626; background: #0a0a0a; }
         .toolcalls-summary { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; background: none; border: none; cursor: pointer; text-align: left; font-size: 12.5px; color: #374151; }
         body.dark-mode .toolcalls-summary { color: #d1d5db; }
         .toolcalls-summary .tc-chevron { margin-left: auto; transition: transform 0.15s ease; color: #9ca3af; }
@@ -526,7 +526,7 @@
         }
         function saveChatLog() {
             try {
-                const log = messages.filter(m => m && !m.isHidden && m.text).map(m => ({ id: m.id, role: m.role, text: m.text, time: m.time || null }));
+                const log = messages.filter(m => m && !m.isHidden && m.text).map(m => ({ id: m.id, role: m.role, text: m.text, time: m.time || null, isProcessing: !!m.isProcessing }));
                 localStorage.setItem(lsChatKey(), JSON.stringify(log));
             } catch(e) {}
         }
@@ -989,10 +989,12 @@
 
             if (maxScrollTop - currentScrollTop <= threshold) {
                 autoScrollActive = true;
-            } else if (currentScrollTop < lastScrollTop - 1) {
-                // FIX: hanya matikan auto-scroll kalau user BENAR-BENAR scroll ke atas.
-                // Pertumbuhan tinggi konten (markdown/gambar dimuat terlambat) tidak lagi
-                // mematikan auto-scroll — dulu inilah penyebab pesan baru "nempel di input".
+            } else if (isUserInteracting && currentScrollTop < lastScrollTop - 1) {
+                // FIX: hanya matikan auto-scroll kalau user BENAR-BENAR sedang menyentuh/
+                // scroll ke atas. Keyboard yang buka-tutup & perubahan tinggi konten membuat
+                // browser meng-clamp scrollTop (terlihat seperti scroll ke atas padahal bukan
+                // aksi user) — itu TIDAK boleh mematikan auto-scroll, karena dulu inilah
+                // penyebab indikator "mengetik" di bawah tidak naik otomatis setelah kirim.
                 autoScrollActive = false;
             }
 
@@ -2223,6 +2225,9 @@
             };
             messages.push(aiMsgObj);
             renderMessages();
+            // FIX: pastikan indikator "mengetik" langsung terlihat di layar walau user
+            // sebelumnya sedang membaca riwayat di atas.
+            scrollToBottom(true);
             
             currentAiMessageId = aiMsgObj.id;
             abortController = new AbortController();
@@ -2662,7 +2667,20 @@ if (loadChatLog()) {
     // pindah halaman saat AI masih menjawab) — lanjutkan jawaban secara otomatis.
     setTimeout(function() {
         try {
-            if (!isGenerating && messages.length > 0 && messages[messages.length - 1].role === 'user' && (messages[messages.length - 1].text || '').trim()) {
+            if (isGenerating || messages.length === 0) return;
+            var lastMsg = messages[messages.length - 1];
+            // Kasus 1: pertanyaan user belum dijawab (keluar halaman sebelum AI mulai mengetik)
+            if (lastMsg.role === 'user' && (lastMsg.text || '').trim()) {
+                fetchAIResponse();
+                return;
+            }
+            // Kasus 2: jawaban AI terpotong (keluar halaman saat AI masih mengetik) —
+            // buang teks setengah jadi lalu lanjutkan jawaban secara otomatis.
+            if (lastMsg.role === 'ai' && lastMsg.isProcessing && messages.length >= 2 &&
+                messages[messages.length - 2].role === 'user') {
+                messages.pop();
+                renderMessages();
+                scrollToBottom(true);
                 fetchAIResponse();
             }
         } catch(e) { console.error('Resume pending answer error:', e); }
