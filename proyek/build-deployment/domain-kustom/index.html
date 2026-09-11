@@ -170,7 +170,9 @@
           <div class="w-full sm:w-80">
             <div class="flex items-center gap-2">
               <input type="text" value="" id="custom-domain-input" class="flex-1 min-w-0 px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none domain-shimmer" placeholder="contohdomain.com" disabled>
-              <button type="button" id="btn-save-domain" onclick="saveDomainFromButton()" disabled class="shrink-0 px-4 py-2 text-sm font-semibold rounded-lg bg-black text-white dark:bg-white dark:text-black disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">Simpan</button>
+              <button type="button" id="btn-save-domain" onclick="saveDomainFromButton()" disabled aria-label="Simpan domain" title="Simpan domain" class="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+                <i data-lucide="check" class="w-4 h-4 pointer-events-none"></i>
+              </button>
             </div>
             <p id="cf-domain-status" class="text-xs mt-1.5 hidden"></p>
           </div>
@@ -446,22 +448,31 @@
         } catch(e) { window.__domainSaveError = (e && e.message) ? e.message : 'gagal menyimpan'; }
     }
 
-    // Tombol Simpan Domain: state eksplisit Menyimpan -> Tersimpan/Gagal (teks saja, tanpa animasi)
+    // Tombol Simpan Domain: icon centang di pojok kanan, tanpa teks.
+    // Idle: centang hitam/putih. Menyimpan: spinner. Sukses: centang hijau. Gagal: silang merah.
+    function setSaveBtnIcon(name, extraClass, bgClass) {
+        const btn = document.getElementById('btn-save-domain');
+        if (!btn) return;
+        btn.innerHTML = '<i data-lucide="' + name + '" class="w-4 h-4 pointer-events-none ' + (extraClass || '') + '"></i>';
+        btn.className = 'shrink-0 w-9 h-9 flex items-center justify-center rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed ' +
+            (bgClass || 'bg-black text-white dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200');
+        if (typeof lucide !== 'undefined' && lucide.createIcons) { try { lucide.createIcons(); } catch (e) {} }
+    }
     async function saveDomainFromButton() {
         const btn = document.getElementById('btn-save-domain');
         if (!btn || btn.disabled) return;
         const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
         if (domainInput) { delete domainInput.dataset.dirty; }
         btn.disabled = true;
-        btn.textContent = 'Menyimpan...';
+        setSaveBtnIcon('loader-2', 'animate-spin');
         window.__domainSaveError = '';
         try { await saveDomainSettings(); } catch (e) {}
         if (window.__domainSaveError) {
-            btn.textContent = 'Gagal — coba lagi';
-            setTimeout(function () { btn.textContent = 'Simpan'; btn.disabled = false; }, 1800);
+            setSaveBtnIcon('x', '', 'bg-red-500 text-white');
+            setTimeout(function () { btn.disabled = false; setSaveBtnIcon('check'); }, 1800);
         } else {
-            btn.textContent = 'Tersimpan ✓';
-            setTimeout(function () { btn.textContent = 'Simpan'; btn.disabled = false; }, 1600);
+            setSaveBtnIcon('check', '', 'bg-emerald-500 text-white');
+            setTimeout(function () { btn.disabled = false; setSaveBtnIcon('check'); }, 1500);
         }
     }
 
