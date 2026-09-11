@@ -26,23 +26,15 @@
       };
     })();
   </script>
-<!-- Firebase Analytics -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
-  const firebaseConfig = {
-    apiKey: "AIzaSyA4s-qmaFwNUdgqKNNWhVLgHETnuvysZwM",
-    authDomain: "clincoo-2026.firebaseapp.com",
-    projectId: "clincoo-2026",
-    storageBucket: "clincoo-2026.firebasestorage.app",
-    messagingSenderId: "777018379666",
-    appId: "1:777018379666:web:b4136b8ed21b099a61854b",
-    measurementId: "G-KMQ8WBZF6E"
-  };
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+<!-- Google tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KMQ8WBZF6E');
 </script>
-<!-- End Firebase Analytics -->
+<!-- End Google tag -->
 </head>
 <body style="background:#111;color:#eee;font:12px/1.5 monospace;padding:12px;white-space:pre-wrap">
   <div>DEBUG NOTIF - tunggu 5 detik...</div>
