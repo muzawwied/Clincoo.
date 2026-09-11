@@ -456,7 +456,30 @@
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="w-full border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer group relative bg-white">
+                    <div class="w-full aspect-video sm:h-80 overflow-hidden bg-[#F9FAFB]">
+                        <img src="assets/templates/tasks.webp?v=1" alt="Pratinjau Manajemen Tugas" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300">
+                    </div>
+                    <div class="flex justify-between items-end gap-3 w-full p-4">
+                        <div class="flex flex-col flex-1 overflow-hidden">
+                            <h3 class="font-semibold text-gray-900 text-base group-hover:text-black truncate">Manajemen Tugas</h3>
+                            <p class="text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">Aplikasi manajemen tugas profesional — dashboard statistik, papan kanban, kalender, proyek, dan laporan dalam desain terang elegan.</p>
+                        </div>
+                        <div class="relative flex-shrink-0">
+                            <button class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleOption(this, event)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                            </button>
+                            <div class="option-popup absolute bottom-full right-0 mb-2 w-44 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-bottom-right">
+                                <button onclick="useTemplate('tasks', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Gunakan Template</button>
+                                <button onclick="usePrompt('Buatkan aplikasi manajemen tugas profesional dengan dashboard statistik, papan kanban, kalender, proyek, dan laporan.')" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Pakai Prompt Ini</button>
+                                <button onclick="previewTemplate('tasks', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Lihat Preview</button>
+                                <button onclick="favoriteTemplate('tasks', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Simpan ke Favorit</button>
+                                <button onclick="reportTemplate('tasks', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">Laporkan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>            </div>
         </div>
     </main>
     <script>
