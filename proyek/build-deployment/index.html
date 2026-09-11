@@ -230,17 +230,21 @@
                 const cta = document.getElementById('view-cta');
                 if (cta) cta.classList.remove('hidden');
             };
+            // 1) INSTAN dari cache sesi lokal — tampilkan dashboard deploy tanpa
+            //    nunggu server. Dulu urutannya kebalik: fetchStatus() jalan duluan,
+            //    jadi masuk halaman deployment selalu loading dulu walau sudah deploy.
+            const ses = readDeploySession();
+            if (ses && (ses.status === 'done' || ses.status === 'deploying')) {
+                window.location.replace('../build-deployment/dashboard/');
+                return;
+            }
+            // 2) Tanpa sesi lokal: cek server (deploy dari device lain / cache hilang)
             try {
                 const st = await fetchStatus();
                 if (st && (st.last_deployment || (st.domains || []).length)) {
                     window.location.replace('../build-deployment/dashboard/'); return;
                 }
             } catch (e) {}
-            const ses = readDeploySession();
-            if (ses && (ses.status === 'done' || ses.status === 'deploying')) {
-                window.location.replace('../build-deployment/dashboard/');
-                return;
-            }
             showCTA();
         });
 
