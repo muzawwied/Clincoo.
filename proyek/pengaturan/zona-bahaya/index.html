@@ -195,11 +195,12 @@
       var m = document.getElementById('status-modal');
       m.classList.remove('hidden'); m.classList.add('flex');
   }
+  // Pasca-hapus: SELALU maju ke halaman utama dengan replace (tanpa entri riwayat baru).
+  // ClincooBack tidak dipakai di sini: tombol kembali cerdas itu untuk tombol 'back' biasa —
+  // setelah proyek dihapus, mundur ke halaman pengaturan proyek yang sudah tidak ada bikin
+  // kesan 'tidak terhapus' dan pengguna tersesat di halaman basi.
   function goHome() {
-      try {
-          if (typeof window.ClincooBack === 'function') { window.ClincooBack(homeUrl()); return; }
-      } catch (e) {}
-      location.href = homeUrl();
+      location.replace(homeUrl());
   }
   async function postJSON(path, bodyObj) {
     var tok = localStorage.getItem('clincoo_auth_token') || '';
