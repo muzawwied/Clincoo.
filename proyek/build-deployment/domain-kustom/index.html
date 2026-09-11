@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<script src="../../../js/loading-state.js?v=3"></script>
   <script src="../../../js/auth-client.js?v=2"></script>
   <script src="../../../js/accent-init.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clincoo_current_project_id',__p);}}catch(e){}})();</script>
@@ -31,13 +32,13 @@
     <script src="../../../js/api.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="../../../js/api.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
     @keyframes domainShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .domain-shimmer { background: linear-gradient(90deg,#f9fafb 25%,#f3f4f6 50%,#f9fafb 75%) !important; background-size: 200% 100% !important; animation: domainShimmer 1.4s infinite; color: transparent !important; }
-    .dark-mode .domain-shimmer { background: linear-gradient(90deg,#111 25%,#1c1c1c 50%,#111 75%) !important; background-size: 200% 100% !important; }
     body { font-family: 'Inter', sans-serif; }
     
     /* Menyembunyikan scrollbar di seluruh browser */
@@ -140,15 +141,6 @@
     <script>/* clincoo-seo-auto: canonical & og mengikuti domain aktif */
 (function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<3;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.jpg");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.jpg");}catch(e){}})();
     </script>
-<!-- Google tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-KMQ8WBZF6E');
-</script>
-<!-- End Google tag -->
 </head>
 <body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-white">
   <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
@@ -176,7 +168,7 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Domain kustom yang digunakan untuk situs produksi</p>
           </div>
           <div class="w-full sm:w-80">
-            <input type="text" value="" id="custom-domain-input" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-[#111] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-400 dark:focus:border-gray-500 domain-shimmer" placeholder="contohdomain.com" disabled>
+            <input type="text" value="" id="custom-domain-input" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none domain-shimmer" placeholder="contohdomain.com" disabled>
             <p id="cf-domain-status" class="text-xs mt-1.5 hidden"></p>
           </div>
         </div>
@@ -243,14 +235,14 @@
                   <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-value">situs-anda.pages.dev</td>
                 </tr>
                 <tr class="bg-white dark:bg-[#0a0a0a]">
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">CNAME</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-type">ALIAS / ANAME</td>
                   <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-name">@ (root)</td>
                   <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-value">situs-anda.pages.dev</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Untuk root domain (@): sebagian provider tidak menerima CNAME di root — gunakan fitur "CNAME Flattening" (Cloudflare) / "ALIAS" / "ANAME" dengan nilai yang sama. SSL otomatis aktif beberapa menit setelah DNS terverifikasi.</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 leading-relaxed">Catatan untuk root (@): aturan DNS standar melarang CNAME di root, jadi mayoritas provider (Niagahoster, Hostinger, Namecheap, dll.) menolaknya. Jika nameserver domain Anda sudah di Cloudflare, gunakan CNAME (flattening otomatis). Jika di provider lain, gunakan tipe ALIAS/ANAME. Cara termudah: pindahkan nameserver domain ke Cloudflare (gratis), lalu CNAME @ pasti diterima. SSL aktif otomatis beberapa menit setelah DNS terverifikasi.</p>
         </div>
 
       </div>
@@ -410,7 +402,7 @@
     function updateDNSRecords(domain, pagesUrl) {
         // Cloudflare Pages: custom domain pakai CNAME ke <project>.pages.dev (TANPA A record IP).
         // Nilai diambil real-time dari hasil deploy proyek (st.pages_url).
-        const target = (pagesUrl || '').replace('https://', '').replace(/\/$/, '') || 'Memuat data deploy...';
+        const target = (pagesUrl || '').replace('https://', '').replace(/\/$/, '') || 'situs-anda.pages.dev';
         const aName = document.getElementById('dns-a-name');
         const aValue = document.getElementById('dns-a-value');
         const cnameName = document.getElementById('dns-cname-name');
@@ -464,8 +456,7 @@
         } catch (e) {}
     }
 
-    async function loadRealDomainStatus(retriesLeft) {
-        if (retriesLeft === undefined) retriesLeft = 2; // percobaan ulang otomatis bila jaringan lambat/goyang
+    async function loadRealDomainStatus() {
         const pid = localStorage.getItem('clincoo_current_project_id') || '';
         const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
         try {
@@ -496,24 +487,9 @@
                 paintDomainLabel('Domain belum terhubung', false);
             }
         } catch (e) {
-            if (retriesLeft > 0) {
-                // Jaringan mobile sering goyang sebentar — coba lagi otomatis sebelum menyerah
-                setTimeout(function () { loadRealDomainStatus(retriesLeft - 1); }, 1800);
-                return;
-            }
             const cached = readDomainCache();
-            if (!cached || !cached.label) paintDomainLabelWithRetry();
+            if (!cached || !cached.label) paintDomainLabel('Gagal memuat status', false);
         }
-    }
-    // Status gagal total setelah retry — beri tombol "Coba lagi" manual, bukan cuma teks mati
-    function paintDomainLabelWithRetry() {
-        const lbl = document.getElementById('cf-domain-status');
-        if (!lbl) return;
-        lbl.innerHTML = 'Gagal memuat status &mdash; <a href="#" id="retry-domain-status" class="underline font-semibold">Coba lagi</a>';
-        lbl.classList.remove('hidden');
-        lbl.className = 'text-xs mt-1.5 font-medium text-red-600 dark:text-red-400';
-        const retryLink = document.getElementById('retry-domain-status');
-        if (retryLink) retryLink.addEventListener('click', function (e) { e.preventDefault(); paintDomainLabel('Memuat status…', false); loadRealDomainStatus(); });
     }
 
     // Override selectPopoverOption to also save
