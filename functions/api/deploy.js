@@ -132,9 +132,8 @@ function projHash(projectId) {
 async function resolvePagesName(db, table, projectId) {
   const stored = await getSetting(db, table, projectId, 'pages_project');
   if (stored) return stored;
-  const appName = await getSetting(db, table, projectId, 'app_name');
-  const slug = slugify(appName) || slugify(projectId) || 'app';
-  return ('cno-be2' + slug + '-' + projHash(projectId)).slice(0, 60);
+  // Subdomain pendek (maks 9 karakter): cno-<hash5> — unik per project, isolasi antar akun tetap terjaga.
+  return 'cno-' + projHash(projectId);
 }
 
 // Lihat project Pages tanpa membuat baru (8000007 = belum ada).

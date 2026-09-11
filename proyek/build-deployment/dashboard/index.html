@@ -187,8 +187,8 @@
                 <h2 class="text-xl font-bold text-gray-900">Build & deployment</h2>
                 
                 <div class="space-y-6">
-                    <!-- Dropdown: Source -->
-                    <div class="relative w-full sm:w-64">
+                    <!-- Dropdown: Source (muncul setelah deploy dari branch ada) -->
+                    <div id="source-config-block" class="relative w-full sm:w-64 hidden">
                         <label class="block text-sm font-semibold text-gray-900 mb-2">Sumber</label>
                         <div class="custom-select-trigger inline-flex items-center justify-between w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleDropdown(this, 'source', ['Deploy dari branch', 'Clincoo Actions'])">
                             <span id="label-source" class="font-medium">Deploy dari branch</span>
@@ -257,7 +257,7 @@
                     <button onclick="saveCustomDomain()" id="btn-save-domain" class="custom-domain-btn min-w-[72px] h-[34px] px-3 bg-white text-gray-900 border border-gray-300 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center shadow-sm">Simpan</button>
                 </div>
 
-                <p class="pt-2"><span id="cf-domain-status" class="text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-semibold">memuat status…</span></p>
+                <p class="pt-2"><span id="cf-domain-status" class="text-xs font-medium text-gray-500">memuat status…</span></p>
 
                 <div class="pt-4 flex items-start gap-3">
                     <div class="mt-0.5">
@@ -388,7 +388,12 @@
         
         // Render state FINAL dari data server: hijau + link + waktu + deployer + domain.
         // Dipakai saat situs SUDAH aktif (langsung tampil, tanpa lewat fase kuning) dan saat polling selesai.
+        function showSourceConfigBlock() {
+            const blk = document.getElementById('source-config-block');
+            if (blk) blk.classList.remove('hidden');
+        }
         function showDeployedState(st) {
+            showSourceConfigBlock();
             const dep = st.last_deployment;
             const ok = dep && ['success', 'active'].includes(dep.status);
             const indicator = document.getElementById('live-indicator');
@@ -414,6 +419,7 @@
         }
 
         function startDeploySimulation() {
+            showSourceConfigBlock();
             const indicator = document.getElementById('live-indicator');
             const shimmer = document.getElementById('link-shimmer');
             const link = document.getElementById('deployed-link');
@@ -444,18 +450,64 @@
             }, 4000);
         }
 
+        function toggleDropdown(element, targetId, optionsArray) {
+            const wrapper = element.parentElement;
+            const existingDropdown = wrapper.querySelector('.custom-dropdown-menu');
+            closeAllDropdowns();
+            if (existingDropdown) return;
+            const labelEl = document.getElementById('label-' + targetId);
+            const currentValue = labelEl ? labelEl.textContent.trim() : '';
+            const dropdown = document.createElement('div');
+            dropdown.className = 'custom-dropdown-menu absolute top-full left-0 w-full mt-1 z-50 bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl overflow-hidden flex flex-col fade-in';
+            let optionsHtml = '';
+            optionsArray.forEach(option => {
+                const isActive = option === currentValue;
+                optionsHtml += `
+                    <div class="w-full px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer flex items-center justify-between ${isActive ? 'bg-gray-50 text-black dark:bg-gray-800 dark:text-white' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'}" onclick="selectOption(event, '${targetId}', '${option}')">
+                        <span>${option}</span>
+                        ${isActive ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
+                    </div>
+                `;
+            });
+            dropdown.innerHTML = optionsHtml;
+            wrapper.appendChild(dropdown);
+            const chevron = element.querySelector('[data-lucide="chevron-down"]');
+            if (chevron) chevron.classList.add('rotate-180');
+            lucide.createIcons();
+            setTimeout(() => { document.addEventListener('click', outsideClickListener); }, 10);
+        }
+        function closeAllDropdowns() {
+            const openDropdowns = document.querySelectorAll('.custom-dropdown-menu');
+            openDropdowns.forEach(dropdown => {
+                const chevron = dropdown.parentElement.querySelector('.rotate-180');
+                if (chevron) chevron.classList.remove('rotate-180');
+                dropdown.remove();
+            });
+            document.removeEventListener('click', outsideClickListener);
+        }
+        function outsideClickListener(e) {
+            if (!e.target.closest('.custom-select-trigger') && !e.target.closest('.custom-dropdown-menu')) {
+                closeAllDropdowns();
+            }
+        }
+        function selectOption(event, targetId, value) {
+            event.stopPropagation();
+            const label = document.getElementById('label-' + targetId);
+            if (label) label.textContent = value;
+            closeAllDropdowns();
+        }
         function renderRealDomains(domains) {
             const badge = document.getElementById('cf-domain-status');
             if (!badge) return;
             if (!domains.length) {
                 badge.textContent = 'Domain kustom belum terhubung ke Cloudflare';
-                badge.className = 'text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-semibold';
+                badge.className = 'text-xs mt-1.5 font-medium text-gray-500';
                 return;
             }
             const d = domains[domains.length - 1];
             const active = d.status === 'active';
             badge.textContent = d.name + ' — ' + (active ? 'AKTIF' : 'menunggu verifikasi DNS (' + (d.status || 'pending') + ')');
-            badge.className = 'text-[11px] px-2.5 py-1 rounded-full font-semibold ' + (active ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700 animate-pulse');
+            badge.className = 'text-xs mt-1.5 font-medium ' + (active ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400 animate-pulse');
             if (!active) {
                 if (deployState.domainTimer) clearInterval(deployState.domainTimer);
                 deployState.domainTimer = setInterval(async () => {
