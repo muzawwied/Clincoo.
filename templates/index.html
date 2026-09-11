@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galeri Template Web — Clincoo</title>
+<meta name="description" content="Galeri template web siap pakai dari Clincoo: portfolio, landing page SaaS, toko online, sampai aplikasi produktivitas. Pilih template, login, dan langsung deploy dalam hitungan menit.">
+<meta property="og:title" content="Galeri Template Web — Clincoo">
+<meta property="og:description" content="Template web siap pakai: portfolio, landing page, toko online, dan aplikasi. Pakai template, login, langsung deploy.">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23000000%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23ffffff%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Menyembunyikan scrollbar di seluruh browser (pola Clincoo) */
+        ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .tpl-card { animation: fadeInUp 0.35s ease both; }
+
+        /* Popover dropdown urutkan */
+        #sort-popover { transform-origin: top right; animation: fadeInUp 0.15s ease both; }
+        #sort-popover.hidden { display: none; }
+
+        /* Skeleton saat gambar pratinjau belum termuat */
+        .img-skeleton { background: linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+        body.dark-mode .img-skeleton { background: linear-gradient(90deg,#111 25%,#1c1c1c 50%,#111 75%); background-size: 200% 100%; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+    <script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+</head>
+<body class="bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white min-h-screen antialiased">
+    <script>try{var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}}catch(e){}</script>
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-40 border-b border-gray-100 dark:border-[#222] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+            <a href="../" class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="w-7 h-7">
+                    <circle cx="16" cy="16" r="16" fill="#000000" class="dark:fill-white"/>
+                    <g fill="#ffffff" class="dark:fill-black">
+                        <path d="M10 16C7 10 9 7 12 7C14 7 15 11 13 16Z"/>
+                        <path d="M12 9C10.5 11 11 13 12 14.5C13 13 13.5 11 12 9Z" fill="#000000" class="dark:fill-white" opacity="0.25"/>
+                        <path d="M22 16C25 10 23 7 20 7C18 7 17 11 19 16Z"/>
+                        <path d="M20 9C21.5 11 21 13 20 14.5C19 13 18.5 11 20 9Z" fill="#000000" class="dark:fill-white" opacity="0.25"/>
+                        <path d="M16 27C24 27 28 22.5 28 17C28 12.5 21 11.5 16 11.5C11 11.5 4 12.5 4 17C4 22.5 8 27 16 27Z"/>
+                    </g>
+                    <circle cx="12.5" cy="17" r="1.5" fill="#000000" class="dark:fill-white" opacity="0.6"/>
+                    <circle cx="19.5" cy="17" r="1.5" fill="#000000" class="dark:fill-white" opacity="0.6"/>
+                    <polygon points="16,20 15,18.5 17,18.5" fill="#000000" class="dark:fill-white" opacity="0.5"/>
+                </svg>
+                <span class="font-bold text-[15px]">Clincoo</span>
+            </a>
+            <a href="../auth/" class="text-sm font-semibold text-white bg-black dark:bg-white dark:text-black px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">Masuk</a>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-6 text-center">
+        <p class="text-xs font-semibold tracking-widest text-gray-400 dark:text-gray-500 uppercase mb-2">Galeri Template</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-3">Template web siap pakai, langsung deploy.</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto leading-relaxed">Pilih template, masuk ke akun Clincoo kamu, dan situs langsung online dalam hitungan menit. Tanpa mulai dari nol.</p>
+    </section>
+
+    <!-- TOOLBAR: search + dropdown urutkan + filter kategori -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-8">
+        <div class="flex flex-col sm:flex-row gap-3">
+
+            <!-- Search -->
+            <div class="relative flex-1">
+                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input id="tpl-search" type="text" placeholder="Cari template..." class="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border border-gray-200 dark:border-[#222] bg-gray-50 dark:bg-[#111] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-400 dark:focus:border-gray-500 transition-colors">
+            </div>
+
+            <!-- Dropdown popover: Urutkan -->
+            <div class="relative sm:w-44">
+                <button id="sort-btn" type="button" class="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-sm rounded-lg border border-gray-200 dark:border-[#222] bg-gray-50 dark:bg-[#111] hover:border-gray-300 dark:hover:border-[#333] transition-colors">
+                    <span class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 truncate">Urutkan: <span id="sort-label" class="font-semibold text-gray-900 dark:text-white">Terbaru</span></span>
+                    <svg id="sort-chevron" class="w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="sort-popover" class="hidden absolute right-0 mt-2 w-full sm:w-44 bg-white dark:bg-[#141414] border border-gray-100 dark:border-[#2a2a2a] rounded-lg shadow-lg py-1 z-50">
+                    <button type="button" data-sort="new" class="sort-option w-full text-left px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1e1e1e] transition-colors">Terbaru</button>
+                    <button type="button" data-sort="az" class="sort-option w-full text-left px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1e1e1e] transition-colors">Nama A ke Z</button>
+                    <button type="button" data-sort="za" class="sort-option w-full text-left px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1e1e1e] transition-colors">Nama Z ke A</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter kategori -->
+        <div id="tpl-filters" class="flex items-center gap-2 mt-3 overflow-x-auto pb-1"></div>
+    </section>
+
+    <!-- GRID TEMPLATE -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
+        <div id="tpl-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="tpl-empty" class="hidden text-center py-16">
+            <p class="text-sm text-gray-400 dark:text-gray-500">Tidak ada template yang cocok dengan pencarianmu.</p>
+        </div>
+    </main>
+
+    <!-- CTA bawah -->
+    <section class="border-t border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#0d0d0d]">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 text-center">
+            <h2 class="text-lg sm:text-xl font-bold mb-2">Punya template sendiri?</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-5 leading-relaxed">Karya terbaikmu bisa tampil di galeri ini dan dipakai ribuan pengguna Clincoo.</p>
+            <a href="../auth/" class="inline-block text-sm font-semibold text-white bg-black dark:bg-white dark:text-black px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity">Mulai dengan Clincoo</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-100 dark:border-[#222]">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-xs text-gray-400 dark:text-gray-500">© 2026 Clincoo — Ruang kerja untuk membangun, mendeploy, dan berkolaborasi.</p>
+            <div class="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
+                <a href="../akun/tentang/" class="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Tentang</a>
+                <a href="../" class="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Beranda</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // ===== Data template (public) — sinkron dengan js/templates-data.js =====
+    var TEMPLATES = [
+        { key: "portfolio", name: "Portfolio Profesional", cat: "Portfolio", desc: "Portfolio pribadi full-stack developer — desain gelap elegan dengan bagian karya, layanan, blog, dan kontak.", url: "https://muzawwied.github.io/portfolio/" },
+        { key: "saas", name: "Landing Page SaaS", cat: "Landing Page", desc: "Landing page produk SaaS modern — hero, fitur, showcase, testimoni, pricing, dan FAQ dalam satu halaman ringan yang siap konversi.", url: "https://muzawwied.github.io/saas-landing/" },
+        { key: "topup", name: "Top Up Game", cat: "Toko Online", desc: "Situs top up game instan dengan tema terang/gelap — katalog game populer, pilihan nominal lengkap, metode pembayaran beragam, dan pelacakan status pesanan.", url: "https://muzawwied.github.io/vylonium-topup/" },
+        { key: "tasks", name: "Manajemen Tugas", cat: "Produktivitas", desc: "Aplikasi manajemen tugas profesional — dashboard statistik, papan kanban, kalender, proyek, dan laporan dalam desain terang elegan.", url: "https://muzawwied.github.io/vylonium-tasks/" }
+    ];
+    var IMG_BASE = '../assets/templates/';
+
+    var state = { q: "", cat: "Semua", sort: "new" };
+
+    // ===== Filter kategori =====
+    var cats = ["Semua"].concat(Array.from(new Set(TEMPLATES.map(function (t) { return t.cat; }))));
+    var filterWrap = document.getElementById('tpl-filters');
+    cats.forEach(function (c) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.dataset.cat = c;
+        b.textContent = c;
+        b.className = 'tpl-chip shrink-0 text-xs font-medium px-3.5 py-1.5 rounded-lg border transition-colors';
+        filterWrap.appendChild(b);
+    });
+    function paintChips() {
+        filterWrap.querySelectorAll('.tpl-chip').forEach(function (b) {
+            var on = b.dataset.cat === state.cat;
+            b.className = 'tpl-chip shrink-0 text-xs font-medium px-3.5 py-1.5 rounded-lg border transition-colors ' +
+                (on ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
+                    : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-[#2a2a2a] hover:border-gray-400 dark:hover:border-[#444]');
+        });
+    }
+    filterWrap.addEventListener('click', function (e) {
+        var b = e.target.closest('.tpl-chip');
+        if (!b) return;
+        state.cat = b.dataset.cat;
+        paintChips();
+        render();
+    });
+    paintChips();
+
+    // ===== Dropdown popover urutkan =====
+    var sortBtn = document.getElementById('sort-btn');
+    var sortPop = document.getElementById('sort-popover');
+    var sortChevron = document.getElementById('sort-chevron');
+    var sortLabel = document.getElementById('sort-label');
+    function closeSort() { sortPop.classList.add('hidden'); sortChevron.style.transform = ''; }
+    sortBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!sortPop.classList.contains('hidden')) { closeSort(); return; }
+        sortPop.classList.remove('hidden');
+        sortChevron.style.transform = 'rotate(180deg)';
+    });
+    sortPop.addEventListener('click', function (e) {
+        var b = e.target.closest('.sort-option');
+        if (!b) return;
+        state.sort = b.dataset.sort;
+        sortLabel.textContent = b.textContent.trim();
+        closeSort();
+        render();
+    });
+    document.addEventListener('click', function (e) { if (!sortPop.contains(e.target) && !sortBtn.contains(e.target)) closeSort(); });
+    window.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSort(); });
+
+    // ===== Search =====
+    var searchInput = document.getElementById('tpl-search');
+    searchInput.addEventListener('input', function () {
+        state.q = searchInput.value.trim().toLowerCase();
+        render();
+    });
+
+    // ===== Render grid =====
+    function render() {
+        var items = TEMPLATES.filter(function (t) {
+            var okCat = state.cat === 'Semua' || t.cat === state.cat;
+            var okQ = !state.q || t.name.toLowerCase().indexOf(state.q) !== -1 || t.desc.toLowerCase().indexOf(state.q) !== -1 || t.cat.toLowerCase().indexOf(state.q) !== -1;
+            return okCat && okQ;
+        });
+        if (state.sort === 'az') items.sort(function (a, b) { return a.name.localeCompare(b.name); });
+        else if (state.sort === 'za') items.sort(function (a, b) { return b.name.localeCompare(a.name); });
+
+        var grid = document.getElementById('tpl-grid');
+        var empty = document.getElementById('tpl-empty');
+        grid.innerHTML = '';
+        empty.classList.toggle('hidden', items.length > 0);
+
+        items.forEach(function (t) {
+            var card = document.createElement('article');
+            card.className = 'tpl-card group border border-gray-100 dark:border-[#222] rounded-lg overflow-hidden bg-white dark:bg-[#0d0d0d] hover:border-gray-300 dark:hover:border-[#3a3a3a] hover:shadow-md transition-all';
+
+            // Gambar pratinjau (klik = buka live preview)
+            var imgWrap = document.createElement('a');
+            imgWrap.href = t.url;
+            imgWrap.target = '_blank';
+            imgWrap.rel = 'noopener';
+            imgWrap.className = 'block relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-[#111]';
+            imgWrap.setAttribute('aria-label', 'Pratinjau ' + t.name);
+            var img = document.createElement('img');
+            img.src = IMG_BASE + t.key + '.webp';
+            img.alt = 'Pratinjau template ' + t.name;
+            img.loading = 'lazy';
+            img.className = 'img-skeleton w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-300';
+            img.addEventListener('load', function () { img.classList.remove('img-skeleton'); });
+            imgWrap.appendChild(img);
+
+            var body = document.createElement('div');
+            body.className = 'p-4';
+            var catEl = document.createElement('span');
+            catEl.className = 'inline-block text-[10px] font-semibold tracking-wide uppercase text-gray-400 dark:text-gray-500 mb-1.5';
+            catEl.textContent = t.cat;
+            var title = document.createElement('h3');
+            title.className = 'text-sm font-bold mb-1';
+            title.textContent = t.name;
+            var desc = document.createElement('p');
+            desc.className = 'text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4';
+            desc.textContent = t.desc;
+
+            var actions = document.createElement('div');
+            actions.className = 'flex items-center gap-2';
+            var previewBtn = document.createElement('a');
+            previewBtn.href = t.url;
+            previewBtn.target = '_blank';
+            previewBtn.rel = 'noopener';
+            previewBtn.className = 'flex-1 text-center text-sm font-medium py-2.5 rounded-lg border border-gray-200 dark:border-[#2a2a2a] text-gray-700 dark:text-gray-200 hover:border-gray-400 dark:hover:border-[#444] transition-colors';
+            previewBtn.textContent = 'Preview';
+            var useBtn = document.createElement('button');
+            useBtn.type = 'button';
+            useBtn.className = 'flex-1 text-sm font-semibold py-2.5 rounded-lg bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity';
+            useBtn.textContent = 'Gunakan';
+            useBtn.addEventListener('click', function () { useTemplate(t.key); });
+            actions.appendChild(previewBtn);
+            actions.appendChild(useBtn);
+
+            body.appendChild(catEl);
+            body.appendChild(title);
+            body.appendChild(desc);
+            body.appendChild(actions);
+            card.appendChild(imgWrap);
+            card.appendChild(body);
+            grid.appendChild(card);
+        });
+    }
+
+    // ===== Aksi "Gunakan": simpan pilihan, arahkan ke login/app =====
+    function useTemplate(key) {
+        try { localStorage.setItem('clincoo_pending_template', key); } catch (e) {}
+        var logged = false;
+        try { logged = !!localStorage.getItem('clincoo_auth_token'); } catch (e) {}
+        window.location.href = logged ? '../' : '../auth/';
+    }
+
+    render();
+    </script>
+
+    <script>/* clincoo-seo-auto: canonical & og mengikuti domain aktif */
+(function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<1;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.jpg");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.jpg");}catch(e){}})();
+    </script>
+<!-- Google tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KMQ8WBZF6E');
+</script>
+<!-- End Google tag -->
+</body>
+</html>
