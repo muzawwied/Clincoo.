@@ -429,7 +429,12 @@
             
             <div class="flex items-center justify-between pt-2">
                 <div class="relative">
-                    <button id="add-btn" class="p-2 -ml-2 text-gray-400 hover:text-black rounded-full transition-colors cursor-pointer" aria-expanded="false" title="Lampirkan File">
+                    <button id="team-ai-toggle" class="p-2 -ml-2 rounded-full transition-colors cursor-pointer text-gray-400 hover:text-black" title="Mode Tim AI: beberapa model AI berdiskusi & membangun web bareng (kuota 5x)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </button>
+                <button id="add-btn" class="p-2 text-gray-400 hover:text-black rounded-full transition-colors cursor-pointer" aria-expanded="false" title="Lampirkan File">
                         <svg id="add-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
@@ -1683,6 +1688,31 @@
             renderMessages();
         }
 
+        // ===== MODE TIM AI: beberapa model AI berdiskusi lalu membangun web (kuota 5x) =====
+        let teamModeOn = false;
+        try { teamModeOn = localStorage.getItem('clincoo_team_mode') === '1'; } catch (e) {}
+        const teamToggle = document.getElementById('team-ai-toggle');
+        function applyTeamToggleStyle() {
+            if (!teamToggle) return;
+            if (teamModeOn) {
+                teamToggle.classList.add('bg-black', 'text-white', 'shadow-md');
+                teamToggle.classList.remove('text-gray-400', 'hover:text-black');
+                teamToggle.title = 'Mode Tim AI AKTIF: diskusi multi-model, memakai 5 kuota per pesan';
+            } else {
+                teamToggle.classList.remove('bg-black', 'text-white', 'shadow-md');
+                teamToggle.classList.add('text-gray-400', 'hover:text-black');
+                teamToggle.title = 'Mode Tim AI: beberapa model AI berdiskusi & membangun web bareng (kuota 5x)';
+            }
+        }
+        if (teamToggle) {
+            applyTeamToggleStyle();
+            teamToggle.addEventListener('click', function () {
+                teamModeOn = !teamModeOn;
+                try { localStorage.setItem('clincoo_team_mode', teamModeOn ? '1' : '0'); } catch (e) {}
+                applyTeamToggleStyle();
+            });
+        }
+
         const TOOL_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
         const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clincoo (kuota 25/hari user gratis, 500/hari admin)
 
@@ -2291,7 +2321,7 @@
                         stopGeneration();
                     }
                 }
-            }, 90000); 
+            }, teamModeOn ? 300000 : 90000); 
 
             if (requiresImage) {
                 try {
@@ -2458,6 +2488,7 @@
                                     session_id: currentSessionId || undefined,
                                     project_id: currentProjectId || undefined,
                                     workspace_tools: true,
+                                    team: teamModeOn && hop === 0,
                                     save_user_message: hop === 0
                                 }),
                                 signal: abortController.signal

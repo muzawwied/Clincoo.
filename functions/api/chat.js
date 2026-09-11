@@ -88,7 +88,7 @@ async function resolveUser(env, request) {
   return null;
 }
 
-async function quotaCheck(env, user) {
+async function quotaCheck(env, user, cost = 1) {
   const isAdmin = ADMIN_EMAILS.has(user.email);
   const limit = isAdmin ? ADMIN_DAILY_LIMIT : DAILY_LIMIT;
   const day = new Date().toISOString().slice(0, 10);
@@ -98,10 +98,10 @@ async function quotaCheck(env, user) {
     ).run();
     const row = await env.DB.prepare('SELECT count FROM ai_quota WHERE user_key = ? AND day = ?').bind(user.key, day).first();
     const count = row ? row.count : 0;
-    if (count >= limit) return { exceeded: true, limit };
+    if (count + cost > limit) return { exceeded: true, limit, count };
     await env.DB.prepare(
-      'INSERT INTO ai_quota (user_key, day, count) VALUES (?, ?, 1) ON CONFLICT(user_key, day) DO UPDATE SET count = count + 1'
-    ).bind(user.key, day).run();
+      'INSERT INTO ai_quota (user_key, day, count) VALUES (?, ?, ?) ON CONFLICT(user_key, day) DO UPDATE SET count = count + ?'
+    ).bind(user.key, day, cost, cost).run();
     return { exceeded: false, limit };
   } catch (e) {
     return { exceeded: false, limit }; // gagal DB ≠ blokir user
@@ -283,10 +283,10 @@ function orMessages(messages) {
   if (out.length > 30) out.splice(0, out.length - 30);
   return out;
 }
-async function tryOpenRouter(apiKey, messages, tools) {
+async function tryOpenRouter(apiKey, messages, tools, models) {
   const statuses = [];
   let lastError = null;
-  for (const model of OPENROUTER_MODELS) {
+  for (const model of (models || OPENROUTER_MODELS)) {
     try {
       const payload = { model, messages };
       if (tools) { payload.tools = tools; payload.tool_choice = 'auto'; }
@@ -310,6 +310,105 @@ async function tryOpenRouter(apiKey, messages, tools) {
     } catch (err) { lastError = 'OpenRouter ' + err.message; statuses.push(0); }
   }
   return { error: lastError || 'Semua model OpenRouter gagal', statuses };
+}
+
+// ===== MODE TIM AI: beberapa model berdiskusi lalu membangun web =====
+// Alur: Arsitek (rencana) -> Programmer (tulis file via tools) -> Reviewer (kritik)
+// -> Perbaikan (programmer revisi). Hasil akhir = tool_calls write_file yang
+// dieksekusi klien seperti biasa. Biaya kuota: 5 (tugas gede), lihat TEAM_COST.
+const TEAM_COST = 5;
+const TEAM_STAGE_MODELS = {
+  arsitek: ['nvidia/nemotron-3-super-120b-a12b:free', 'openrouter/free'],
+  programmer: ['nvidia/nemotron-3.5-lightning:free', 'nvidia/nemotron-3-super-120b-a12b:free'],
+  reviewer: ['cohere/north-mini-code:free', 'nvidia/nemotron-3-super-120b-a12b:free'],
+  perbaikan: ['nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-3.5-lightning:free']
+};
+const TEAM_LABELS = {
+  arsitek: 'Arsitek', programmer: 'Programmer', reviewer: 'Reviewer', perbaikan: 'Perbaikan'
+};
+
+// satu panggilan model peran (OR dulu, Gemini cadangan)
+async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tools) {
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userText }
+  ];
+  let r = null;
+  if (orKey) r = await tryOpenRouter(orKey, messages, tools || null, TEAM_STAGE_MODELS[stage]);
+  if ((!r || r.error) && apiKey) {
+    // cadangan Gemini (format konversi sederhana; tools Gemini pakai functionDeclarations)
+    const { systemInstruction, contents } = toGeminiPayload(messages);
+    const gTools = tools ? [{ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS }] : null;
+    r = await tryModels(apiKey, systemInstruction, contents, gTools);
+  }
+  return r || { error: 'Tidak ada provider AI tersedia' };
+}
+
+async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
+  const transcript = [];
+
+  // Tahap 1: Arsitek menyusun rencana situs
+  const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
+    'Kamu adalah ARSITEK WEB senior di Tim AI Clincoo. Dari permintaan user, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 250 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat (path + isi singkat masing-masing), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
+    userPrompt, null);
+  if (r1.error) return { error: 'Arsitek gagal: ' + r1.error };
+  transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
+
+  // Tahap 2: Programmer membangun file web
+  const r2 = await teamStage(env, orKey, apiKey, 'programmer',
+    'Kamu adalah PROGRAMMER WEB di Tim AI Clincoo. Kerjakan rencana arsitek berikut SECARA PENUH: buat SEMUA file web (HTML/CSS/JS) memakai tool write_file — satu write_file per file, konten lengkap, siap jalan. Kode harus rapi, responsif, dan sesuai rencana. Jangan tanya balik, langsung eksekusi semua file.',
+    'RENCANA ARSITEK:\n' + (r1.text || ''), oTools);
+  if (r2.error) return { error: 'Programmer gagal: ' + r2.error, transcript };
+  const draftCalls = r2.tool_calls || [];
+  if (!draftCalls.length) {
+    // programmer cuma ngobrol tanpa bikin file -> gagal tahap ini
+    return { error: 'Programmer tidak menghasilkan file', transcript, text: r2.text };
+  }
+  transcript.push({ stage: 'programmer', model: r2.model, text: draftCalls.map(tc => (tc.args && tc.args.path) ? 'write_file: ' + tc.args.path : tc.name).join(', ') });
+
+  // Tahap 3: Reviewer mengaudit hasil
+  const filesDigest = draftCalls.filter(tc => tc.name === 'write_file').map(tc => {
+    const p = tc.args.path || '?';
+    const c = String(tc.args.content || '');
+    return 'FILE ' + p + ' (' + c.length + ' karakter)\nawal:\n' + c.slice(0, 400) + '\nakhir:\n' + c.slice(-300);
+  }).join('\n\n');
+  const r3 = await teamStage(env, orKey, apiKey, 'reviewer',
+    'Kamu adalah REVIEWER KODE ketat di Tim AI Clincoo. Audit file web berikut terhadap rencana arsitek. Laporkan HANYA masalah yang benar-benar fatal atau penting (link/asset rusak, fitur hilang, HTML rusak, JS error, tidak responsif) — maks 150 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
+    'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest, null);
+  if (r3.error) return { error: 'Reviewer gagal: ' + r3.error, transcript, tool_calls: draftCalls };
+  const reviewText = (r3.text || '').trim();
+  transcript.push({ stage: 'reviewer', model: r3.model, text: reviewText.slice(0, 1000) });
+
+  // Tahap 4: Perbaikan hanya jika reviewer menemukan masalah
+  const needsFix = reviewText.length > 0 && !/^semua ok/i.test(reviewText);
+  let finalCalls = draftCalls;
+  let fixModel = null;
+  if (needsFix) {
+    const r4 = await teamStage(env, orKey, apiKey, 'perbaikan',
+      'Kamu adalah PROGRAMMER WEB senior di Tim AI Clincoo. Temuan reviewer di bawah harus dibereskan. Tulis ULANG HANYA file yang bermasalah dengan tool write_file (overwrite penuh, konten lengkap diperbaiki). Jangan mengulang file yang sudah benar.',
+      'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, oTools);
+    if (!r4.error && r4.tool_calls && r4.tool_calls.length) {
+      // gabung: draft + revisi (revisi menimpa path sama)
+      const byPath = new Map();
+      for (const tc of draftCalls) byPath.set(tc.args.path, tc);
+      for (const tc of r4.tool_calls) byPath.set(tc.args.path, tc);
+      finalCalls = [...byPath.values()];
+      fixModel = r4.model;
+      transcript.push({ stage: 'perbaikan', model: r4.model, text: r4.tool_calls.map(tc => 'revisi: ' + (tc.args && tc.args.path)).join(', ') });
+    }
+  }
+
+  return { transcript, tool_calls: finalCalls, text: '', fixModel };
+}
+
+function teamTranscriptText(transcript) {
+  const icons = { arsitek: '\u{1F9D1}\u200D\u{1F4BB}', reviewer: '\u{1F50D}', perbaikan: '\u{1F527}' };
+  return '\n\n'.join(transcript.map(t => {
+    const label = (TEAM_LABELS[t.stage] || t.stage) + ' (' + (t.model || '?') + ')';
+    const icon = icons[t.stage] || '';
+    const body = (t.text || '').slice(0, 1200);
+    return icon + ' [' + label + ']\n' + body;
+  }));
 }
 
 export async function onRequestPost({ request, env }) {
@@ -363,9 +462,10 @@ export async function onRequestPost({ request, env }) {
     }
 
     // --- Kuota: hanya pesan asli (hop 0). Hop tool lanjutan tidak dihitung ---
+    // Mode Tim AI = tugas gede: 1 pesan memakan TEAM_COST kuota.
     const isFirstHop = body.save_user_message !== false;
     if (isFirstHop) {
-      const q = await quotaCheck(env, user);
+      const q = await quotaCheck(env, user, body.team === true ? TEAM_COST : 1);
       if (q.exceeded) {
         return new Response(JSON.stringify({ quota_exhausted: true, error: QUOTA_MSG }), {
           status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '3600', ...CORS }
@@ -375,6 +475,29 @@ export async function onRequestPost({ request, env }) {
 
     const orKey = await getOpenRouterKey(env);
     const apiKey = await getApiKey(env);
+
+    // ===== MODE TIM AI: diskusi multi-model lalu bangun web =====
+    if (body.team === true) {
+      const lastUser = [...messages].reverse().find(m => m.role === 'user');
+      const userPrompt = (typeof lastUser?.content === 'string' ? lastUser.content : (Array.isArray(lastUser?.content) ? (lastUser.content.find(b => b && b.type === 'text') || {}).text : '')) || '';
+      if (!userPrompt) {
+        return new Response(JSON.stringify({ error: 'Pesan kosong' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+      }
+      const t = await teamOrchestrate(env, orKey, apiKey, userPrompt, body.workspace_tools === true ? orTools() : null);
+      if (t.error && !t.tool_calls) {
+        return new Response(JSON.stringify({ error: 'Tim AI gagal: ' + t.error }), { status: 502, headers: { 'Content-Type': 'application/json', ...CORS } });
+      }
+      const out = {
+        text: (t.tool_calls && t.tool_calls.length
+          ? '\u{1F9E9} Tim AI selesai berdiskusi & membangun:\n' + teamTranscriptText(t.transcript || [])
+          : (t.text || 'Tim AI selesai.') + '\n' + teamTranscriptText(t.transcript || [])),
+        model: 'Tim AI (' + String((t.transcript || []).length + (t.tool_calls ? 1 : 0)) + ' panggilan model)',
+        session_id: body.session_id || ('ls_' + Date.now())
+      };
+      if (t.tool_calls && t.tool_calls.length) out.tool_calls = t.tool_calls;
+      return new Response(JSON.stringify(out), { headers: { 'Content-Type': 'application/json', ...CORS } });
+    }
+
     if (!orKey && !apiKey) {
       return new Response(JSON.stringify({ error: 'Kunci AI (OpenRouter/Gemini) belum dikonfigurasi. Tambahkan lewat Pengaturan → Environment (global).' }), {
         status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
