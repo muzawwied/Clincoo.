@@ -389,7 +389,7 @@
             if (settings.redirect) {
                 selectPopoverOption('redirect', settings.redirect, settings.redirectLabel || 'Redirect ke domain utama');
             }
-            updateDNSRecords(settings.domain || '');
+            updateDNSRecords(settings.domain || '', lastPagesUrl);
         } catch(e) {
             // Jangan biarkan input tetap terkunci bila backend gagal — tampilkan penyebabnya
             const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
