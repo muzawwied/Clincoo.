@@ -227,8 +227,7 @@
                                     <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ClincooPay</p>
                                     <p id="clincoopay-desc" class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Memuat…</p>
                                 </div>
-                                <div id="clincoopay-cta" class="shrink-0"></div>
-                                <div class="radio-indicator shrink-0 ml-2"></div>
+                                <div class="radio-indicator shrink-0"></div>
                             </div>
                             <input type="hidden" name="payment-method" value="ClincooPay">
                         </div>
@@ -659,39 +658,20 @@
 
         async function cpLoad() {
             var desc = document.getElementById('clincoopay-desc');
-            var cta = document.getElementById('clincoopay-cta');
-            if (!desc && !cta) return;
-            if (desc) desc.textContent = 'Memuat…';
-            if (cta) cta.innerHTML = '';
+            if (!desc) return;
+            desc.textContent = 'Memuat…';
             try {
                 var st = await fetch(API_BASE + '/api/clincoopay', { headers: cpAuthHeaders() }).then(function(r) { return r.json(); });
                 cpConnected = !!st.connected;
                 if (st.connected) {
                     var bal = (st.wallet_balance == null) ? '…' : Number(st.wallet_balance).toLocaleString('id-ID');
-                    if (desc) desc.innerHTML = 'Saldo · <span class="font-bold text-gray-900 dark:text-white">' + bal + '</span>';
-                    if (cta) cta.innerHTML =
-                        '<button type="button" onclick="cpUnlink()" class="px-3.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:text-red-500 hover:border-red-300 dark:hover:border-red-500/40 transition-all">Putuskan</button>';
+                    desc.innerHTML = 'Saldo · <span class="font-bold text-gray-900 dark:text-white">' + bal + '</span>';
                 } else {
-                    if (desc) desc.textContent = 'Clincoo wallet';
-                    if (cta) cta.innerHTML =
-                        '<button type="button" onclick="location.href=\'clincoopay/\'" class="px-3.5 py-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-black text-[11px] font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">Hubungkan</button>';
+                    desc.textContent = 'Clincoo wallet';
                 }
             } catch (e) {
-                if (desc) desc.textContent = 'Gagal memuat status ClincooPay.';
-                if (cta) cta.innerHTML = '';
+                desc.textContent = 'Gagal memuat status ClincooPay.';
             }
-        }
-
-        async function cpUnlink() {
-            try {
-                await fetch(API_BASE + '/api/clincoopay', {
-                    method: 'POST',
-                    headers: cpAuthHeaders(),
-                    body: JSON.stringify({ action: 'unlink' })
-                }).then(function(r) { return r.json(); });
-                showModal('Dompet Diputuskan', 'Saldo Clincoo kembali berdiri sendiri dan tidak lagi tersinkron.');
-                cpLoad();
-            } catch (e) {}
         }
 
         cpLoad();
