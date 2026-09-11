@@ -213,18 +213,35 @@
             var card = document.createElement('article');
             card.className = 'tpl-card group border border-gray-100 dark:border-[#222] rounded-lg overflow-hidden bg-white dark:bg-[#0d0d0d] hover:border-gray-300 dark:hover:border-[#3a3a3a] hover:shadow-md transition-all';
 
-            // Gambar pratinjau (klik = buka live preview)
+            // Bar browser mini (rapih, biar thumbnail keliatan seperti tab sungguhan)
+            var frame = document.createElement('div');
+            frame.className = 'border-b border-gray-100 dark:border-[#222] bg-gray-50 dark:bg-[#111] flex items-center gap-2 px-3 py-2';
+            var dots = document.createElement('span');
+            dots.className = 'flex items-center gap-1 shrink-0';
+            ['#f87171', '#fbbf24', '#4ade80'].forEach(function (c) {
+                var d = document.createElement('i');
+                d.className = 'block w-2 h-2 rounded-full';
+                d.style.background = c;
+                dots.appendChild(d);
+            });
+            var urlPill = document.createElement('span');
+            urlPill.className = 'flex-1 min-w-0 truncate text-[10px] text-gray-400 dark:text-gray-500 bg-white dark:bg-[#181818] border border-gray-100 dark:border-[#2a2a2a] rounded-md px-2 py-0.5';
+            urlPill.textContent = t.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+            frame.appendChild(dots);
+            frame.appendChild(urlPill);
+
+            // Gambar pratinjau — aspect-video (16:9, pas sama ukuran asli 1280x720) agar tidak terpotong
             var imgWrap = document.createElement('a');
             imgWrap.href = t.url;
             imgWrap.target = '_blank';
             imgWrap.rel = 'noopener';
-            imgWrap.className = 'block relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-[#111]';
+            imgWrap.className = 'block relative aspect-video overflow-hidden bg-gray-100 dark:bg-[#111]';
             imgWrap.setAttribute('aria-label', 'Pratinjau ' + t.name);
             var img = document.createElement('img');
             img.src = IMG_BASE + t.key + '.webp';
             img.alt = 'Pratinjau template ' + t.name;
             img.loading = 'lazy';
-            img.className = 'img-skeleton w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-300';
+            img.className = 'img-skeleton w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300';
             img.addEventListener('load', function () { img.classList.remove('img-skeleton'); });
             imgWrap.appendChild(img);
 
@@ -260,6 +277,7 @@
             body.appendChild(title);
             body.appendChild(desc);
             body.appendChild(actions);
+            card.appendChild(frame);
             card.appendChild(imgWrap);
             card.appendChild(body);
             grid.appendChild(card);
