@@ -282,11 +282,11 @@
         document.getElementById('billing-text').classList.remove('clincoo-shimmer');
         document.getElementById('billing-popover').classList.add('hidden');
         const cycle = text.indexOf('Tahunan') === 0 ? 'Tahunan' : 'Bulanan';
-        fetch(SUB_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ billingCycle: cycle }) }).catch(function(){});
+        fetch(SUB_API, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()), body: JSON.stringify({ billingCycle: cycle }) }).catch(function(){});
     }
     
     // === Data langganan dari D1 (nyambung sama halaman upgrade) ===
-    const SUB_API = 'https://clincoo-be2.pages.dev/api/subscription';
+    const SUB_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/subscription';
     let subData = null;
     const fmtID = function(n){ return Number(n).toLocaleString('id-ID'); };
 
@@ -331,9 +331,15 @@
         setVal('next-billing', nbText);
     }
 
+    function authHeaders() {
+        const hdr = {};
+        const tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+        if (tok) hdr['Authorization'] = 'Bearer ' + tok;
+        return hdr;
+    }
     async function loadSubscription(){
         try {
-            const res = await fetch(SUB_API);
+            const res = await fetch(SUB_API, { headers: authHeaders() });
             subData = await res.json();
             if(!subData || subData.error) throw new Error(subData ? subData.error : 'no data');
             fillSubscription(subData);

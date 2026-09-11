@@ -244,6 +244,13 @@
         // Backend API — hosted on Cloudflare Pages
         const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '';
         const WALLET_API_URL = API_BASE + '/api/wallet';
+        // Tanpa token, backend mengira user belum login -> saldo ClincooPay (mirroring) tidak pernah diambil.
+        function walletAuthHeaders(extra) {
+            const hdr = Object.assign({}, extra || {});
+            const tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+            if (tok) hdr['Authorization'] = 'Bearer ' + tok;
+            return hdr;
+        }
         var TOPUP_API = API_BASE + '/api/topup';
         let currentBalance = 0;
 
@@ -282,7 +289,7 @@
 
         async function initWalletFromD1() {
             try {
-                const res = await fetch(WALLET_API_URL).then(r => r.json());
+                const res = await fetch(WALLET_API_URL, { headers: walletAuthHeaders() }).then(r => r.json());
                 currentBalance = res.balance || 0;
             } catch(e) {}
         }
@@ -309,7 +316,7 @@
 
         async function renderBalance() {
             try {
-                const res = await fetch(WALLET_API_URL).then(r => r.json());
+                const res = await fetch(WALLET_API_URL, { headers: walletAuthHeaders() }).then(r => r.json());
                 currentBalance = res.balance || 0;
             } catch(e) {}
             const balSkeleton = document.getElementById('balance-skeleton');
@@ -321,7 +328,7 @@
 
         async function getTransactions() {
             try {
-                const res = await fetch(WALLET_API_URL + '?action=transactions').then(r => r.json());
+                const res = await fetch(WALLET_API_URL + '?action=transactions', { headers: walletAuthHeaders() }).then(r => r.json());
                 return res.transactions || [];
             } catch(e) { return []; }
         }

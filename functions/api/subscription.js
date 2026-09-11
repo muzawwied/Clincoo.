@@ -69,10 +69,17 @@ export async function onRequestGet({ request, env }) {
       }
     }
 
+    // Jumlah proyek diambil dari user_projects MILIK user yang login
+    // (dulu salah: COUNT(*) dari tabel 'projects' tanpa scope user -> selalu 0 / bocor antar akun).
     let projectCount = 0;
     try {
-      const projResult = await db.prepare('SELECT COUNT(*) as c FROM projects').first();
-      projectCount = projResult?.c || 0;
+      if (user) {
+        const projResult = await db.prepare('SELECT COUNT(*) as c FROM user_projects WHERE user_id = ?').bind(user.id).first();
+        projectCount = projResult?.c || 0;
+      } else {
+        const projResult = await db.prepare('SELECT COUNT(*) as c FROM user_projects').first();
+        projectCount = projResult?.c || 0;
+      }
     } catch(e) {}
 
     return new Response(JSON.stringify({
