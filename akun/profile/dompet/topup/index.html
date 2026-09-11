@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <script>/* base dinamis: URL bersih per-step (mis. /topup/qris/) tetap memuat aset dari /topup/ */
-  (function(){var p=location.pathname.replace(/[^/]+\.html$/,'');var m=p.match(/\/(nominal|konfirmasi|qris)\/?$/);if(m)p=p.slice(0,m.index);if(!/\/$/.test(p))p+='/';document.write('<base href="'+p+'">');})();</script>
+  (function(){var p=location.pathname.replace(/[^/]+\.html$/,'');var m=p.match(/\/(metode|nominal|konfirmasi|qris)\/?$/);if(m)p=p.slice(0,m.index);if(!/\/$/.test(p))p+='/';document.write('<base href="'+p+'">');})();</script>
   <script src="../../../../js/auth-client.js?v=2"></script>
     <script src="../../../../js/accent-init.js"></script>
     <meta charset="UTF-8">
@@ -547,7 +547,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             try { lucide.createIcons(); } catch (e) {}
             resetKeypad();
-            var stepSeg = (location.pathname.match(/\/(nominal|konfirmasi|qris)\/?$/) || [])[1] || '';
+            var stepSeg = (location.pathname.match(/\/(metode|nominal|konfirmasi|qris)\/?$/) || [])[1] || '';
             goToStep1();
             // Order QRIS aktif? Langsung kembali ke step QR (tahan saat refresh)
             qrisRestore();
@@ -558,8 +558,8 @@
                     if (smEl) { smEl.classList.add('hidden'); smEl.classList.remove('flex'); }
                     if (saEl) { saEl.classList.remove('hidden'); saEl.classList.add('flex'); }
                     setStepPath('nominal');
-                } else if (stepSeg === 'qris') {
-                    setStepPath(''); // /qris tanpa order aktif -> kembali ke metode
+                } else if (stepSeg === 'qris' || stepSeg === 'konfirmasi') {
+                    setStepPath('metode'); // path step tanpa state aktif -> kembali ke metode
                 }
             }
         });
@@ -573,7 +573,7 @@
         // (shareable, tahan refresh via _redirects 200, tanpa menumpuk riwayat back)
         var TOPUP_BASE = (function () {
             var p = location.pathname.replace(/[^/]+\.html$/, '');
-            var m = p.match(/\/(nominal|konfirmasi|qris)\/?$/);
+            var m = p.match(/\/(metode|nominal|konfirmasi|qris)\/?$/);
             if (m) p = p.slice(0, m.index);
             if (!/\/$/.test(p)) p += '/';
             return p;
@@ -590,7 +590,7 @@
             var stepAmount = document.getElementById('step-amount');
             if (stepMethod) { stepMethod.classList.remove('hidden'); stepMethod.classList.add('flex'); }
             if (stepAmount) { stepAmount.classList.add('hidden'); stepAmount.classList.remove('flex'); }
-            setStepPath('');
+            setStepPath('metode');
         }
 
         function goToStep2() {

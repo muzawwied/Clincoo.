@@ -80,6 +80,8 @@
 /visibilitas-akses.html    /proyek/pengaturan/visibilitas-akses/    301
 
 # Langkah top-up (step dalam satu halaman) — 200 rewrite agar URL bersih tanpa hash, aset aman via base dinamis
+/akun/profile/dompet/topup/metode    /akun/profile/dompet/topup/    200
+/akun/profile/dompet/topup/metode/   /akun/profile/dompet/topup/    200
 /akun/profile/dompet/topup/nominal    /akun/profile/dompet/topup/    200
 /akun/profile/dompet/topup/nominal/   /akun/profile/dompet/topup/    200
 /akun/profile/dompet/topup/konfirmasi    /akun/profile/dompet/topup/    200
