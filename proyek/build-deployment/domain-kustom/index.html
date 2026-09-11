@@ -168,7 +168,10 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Domain kustom yang digunakan untuk situs produksi</p>
           </div>
           <div class="w-full sm:w-80">
-            <input type="text" value="" id="custom-domain-input" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none domain-shimmer" placeholder="contohdomain.com" disabled>
+            <div class="flex items-center gap-2">
+              <input type="text" value="" id="custom-domain-input" class="flex-1 min-w-0 px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none domain-shimmer" placeholder="contohdomain.com" disabled>
+              <button type="button" id="btn-save-domain" onclick="saveDomainFromButton()" disabled class="shrink-0 px-4 py-2 text-sm font-semibold rounded-lg bg-black text-white dark:bg-white dark:text-black disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">Simpan</button>
+            </div>
             <p id="cf-domain-status" class="text-xs mt-1.5 hidden"></p>
           </div>
         </div>
@@ -382,6 +385,7 @@
             const settings = data.domain_settings ? JSON.parse(data.domain_settings) : {};
             const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
             if (domainInput) { domainInput.classList.remove('domain-shimmer'); domainInput.disabled = false; }
+            var _sb1 = document.getElementById('btn-save-domain'); if (_sb1) _sb1.disabled = false;
             if (domainInput && settings.domain && !domainInput.dataset.dirty) {
                 domainInput.value = settings.domain;
                 writeDomainCache({ domain: settings.domain });
@@ -394,6 +398,7 @@
             // Jangan biarkan input tetap terkunci bila backend gagal — tampilkan penyebabnya
             const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
             if (domainInput) { domainInput.classList.remove('domain-shimmer'); domainInput.disabled = false; }
+            var _sb1 = document.getElementById('btn-save-domain'); if (_sb1) _sb1.disabled = false;
             const cached = readDomainCache();
             if (!cached || !cached.domain) paintDomainLabel('Gagal memuat data', false);
         }
@@ -438,7 +443,26 @@
             await ClincooAPI.logActivity('domain_updated', 'Domain: ' + settings.domain);
             updateDNSRecords('', lastPagesUrl); // nilai record = URL deploy asli, bukan placeholder
             if (settings.domain) attachDomainToPages(settings.domain);
-        } catch(e) {}
+        } catch(e) { window.__domainSaveError = (e && e.message) ? e.message : 'gagal menyimpan'; }
+    }
+
+    // Tombol Simpan Domain: state eksplisit Menyimpan -> Tersimpan/Gagal (teks saja, tanpa animasi)
+    async function saveDomainFromButton() {
+        const btn = document.getElementById('btn-save-domain');
+        if (!btn || btn.disabled) return;
+        const domainInput = document.querySelector('input[placeholder="contohdomain.com"]');
+        if (domainInput) { delete domainInput.dataset.dirty; }
+        btn.disabled = true;
+        btn.textContent = 'Menyimpan...';
+        window.__domainSaveError = '';
+        try { await saveDomainSettings(); } catch (e) {}
+        if (window.__domainSaveError) {
+            btn.textContent = 'Gagal — coba lagi';
+            setTimeout(function () { btn.textContent = 'Simpan'; btn.disabled = false; }, 1800);
+        } else {
+            btn.textContent = 'Tersimpan ✓';
+            setTimeout(function () { btn.textContent = 'Simpan'; btn.disabled = false; }, 1600);
+        }
     }
 
     async function attachDomainToPages(domain) {
@@ -515,6 +539,7 @@
                 domainInput.value = cached.domain;
                 domainInput.classList.remove('domain-shimmer');
                 domainInput.disabled = false;
+                var _sb2 = document.getElementById('btn-save-domain'); if (_sb2) _sb2.disabled = false;
             }
         }
         // 2) Muat data segar dari server — PARALEL, bukan berurutan
