@@ -137,7 +137,7 @@ function renderProjects() {
     function createAllCard(proj) {
         const title = esc(proj.aiName || proj.title || 'Proyek Tanpa Nama');
         const desc = esc(proj.aiDesc || proj.prompt || '');
-        return '<div class="w-full bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex items-center gap-4" onclick="openProject(\'' + esc(proj.id) + '\')">' +
+        return '<div data-proj-id="' + esc(proj.id) + '" class="relative w-full bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex items-center gap-4" onclick="openProject(\'' + esc(proj.id) + '\')">' +
             '<div class="w-20 h-20 shrink-0 bg-[#F9FAFB] rounded-xl p-2.5 flex flex-col justify-between border border-gray-100 group-hover:border-gray-200 transition-colors">' +
             '<div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div></div>' +
             '<div class="flex-1 min-w-0"><h3 class="font-semibold text-gray-900 text-base group-hover:text-black truncate">' + title + '</h3>' +
@@ -184,8 +184,26 @@ function openProject(id) {
 }
 
 // Popup konfirmasi hapus proyek (CTA teks saja, radius kecil) — disuntik sekali per halaman
+// Toast teks sederhana (preferensi notifikasi teks-saja)
+function _showToast(msg, kind) {
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translate(-50%,12px);z-index:999;' +
+        'padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;color:#fff;' +
+        'background:' + (kind === 'error' ? '#dc2626' : '#111') + ';box-shadow:0 8px 24px rgba(0,0,0,.18);' +
+        'opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;';
+    document.body.appendChild(t);
+    requestAnimationFrame(function () { t.style.opacity = '1'; t.style.transform = 'translate(-50%,0)'; });
+    setTimeout(function () { t.style.opacity = '0'; t.style.transform = 'translate(-50%,12px)'; setTimeout(function () { t.remove(); }, 350); }, 2200);
+}
 function _ensureDeleteModal() {
     if (document.getElementById('confirm-delete-modal')) return;
+    if (!document.getElementById('clincoo-delete-spin-css')) {
+        const st = document.createElement('style');
+        st.id = 'clincoo-delete-spin-css';
+        st.textContent = '.cc-spin{animation:cc-spin .8s linear infinite}@keyframes cc-spin{to{transform:rotate(360deg)}}.cc-deleting{opacity:.45;pointer-events:none;filter:grayscale(.3)}';
+        document.head.appendChild(st);
+    }
     const div = document.createElement('div');
     div.innerHTML =
         '<div id="confirm-delete-modal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
@@ -193,6 +211,7 @@ function _ensureDeleteModal() {
         '<h3 class="text-base font-semibold text-gray-900">Hapus proyek ini?</h3>' +
         '<p id="confirm-delete-name" class="text-sm text-gray-500 mt-1 px-2 truncate"></p>' +
         '<p class="text-[13px] text-gray-400 mt-2 leading-snug">Semua data proyek akan dihapus, <span class="text-gray-500">termasuk situs yang sudah dipublish dan link publiknya</span>.</p>' +
+        '<p id="confirm-delete-error" class="text-xs text-red-600 mt-2 hidden">Gagal menghapus proyek. Periksa koneksi lalu coba lagi.</p>' +
         '<div class="flex items-center justify-center gap-10 mt-5">' +
         '<button type="button" id="confirm-delete-cancel" class="text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors px-1 py-0.5">Batal</button>' +
         '<button type="button" id="confirm-delete-ok" class="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors px-1 py-0.5">Hapus</button>' +
@@ -201,16 +220,49 @@ function _ensureDeleteModal() {
     const modal = document.getElementById('confirm-delete-modal');
     modal.addEventListener('click', function (e) { if (e.target === modal) _closeDeleteModal(); });
     document.getElementById('confirm-delete-cancel').addEventListener('click', _closeDeleteModal);
-    document.getElementById('confirm-delete-ok').addEventListener('click', function () {
+    document.getElementById('confirm-delete-ok').addEventListener('click', async function () {
         const id = _pendingDeleteId;
-        _closeDeleteModal();
-        if (id) _doDeleteProject(id);
+        if (!id) { _closeDeleteModal(); return; }
+        const okBtn = document.getElementById('confirm-delete-ok');
+        const cancelBtn = document.getElementById('confirm-delete-cancel');
+        // status menghapus: tombol berputar, kartu proyek diredupkan + spinner
+        okBtn.disabled = true;
+        okBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 inline-block align-[-3px] cc-spin"></i> Menghapus...';
+        if (cancelBtn) cancelBtn.style.visibility = 'hidden';
+        document.querySelectorAll('[data-proj-id="' + id + '"]').forEach(function (el) {
+            el.classList.add('cc-deleting');
+            el.insertAdjacentHTML('beforeend', '<div class="cc-del-overlay absolute inset-0 flex items-center justify-center"><i data-lucide="loader-2" class="w-6 h-6 text-gray-900 cc-spin"></i></div>');
+        });
+        try { lucide.createIcons(); } catch (e) {}
+        let ok = false;
+        try { ok = await _doDeleteProject(id); } catch (e) { ok = false; }
+        if (ok) {
+            _closeDeleteModal();
+            _showToast('Proyek dihapus', 'success');
+        } else {
+            const errEl = document.getElementById('confirm-delete-error');
+            if (errEl) errEl.classList.remove('hidden');
+            if (okBtn) { okBtn.disabled = false; okBtn.innerHTML = 'Coba Lagi'; }
+            document.querySelectorAll('.cc-del-overlay').forEach(function (ov) { ov.remove(); });
+            document.querySelectorAll('.cc-deleting').forEach(function (el) { el.classList.remove('cc-deleting'); });
+        }
     });
+}
+function _resetDeleteModalUI() {
+    const okBtn = document.getElementById('confirm-delete-ok');
+    const cancelBtn = document.getElementById('confirm-delete-cancel');
+    const errEl = document.getElementById('confirm-delete-error');
+    if (okBtn) { okBtn.disabled = false; okBtn.innerHTML = 'Hapus'; }
+    if (cancelBtn) cancelBtn.style.visibility = '';
+    if (errEl) errEl.classList.add('hidden');
+    document.querySelectorAll('.cc-del-overlay').forEach(function (ov) { ov.remove(); });
+    document.querySelectorAll('.cc-deleting').forEach(function (el) { el.classList.remove('cc-deleting'); });
 }
 function _closeDeleteModal() {
     const modal = document.getElementById('confirm-delete-modal');
     if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
     _pendingDeleteId = null;
+    _resetDeleteModalUI();
 }
 let _pendingDeleteId = null;
 function deleteProject(id) {
@@ -224,13 +276,19 @@ function deleteProject(id) {
     modal.classList.add('flex');
 }
 async function _doDeleteProject(id) {
-    // tarik publish-an: situs + link publik (Cloudflare Pages) ikut dihapus
+    // tarik publish-an: situs + link publik (Cloudflare Pages) ikut dihapus (non-fatal)
     const tok = (function () { try { return localStorage.getItem('clincoo_auth_token') || ''; } catch (e) { return ''; } })();
     const hdrs = { 'Content-Type': 'application/json' };
     if (tok) hdrs['Authorization'] = 'Bearer ' + tok;
     const apiRoot = PROJECTS_API.replace(/\/projects$/, '');
     try { await fetch(apiRoot + '/deploy', { method: 'POST', headers: hdrs, body: JSON.stringify({ project_id: id, action: 'unpublish' }) }); } catch (e) {}
-    try { await fetch(PROJECTS_API, { method: 'POST', headers: hdrs, body: JSON.stringify({ action: 'delete', id: id }) }); } catch (e) {}
+    let serverOk = true;
+    try {
+        const res = await fetch(PROJECTS_API, { method: 'POST', headers: hdrs, body: JSON.stringify({ action: 'delete', id: id }) });
+        if (!res.ok) serverOk = false;
+        else { const d = await res.json().catch(() => null); if (d && d.success === false) serverOk = false; }
+    } catch (e) { serverOk = false; }
+    if (!serverOk) return false; // server gagal -> kartu TETAP ada, pelanggan diberi tahu
 
     // data lokal proyek (chat, file workspace, penunjuk aktif)
     try {
@@ -252,6 +310,7 @@ async function _doDeleteProject(id) {
     } catch(e) {}
 
     renderProjects();
+    return true;
 }
 
 function duplicateProject(id) {
