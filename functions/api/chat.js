@@ -403,12 +403,12 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
 
 function teamTranscriptText(transcript) {
   const icons = { arsitek: '\u{1F9D1}\u200D\u{1F4BB}', reviewer: '\u{1F50D}', perbaikan: '\u{1F527}' };
-  return '\n\n'.join(transcript.map(t => {
+  return transcript.map(t => {
     const label = (TEAM_LABELS[t.stage] || t.stage) + ' (' + (t.model || '?') + ')';
     const icon = icons[t.stage] || '';
     const body = (t.text || '').slice(0, 1200);
     return icon + ' [' + label + ']\n' + body;
-  }));
+  }).join('\n\n');
 }
 
 export async function onRequestPost({ request, env }) {
