@@ -705,8 +705,10 @@
         var qrisPollTimer = null;
         var qrisCountdownTimer = null;
 
-        // Estimasi biaya layanan Pakasir (QRIS): 310 + 0.7% nominal — final mengikuti tagihan
+        // Estimasi biaya layanan Pakasir (QRIS), mengikuti tarif produksi:
+        // <= 105.000: 310 + 0.7% nominal | > 105.000: flat 1% (pakasir.com/p/pricing) — final tetap mengikuti tagihan
         function qrisFeeEstimate(amount) {
+            if (amount > 105000) return Math.ceil(amount * 0.01);
             return 310 + Math.ceil(amount * 0.007);
         }
 
