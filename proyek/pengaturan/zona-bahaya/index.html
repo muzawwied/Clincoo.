@@ -272,6 +272,16 @@
     if (btnD) btnD.addEventListener('click', function () {
       askConfirm('Hapus proyek ini?', 'Semua data proyek akan dihapus permanen, termasuk situs yang sudah dipublish dan link publiknya.', 'Hapus', async function () {
         var r1 = await postJSON('/deploy', { project_id: pid, action: 'unpublish' });
+        // Situs HARUS benar-benar ditarik dari Cloudflare sebelum proyek dihapus.
+        // Kalau tidak, domain kustom + subdomain tetap hidup tanpa proyek yang mengontrolnya.
+        if (r1 && r1.error) {
+          showStatus('Gagal menarik situs', 'Situs publik gagal dihapus dari Cloudflare (' + r1.error + '). Proyek TIDAK jadi dihapus supaya tidak ada situs yatim yang masih aktif — coba lagi.');
+          return;
+        }
+        if (!r1 || !r1.success) {
+          showStatus('Gagal menarik situs', 'Server tidak merespons permintaan penarikan situs. Proyek TIDAK jadi dihapus — coba lagi.');
+          return;
+        }
         var r2 = await postJSON('/projects', { action: 'delete', id: pid });
         if (r2.error) { showStatus('Gagal menghapus proyek', r2.error); return; }
         removeLocalData(pid);
