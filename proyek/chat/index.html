@@ -453,20 +453,21 @@
                         <span id="team-mode-label">Biasa</span>
                         <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
-                    <div id="team-mode-menu" class="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-xl p-2 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50 origin-bottom-right">
-                        <button type="button" data-team-mode="kolaborasi" class="team-mode-option w-full flex flex-col items-start px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
+                    <div id="team-mode-menu" class="absolute bottom-full right-0 mb-2 w-60 bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-xl p-1.5 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50 origin-bottom-right">
+                        <button type="button" data-team-mode="kolaborasi" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
                             <span class="text-sm font-semibold flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                 Kolaborasi
+                                <span id="collab-pro-badge" class="hidden ml-auto text-[10px] font-bold tracking-wide bg-gray-900 text-white rounded-md px-1.5 py-0.5">PRO</span>
                             </span>
-                            <span class="text-xs text-gray-500 mt-0.5">Tim AI multi-model berdiskusi lalu membangun web (5 kuota/pesan)</span>
+                            <span class="text-xs text-gray-500 mt-0.5">Tim AI berdiskusi &amp; membangun web (5 kuota/pesan)</span>
                         </button>
-                        <button type="button" data-team-mode="biasa" class="team-mode-option w-full flex flex-col items-start px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
+                        <button type="button" data-team-mode="biasa" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
                             <span class="text-sm font-semibold flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0zM7 21v-2.13A8.966 8.966 0 0112 21a8.966 8.966 0 004.494-1.13A8.966 8.966 0 0012 21a8.966 8.966 0 01-5-1.13V21z"></path></svg>
                                 Biasa
                             </span>
-                            <span class="text-xs text-gray-500 mt-0.5">Chat normal dengan satu AI (1 kuota/pesan)</span>
+                            <span class="text-xs text-gray-500 mt-0.5">Chat dengan satu AI (1 kuota/pesan)</span>
                         </button>
                     </div>
                 </div>
@@ -1357,6 +1358,13 @@
             `;
         }
 
+        // Saat tab ditutup / disembunyikan saat AI masih mengetik, simpan kondisi terakhir —
+        // begitu kembali, halaman melanjutkan (lihat logika resume di bawah).
+        window.addEventListener('pagehide', function () { try { saveChatLog(); } catch (e) {} });
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') { try { saveChatLog(); } catch (e) {} }
+        });
+
         function renderMessages() {
             try { saveChatLog(); } catch(e) {}
             chatContainer.innerHTML = '';
@@ -1756,8 +1764,58 @@
             if (show) teamMenu.classList.remove('opacity-0', 'invisible', 'translate-y-2');
             else teamMenu.classList.add('opacity-0', 'invisible', 'translate-y-2');
         }
+        // ===== Kolaborasi = fitur Paket Pro =====
+        // Cepat: cache langganan (diisi halaman Langganan). Revalidasi server di bawah.
+        var SUB_CACHE_KEY2 = 'clincoo_subscription_cache';
+        function readSubCache2() { try { return JSON.parse(localStorage.getItem(SUB_CACHE_KEY2) || 'null') || null; } catch (e) { return null; } }
+        function isPlanPro() { var c = readSubCache2(); return !!(c && c.plan && c.plan !== 'Starter'); }
+        function refreshCollabBadge() {
+            var b = document.getElementById('collab-pro-badge');
+            if (b) b.classList.toggle('hidden', isPlanPro());
+        }
+        function upgradeUrlPro() {
+            var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+            return base + '/akun/langganan/upgrade/konfirmasi/?plan=Pro&billing=Bulanan';
+        }
+        function showProLockPopup() {
+            if (document.getElementById('collab-pro-lock')) return;
+            var ov = document.createElement('div');
+            ov.id = 'collab-pro-lock';
+            ov.className = 'fixed inset-0 z-[90] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4';
+            ov.innerHTML = '<div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-xl w-full max-w-xs p-5 relative">'
+                + '<button type="button" id="collab-pro-lock-x" class="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors" title="Tutup"><i data-lucide="x" class="w-4 h-4"></i></button>'
+                + '<div class="w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center mb-3"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div>'
+                + '<h3 class="text-base font-bold text-gray-900 dark:text-white">Kolaborasi khusus Paket Pro</h3>'
+                + '<p class="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">Mode tim AI multi-model hanya untuk Paket Pro. Upgrade untuk mengaktifkan diskusi tim &amp; membangun web bareng (5 kuota/pesan).</p>'
+                + '<a href="' + upgradeUrlPro() + '" class="block w-full text-center mt-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity">Upgrade ke Pro</a>'
+                + '</div>';
+            document.body.appendChild(ov);
+            try { lucide.createIcons(); } catch (e) {}
+            var x = document.getElementById('collab-pro-lock-x');
+            if (x) x.addEventListener('click', function () { ov.remove(); });
+            ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.remove(); });
+        }
+        // Revalidasi plan di background — cache bisa basi setelah upgrade di halaman lain.
+        async function revalidatePlan2() {
+            try {
+                var tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+                var res = await fetch(TOOL_API_BASE + '/api/subscription', { cache: 'no-store', headers: tok ? { Authorization: 'Bearer ' + tok } : {} });
+                if (!res.ok) return;
+                var d = await res.json();
+                if (d && d.plan) {
+                    try { localStorage.setItem(SUB_CACHE_KEY2, JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
+                    refreshCollabBadge();
+                    if (isPlanPro()) {
+                        var lk = document.getElementById('collab-pro-lock');
+                        if (lk) lk.remove();
+                    }
+                }
+            } catch (e) {}
+        }
         if (teamCapsule) {
             applyTeamModeStyle();
+            refreshCollabBadge();
+            revalidatePlan2();
             teamCapsule.addEventListener('click', function (e) {
                 e.stopPropagation();
                 toggleTeamMenu(teamMenu.classList.contains('invisible'));
@@ -1765,7 +1823,14 @@
             document.querySelectorAll('.team-mode-option').forEach(function (btn) {
                 btn.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    teamModeOn = btn.getAttribute('data-team-mode') === 'kolaborasi';
+                    var want = btn.getAttribute('data-team-mode') === 'kolaborasi';
+                    if (want && !isPlanPro()) {
+                        toggleTeamMenu(false);
+                        showProLockPopup();
+                        revalidatePlan2();
+                        return;
+                    }
+                    teamModeOn = want;
                     try { localStorage.setItem('clincoo_team_mode', teamModeOn ? '1' : '0'); } catch (err) {}
                     applyTeamModeStyle();
                     toggleTeamMenu(false);
@@ -2749,6 +2814,20 @@
 
                 var submitHandoff = function() {
                     localStorage.removeItem('clincoo_current_chat_msg');
+                    // Lampiran dari halaman utama (isi file: teks/dataURL) ikut ke pesan pertama
+                    try {
+                        var attRaw = localStorage.getItem('clincoo_current_attachments');
+                        if (attRaw) {
+                            var atts = JSON.parse(attRaw);
+                            if (Array.isArray(atts) && atts.length > 0) {
+                                currentAttachments = atts.map(function (a) {
+                                    return { id: generateId(), type: a.type || 'document', name: a.name || 'file', size: a.size || 0, data: a.data || null, text: a.text || null, extension: a.extension || '' };
+                                });
+                                showAttachmentPreview();
+                            }
+                            localStorage.removeItem('clincoo_current_attachments');
+                        }
+                    } catch (e2) {}
                     setTimeout(function() {
                         try {
                             chatInput.value = handoffMsg;

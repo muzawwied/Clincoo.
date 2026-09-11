@@ -796,8 +796,47 @@
                     uploadMenu.classList.add('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
                 }
             });
-            realFileInput.addEventListener('change', (e) => {
+            // Upload dari halaman utama: ISI file dibaca sekarang (bukan cuma nama),
+            // distage di localStorage lalu dibawa ke halaman chat saat prompt dikirim.
+            window.__stagedAtt = [];
+            try { localStorage.removeItem('clincoo_staged_attachments'); } catch (e) {}
+            window.__readFileAsDataURL = function (f) {
+                return new Promise(function (res, rej) {
+                    const r = new FileReader();
+                    r.onload = function () { res(r.result); };
+                    r.onerror = function () { rej(r.error); };
+                    r.readAsDataURL(f);
+                });
+            };
+            window.__readFileAsText = function (f) {
+                return new Promise(function (res, rej) {
+                    const r = new FileReader();
+                    r.onload = function () { res(r.result); };
+                    r.onerror = function () { rej(r.error); };
+                    r.readAsText(f);
+                });
+            };
+            window.__stageSize = function () {
+                let total = 0;
+                window.__stagedAtt.forEach(function (a) {
+                    total += (a.data ? a.data.length : 0) + (a.text ? a.text.length : 0);
+                });
+                return total;
+            };
+            window.__saveStaged = function () {
+                try { localStorage.setItem('clincoo_staged_attachments', JSON.stringify(window.__stagedAtt)); } catch (e) {}
+            };
+            window.removeStagedChip = function (id) {
+                window.__stagedAtt = window.__stagedAtt.filter(function (a) { return a.id !== id; });
+                __saveStaged();
+                const chip = document.querySelector('.file-chip[data-att-id="' + id + '"]');
+                if (chip) chip.remove();
+                const c = document.getElementById('file-preview-container');
+                if (c && c.children.length === 0) c.classList.add('hidden');
+            };
+            realFileInput.addEventListener('change', async (e) => {
                 const maxFiles = 10;
+                const maxStage = 3.5 * 1024 * 1024; // batas total isi lampiran (localStorage)
                 const currentCount = filePreviewContainer ? filePreviewContainer.querySelectorAll('.file-chip').length : 0;
                 let files = Array.from(e.target.files);
                 if (currentCount + files.length > maxFiles) {
@@ -806,24 +845,40 @@
                 if (files.length > 0 && filePreviewContainer) {
                     filePreviewContainer.classList.remove('hidden');
                     filePreviewContainer.classList.add('flex');
-                    files.forEach(file => {
-                        const ext = file.name.split('.').pop().toLowerCase();
+                    for (const file of files) {
+                        const ext = (file.name.split('.').pop() || '').toLowerCase();
                         let iconStr = 'file';
                         if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) iconStr = 'image';
                         else if (['html', 'css', 'js', 'json', 'xml', 'jsx', 'tsx', 'php'].includes(ext)) iconStr = 'file-code-2';
-                        else if (['pdf', 'txt', 'doc', 'docx'].includes(ext)) iconStr = 'file-text';
+                        else if (['pdf', 'txt', 'doc', 'docx', 'md'].includes(ext)) iconStr = 'file-text';
                         else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) iconStr = 'file-archive';
+                        const attId = 'att_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+                        let data = null, text = null;
+                        const isImage = ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext) || (file.type || '').startsWith('image/');
+                        try {
+                            if (isImage && file.size <= 2 * 1024 * 1024) {
+                                data = await __readFileAsDataURL(file);
+                            } else if (!isImage && !['zip', 'rar', '7z', 'tar', 'gz', 'pdf', 'doc', 'docx'].includes(ext) && file.size <= 150 * 1024) {
+                                text = await __readFileAsText(file);
+                            }
+                        } catch (err) {}
+                        if (__stageSize() + (data ? data.length : 0) + (text ? text.length : 0) > maxStage) {
+                            data = data && !text ? null : data; // jangan penuhi localStorage — lampiran berikutnya nama-saja
+                        }
+                        window.__stagedAtt.push({ id: attId, type: isImage ? 'image' : 'document', name: file.name, size: file.size, data: data, text: text, extension: ext });
+                        __saveStaged();
                         const chip = document.createElement('div');
                         chip.className = 'file-chip inline-flex items-center gap-2 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-xl text-xs text-gray-800 font-medium shadow-sm transition-colors duration-300 flex-shrink-0';
+                        chip.setAttribute('data-att-id', attId);
                         chip.innerHTML = `
                             <i data-lucide="${iconStr}" class="w-3.5 h-3.5 text-gray-500"></i>
                             <span class="max-w-[150px] truncate">${file.name}</span>
-                            <button type="button" class="text-gray-400 hover:text-black cursor-pointer ml-1" onclick="this.parentElement.remove(); if(document.getElementById('file-preview-container').children.length === 0) document.getElementById('file-preview-container').classList.add('hidden');">
+                            <button type="button" class="text-gray-400 hover:text-black cursor-pointer ml-1" onclick="removeStagedChip('${attId}')" title="Hapus lampiran">
                                 <i data-lucide="x" class="w-3.5 h-3.5"></i>
                             </button>
                         `;
                         filePreviewContainer.appendChild(chip);
-                    });
+                    }
                     try { lucide.createIcons(); } catch (e) {}
                 }
                 realFileInput.value = '';
@@ -1038,13 +1093,19 @@
                 pushProjectsToServer(projects);
                 localStorage.setItem('clincoo_current_chat_msg', prompt);
                 localStorage.setItem('clincoo_current_project_id', projectId);
-                const fileChips = filePreviewContainer ? filePreviewContainer.querySelectorAll('.file-chip') : [];
-                if (fileChips.length > 0) {
-                    const attachments = Array.from(fileChips).map(chip => {
-                        const nameEl = chip.querySelector('span');
-                        return { name: nameEl ? nameEl.textContent : 'file', type: 'document' };
-                    });
+                let staged = [];
+                try { staged = JSON.parse(localStorage.getItem('clincoo_staged_attachments') || '[]'); } catch(e) {}
+                if (staged.length > 0) {
+                    // Isi file ikut (teks utk dokumen, dataURL utk gambar) — bukan sekadar nama.
+                    // File besar yang tak terbaca tetap dikirim nama-saja agar AI tahu lampirannya ada.
+                    const attachments = staged.map(a => ({ type: a.type, name: a.name, size: a.size, data: a.data, text: a.text, extension: a.extension }));
                     localStorage.setItem('clincoo_current_attachments', JSON.stringify(attachments));
+                    localStorage.removeItem('clincoo_staged_attachments');
+                    if (filePreviewContainer) {
+                        filePreviewContainer.classList.add('hidden');
+                        filePreviewContainer.classList.remove('flex');
+                        filePreviewContainer.innerHTML = '';
+                    }
                 }
             } catch(e) {}
             window.location.href = 'proyek/chat/?id=' + projectId;
