@@ -327,6 +327,9 @@ async function tryOpenRouter(apiKey, messages, tools, models) {
 // -> Perbaikan (programmer revisi). Hasil akhir = tool_calls write_file yang
 // dieksekusi klien seperti biasa. Biaya kuota: 5 (tugas gede), lihat TEAM_COST.
 const TEAM_COST = 5;
+// Batas waktu total orkestrasi (ms) — harus di bawah timeout klien 300s.
+// Tahap yang belum jalan saat deadline lewat dilewati (draft tetap dikirim).
+const TEAM_DEADLINE_MS = 150_000;
 const TEAM_STAGE_MODELS = {
   arsitek: ['nvidia/nemotron-3-super-120b-a12b:free', 'openrouter/free'],
   programmer: ['nvidia/nemotron-3.5-lightning:free', 'nvidia/nemotron-3-super-120b-a12b:free'],
@@ -359,9 +362,9 @@ async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tool
 // balasan sintetis "sukses" agar dia lanjut menulis file berikutnya — sama seperti
 // loop function-calling di sisi klien (MAX_TOOL_HOPS), tapi berjalan di server untuk
 // tahap Tim AI. Berhenti saat model tidak lagi memanggil tool, atau maxHops tercapai.
-async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, maxHops) {
+async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, maxHops, deadline) {
   const messages = [
-    { role: 'system', content: systemPrompt + '\n\nPENTING: panggil tool write_file SATU per SATU, boleh berkali-kali giliran berturut-turut, sampai SEMUA file dari rencana selesai ditulis. Setelah semua file selesai, berhenti memanggil tool dan balas teks singkat "selesai".' },
+    { role: 'system', content: systemPrompt + '\n\nPENTING: panggil tool write_file untuk BEBERAPA file SEKALIGUS dalam satu giliran bila memungkinkan (paralel). Kalau konten terlalu panjang untuk satu giliran, lanjutkan file berikutnya di giliran sesudahnya sampai SEMUA file dari rencana selesai. Setelah semua file selesai, berhenti memanggil tool dan balas teks singkat "selesai".' },
     { role: 'user', content: userText }
   ];
   const collected = new Map(); // key: name+':'+path -> tool_call
@@ -370,6 +373,7 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
   let usedGeminiFallback = false;
 
   for (let hop = 0; hop < maxHops; hop++) {
+    if (deadline && Date.now() > deadline) break; // jaga total waktu orkestrasi
     let r = null;
     if (orKey && !usedGeminiFallback) r = await tryOpenRouter(orKey, messages, orBuildTools(), TEAM_STAGE_MODELS[stage]);
     if ((!r || r.error) && apiKey) {
@@ -406,15 +410,16 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
 
   // Tahap 1: Arsitek menyusun rencana situs
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
-    'Kamu adalah ARSITEK WEB senior di Tim AI Clincoo. Dari permintaan user, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 250 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat (path + isi singkat masing-masing), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
+    'Kamu adalah ARSITEK WEB senior di Tim AI Clincoo. Dari permintaan user, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
     userPrompt, null);
   if (r1.error) return { error: 'Arsitek gagal: ' + r1.error };
   transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
 
   // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
+  const startedAt = Date.now();
   const r2 = await teamBuildLoop(env, orKey, apiKey, 'programmer',
     'Kamu adalah PROGRAMMER WEB di Tim AI Clincoo. Kerjakan rencana arsitek berikut SECARA PENUH: buat SEMUA file web (HTML/CSS/JS) yang disebut di rencana memakai tool write_file — konten lengkap per file, siap jalan, rapi, dan responsif.',
-    'RENCANA ARSITEK:\n' + (r1.text || ''), 10);
+    'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS);
   if (r2.error) return { error: 'Programmer gagal: ' + r2.error, transcript };
   const draftCalls = (r2.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
   if (!draftCalls.length) {
@@ -429,6 +434,11 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
     const c = String(tc.args.content || '');
     return 'FILE ' + p + ' (' + c.length + ' karakter)\nawal:\n' + c.slice(0, 400) + '\nakhir:\n' + c.slice(-300);
   }).join('\n\n');
+  if (Date.now() - startedAt > TEAM_DEADLINE_MS - 40_000) {
+    // waktu hampir habis — kirim draft apa adanya, lewati review
+    transcript.push({ stage: 'reviewer', model: null, text: '(dilewati — batas waktu tercapai)' });
+    return { transcript, tool_calls: draftCalls, text: '', fixModel: null };
+  }
   const r3 = await teamStage(env, orKey, apiKey, 'reviewer',
     'Kamu adalah REVIEWER KODE ketat di Tim AI Clincoo. Audit file web berikut terhadap rencana arsitek. Laporkan HANYA masalah yang benar-benar fatal atau penting (link/asset rusak, fitur hilang, HTML rusak, JS error, tidak responsif) — maks 150 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
     'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest, null);
@@ -443,7 +453,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   if (needsFix) {
     const r4 = await teamBuildLoop(env, orKey, apiKey, 'perbaikan',
       'Kamu adalah PROGRAMMER WEB senior di Tim AI Clincoo. Temuan reviewer di bawah harus dibereskan. Tulis ULANG HANYA file yang bermasalah/hilang dengan tool write_file (overwrite penuh, konten lengkap diperbaiki). Jangan mengulang file yang sudah benar dan tidak disebut reviewer.',
-      'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, 8);
+      'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, 4, startedAt + TEAM_DEADLINE_MS);
     const fixCalls = (r4.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
     if (!r4.error && fixCalls.length) {
       // gabung: draft + revisi (revisi menimpa path sama)
