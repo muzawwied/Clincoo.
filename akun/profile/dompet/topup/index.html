@@ -40,6 +40,8 @@
         .text-accent { color: var(--accent-color) !important; }
         .border-accent { border-color: var(--accent-color) !important; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
+        #method-cta-wrap { max-height: 120px; opacity: 1; transition: max-height 0.35s ease, opacity 0.35s ease; }
+        #method-cta-wrap.cta-hidden { max-height: 0; opacity: 0; pointer-events: none; overflow: hidden; }
         #qris-paid-btn .paid-label { display: inline-block; max-width: 200px; opacity: 1; margin-left: 8px; overflow: hidden; white-space: nowrap; transition: opacity 0.35s ease, max-width 0.35s ease, margin-left 0.35s ease; }
         #qris-paid-btn.checking .paid-label { opacity: 0; max-width: 0; margin-left: 0; }
         #qris-paid-btn.checking svg { animation: cpSpin 0.8s linear infinite; }
@@ -383,7 +385,9 @@
                 </div>
 
                 <div class="pt-4 pb-8 w-full mt-auto">
-                    <button onclick="goToStep2()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Lanjutkan</button>
+                    <div id="method-cta-wrap" class="cta-hidden">
+                        <button onclick="goToStep2()" class="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-lg active:scale-[0.98]">Lanjutkan</button>
+                    </div>
                 </div>
             </main>
         </div>
@@ -542,11 +546,13 @@
             try { lucide.createIcons(); } catch (e) {}
             resetKeypad();
             goToStep1();
+            // Order QRIS aktif? Langsung kembali ke step QR (tahan saat refresh)
+            qrisRestore();
         });
 
         
         
-        function closeTopUpPage() { window.ClincooBack('../'); }
+        function closeTopUpPage() { qrisForgetSession(); window.ClincooBack('../'); }
 
         
         function goToStep1() {
@@ -624,6 +630,13 @@
             labelEl.classList.remove('bg-white', 'dark:bg-[#0a0a0a]');
             var radio = labelEl.querySelector('input[type="radio"]');
             if (radio) radio.checked = true;
+            // CTA Lanjutkan hanya untuk QRIS & metode lain — ClincooPay informatif saja
+            var inp = labelEl.querySelector('input[name="payment-method"]');
+            var wrap = document.getElementById('method-cta-wrap');
+            if (wrap && inp) {
+                if (inp.value === 'ClincooPay') wrap.classList.add('cta-hidden');
+                else wrap.classList.remove('cta-hidden');
+            }
         }
 
         async function processClincooPay() {
@@ -765,11 +778,29 @@
                 box.innerHTML = '<p class="text-xs text-gray-500 dark:text-gray-400 px-4">Gagal merender QR. Coba lagi.</p>';
             }
             try { lucide.createIcons(); } catch (e) {}
+            try { localStorage.setItem('clincoo_qris_active_order', JSON.stringify(res)); } catch (e) {}
             startQrisCountdown(res.expired_at);
             startQrisPoll(res.order_id);
         }
 
+        function qrisForgetSession() {
+            try { localStorage.removeItem('clincoo_qris_active_order'); } catch (e) {}
+        }
+
+        function qrisRestore() {
+            try {
+                var raw = localStorage.getItem('clincoo_qris_active_order');
+                if (!raw) return;
+                var o = JSON.parse(raw);
+                if (!o || !o.order_id || !o.qr_string) { qrisForgetSession(); return; }
+                if (o.expired_at && !isNaN(new Date(o.expired_at).getTime()) && new Date(o.expired_at).getTime() < Date.now()) { qrisForgetSession(); return; }
+                qrisOrder = o;
+                showQrisStep(o);
+            } catch (e) {}
+        }
+
         function qrisBackToAmount() {
+            qrisForgetSession();
             stopQrisTimers();
             var st = document.getElementById('step-qris');
             st.classList.add('hidden'); st.classList.remove('flex');
@@ -816,12 +847,14 @@
                 }).then(function (r) { return r.json(); });
                 if (data.status === 'paid') {
                     stopQrisTimers();
+                    qrisForgetSession();
                     showModal('Top Up Berhasil', 'Pembayaran QRIS diterima. Saldo sudah masuk ke Dompet Clincoo.');
                     setTimeout(function () { closeTopUpPage(); }, 1500);
                     return;
                 }
                 if (data.status === 'failed') {
                     stopQrisTimers();
+                    qrisForgetSession();
                     showModal('Pembayaran Tidak Selesai', 'Transaksi dibatalkan atau kedaluwarsa.');
                     return;
                 }
