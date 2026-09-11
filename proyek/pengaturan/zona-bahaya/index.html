@@ -99,8 +99,17 @@
     <script>/* clincoo-seo-auto: canonical & og mengikuti domain aktif */
 (function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<3;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.jpg");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.jpg");}catch(e){}})();
     </script>
-<script src="../../../../js/i18n-dict.js" defer></script>
-<script src="../../../../js/i18n.js" defer></script>
+<!-- Google tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KMQ8WBZF6E');
+</script>
+<!-- End Google tag -->
+<script src="../../../js/i18n-dict.js" defer></script>
+<script src="../../../js/i18n.js" defer></script>
 </head>
 <body class="text-gray-900 antialiased h-screen w-full overflow-hidden relative bg-white">
   <script>(function(){var t=localStorage.getItem("clincoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
@@ -182,7 +191,18 @@
   }
   function closeConfirm() { var m = document.getElementById('confirm-modal'); m.classList.add('hidden'); m.classList.remove('flex'); confirmCb = null; }
   function showStatus(title, msg, cb) {
-      try { if (typeof cb === 'function') cb(); } catch (e) {}
+      document.getElementById('status-title').textContent = title;
+      document.getElementById('status-msg').textContent = msg;
+      statusCb = (typeof cb === 'function') ? cb : null;
+      var m = document.getElementById('status-modal');
+      m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  // Pasca-hapus: SELALU maju ke halaman utama dengan replace (tanpa entri riwayat baru).
+  // ClincooBack tidak dipakai di sini: tombol kembali cerdas itu untuk tombol 'back' biasa —
+  // setelah proyek dihapus, mundur ke halaman pengaturan proyek yang sudah tidak ada bikin
+  // kesan 'tidak terhapus' dan pengguna tersesat di halaman basi.
+  function goHome() {
+      location.replace(homeUrl());
   }
   async function postJSON(path, bodyObj) {
     var tok = localStorage.getItem('clincoo_auth_token') || '';
@@ -208,9 +228,10 @@
       if (busy || !confirmCb) return;
       var cb = confirmCb; confirmCb = null;
       var okBtn = document.getElementById('confirm-ok');
+      var okLabel = okBtn.textContent;
       okBtn.textContent = 'Memproses...';
       busy = true;
-      Promise.resolve(cb()).finally(function () { busy = false; closeConfirm(); okBtn.textContent = 'Ya'; });
+      Promise.resolve(cb()).finally(function () { busy = false; closeConfirm(); okBtn.textContent = okLabel; });
     });
     document.getElementById('status-ok').addEventListener('click', function () {
       var m = document.getElementById('status-modal'); m.classList.add('hidden'); m.classList.remove('flex');
@@ -231,7 +252,7 @@
           localStorage.setItem('clincoo_projects', JSON.stringify(list));
           if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
         } catch (e) {}
-        showStatus('Transfer berhasil', 'Proyek kini menjadi milik ' + email + '.', function () { window.ClincooBack(homeUrl()); });
+        showStatus('Transfer berhasil', 'Proyek kini menjadi milik ' + email + '.', function () { goHome(); });
       });
     });
 
@@ -260,7 +281,7 @@
           localStorage.setItem('clincoo_projects', JSON.stringify(list));
           if (localStorage.getItem('clincoo_current_project_id') === pid) localStorage.removeItem('clincoo_current_project_id');
         } catch (e) {}
-        showStatus('Proyek dihapus', 'Semua data dan situs publish-an telah dihapus.', function () { window.ClincooBack(homeUrl()); });
+        goHome();
       });
     });
   });
