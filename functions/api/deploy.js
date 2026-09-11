@@ -97,6 +97,10 @@ async function fireWebhooks(db, table, projectId, status, payload) {
   } catch (e) { /* webhook tidak boleh membatalkan deploy */ }
 }
 
+async function setPhase(db, table, projectId, text) {
+  try { await setSetting(db, table, projectId, 'deploy_phase', text || ''); } catch (e) {}
+}
+
 async function setSetting(db, table, projectId, key, value) {
   // Tabel project_settings per-proyek hanya punya kolom (project_id, key, value) —
   // JANGAN pakai updated_at/ON CONFLICT, itu membuat insert GAGAL SENYAP
@@ -220,8 +224,14 @@ export async function onRequestGet({ request, env }) {
     } catch (e) {}
 
     const lastDeployBy = await getSetting(db, T.projectSettings, projectId, 'last_deploy_by');
-    return json({ pages_project: name, pages_url: pagesUrl, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, api_rev: 'uniq1' });
+    const deployPhase = await getSetting(db, T.projectSettings, projectId, 'deploy_phase');
+    return json({ pages_project: name, pages_url: pagesUrl, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, deploy_phase: deployPhase || '', api_rev: 'uniq2' });
   } catch (err) {
+    try {
+      const db = env.DB;
+      const T = await getProjectTables(db, projectId);
+      await setPhase(db, T.projectSettings, projectId, '');
+    } catch (e2) {}
     return json({ error: err.message }, 500);
   }
 }
@@ -292,6 +302,7 @@ export async function onRequestPost({ request, env }) {
       return json({ error: 'Workspace proyek masih kosong — tidak ada file untuk dideploy. Buat file dulu di halaman Workspace.' }, 400);
     }
 
+    await setPhase(db, T.projectSettings, projectId, 'Menyiapkan proyek Pages...');
     await ensurePagesProject(creds, name);
     await setSetting(db, T.projectSettings, projectId, 'pages_project', name);
 
@@ -320,13 +331,22 @@ export async function onRequestPost({ request, env }) {
     } catch (e) {}
 
     const toUpload = assets.filter(a => missing.indexOf(a.key) > -1);
-    for (let i = 0; i < toUpload.length; i += 25) {
-      const batch = toUpload.slice(i, i + 25).map(a => ({
-        key: a.key, value: a.value, metadata: { contentType: a.contentType }, base64: true
+    if (toUpload.length) await setPhase(db, T.projectSettings, projectId, 'Mengunggah ' + toUpload.length + ' file (0/' + toUpload.length + ')...');
+    const chunks = [];
+    for (let i = 0; i < toUpload.length; i += 25) chunks.push(toUpload.slice(i, i + 25));
+    let uploaded = 0;
+    const CONC = 3;
+    for (let i = 0; i < chunks.length; i += CONC) {
+      await Promise.all(chunks.slice(i, i + CONC).map(async (chunk) => {
+        const batch = chunk.map(a => ({
+          key: a.key, value: a.value, metadata: { contentType: a.contentType }, base64: true
+        }));
+        await cfFetch('/pages/assets/upload', creds.apiKey, {
+          method: 'POST', headers: { Authorization: 'Bearer ' + jwt }, body: JSON.stringify(batch)
+        });
+        uploaded += chunk.length;
+        await setPhase(db, T.projectSettings, projectId, 'Mengunggah ' + toUpload.length + ' file (' + uploaded + '/' + toUpload.length + ')...');
       }));
-      await cfFetch('/pages/assets/upload', creds.apiKey, {
-        method: 'POST', headers: { Authorization: 'Bearer ' + jwt }, body: JSON.stringify(batch)
-      });
     }
 
     try {
@@ -335,6 +355,7 @@ export async function onRequestPost({ request, env }) {
       });
     } catch (e) {}
 
+    await setPhase(db, T.projectSettings, projectId, 'Memproses deployment di Cloudflare...');
     const form = new FormData();
     const manifest = {};
     for (const a of assets) manifest['/' + a.path] = a.key;
@@ -351,12 +372,14 @@ export async function onRequestPost({ request, env }) {
       await fireWebhooks(db, T.projectSettings, projectId, 'fail', {
         event: 'deploy.failed', project_id: projectId, pages_project: name, error: msg, at: new Date().toISOString()
       });
+      await setPhase(db, T.projectSettings, projectId, '');
       return json({ error: 'Cloudflare menolak deployment: ' + msg }, 500);
     }
     const dep = depData.result || {};
 
     await db.prepare(`INSERT INTO ${T.deployLogs} (project_id, status, url, message, created_at) VALUES (?, 'success', ?, ?, datetime('now'))`)
       .bind(projectId, pagesUrl, 'deploy ' + files.length + ' file ke ' + name).run();
+    await setPhase(db, T.projectSettings, projectId, '');
     await bumpMonthlyDeployCount(db, user && user.id);
     try { await setSetting(db, T.projectSettings, projectId, 'last_deploy_by', (user && (user.name || user.email)) || 'pengguna'); } catch (e) {}
     await fireWebhooks(db, T.projectSettings, projectId, 'success', {
