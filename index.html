@@ -1064,6 +1064,26 @@
             });
         }
 
+        // Escape HTML + buang sisa sintaks markdown — pembersih pertahanan-berlapis untuk
+        // kartu proyek: menangani proyek lama yang sudah kesimpan dengan markdown mentah,
+        // bukan cuma proyek baru (perbaikan penyimpanan dilakukan juga di proyek/chat).
+        function escCard(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+        function stripMdCard(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/```[\s\S]*?```/g, ' ')
+                .replace(/`([^`]+)`/g, '$1')
+                .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+                .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+                .replace(/^#{1,6}\s+/gm, '')
+                .replace(/(\*\*|__)(.*?)\1/g, '$2')
+                .replace(/(\*|_)(.*?)\1/g, '$2')
+                .replace(/~~(.*?)~~/g, '$1')
+                .replace(/^\s*[-*+]\s+/gm, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
         function renderProjects() {
             let projects = [];
             try {
@@ -1098,8 +1118,8 @@
             }
 
             function createHomeCard(proj) {
-                const title = proj.aiName || proj.title || 'Proyek Tanpa Nama';
-                const desc = proj.aiDesc || proj.prompt || '';
+                const title = escCard(stripMdCard(proj.aiName || proj.title || 'Proyek Tanpa Nama'));
+                const desc = escCard(stripMdCard(proj.aiDesc || proj.prompt || ''));
                 return '<div data-proj-id="'+proj.id+'" class="relative w-56 sm:w-60 flex-shrink-0 border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group" onclick="openProject(\''+proj.id+'\')">' +
                     '<div class="w-full h-28 bg-[#F9FAFB] rounded-xl mb-3.5 p-3 flex flex-col justify-between border border-gray-100 group-hover:border-gray-200 transition-colors">' +
                     '<div class="flex items-center justify-between"><div class="w-12 h-2 bg-gray-200 rounded-full"></div><div class="w-3 h-3 rounded-full bg-black/10"></div></div>' +
@@ -1113,8 +1133,8 @@
             }
 
             function createAllCard(proj) {
-                const title = proj.aiName || proj.title || 'Proyek Tanpa Nama';
-                const desc = proj.aiDesc || proj.prompt || '';
+                const title = escCard(stripMdCard(proj.aiName || proj.title || 'Proyek Tanpa Nama'));
+                const desc = escCard(stripMdCard(proj.aiDesc || proj.prompt || ''));
                 return '<div data-proj-id="'+proj.id+'" class="relative w-full bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex items-center gap-4" onclick="openProject(\''+proj.id+'\')">' +
                     '<div class="w-20 h-20 shrink-0 bg-[#F9FAFB] rounded-xl p-2.5 flex flex-col justify-between border border-gray-100 group-hover:border-gray-200 transition-colors">' +
                     '<div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div>' +

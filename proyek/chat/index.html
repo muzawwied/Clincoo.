@@ -763,6 +763,25 @@
             }
         }
 
+        // Teks polos tanpa sintaks markdown — dipakai untuk aiName/aiDesc proyek
+        // (kartu proyek menampilkan teks apa adanya, bukan HTML terformat, jadi
+        // '**tebal**' / '_miring_' / heading / tautan harus dibuang dulu).
+        function stripMdSyntax(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/```[\s\S]*?```/g, ' ')
+                .replace(/`([^`]+)`/g, '$1')
+                .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+                .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+                .replace(/^#{1,6}\s+/gm, '')
+                .replace(/(\*\*|__)(.*?)\1/g, '$2')
+                .replace(/(\*|_)(.*?)\1/g, '$2')
+                .replace(/~~(.*?)~~/g, '$1')
+                .replace(/^\s*[-*+]\s+/gm, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
         function showGlobalTooltip(element, text) {
             document.querySelectorAll('.global-tooltip').forEach(el => el.remove());
             const rect = element.getBoundingClientRect();
@@ -1685,12 +1704,13 @@
                             if (stored) projects = JSON.parse(stored);
                             const projIndex = projects.findIndex(p => p.id === projectId);
                             if (projIndex !== -1) {
-                                const firstLine = finishedMsg.text.split('\n')[0].substring(0, 50);
+                                const cleanText = stripMdSyntax(finishedMsg.text);
+                                const firstLine = cleanText.split('\n')[0].substring(0, 50);
                                 // pesan error/kuota AI jangan disimpen jadi nama proyek
                                 const badName = /^(kuota ai|maaf, terjadi kesalahan|maaf, terjadi)/i.test(firstLine.trim());
                                 if (!projects[projIndex].aiName && !badName) {
                                     projects[projIndex].aiName = firstLine;
-                                    projects[projIndex].aiDesc = finishedMsg.text.substring(0, 120);
+                                    projects[projIndex].aiDesc = cleanText.substring(0, 120);
                                     projects[projIndex].updatedAt = new Date().toISOString();
                                     localStorage.setItem('clincoo_projects', JSON.stringify(projects));
                                 }

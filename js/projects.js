@@ -1,5 +1,20 @@
 // Escape HTML — wajib untuk semua data user/server sebelum masuk innerHTML (anti-XSS)
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function stripMd(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/`([^`]+)`/g, '$1')
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+        .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+        .replace(/^#{1,6}\s+/gm, '')
+        .replace(/(\*\*|__)(.*?)\1/g, '$2')
+        .replace(/(\*|_)(.*?)\1/g, '$2')
+        .replace(/~~(.*?)~~/g, '$1')
+        .replace(/^\s*[-*+]\s+/gm, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
 /**
  * Clincoo Project Management
  */
@@ -122,8 +137,8 @@ function renderProjects() {
     const allList = document.getElementById('all-projects-list');
 
     function createHomeCard(proj) {
-        const title = esc(proj.aiName || proj.title || 'Proyek Tanpa Nama');
-        const desc = esc(proj.aiDesc || proj.prompt || '');
+        const title = esc(stripMd(proj.aiName || proj.title || 'Proyek Tanpa Nama'));
+        const desc = esc(stripMd(proj.aiDesc || proj.prompt || ''));
         return '<div class="w-56 sm:w-60 flex-shrink-0 border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group" onclick="openProject(\'' + esc(proj.id) + '\')">' +
             '<div class="w-full h-28 bg-[#F9FAFB] rounded-xl mb-3.5 p-3 flex flex-col justify-between border border-gray-100 group-hover:border-gray-200 transition-colors">' +
             '<div class="flex items-center justify-between"><div class="w-12 h-2 bg-gray-200 rounded-full"></div><div class="w-3 h-3 rounded-full bg-black/10"></div></div>' +
@@ -135,8 +150,8 @@ function renderProjects() {
     }
 
     function createAllCard(proj) {
-        const title = esc(proj.aiName || proj.title || 'Proyek Tanpa Nama');
-        const desc = esc(proj.aiDesc || proj.prompt || '');
+        const title = esc(stripMd(proj.aiName || proj.title || 'Proyek Tanpa Nama'));
+        const desc = esc(stripMd(proj.aiDesc || proj.prompt || ''));
         return '<div data-proj-id="' + esc(proj.id) + '" class="relative w-full bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex items-center gap-4" onclick="openProject(\'' + esc(proj.id) + '\')">' +
             '<div class="w-20 h-20 shrink-0 bg-[#F9FAFB] rounded-xl p-2.5 flex flex-col justify-between border border-gray-100 group-hover:border-gray-200 transition-colors">' +
             '<div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div></div>' +
