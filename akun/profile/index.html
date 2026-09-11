@@ -253,15 +253,8 @@
     <script>/* clincoo-seo-auto: canonical & og mengikuti domain aktif */
 (function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<2;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.jpg");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.jpg");}catch(e){}})();
     </script>
-<!-- Google tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-KMQ8WBZF6E');
-</script>
-<!-- End Google tag -->
+<script src="../../../js/i18n-dict.js" defer></script>
+<script src="../../../js/i18n.js" defer></script>
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 pt-20">
     <script>try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||(t==='Sistem (Default)'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.body.classList.add('dark-mode');var a=localStorage.getItem('clincoo_accent')||'Hitam (Default)';var am={'Hitam (Default)':{m:'#000000',h:'#1f2937'},'Biru':{m:'#2563eb',h:'#1d4ed8'},'Hijau':{m:'#059669',h:'#047857'},'Ungu':{m:'#9333ea',h:'#7e22ce'},'Merah':{m:'#dc2626',h:'#b91c1c'}};var c=am[a]||am['Hitam (Default)'];document.documentElement.style.setProperty('--accent-color',c.m);document.documentElement.style.setProperty('--accent-hover',c.h);}catch(e){}</script>
@@ -341,6 +334,29 @@
                         </div>
                     </div>
                 </div>
+                    <div class="relative w-full">
+                        <button id="language-dropdown-btn" class="w-full flex items-center justify-between px-6 py-2 hover:bg-gray-50 transition-colors group cursor-pointer">
+                            <div class="flex items-center">
+                                <i data-lucide="globe" class="w-5 h-5 text-gray-500 mr-4 group-hover:text-gray-900 transition-colors"></i>
+                                <div class="flex flex-col items-start">
+                                    <span class="text-[15px] font-medium text-gray-800 group-hover:text-gray-900">Bahasa</span>
+                                    <span id="language-status-text" class="text-[12px] text-gray-500 mt-0.5">Bahasa Indonesia</span>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                        </button>
+                        <div id="language-dropdown-menu" class="hidden absolute left-6 right-6 top-full mt-1 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-30">
+                            <button onclick="setLanguage('id')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center justify-between cursor-pointer">
+                                <span>Bahasa Indonesia</span><i data-lucide="check" class="w-4 h-4 text-gray-900 lang-check hidden"></i>
+                            </button>
+                            <button onclick="setLanguage('en')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center justify-between cursor-pointer">
+                                <span>English</span><i data-lucide="check" class="w-4 h-4 text-gray-900 lang-check hidden"></i>
+                            </button>
+                            <button onclick="setLanguage('es')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 text-gray-700 font-medium flex items-center justify-between cursor-pointer">
+                                <span>Español</span><i data-lucide="check" class="w-4 h-4 text-gray-900 lang-check hidden"></i>
+                            </button>
+                        </div>
+                    </div>
                 <h3 class="px-6 pt-4 text-[12px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Lainnya</h3>
                 <div class="flex flex-col w-full">
                     <a href="../kolaborasi/" class="w-full flex items-center px-6 py-2 hover:bg-gray-50 transition-colors group">
@@ -545,6 +561,29 @@
                 });
             });
         }
+        // Bahasa (i18n)
+        const LANG_NAMES = { id: 'Bahasa Indonesia', en: 'English', es: 'Español' };
+        function currentLanguage() {
+            try { const v = localStorage.getItem('clincoo_language'); if (v === 'en' || v === 'es' || v === 'id') return v; } catch (e) {}
+            return 'id';
+        }
+        function setLanguage(code) {
+            try { localStorage.setItem('clincoo_language', code === 'en' || code === 'es' ? code : 'id'); } catch (e) {}
+            location.reload(); // re-render seluruh UI dalam bahasa baru
+        }
+        (function initLanguageUI() {
+            const st = document.getElementById('language-status-text');
+            if (st) st.textContent = LANG_NAMES[currentLanguage()] || LANG_NAMES.id;
+            const menu = document.getElementById('language-dropdown-menu');
+            if (menu) {
+                const btns = menu.querySelectorAll('button');
+                btns.forEach(function (b, i) {
+                    const code = ['id', 'en', 'es'][i];
+                    const chk = b.querySelector('.lang-check');
+                    if (chk && code === currentLanguage()) chk.classList.remove('hidden');
+                });
+            }
+        })();
         const themeBtn = document.getElementById('theme-dropdown-btn');
         const themeMenu = document.getElementById('theme-dropdown-menu');
         if (themeBtn && themeMenu) {
@@ -556,6 +595,19 @@
         document.addEventListener('click', (e) => {
             if (themeMenu && !themeMenu.contains(e.target) && themeBtn && !themeBtn.contains(e.target)) {
                 themeMenu.classList.add('hidden');
+            }
+        });
+        const langBtn = document.getElementById('language-dropdown-btn');
+        const langMenu = document.getElementById('language-dropdown-menu');
+        if (langBtn && langMenu) {
+            langBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                langMenu.classList.toggle('hidden');
+            });
+        }
+        document.addEventListener('click', (e) => {
+            if (langMenu && !langMenu.contains(e.target) && langBtn && !langBtn.contains(e.target)) {
+                langMenu.classList.add('hidden');
             }
         });
     </script>

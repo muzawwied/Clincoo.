@@ -259,8 +259,8 @@
         body.dark-mode .tool-task-text.err { color: #f87171 !important; }
 
         /* Kartu dropdown "Menjalankan Tugas" */
-        .toolcalls-card { border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; overflow: hidden; }
-        body.dark-mode .toolcalls-card { border-color: #262626; background: #0a0a0a; }
+        .toolcalls-card { border: none; border-radius: 12px; background: #f9fafb; overflow: hidden; }
+        body.dark-mode .toolcalls-card { border: none; background: #0a0a0a; }
         .toolcalls-summary { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; background: none; border: none; cursor: pointer; text-align: left; font-size: 12.5px; color: #374151; }
         body.dark-mode .toolcalls-summary { color: #d1d5db; }
         .toolcalls-summary .tc-chevron { margin-left: auto; transition: transform 0.15s ease; color: #9ca3af; }
@@ -357,15 +357,8 @@
     <script>/* clincoo-seo-auto: canonical & og mengikuti domain aktif */
 (function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<2;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.jpg");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.jpg");}catch(e){}})();
     </script>
-<!-- Google tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-KMQ8WBZF6E');
-</script>
-<!-- End Google tag -->
+<script src="../../../js/i18n-dict.js" defer></script>
+<script src="../../../js/i18n.js" defer></script>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden selection:bg-gray-200">
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
@@ -443,30 +436,6 @@
                     </div>
                     
                     <input type="file" id="real-file-input" class="hidden" multiple>
-                </div>
-                
-                <div class="relative shrink-0">
-                    <button id="team-mode-capsule" type="button" class="flex items-center gap-1.5 h-10 pl-3 pr-2.5 rounded-full border border-gray-200 text-[13px] font-medium text-gray-600 hover:border-gray-400 hover:text-gray-900 transition-colors cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        <span id="team-mode-label">Biasa</span>
-                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div id="team-mode-menu" class="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-xl p-2 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50 origin-bottom-right">
-                        <button type="button" data-team-mode="kolaborasi" class="team-mode-option w-full flex flex-col items-start px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
-                            <span class="text-sm font-semibold flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                Kolaborasi
-                            </span>
-                            <span class="text-xs text-gray-500 mt-0.5">Tim AI multi-model berdiskusi lalu membangun web (5 kuota/pesan)</span>
-                        </button>
-                        <button type="button" data-team-mode="biasa" class="team-mode-option w-full flex flex-col items-start px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
-                            <span class="text-sm font-semibold flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0zM7 21v-2.13A8.966 8.966 0 0112 21a8.966 8.966 0 004.494-1.13A8.966 8.966 0 0012 21a8.966 8.966 0 01-5-1.13V21z"></path></svg>
-                                Biasa
-                            </span>
-                            <span class="text-xs text-gray-500 mt-0.5">Chat normal dengan satu AI (1 kuota/pesan)</span>
-                        </button>
-                    </div>
                 </div>
                 
                 <button id="submit-prompt-btn" class="w-10 h-10 bg-black text-white rounded-full hover:bg-gray-800 transition-all duration-200 active:scale-90 flex items-center justify-center cursor-pointer shadow-sm hover:shadow-md">
@@ -559,7 +528,7 @@
         }
         function saveChatLog() {
             try {
-                const log = messages.filter(m => m && !m.isHidden && m.text).map(m => ({ id: m.id, role: m.role, text: m.text, time: m.time || null, isProcessing: !!m.isProcessing }));
+                const log = messages.filter(m => m && !m.isHidden && m.text).map(m => ({ id: m.id, role: m.role, text: m.text, time: m.time || null }));
                 localStorage.setItem(lsChatKey(), JSON.stringify(log));
             } catch(e) {}
         }
@@ -1022,12 +991,10 @@
 
             if (maxScrollTop - currentScrollTop <= threshold) {
                 autoScrollActive = true;
-            } else if (isUserInteracting && currentScrollTop < lastScrollTop - 1) {
-                // FIX: hanya matikan auto-scroll kalau user BENAR-BENAR sedang menyentuh/
-                // scroll ke atas. Keyboard yang buka-tutup & perubahan tinggi konten membuat
-                // browser meng-clamp scrollTop (terlihat seperti scroll ke atas padahal bukan
-                // aksi user) — itu TIDAK boleh mematikan auto-scroll, karena dulu inilah
-                // penyebab indikator "mengetik" di bawah tidak naik otomatis setelah kirim.
+            } else if (currentScrollTop < lastScrollTop - 1) {
+                // FIX: hanya matikan auto-scroll kalau user BENAR-BENAR scroll ke atas.
+                // Pertumbuhan tinggi konten (markdown/gambar dimuat terlambat) tidak lagi
+                // mematikan auto-scroll — dulu inilah penyebab pesan baru "nempel di input".
                 autoScrollActive = false;
             }
 
@@ -1707,51 +1674,6 @@
             renderMessages();
         }
 
-        // ===== MODE TIM AI: beberapa model AI berdiskusi lalu membangun web (kuota 5x) =====
-        // Pilihan mode lewat capsul dropdown di samping kiri tombol kirim.
-        let teamModeOn = false;
-        try { teamModeOn = localStorage.getItem('clincoo_team_mode') === '1'; } catch (e) {}
-        const teamCapsule = document.getElementById('team-mode-capsule');
-        const teamMenu = document.getElementById('team-mode-menu');
-        const teamLabel = document.getElementById('team-mode-label');
-        function applyTeamModeStyle() {
-            if (!teamCapsule || !teamLabel) return;
-            teamLabel.textContent = teamModeOn ? 'Kolaborasi' : 'Biasa';
-            if (teamModeOn) {
-                teamCapsule.classList.add('bg-gray-900', 'border-gray-900', 'text-white');
-                teamCapsule.classList.remove('border-gray-200', 'text-gray-600');
-            } else {
-                teamCapsule.classList.remove('bg-gray-900', 'border-gray-900', 'text-white');
-                teamCapsule.classList.add('border-gray-200', 'text-gray-600');
-            }
-            document.querySelectorAll('.team-mode-option').forEach(function (btn) {
-                const active = (btn.getAttribute('data-team-mode') === 'kolaborasi') === teamModeOn;
-                btn.classList.toggle('bg-gray-100', active);
-            });
-        }
-        function toggleTeamMenu(show) {
-            if (!teamMenu) return;
-            if (show) teamMenu.classList.remove('opacity-0', 'invisible', 'translate-y-2');
-            else teamMenu.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        }
-        if (teamCapsule) {
-            applyTeamModeStyle();
-            teamCapsule.addEventListener('click', function (e) {
-                e.stopPropagation();
-                toggleTeamMenu(teamMenu.classList.contains('invisible'));
-            });
-            document.querySelectorAll('.team-mode-option').forEach(function (btn) {
-                btn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    teamModeOn = btn.getAttribute('data-team-mode') === 'kolaborasi';
-                    try { localStorage.setItem('clincoo_team_mode', teamModeOn ? '1' : '0'); } catch (err) {}
-                    applyTeamModeStyle();
-                    toggleTeamMenu(false);
-                });
-            });
-            document.addEventListener('click', function () { toggleTeamMenu(false); });
-        }
-
         const TOOL_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
         const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clincoo (kuota 25/hari user gratis, 500/hari admin)
 
@@ -2303,9 +2225,6 @@
             };
             messages.push(aiMsgObj);
             renderMessages();
-            // FIX: pastikan indikator "mengetik" langsung terlihat di layar walau user
-            // sebelumnya sedang membaca riwayat di atas.
-            scrollToBottom(true);
             
             currentAiMessageId = aiMsgObj.id;
             abortController = new AbortController();
@@ -2360,7 +2279,7 @@
                         stopGeneration();
                     }
                 }
-            }, teamModeOn ? 300000 : 90000); 
+            }, 90000); 
 
             if (requiresImage) {
                 try {
@@ -2527,7 +2446,6 @@
                                     session_id: currentSessionId || undefined,
                                     project_id: currentProjectId || undefined,
                                     workspace_tools: true,
-                                    team: teamModeOn && hop === 0,
                                     save_user_message: hop === 0
                                 }),
                                 signal: abortController.signal
@@ -2746,33 +2664,8 @@ if (loadChatLog()) {
     // pindah halaman saat AI masih menjawab) — lanjutkan jawaban secara otomatis.
     setTimeout(function() {
         try {
-            if (isGenerating || messages.length === 0) return;
-            var lastMsg = messages[messages.length - 1];
-            // Kasus 1: pertanyaan user belum dijawab (keluar halaman sebelum AI mulai mengetik)
-            if (lastMsg.role === 'user' && (lastMsg.text || '').trim()) {
+            if (!isGenerating && messages.length > 0 && messages[messages.length - 1].role === 'user' && (messages[messages.length - 1].text || '').trim()) {
                 fetchAIResponse();
-                return;
-            }
-            // Kasus 2: jawaban AI terpotong (keluar halaman saat AI masih mengetik).
-            // Sudah ada progres tools (file dibuat dll)? Finalisasi apa adanya — JANGAN
-            // buang progres & ulang dari nol (dulu: progres hilang + ngetik ulang).
-            if (lastMsg.role === 'ai' && lastMsg.isProcessing && messages.length >= 2 &&
-                messages[messages.length - 2].role === 'user') {
-                if (lastMsg.toolCalls && lastMsg.toolCalls.length > 0) {
-                    lastMsg.isProcessing = false;
-                    lastMsg.isTyping = false;
-                    if (!lastMsg.text || !String(lastMsg.text).trim()) {
-                        lastMsg.text = 'Proses selesai — progres tersimpan. Cek hasilnya di halaman Workspace.';
-                    }
-                    saveChatLog();
-                    renderMessages();
-                    scrollToBottom(true);
-                } else {
-                    messages.pop();
-                    renderMessages();
-                    scrollToBottom(true);
-                    fetchAIResponse();
-                }
             }
         } catch(e) { console.error('Resume pending answer error:', e); }
     }, 1200);

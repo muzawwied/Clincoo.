@@ -175,15 +175,8 @@
     <script>/* clincoo-seo-auto: canonical & og mengikuti domain aktif */
 (function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<4;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.jpg");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.jpg");}catch(e){}})();
     </script>
-<!-- Google tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-KMQ8WBZF6E');
-</script>
-<!-- End Google tag -->
+<script src="../../../../../js/i18n-dict.js" defer></script>
+<script src="../../../../../js/i18n.js" defer></script>
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 bg-white">
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
@@ -223,9 +216,8 @@
                             </div>
                             <input type="hidden" name="payment-method" value="ClincooPay">
                         </div>
-                        <!-- QRIS via Pakasir — aktif: buat transaksi, QR ditampilkan di step khusus -->
-                        <div onclick="selectPaymentMethod(this)" class="pay-method-card border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]">
-                            <div class="flex items-center space-x-3.5 flex-1 min-w-0 mr-2 p-3.5">
+                        <div class="pay-method-card-locked flex items-center justify-between p-3.5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a] opacity-70 cursor-default select-none" aria-disabled="true">
+                            <div class="flex items-center space-x-3.5 flex-1 min-w-0 mr-2">
                                 <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
                                     <img src="../../../assets/qris-wikimedia.svg" alt="QRIS" class="w-full h-full object-contain">
                                 </div>
@@ -234,7 +226,7 @@
                                     <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Gopay, OVO, Dana, BCA Mobile, dll</p>
                                 </div>
                             </div>
-                            <input type="radio" name="payment-method" value="QRIS" class="hidden">
+                            <span class="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">Segera</span>
                         </div>
                     </div>
 
@@ -415,45 +407,6 @@
                 </div>
             </main>
         </div>
-
-        <!-- STEP 3: QRIS PAYMENT (Pakasir) -->
-        <div id="step-qris" class="hidden flex-col w-full min-h-screen overflow-y-auto">
-            <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
-                <button onclick="qrisBackToAmount()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
-                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
-                </button>
-            </header>
-
-            <main class="flex-1 w-full flex flex-col px-5 py-6">
-                <div class="flex flex-col items-center mb-5 w-full mt-2">
-                    <h2 class="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight text-center">Scan &amp; Bayar via QRIS</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5 text-center">Scan dengan GoPay, DANA, OVO, ShopeePay, atau m-banking</p>
-                </div>
-
-                <div class="w-full max-w-sm mx-auto">
-                    <div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] p-5 text-center">
-                        <div class="flex justify-between items-center text-[11px] font-medium text-gray-400 dark:text-gray-500">
-                            <span>Order</span>
-                            <span id="qris-order-id" class="font-mono"></span>
-                        </div>
-                        <div id="qris-qr-box" class="w-[220px] h-[220px] mx-auto my-4 rounded-xl bg-white flex items-center justify-center overflow-hidden border border-gray-100"></div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Total Bayar</p>
-                        <p id="qris-total" class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight mt-1"></p>
-                        <p id="qris-expire" class="text-[11px] text-gray-400 dark:text-gray-500 mt-2"></p>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 pt-4">
-                        <button onclick="downloadQris()" class="w-full py-3.5 rounded-xl font-bold text-sm bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white hover:border-gray-900 dark:hover:border-white transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                            <i data-lucide="download" class="w-4 h-4"></i>Download QR
-                        </button>
-                        <button onclick="checkQrisStatusNow()" class="w-full py-3.5 rounded-xl font-bold text-sm bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>Sudah Bayar
-                        </button>
-                    </div>
-                    <p class="text-center text-[11px] text-gray-400 dark:text-gray-500 mt-3">Status pembayaran dicek otomatis setiap beberapa detik.</p>
-                </div>
-            </main>
-        </div>
     </div>
 
     <div id="system-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
@@ -468,8 +421,6 @@
         </div>
 
     <script>
-        // Library render QR dari string QRIS (ringan, tanpa dependency)
-        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');
         const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '';
         var TOPUP_API = API_BASE + '/api/topup';
         let selectedNominalAmount = 0;
@@ -637,136 +588,6 @@
         var XENDIT_METHOD_MAP = { 'QRIS Instant': 'qris', 'LinkAja': 'linkaja', 'GoPay': 'gopay', 'OVO': 'ovo', 'DANA': 'dana', 'ShopeePay': 'shopeepay', 'BCA Virtual Account': 'bca', 'Mandiri Virtual Account': 'mandiri', 'BRI Virtual Account': 'bri', 'BNI Virtual Account': 'bni' };
         var topupPollTimer = null;
 
-        // ===== QRIS via Pakasir =====
-        var qrisOrder = null;
-        var qrisPollTimer = null;
-        var qrisCountdownTimer = null;
-
-        async function processQRIS() {
-            var token = '';
-            try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
-            var res;
-            try {
-                res = await fetch(API_BASE + '/api/topup-qris', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ action: 'create', amount: selectedNominalAmount })
-                }).then(function (r) { return r.json(); });
-            } catch (e) { showModal('Gagal', 'Tidak dapat terhubung ke server pembayaran.'); return; }
-            if (!res.success) {
-                if (res.need_login) { showModal('Sesi Berakhir', 'Silakan masuk ulang, lalu coba isi saldo kembali.'); return; }
-                if (res.error === 'payment_not_configured') { showModal('Top Up Gagal', res.message || 'PAKASIR_API_KEY belum diatur.'); return; }
-                showModal('Top Up Gagal', res.message || res.error || 'Gagal membuat transaksi QRIS.');
-                return;
-            }
-            qrisOrder = res;
-            showQrisStep(res);
-        }
-
-        function showQrisStep(res) {
-            var stepMethod = document.getElementById('step-method');
-            var stepAmount = document.getElementById('step-amount');
-            var st = document.getElementById('step-qris');
-            if (stepMethod) { stepMethod.classList.add('hidden'); stepMethod.classList.remove('flex'); }
-            if (stepAmount) { stepAmount.classList.add('hidden'); stepAmount.classList.remove('flex'); }
-            st.classList.remove('hidden'); st.classList.add('flex');
-            document.getElementById('qris-order-id').textContent = res.order_id || '';
-            document.getElementById('qris-total').textContent = 'Rp ' + Number(res.total_payment || 0).toLocaleString('id-ID');
-            var box = document.getElementById('qris-qr-box');
-            box.innerHTML = '';
-            try {
-                new QRCode(box, { text: res.qr_string, width: 220, height: 220, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
-            } catch (e) {
-                box.innerHTML = '<p class="text-xs text-gray-500 dark:text-gray-400 px-4">Gagal merender QR. Coba lagi.</p>';
-            }
-            try { lucide.createIcons(); } catch (e) {}
-            startQrisCountdown(res.expired_at);
-            startQrisPoll(res.order_id);
-        }
-
-        function qrisBackToAmount() {
-            stopQrisTimers();
-            var st = document.getElementById('step-qris');
-            st.classList.add('hidden'); st.classList.remove('flex');
-            var stepAmount = document.getElementById('step-amount');
-            stepAmount.classList.remove('hidden'); stepAmount.classList.add('flex');
-            try { lucide.createIcons(); } catch (e) {}
-        }
-
-        function startQrisCountdown(expiredAt) {
-            var el = document.getElementById('qris-expire');
-            var end = expiredAt ? new Date(expiredAt).getTime() : 0;
-            if (!end) { el.textContent = ''; return; }
-            function tick() {
-                var left = Math.floor((end - Date.now()) / 1000);
-                if (left <= 0) {
-                    el.textContent = 'QR kedaluwarsa — silakan buat transaksi baru.';
-                    stopQrisTimers();
-                    return;
-                }
-                var m = Math.floor(left / 60), sec = left % 60;
-                el.textContent = 'Kedaluwarsa dalam ' + m + ':' + (sec < 10 ? '0' : '') + sec;
-            }
-            tick();
-            qrisCountdownTimer = setInterval(tick, 1000);
-        }
-
-        function startQrisPoll(orderId) {
-            if (qrisPollTimer) { clearInterval(qrisPollTimer); qrisPollTimer = null; }
-            var attempts = 0;
-            checkQris(orderId, true);
-            qrisPollTimer = setInterval(async function () {
-                attempts++;
-                if (attempts > 600) { clearInterval(qrisPollTimer); qrisPollTimer = null; return; }
-                await checkQris(orderId, true);
-            }, 3000);
-        }
-
-        async function checkQris(orderId, auto) {
-            var token = '';
-            try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
-            try {
-                var data = await fetch(API_BASE + '/api/topup-qris?action=status&order_id=' + encodeURIComponent(orderId), {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                }).then(function (r) { return r.json(); });
-                if (data.status === 'paid') {
-                    stopQrisTimers();
-                    showModal('Top Up Berhasil', 'Pembayaran QRIS diterima. Saldo sudah masuk ke Dompet Clincoo.');
-                    setTimeout(function () { closeTopUpPage(); }, 1500);
-                    return;
-                }
-                if (data.status === 'failed') {
-                    stopQrisTimers();
-                    showModal('Pembayaran Tidak Selesai', 'Transaksi dibatalkan atau kedaluwarsa.');
-                    return;
-                }
-                if (!auto) showModal('Belum Terbayar', 'Belum ada pembayaran terdeteksi. Coba lagi beberapa saat setelah membayar.');
-            } catch (e) {
-                if (!auto) showModal('Gagal', 'Tidak dapat menghubungi server.');
-            }
-        }
-
-        function checkQrisStatusNow() { if (qrisOrder) checkQris(qrisOrder.order_id, false); }
-
-        function downloadQris() {
-            var box = document.getElementById('qris-qr-box');
-            var canvas = box ? box.querySelector('canvas') : null;
-            var img = box ? box.querySelector('img') : null;
-            var src = canvas ? canvas.toDataURL('image/png') : (img ? img.src : null);
-            if (!src) { showModal('Gagal', 'QR belum siap untuk diunduh.'); return; }
-            var a = document.createElement('a');
-            a.href = src;
-            a.download = 'clincoo-qris-' + (qrisOrder ? qrisOrder.order_id : 'bayar') + '.png';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        }
-
-        function stopQrisTimers() {
-            if (qrisPollTimer) { clearInterval(qrisPollTimer); qrisPollTimer = null; }
-            if (qrisCountdownTimer) { clearInterval(qrisCountdownTimer); qrisCountdownTimer = null; }
-        }
-
         async function processTopUp() {
             if (!selectedNominalAmount || selectedNominalAmount < 10000) {
                 showModal('Nominal Tidak Valid', 'Minimal isi saldo adalah 10.000. Ketik jumlahnya di keyboard di atas.');
@@ -775,7 +596,6 @@
             var methodEl = document.querySelector('input[name="payment-method"]:checked');
             var method = methodEl ? methodEl.value : 'ClincooPay';
             if (method === 'ClincooPay') { return processClincooPay(); }
-            if (method === 'QRIS') { return processQRIS(); }
             var channel = XENDIT_METHOD_MAP[method] || 'qris';
             try {
                 var payerEmail = ''; try { payerEmail = localStorage.getItem('clincoo_email') || ''; } catch(e) {}

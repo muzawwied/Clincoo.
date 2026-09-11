@@ -115,15 +115,8 @@
     <script>/* clincoo-seo-auto: canonical & og mengikuti domain aktif */
 (function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<3;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.jpg");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.jpg");}catch(e){}})();
     </script>
-<!-- Google tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-KMQ8WBZF6E');
-</script>
-<!-- End Google tag -->
+<script src="../../../../js/i18n-dict.js" defer></script>
+<script src="../../../../js/i18n.js" defer></script>
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 pt-16 relative">
     <script>
@@ -239,43 +232,21 @@
             const btn = document.getElementById('btn-process-deploy');
             if (!pid()) { console.warn('Proyek belum dipilih.'); return; }
             if (deployState.deploying) return; // klik hanya sekali per sesi
-            // Feedback INSTAN begitu diklik — dulu tombol terasa mati selama pengecekan
-            // nama aplikasi (round-trip jaringan) sebelum "Menyiapkan deploy..." muncul.
-            const DEPLOY_BTN_IDLE = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
-            const DEPLOY_BTN_BUSY = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
-            const resetDeployBtn = () => {
-                btn.innerHTML = `Jalankan Deploy`;
-                btn.className = DEPLOY_BTN_IDLE;
-                btn.disabled = false;
-                lucide.createIcons();
-            };
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Menyiapkan deploy...</span>`;
-            btn.className = DEPLOY_BTN_BUSY;
-            lucide.createIcons();
             // Nama aplikasi wajib sebelum deploy pertama — menentukan subdomain situs
             if (!window.__appNameOk) {
                 try {
                     const st = await apiFetch('/project-settings?project_id=' + encodeURIComponent(pid()));
-                    if (!st || !st.app_name) { openAppNameModal(); resetDeployBtn(); return; }
+                    if (!st || !st.app_name) { openAppNameModal(); return; }
                     window.__appNameOk = true;
                 } catch (e) { window.__appNameOk = true; } // jangan blokir deploy bila cek gagal
             }
             deployState.deploying = true;
             writeDeploySession({ status: 'deploying', started_at: Date.now() });
-            const phaseTimer = setInterval(async () => {
-                try {
-                    const st = await apiFetch('/deploy?project_id=' + encodeURIComponent(pid()));
-                    const ph = st && st.deploy_phase;
-                    if (ph) {
-                        btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">${ph}</span>`;
-                        lucide.createIcons();
-                    }
-                } catch (e) {}
-            }, 2000);
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Menyiapkan deploy...</span>`;
+            btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
+            lucide.createIcons();
             try {
                 const res = await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid() }) });
-                clearInterval(phaseTimer);
                 deployState.deploying = false;
                 writeDeploySession({ status: 'done', pages_url: (res && res.pages_url) || deployState.pages_url || '', done_at: Date.now() });
                 btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span class="inline-block">Berhasil Deploy!</span>`;
@@ -287,7 +258,6 @@
                     btn.disabled = false;
                 }, 1000);
             } catch (err) {
-                clearInterval(phaseTimer);
                 deployState.deploying = false;
                 writeDeploySession({ status: 'failed' });
                 console.warn('Deploy gagal: ' + err.message);

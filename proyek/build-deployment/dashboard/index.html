@@ -115,15 +115,8 @@
     <script>/* clincoo-seo-auto: canonical & og mengikuti domain aktif */
 (function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<3;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.jpg");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.jpg");}catch(e){}})();
     </script>
-<!-- Google tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-KMQ8WBZF6E');
-</script>
-<!-- End Google tag -->
+<script src="../../../../js/i18n-dict.js" defer></script>
+<script src="../../../../js/i18n.js" defer></script>
 </head>
 <body class="min-h-screen flex flex-col text-gray-900 pt-16 relative">
     <script>
@@ -355,8 +348,6 @@
             visitBtn.disabled = false;
             visitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             visitBtn.onclick = () => window.open(ses.pages_url, '_blank');
-            if (ses.deployed_by) setDeployedBy(ses.deployed_by);
-            if (Array.isArray(ses.domains)) renderRealDomains(ses.domains);
 
             // Segarkan data asli dari server bila tersedia (tidak menimpa sesi bila gagal)
             fetchStatus().then(st => {
@@ -372,15 +363,6 @@
                     if (dep.created) timeLabel.innerText = timeAgoIso(dep.created);
                 }
                 renderRealDomains(st.domains || []);
-                try {
-                    writeDeploySession({
-                        status: 'done',
-                        pages_url: (dep && dep.url) || ses.pages_url,
-                        done_at: Date.now(),
-                        deployed_by: st.last_deploy_by || ses.deployed_by || '',
-                        domains: st.domains || []
-                    });
-                } catch (e) {}
             }).catch(() => {});
         }
         
@@ -398,7 +380,7 @@
             shimmer.style.display = 'none';
             link.style.display = 'inline-block';
             deployState.pages_url = st.pages_url || (ok ? (dep.url || '') : '');
-            if (ok) writeDeploySession({ status: 'done', pages_url: deployState.pages_url, done_at: Date.now(), deployed_by: st.last_deploy_by || '', domains: st.domains || [] });
+            if (ok) writeDeploySession({ status: 'done', pages_url: deployState.pages_url, done_at: Date.now() });
             link.textContent = deployState.pages_url || 'gagal dideploy';
             link.href = deployState.pages_url || '#';
             timeLabel.innerText = ok ? timeAgoIso(dep.created) : 'deploy gagal';
@@ -530,11 +512,6 @@
 
         document.addEventListener("DOMContentLoaded", async () => {
             loadCustomDomain();
-            // 1) Tampilkan instan dari cache sesi lokal (local storage) — tanpa nunggu server
-            const ses = readDeploySession();
-            if (ses && ses.status === 'done' && ses.pages_url) { showDashboardFromSession(ses); return; }
-            if (ses && ses.status === 'deploying') { startDeploySimulation(); processDeploy(); return; }
-            // 2) Tanpa sesi: baru cek data server (proyek pernah dideploy dari device lain, dsb.)
             try {
                 const st = await fetchStatus();
                 if (st && st.last_deployment && ['success', 'active'].includes(st.last_deployment.status)) {
@@ -542,6 +519,9 @@
                 }
                 if (st && (st.last_deployment || (st.domains || []).length)) { startDeploySimulation(); return; }
             } catch (e) {}
+            const ses = readDeploySession();
+            if (ses && ses.status === 'done' && ses.pages_url) { showDashboardFromSession(ses); return; }
+            if (ses && ses.status === 'deploying') { startDeploySimulation(); processDeploy(); return; }
             window.location.replace('../build-deployment/');
         });
         // Fitur Tombol Save di Source Config dengan Animasi Loading -> Check
