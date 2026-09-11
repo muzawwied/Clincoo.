@@ -249,11 +249,22 @@
             }
             deployState.deploying = true;
             writeDeploySession({ status: 'deploying', started_at: Date.now() });
+            const phaseTimer = setInterval(async () => {
+                try {
+                    const st = await apiFetch('/deploy?project_id=' + encodeURIComponent(pid()));
+                    const ph = st && st.deploy_phase;
+                    if (ph) {
+                        btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">${ph}</span>`;
+                        lucide.createIcons();
+                    }
+                } catch (e) {}
+            }, 2000);
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Menyiapkan deploy...</span>`;
             btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
             lucide.createIcons();
             try {
                 const res = await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid() }) });
+                clearInterval(phaseTimer);
                 deployState.deploying = false;
                 writeDeploySession({ status: 'done', pages_url: (res && res.pages_url) || deployState.pages_url || '', done_at: Date.now() });
                 btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span class="inline-block">Berhasil Deploy!</span>`;
@@ -265,6 +276,7 @@
                     btn.disabled = false;
                 }, 1000);
             } catch (err) {
+                clearInterval(phaseTimer);
                 deployState.deploying = false;
                 writeDeploySession({ status: 'failed' });
                 console.warn('Deploy gagal: ' + err.message);
