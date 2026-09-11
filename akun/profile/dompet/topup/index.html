@@ -40,6 +40,12 @@
         .text-accent { color: var(--accent-color) !important; }
         .border-accent { border-color: var(--accent-color) !important; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .pay-method-card .radio-indicator { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e7eb; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        body.dark-mode .pay-method-card .radio-indicator { border-color: #374151; }
+        .pay-method-card.selected .radio-indicator { border-color: #111827; background-color: #111827; }
+        .pay-method-card.selected .radio-indicator::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #ffffff; }
+        body.dark-mode .pay-method-card.selected .radio-indicator { border-color: #ffffff; background-color: #ffffff; }
+        body.dark-mode .pay-method-card.selected .radio-indicator::after { background: #000000; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         body.dark-mode { background-color: #000000; color: #e0e0e0; }
@@ -212,7 +218,7 @@
                     <div class="space-y-3">
                         <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">Pembayaran Instan</h4>
                         <!-- ClincooPay (metode aktif satu-satunya) — kartu tunggal: metode + status koneksi menyatu -->
-                        <div class="pay-method-card selected border-2 border-gray-900 dark:border-white rounded-2xl w-full bg-gray-50 dark:bg-[#1a1a1a]">
+                        <div class="pay-method-card selected border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-gray-50 dark:bg-[#1a1a1a]">
                             <div class="flex items-center space-x-3 p-3.5">
                                 <div class="relative w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
                                     <img src="https://muzawwied.github.io/Wallet/logo.png" alt="ClincooPay" class="absolute inset-0 w-full h-full object-cover scale-[1.42]">
@@ -222,6 +228,7 @@
                                     <p id="clincoopay-desc" class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Memuat…</p>
                                 </div>
                                 <div id="clincoopay-cta" class="shrink-0"></div>
+                                <div class="radio-indicator shrink-0 ml-2"></div>
                             </div>
                             <input type="hidden" name="payment-method" value="ClincooPay">
                         </div>
@@ -235,6 +242,7 @@
                                     <p class="text-sm font-bold text-gray-900 dark:text-white truncate">QRIS</p>
                                     <p class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Gopay, OVO, Dana, BCA Mobile, dll</p>
                                 </div>
+                                <div class="radio-indicator shrink-0"></div>
                             </div>
                             <input type="radio" name="payment-method" value="QRIS" class="hidden">
                         </div>
@@ -604,12 +612,13 @@
         }
 
         function selectPaymentMethod(labelEl) {
+            // Pilihan hanya ditandai bg + indikator bulat kanan — border kartu tidak diubah
             document.querySelectorAll('.pay-method-card').forEach(function(card) {
-                card.classList.remove('selected', 'border-2', 'border-gray-900', 'dark:border-white', 'bg-gray-50', 'dark:bg-[#1a1a1a]');
-                card.classList.add('border', 'border-gray-200', 'dark:border-gray-800', 'bg-white', 'dark:bg-[#0a0a0a]');
+                card.classList.remove('selected', 'bg-gray-50', 'dark:bg-[#1a1a1a]');
+                card.classList.add('bg-white', 'dark:bg-[#0a0a0a]');
             });
-            labelEl.classList.add('selected', 'border-2', 'border-gray-900', 'dark:border-white', 'bg-gray-50', 'dark:bg-[#1a1a1a]');
-            labelEl.classList.remove('border', 'border-gray-200', 'dark:border-gray-800', 'bg-white', 'dark:bg-[#0a0a0a]');
+            labelEl.classList.add('selected', 'bg-gray-50', 'dark:bg-[#1a1a1a]');
+            labelEl.classList.remove('bg-white', 'dark:bg-[#0a0a0a]');
             var radio = labelEl.querySelector('input[type="radio"]');
             if (radio) radio.checked = true;
         }
