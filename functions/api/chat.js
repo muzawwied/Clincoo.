@@ -498,6 +498,36 @@ function teamTranscriptText(transcript) {
   }).join('\n\n');
 }
 
+// GET /api/chat — sisa kredit AI harian akun ini (dipakai UI, mis. halaman hubungkan ClincooPay)
+export async function onRequestGet({ request, env }) {
+  try {
+    const user = await resolveUser(env, request);
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Login diperlukan', need_login: true }), {
+        status: 401, headers: { 'Content-Type': 'application/json', ...CORS }
+      });
+    }
+    const isAdmin = ADMIN_EMAILS.has(user.email);
+    const limit = isAdmin ? ADMIN_DAILY_LIMIT : DAILY_LIMIT;
+    const day = new Date().toISOString().slice(0, 10);
+    let used = 0;
+    try {
+      await env.DB.prepare(
+        'CREATE TABLE IF NOT EXISTS ai_quota (user_key TEXT, day TEXT, count INTEGER, PRIMARY KEY (user_key, day))'
+      ).run();
+      const row = await env.DB.prepare('SELECT count FROM ai_quota WHERE user_key = ? AND day = ?').bind(user.key, day).first();
+      used = row ? row.count : 0;
+    } catch (e) {}
+    return new Response(JSON.stringify({ success: true, limit, used, remaining: Math.max(0, limit - used), day }), {
+      headers: { 'Content-Type': 'application/json', ...CORS }
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), {
+      status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
+    });
+  }
+}
+
 export async function onRequestPost({ request, env }) {
   try {
     if (!rateLimitOk(clientIp(request))) {

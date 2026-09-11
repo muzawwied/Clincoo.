@@ -395,9 +395,21 @@
 
         function openTopUpPage() { window.location.href = 'topup/'; }
 
-        function showModal(title, message) {
-        return;
-    }
+        function showModal(title, message, isError) {
+            var iconWrap = document.getElementById('modal-icon-wrap');
+            if (iconWrap) {
+                var icon = isError ? 'alert-circle' : 'check-circle';
+                var cls = isError ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600';
+                iconWrap.className = 'w-12 h-12 rounded-full ' + cls + ' flex items-center justify-center mb-4 mx-auto';
+                iconWrap.innerHTML = '<i data-lucide="' + icon + '" class="w-6 h-6"></i>';
+            }
+            document.getElementById('modal-title').textContent = title || '';
+            document.getElementById('modal-message').textContent = message || '';
+            var modal = document.getElementById('system-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            try { lucide.createIcons(); } catch (e) {}
+        }
 
         function closeModal() {
             var modal = document.getElementById('system-modal');

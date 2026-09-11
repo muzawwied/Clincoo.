@@ -521,6 +521,7 @@
                         </button>
                     </div>
                     <p class="text-center text-[11px] text-gray-400 dark:text-gray-500 mt-3">Status pembayaran dicek otomatis setiap beberapa detik.</p>
+                    <p class="text-center mt-1.5"><span onclick="qrisCancelTopup()" class="text-[11px] text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer transition-colors">Batalkan Top Up</span></p>
                 </div>
             </main>
         </div>
@@ -901,6 +902,23 @@
             }
         }
 
+        async function qrisCancelTopup() {
+            if (!qrisOrder || !qrisOrder.order_id) return;
+            var token = '';
+            try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
+            stopQrisTimers();
+            try {
+                await fetch(API_BASE + '/api/topup-qris', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ action: 'cancel', order_id: qrisOrder.order_id })
+                });
+            } catch (e) {}
+            qrisForgetSession();
+            goToStep1();
+            showModal('Top Up Dibatalkan', 'Transaksi QRIS dibatalkan. Saldo kamu tetap aman.');
+        }
+
         async function checkQrisStatusNow() {
             var btn = document.getElementById('qris-paid-btn');
             if (!qrisOrder || !btn || btn.classList.contains('checking')) return;
@@ -1006,9 +1024,21 @@
 
         function formatNumberOnly(num) { return Number(num).toLocaleString('id-ID'); }
 
-        function showModal(title, message) {
-        return;
-    }
+        function showModal(title, message, isError) {
+            var iconWrap = document.getElementById('modal-icon-wrap');
+            if (iconWrap) {
+                var icon = isError ? 'alert-circle' : 'check-circle';
+                var cls = isError ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600';
+                iconWrap.className = 'w-12 h-12 rounded-full ' + cls + ' flex items-center justify-center mb-4 mx-auto';
+                iconWrap.innerHTML = '<i data-lucide="' + icon + '" class="w-6 h-6"></i>';
+            }
+            document.getElementById('modal-title').textContent = title || '';
+            document.getElementById('modal-message').textContent = message || '';
+            var modal = document.getElementById('system-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            try { lucide.createIcons(); } catch (e) {}
+        }
 
         function closeModal() {
             var modal = document.getElementById('system-modal');

@@ -92,6 +92,7 @@
                 </div>
                 <h2 class="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Hubungkan ClincooPay</h2>
                 <p id="page-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sinkronkan dompet Wallet kamu dengan Clincoo.</p>
+            <p id="cp-credits" class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 hidden"></p>
             </div>
 
             <!-- STEP 1: INPUT ID WALLET -->
@@ -102,6 +103,7 @@
                         class="w-full px-4 py-3 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-900 dark:text-white placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:border-sky-400 tracking-widest uppercase">
                     <p class="text-[10px] text-slate-400 mt-1.5 px-1">Buka aplikasi Wallet → Profil → salin 10 karakter ID kamu.</p>
                 </div>
+                <p class="text-[10px] text-center leading-relaxed px-2">Belum punya akun ClincooPay? Daftar gratis di <a href="https://wallet-muz.pages.dev" target="_blank" rel="noopener" class="text-sky-500 font-semibold underline underline-offset-2">wallet-muz.pages.dev</a></p>
                 <p id="cp-id-error" class="text-xs text-red-500 hidden px-1"></p>
                 <button id="cp-send-btn" onclick="sendRequest()" class="w-full py-3 bg-sky-400 text-white rounded-full font-semibold text-sm hover:bg-sky-500 transition-all active:scale-[0.98]" style="box-shadow:0 4px 12px rgba(56,189,248,.25)">Kirim Permintaan</button>
                 <p class="text-[10px] text-slate-400 text-center leading-relaxed px-2">Setelah terkirim: konfirmasi di notifikasi Wallet, lalu masukkan PIN wallet di sini. PIN tidak pernah disimpan Clincoo.</p>
@@ -208,6 +210,18 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Sisa kredit AI hari ini (info kecil di bawah judul)
+            (async function () {
+                try {
+                    var t = ''; try { t = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
+                    var r = await fetch(API_BASE + '/api/chat', { headers: { 'Authorization': 'Bearer ' + t } }).then(function (x) { return x.json(); });
+                    if (r && r.success) {
+                        var el = document.getElementById('cp-credits');
+                        el.textContent = 'Sisa kredit chat AI hari ini: ' + r.remaining + '/' + r.limit;
+                        el.classList.remove('hidden');
+                    }
+                } catch (e) {}
+            })();
             try { lucide.createIcons(); } catch (e) {}
             buildPinPad();
             showStep('step-check');
