@@ -410,7 +410,7 @@
     function updateDNSRecords(domain, pagesUrl) {
         // Cloudflare Pages: custom domain pakai CNAME ke <project>.pages.dev (TANPA A record IP).
         // Nilai diambil real-time dari hasil deploy proyek (st.pages_url).
-        const target = (pagesUrl || '').replace('https://', '').replace(/\/$/, '') || 'situs-anda.pages.dev';
+        const target = (pagesUrl || '').replace('https://', '').replace(/\/$/, '') || 'Memuat data deploy...';
         const aName = document.getElementById('dns-a-name');
         const aValue = document.getElementById('dns-a-value');
         const cnameName = document.getElementById('dns-cname-name');
@@ -464,7 +464,8 @@
         } catch (e) {}
     }
 
-    async function loadRealDomainStatus() {
+    async function loadRealDomainStatus(retriesLeft) {
+        if (retriesLeft === undefined) retriesLeft = 2; // percobaan ulang otomatis bila jaringan lambat/goyang
         const pid = localStorage.getItem('clincoo_current_project_id') || '';
         const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
         try {
@@ -495,9 +496,24 @@
                 paintDomainLabel('Domain belum terhubung', false);
             }
         } catch (e) {
+            if (retriesLeft > 0) {
+                // Jaringan mobile sering goyang sebentar — coba lagi otomatis sebelum menyerah
+                setTimeout(function () { loadRealDomainStatus(retriesLeft - 1); }, 1800);
+                return;
+            }
             const cached = readDomainCache();
-            if (!cached || !cached.label) paintDomainLabel('Gagal memuat status', false);
+            if (!cached || !cached.label) paintDomainLabelWithRetry();
         }
+    }
+    // Status gagal total setelah retry — beri tombol "Coba lagi" manual, bukan cuma teks mati
+    function paintDomainLabelWithRetry() {
+        const lbl = document.getElementById('cf-domain-status');
+        if (!lbl) return;
+        lbl.innerHTML = 'Gagal memuat status &mdash; <a href="#" id="retry-domain-status" class="underline font-semibold">Coba lagi</a>';
+        lbl.classList.remove('hidden');
+        lbl.className = 'text-xs mt-1.5 font-medium text-red-600 dark:text-red-400';
+        const retryLink = document.getElementById('retry-domain-status');
+        if (retryLink) retryLink.addEventListener('click', function (e) { e.preventDefault(); paintDomainLabel('Memuat status…', false); loadRealDomainStatus(); });
     }
 
     // Override selectPopoverOption to also save
