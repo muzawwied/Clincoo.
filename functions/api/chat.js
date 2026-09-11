@@ -42,6 +42,17 @@ function clientIp(request) {
 }
 
 const PREFERRED_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
+
+// ===== PROVIDER UTAMA: OpenRouter (model gratis, tool calling) =====
+// Rantai fallback: nemotron-3-super (nalar+tools terkuat) -> nemotron-3.5-lightning
+// (eksekusi agent cepat) -> openrouter/free (router, tahan model delist).
+// Gemini hanya cadangan: dipanggil saat OpenRouter gagal/limit/tanpa kunci.
+const OPENROUTER_MODELS = [
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'nvidia/nemotron-3.5-lightning:free',
+  'openrouter/free'
+];
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const QUOTA_MSG = 'Kuota AI Clincoo hari ini sudah habis. Kuota reset otomatis setiap hari — silakan coba lagi besok.';
 
 const ADMIN_EMAILS = new Set(['devconium@gmail.com', 'muzawwied@gmail.com']);
@@ -53,6 +64,15 @@ async function getApiKey(env) {
   if (!env.DB) return null;
   try {
     const row = await env.DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind('GEMINI_API_KEY').first();
+    return row?.value || null;
+  } catch { return null; }
+}
+
+async function getOpenRouterKey(env) {
+  if (env.OPENROUTER_API_KEY) return env.OPENROUTER_API_KEY;
+  if (!env.DB) return null;
+  try {
+    const row = await env.DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind('OPENROUTER_API_KEY').first();
     return row?.value || null;
   } catch { return null; }
 }
@@ -216,6 +236,82 @@ async function tryModels(apiKey, systemInstruction, contents, tools) {
   return { error: lastError || 'All models failed', quotaExhausted };
 }
 
+// ===== OpenRouter: konversi format =====
+// Skema Gemini (OBJECT/STRING uppercase) -> JSON Schema OpenAI (lowercase)
+function orParam(schema) {
+  const t = String((schema && schema.type) || '').toLowerCase();
+  const out = { type: t === 'array' ? 'array' : t === 'boolean' ? 'boolean' : t === 'number' ? 'number' : t === 'object' ? 'object' : 'string' };
+  if (schema && schema.description) out.description = schema.description;
+  if (schema && schema.properties) {
+    out.properties = {};
+    for (const [k, v] of Object.entries(schema.properties)) out.properties[k] = orParam(v);
+  }
+  if (schema && Array.isArray(schema.required)) out.required = schema.required;
+  return out;
+}
+function orTools() {
+  return WORKSPACE_FUNCTION_DECLARATIONS.map(d => ({
+    type: 'function',
+    function: { name: d.name, description: d.description || '', parameters: orParam(d.parameters || { type: 'OBJECT', properties: {} }) }
+  }));
+}
+// messages klien (format blok Clincoo) -> pesan OpenAI-compatible
+function orMessages(messages) {
+  const out = [];
+  const pushText = (role, text) => { if (text) out.push({ role, content: text }); };
+  for (const m of messages) {
+    if (!m) continue;
+    const role = m.role === 'assistant' ? 'assistant' : m.role === 'system' ? 'system' : 'user';
+    if (typeof m.content === 'string') { pushText(role, m.content); continue; }
+    const blocks = Array.isArray(m.content) ? m.content : [];
+    let pendingText = '';
+    for (const b of blocks) {
+      if (!b) continue;
+      if (b.type === 'text' && b.text) pendingText += (pendingText ? '\n' : '') + b.text;
+      else if (b.type === 'function_call' && b.name) {
+        pushText(role === 'assistant' ? 'assistant' : 'user', pendingText); pendingText = '';
+        out.push({ role: 'assistant', content: null, tool_calls: [{ id: 'call_' + (b.call_id || b.name), type: 'function', function: { name: b.name, arguments: JSON.stringify(b.args || {}) } }] });
+      } else if (b.type === 'function_response' && b.name) {
+        pushText('user', pendingText); pendingText = '';
+        out.push({ role: 'tool', tool_call_id: 'call_' + (b.call_id || b.name), content: JSON.stringify({ result: b.result }) });
+      }
+      // image_url dibiarkan (model gratis OR non-vision; payload bergambar diarahkan ke Gemini)
+    }
+    pushText(role, pendingText);
+  }
+  // konteks panjang: 30 pesan terakhir (sama seperti jalur Gemini)
+  if (out.length > 30) out.splice(0, out.length - 30);
+  return out;
+}
+async function tryOpenRouter(apiKey, messages, tools) {
+  const statuses = [];
+  let lastError = null;
+  for (const model of OPENROUTER_MODELS) {
+    try {
+      const payload = { model, messages };
+      if (tools) { payload.tools = tools; payload.tool_choice = 'auto'; }
+      const res = await fetch(OPENROUTER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'HTTP-Referer': 'https://clincoo-be2.pages.dev', 'X-Title': 'Clincoo' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) { lastError = `OpenRouter ${model} returned ${res.status}: ${(await res.text()).slice(0, 200)}`; statuses.push(res.status); continue; }
+      const d = await res.json();
+      const m = d?.choices?.[0]?.message;
+      const text = (typeof m?.content === 'string' ? m.content : '') || '';
+      const toolCalls = (m?.tool_calls || []).map(tc => {
+        let args = {};
+        try { args = JSON.parse(tc.function?.arguments || '{}'); } catch (e) {}
+        return { name: tc.function?.name || '', args };
+      }).filter(tc => tc.name);
+      if (toolCalls.length > 0) return { tool_calls: toolCalls, text, model };
+      if (text) return { text, model };
+      lastError = `OpenRouter ${model} returned empty response`; statuses.push(0);
+    } catch (err) { lastError = 'OpenRouter ' + err.message; statuses.push(0); }
+  }
+  return { error: lastError || 'Semua model OpenRouter gagal', statuses };
+}
+
 export async function onRequestPost({ request, env }) {
   try {
     if (!rateLimitOk(clientIp(request))) {
@@ -277,20 +373,37 @@ export async function onRequestPost({ request, env }) {
       }
     }
 
+    const orKey = await getOpenRouterKey(env);
     const apiKey = await getApiKey(env);
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'GEMINI_API_KEY belum dikonfigurasi di database. Tambahkan lewat Pengaturan → Environment (global).' }), {
+    if (!orKey && !apiKey) {
+      return new Response(JSON.stringify({ error: 'Kunci AI (OpenRouter/Gemini) belum dikonfigurasi. Tambahkan lewat Pengaturan → Environment (global).' }), {
         status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
       });
     }
 
-    const { systemInstruction, contents } = toGeminiPayload(messages);
-    // Mode workspace tools: HANYA functionDeclarations (tanpa google_search —
-    // kombinasi keduanya ditolak Gemini API dan memicu bug JSON palsu).
-    const tools = body.workspace_tools === true
+    // Mode workspace tools.
+    // Jalur Gemini: HANYA functionDeclarations (tanpa google_search — kombinasi
+    // keduanya ditolak Gemini API dan memicu bug JSON palsu).
+    const gTools = body.workspace_tools === true
       ? [{ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS }]
       : null;
-    const r = await tryModels(apiKey, systemInstruction, contents, tools);
+    const oTools = body.workspace_tools === true ? orTools() : null;
+
+    // Payload bergambar -> langsung Gemini (model gratis OpenRouter non-vision).
+    const hasImages = messages.some(m => Array.isArray(m?.content) && m.content.some(b => b && b.type === 'image_url' && b.image_url?.url));
+
+    // PROVIDER UTAMA: OpenRouter. Gagal/limit/tanpa kunci -> cadangan Gemini.
+    let r = null;
+    if (orKey && !hasImages) {
+      r = await tryOpenRouter(orKey, orMessages(messages), oTools);
+    }
+    if ((!r || r.error) && apiKey) {
+      const { systemInstruction, contents } = toGeminiPayload(messages);
+      r = await tryModels(apiKey, systemInstruction, contents, gTools);
+    }
+    if (!r || (r.error && !apiKey)) {
+      if (!r) r = { error: 'Tidak ada provider AI tersedia' };
+    }
 
     if (r.error && r.quotaExhausted) {
       return new Response(JSON.stringify({ quota_exhausted: true, error: QUOTA_MSG }), {
