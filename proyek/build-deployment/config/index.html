@@ -239,11 +239,25 @@
             const btn = document.getElementById('btn-process-deploy');
             if (!pid()) { console.warn('Proyek belum dipilih.'); return; }
             if (deployState.deploying) return; // klik hanya sekali per sesi
+            // Feedback INSTAN begitu diklik — dulu tombol terasa mati selama pengecekan
+            // nama aplikasi (round-trip jaringan) sebelum "Menyiapkan deploy..." muncul.
+            const DEPLOY_BTN_IDLE = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
+            const DEPLOY_BTN_BUSY = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
+            const resetDeployBtn = () => {
+                btn.innerHTML = `Jalankan Deploy`;
+                btn.className = DEPLOY_BTN_IDLE;
+                btn.disabled = false;
+                lucide.createIcons();
+            };
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Menyiapkan deploy...</span>`;
+            btn.className = DEPLOY_BTN_BUSY;
+            lucide.createIcons();
             // Nama aplikasi wajib sebelum deploy pertama — menentukan subdomain situs
             if (!window.__appNameOk) {
                 try {
                     const st = await apiFetch('/project-settings?project_id=' + encodeURIComponent(pid()));
-                    if (!st || !st.app_name) { openAppNameModal(); return; }
+                    if (!st || !st.app_name) { openAppNameModal(); resetDeployBtn(); return; }
                     window.__appNameOk = true;
                 } catch (e) { window.__appNameOk = true; } // jangan blokir deploy bila cek gagal
             }
@@ -259,9 +273,6 @@
                     }
                 } catch (e) {}
             }, 2000);
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span class="inline-block">Menyiapkan deploy...</span>`;
-            btn.className = "flex-[2] py-4 bg-transparent border border-transparent text-gray-500 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-not-allowed";
-            lucide.createIcons();
             try {
                 const res = await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid() }) });
                 clearInterval(phaseTimer);
