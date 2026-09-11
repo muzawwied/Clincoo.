@@ -429,12 +429,7 @@
             
             <div class="flex items-center justify-between pt-2">
                 <div class="relative">
-                    <button id="team-ai-toggle" class="p-2 -ml-2 rounded-full transition-colors cursor-pointer text-gray-400 hover:text-black" title="Mode Tim AI: beberapa model AI berdiskusi & membangun web bareng (kuota 5x)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                </button>
-                <button id="add-btn" class="p-2 text-gray-400 hover:text-black rounded-full transition-colors cursor-pointer" aria-expanded="false" title="Lampirkan File">
+                    <button id="add-btn" class="p-2 -ml-2 text-gray-400 hover:text-black rounded-full transition-colors cursor-pointer" aria-expanded="false" title="Lampirkan File">
                         <svg id="add-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
@@ -448,6 +443,30 @@
                     </div>
                     
                     <input type="file" id="real-file-input" class="hidden" multiple>
+                </div>
+                
+                <div class="relative shrink-0">
+                    <button id="team-mode-capsule" type="button" class="flex items-center gap-1.5 h-10 pl-3 pr-2.5 rounded-full border border-gray-200 text-[13px] font-medium text-gray-600 hover:border-gray-400 hover:text-gray-900 transition-colors cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <span id="team-mode-label">Biasa</span>
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="team-mode-menu" class="absolute bottom-full right-0 mb-2 w-64 bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-xl p-2 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50 origin-bottom-right">
+                        <button type="button" data-team-mode="kolaborasi" class="team-mode-option w-full flex flex-col items-start px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
+                            <span class="text-sm font-semibold flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                Kolaborasi
+                            </span>
+                            <span class="text-xs text-gray-500 mt-0.5">Tim AI multi-model berdiskusi lalu membangun web (5 kuota/pesan)</span>
+                        </button>
+                        <button type="button" data-team-mode="biasa" class="team-mode-option w-full flex flex-col items-start px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
+                            <span class="text-sm font-semibold flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0zM7 21v-2.13A8.966 8.966 0 0112 21a8.966 8.966 0 004.494-1.13A8.966 8.966 0 0012 21a8.966 8.966 0 01-5-1.13V21z"></path></svg>
+                                Biasa
+                            </span>
+                            <span class="text-xs text-gray-500 mt-0.5">Chat normal dengan satu AI (1 kuota/pesan)</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <button id="submit-prompt-btn" class="w-10 h-10 bg-black text-white rounded-full hover:bg-gray-800 transition-all duration-200 active:scale-90 flex items-center justify-center cursor-pointer shadow-sm hover:shadow-md">
@@ -1689,28 +1708,48 @@
         }
 
         // ===== MODE TIM AI: beberapa model AI berdiskusi lalu membangun web (kuota 5x) =====
+        // Pilihan mode lewat capsul dropdown di samping kiri tombol kirim.
         let teamModeOn = false;
         try { teamModeOn = localStorage.getItem('clincoo_team_mode') === '1'; } catch (e) {}
-        const teamToggle = document.getElementById('team-ai-toggle');
-        function applyTeamToggleStyle() {
-            if (!teamToggle) return;
+        const teamCapsule = document.getElementById('team-mode-capsule');
+        const teamMenu = document.getElementById('team-mode-menu');
+        const teamLabel = document.getElementById('team-mode-label');
+        function applyTeamModeStyle() {
+            if (!teamCapsule || !teamLabel) return;
+            teamLabel.textContent = teamModeOn ? 'Kolaborasi' : 'Biasa';
             if (teamModeOn) {
-                teamToggle.classList.add('bg-black', 'text-white', 'shadow-md');
-                teamToggle.classList.remove('text-gray-400', 'hover:text-black');
-                teamToggle.title = 'Mode Tim AI AKTIF: diskusi multi-model, memakai 5 kuota per pesan';
+                teamCapsule.classList.add('bg-gray-900', 'border-gray-900', 'text-white');
+                teamCapsule.classList.remove('border-gray-200', 'text-gray-600');
             } else {
-                teamToggle.classList.remove('bg-black', 'text-white', 'shadow-md');
-                teamToggle.classList.add('text-gray-400', 'hover:text-black');
-                teamToggle.title = 'Mode Tim AI: beberapa model AI berdiskusi & membangun web bareng (kuota 5x)';
+                teamCapsule.classList.remove('bg-gray-900', 'border-gray-900', 'text-white');
+                teamCapsule.classList.add('border-gray-200', 'text-gray-600');
             }
-        }
-        if (teamToggle) {
-            applyTeamToggleStyle();
-            teamToggle.addEventListener('click', function () {
-                teamModeOn = !teamModeOn;
-                try { localStorage.setItem('clincoo_team_mode', teamModeOn ? '1' : '0'); } catch (e) {}
-                applyTeamToggleStyle();
+            document.querySelectorAll('.team-mode-option').forEach(function (btn) {
+                const active = (btn.getAttribute('data-team-mode') === 'kolaborasi') === teamModeOn;
+                btn.classList.toggle('bg-gray-100', active);
             });
+        }
+        function toggleTeamMenu(show) {
+            if (!teamMenu) return;
+            if (show) teamMenu.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+            else teamMenu.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        }
+        if (teamCapsule) {
+            applyTeamModeStyle();
+            teamCapsule.addEventListener('click', function (e) {
+                e.stopPropagation();
+                toggleTeamMenu(teamMenu.classList.contains('invisible'));
+            });
+            document.querySelectorAll('.team-mode-option').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    teamModeOn = btn.getAttribute('data-team-mode') === 'kolaborasi';
+                    try { localStorage.setItem('clincoo_team_mode', teamModeOn ? '1' : '0'); } catch (err) {}
+                    applyTeamModeStyle();
+                    toggleTeamMenu(false);
+                });
+            });
+            document.addEventListener('click', function () { toggleTeamMenu(false); });
         }
 
         const TOOL_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
@@ -2714,14 +2753,26 @@ if (loadChatLog()) {
                 fetchAIResponse();
                 return;
             }
-            // Kasus 2: jawaban AI terpotong (keluar halaman saat AI masih mengetik) —
-            // buang teks setengah jadi lalu lanjutkan jawaban secara otomatis.
+            // Kasus 2: jawaban AI terpotong (keluar halaman saat AI masih mengetik).
+            // Sudah ada progres tools (file dibuat dll)? Finalisasi apa adanya — JANGAN
+            // buang progres & ulang dari nol (dulu: progres hilang + ngetik ulang).
             if (lastMsg.role === 'ai' && lastMsg.isProcessing && messages.length >= 2 &&
                 messages[messages.length - 2].role === 'user') {
-                messages.pop();
-                renderMessages();
-                scrollToBottom(true);
-                fetchAIResponse();
+                if (lastMsg.toolCalls && lastMsg.toolCalls.length > 0) {
+                    lastMsg.isProcessing = false;
+                    lastMsg.isTyping = false;
+                    if (!lastMsg.text || !String(lastMsg.text).trim()) {
+                        lastMsg.text = 'Proses selesai — progres tersimpan. Cek hasilnya di halaman Workspace.';
+                    }
+                    saveChatLog();
+                    renderMessages();
+                    scrollToBottom(true);
+                } else {
+                    messages.pop();
+                    renderMessages();
+                    scrollToBottom(true);
+                    fetchAIResponse();
+                }
             }
         } catch(e) { console.error('Resume pending answer error:', e); }
     }, 1200);
