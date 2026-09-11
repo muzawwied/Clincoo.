@@ -40,6 +40,10 @@
         .text-accent { color: var(--accent-color) !important; }
         .border-accent { border-color: var(--accent-color) !important; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
+        #qris-paid-btn .paid-label { display: inline-block; max-width: 200px; opacity: 1; margin-left: 8px; overflow: hidden; white-space: nowrap; transition: opacity 0.35s ease, max-width 0.35s ease, margin-left 0.35s ease; }
+        #qris-paid-btn.checking .paid-label { opacity: 0; max-width: 0; margin-left: 0; }
+        #qris-paid-btn.checking svg { animation: cpSpin 0.8s linear infinite; }
+        @keyframes cpSpin { to { transform: rotate(360deg); } }
         .pay-method-card .radio-indicator { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #e5e7eb; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
         body.dark-mode .pay-method-card .radio-indicator { border-color: #374151; }
         .pay-method-card.selected .radio-indicator { border-color: #111827; background-color: #111827; }
@@ -506,8 +510,8 @@
                         <button onclick="downloadQris()" class="w-full py-3.5 rounded-xl font-bold text-sm bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white hover:border-gray-900 dark:hover:border-white transition-all active:scale-[0.98] flex items-center justify-center gap-2">
                             <i data-lucide="download" class="w-4 h-4"></i>Download QR
                         </button>
-                        <button onclick="checkQrisStatusNow()" class="w-full py-3.5 rounded-xl font-bold text-sm bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>Sudah Bayar
+                        <button id="qris-paid-btn" onclick="checkQrisStatusNow()" class="w-full py-3.5 rounded-xl font-bold text-sm bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-all active:scale-[0.98] flex items-center justify-center">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 shrink-0"></i><span class="paid-label">Sudah Bayar</span>
                         </button>
                     </div>
                     <p class="text-center text-[11px] text-gray-400 dark:text-gray-500 mt-3">Status pembayaran dicek otomatis setiap beberapa detik.</p>
@@ -827,7 +831,13 @@
             }
         }
 
-        function checkQrisStatusNow() { if (qrisOrder) checkQris(qrisOrder.order_id, false); }
+        async function checkQrisStatusNow() {
+            var btn = document.getElementById('qris-paid-btn');
+            if (!qrisOrder || !btn || btn.classList.contains('checking')) return;
+            btn.classList.add('checking');
+            try { await checkQris(qrisOrder.order_id, false); }
+            finally { btn.classList.remove('checking'); }
+        }
 
         function downloadQris() {
             var box = document.getElementById('qris-qr-box');
