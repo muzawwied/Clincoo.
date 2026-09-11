@@ -418,7 +418,55 @@
             </main>
         </div>
 
-        <!-- STEP 3: QRIS PAYMENT (Pakasir) -->
+        <!-- STEP 3: KONFIRMASI TOP UP QRIS (ringkasan + CTA Lanjutkan) -->
+        <div id="step-qris-confirm" class="hidden flex-col w-full min-h-screen overflow-y-auto">
+            <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
+                <button onclick="qrisConfirmBack()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+            </header>
+
+            <main class="flex-1 w-full flex flex-col px-5 py-6">
+                <div class="flex flex-col items-center mb-5 w-full mt-2">
+                    <h2 class="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight text-center">Konfirmasi Top Up</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5 text-center">Periksa detail pembayaran sebelum melanjutkan</p>
+                </div>
+
+                <div class="w-full max-w-sm mx-auto">
+                    <div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0a0a0a] p-5">
+                        <div class="flex items-center justify-between py-2.5">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Metode Pembayaran</p>
+                            <div class="flex items-center gap-2">
+                                <img src="../../assets/qris-wikimedia.svg" alt="QRIS" class="w-6 h-6 object-contain">
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">QRIS</p>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-100 dark:border-gray-800"></div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Nominal Top Up</p>
+                            <p id="qris-confirm-nominal" class="text-sm font-bold text-gray-900 dark:text-white"></p>
+                        </div>
+                        <div class="border-t border-gray-100 dark:border-gray-800"></div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Biaya Layanan</p>
+                            <p id="qris-confirm-fee" class="text-sm font-bold text-gray-900 dark:text-white"></p>
+                        </div>
+                        <div class="border-t border-gray-100 dark:border-gray-800"></div>
+                        <div class="flex items-center justify-between py-2.5">
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">Total Bayar</p>
+                            <p id="qris-confirm-total" class="text-base font-extrabold text-gray-900 dark:text-white"></p>
+                        </div>
+                    </div>
+                    <p class="text-center text-[11px] text-gray-400 dark:text-gray-500 mt-3">Biaya layanan bersifat estimasi; total final mengikuti tagihan QRIS.</p>
+                </div>
+
+                <div class="pt-4 pb-8 w-full mt-auto max-w-sm mx-auto">
+                    <button id="qris-continue-btn" onclick="processQRIS()" class="w-full py-4 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-all shadow-lg active:scale-[0.98]">Lanjutkan</button>
+                </div>
+            </main>
+        </div>
+
+        <!-- STEP 4: QRIS PAYMENT (Pakasir) -->
         <div id="step-qris" class="hidden flex-col w-full min-h-screen overflow-y-auto">
             <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
                 <button onclick="qrisBackToAmount()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
@@ -644,7 +692,38 @@
         var qrisPollTimer = null;
         var qrisCountdownTimer = null;
 
+        // Estimasi biaya layanan Pakasir (QRIS): 310 + 0.7% nominal — final mengikuti tagihan
+        function qrisFeeEstimate(amount) {
+            return 310 + Math.ceil(amount * 0.007);
+        }
+
+        function showQrisConfirm() {
+            var stepMethod = document.getElementById('step-method');
+            var stepAmount = document.getElementById('step-amount');
+            var st = document.getElementById('step-qris-confirm');
+            if (stepMethod) { stepMethod.classList.add('hidden'); stepMethod.classList.remove('flex'); }
+            if (stepAmount) { stepAmount.classList.add('hidden'); stepAmount.classList.remove('flex'); }
+            st.classList.remove('hidden'); st.classList.add('flex');
+            var fee = qrisFeeEstimate(selectedNominalAmount);
+            document.getElementById('qris-confirm-nominal').textContent = 'Rp ' + Number(selectedNominalAmount).toLocaleString('id-ID');
+            document.getElementById('qris-confirm-fee').textContent = 'Rp ' + Number(fee).toLocaleString('id-ID');
+            document.getElementById('qris-confirm-total').textContent = 'Rp ' + Number(selectedNominalAmount + fee).toLocaleString('id-ID');
+            var btn = document.getElementById('qris-continue-btn');
+            btn.disabled = false;
+            btn.textContent = 'Lanjutkan';
+            try { lucide.createIcons(); } catch (e) {}
+        }
+
+        function qrisConfirmBack() {
+            var st = document.getElementById('step-qris-confirm');
+            st.classList.add('hidden'); st.classList.remove('flex');
+            var stepAmount = document.getElementById('step-amount');
+            stepAmount.classList.remove('hidden'); stepAmount.classList.add('flex');
+        }
+
         async function processQRIS() {
+            var btn = document.getElementById('qris-continue-btn');
+            if (btn) { btn.disabled = true; btn.textContent = 'Memproses…'; }
             var token = '';
             try { token = localStorage.getItem('clincoo_auth_token') || ''; } catch (e) {}
             var res;
@@ -656,11 +735,13 @@
                 }).then(function (r) { return r.json(); });
             } catch (e) { showModal('Gagal', 'Tidak dapat terhubung ke server pembayaran.'); return; }
             if (!res.success) {
+                if (btn) { btn.disabled = false; btn.textContent = 'Lanjutkan'; }
                 if (res.need_login) { showModal('Sesi Berakhir', 'Silakan masuk ulang, lalu coba isi saldo kembali.'); return; }
                 if (res.error === 'payment_not_configured') { showModal('Top Up Gagal', res.message || 'PAKASIR_API_KEY belum diatur.'); return; }
                 showModal('Top Up Gagal', res.message || res.error || 'Gagal membuat transaksi QRIS.');
                 return;
             }
+            if (btn) { btn.disabled = false; btn.textContent = 'Lanjutkan'; }
             qrisOrder = res;
             showQrisStep(res);
         }
@@ -668,9 +749,11 @@
         function showQrisStep(res) {
             var stepMethod = document.getElementById('step-method');
             var stepAmount = document.getElementById('step-amount');
+            var stepConfirm = document.getElementById('step-qris-confirm');
             var st = document.getElementById('step-qris');
             if (stepMethod) { stepMethod.classList.add('hidden'); stepMethod.classList.remove('flex'); }
             if (stepAmount) { stepAmount.classList.add('hidden'); stepAmount.classList.remove('flex'); }
+            if (stepConfirm) { stepConfirm.classList.add('hidden'); stepConfirm.classList.remove('flex'); }
             st.classList.remove('hidden'); st.classList.add('flex');
             document.getElementById('qris-order-id').textContent = res.order_id || '';
             document.getElementById('qris-total').textContent = 'Rp ' + Number(res.total_payment || 0).toLocaleString('id-ID');
@@ -777,7 +860,7 @@
             var methodEl = document.querySelector('input[name="payment-method"]:checked');
             var method = methodEl ? methodEl.value : 'ClincooPay';
             if (method === 'ClincooPay') { return processClincooPay(); }
-            if (method === 'QRIS') { return processQRIS(); }
+            if (method === 'QRIS') { return showQrisConfirm(); }
             var channel = XENDIT_METHOD_MAP[method] || 'qris';
             try {
                 var payerEmail = ''; try { payerEmail = localStorage.getItem('clincoo_email') || ''; } catch(e) {}

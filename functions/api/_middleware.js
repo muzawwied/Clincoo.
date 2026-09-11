@@ -2,6 +2,7 @@
 //   - /api/auth/*        (login, register, me, oauth akun)
 //   - /api/github-oauth* (redirect callback GitHub, tanpa header Bearer)
 //   - /api/topup*        (callback Xendit divalidasi sendiri via x-callback-token)
+//   - /api/topup-qris*   (webhook Pakasir diverifikasi sendiri via transactiondetail; create/status wajib Bearer di dalam handler)
 //   - /api/scheduled-tasks (endpoint memvalidasi sendiri: aksi user wajib Bearer, run_due wajib x-cron-secret)
 //   - /api/wallet-sync*  (endpoint memvalidasi sendiri: config wajib Bearer; jalur eksternal wajib api_key)
 //   - /api/collab*        (GET info undangan publik via token rahasia; POST divalidasi sendiri di collab.js)
@@ -10,7 +11,7 @@
 // Respons 401 sama seperti versi production: {"error":"Login diperlukan","need_login":true}
 import { initTables as initAuthTables, getUserByToken, getToken } from './auth/shared.js';
 
-const PUBLIC = [/^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(\/|$)/, /^\/api\/wallet(\/|$)/, /^\/api\/scheduled-tasks(\/|$)/, /^\/api\/wallet-sync(\/|$)/, /^\/api\/collab(\/|$)/, /^\/api\/chat(\/|$)/]; // chat: proxy kuota AI per-user, validasi sendiri (token lokal ATAU be2)
+const PUBLIC = [/^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(-qris)?(\/|$)/, /^\/api\/wallet(\/|$)/, /^\/api\/scheduled-tasks(\/|$)/, /^\/api\/wallet-sync(\/|$)/, /^\/api\/collab(\/|$)/, /^\/api\/chat(\/|$)/]; // chat: proxy kuota AI per-user, validasi sendiri (token lokal ATAU be2)
 
 export async function onRequest({ request, env, next }) {
   if (request.method === 'OPTIONS') return next();
