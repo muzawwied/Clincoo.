@@ -417,8 +417,8 @@
         <div class="w-full bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-4 sm:p-5 transition-all text-left border border-gray-100 pointer-events-auto max-w-4xl mx-auto">
             <div id="quota-banner" class="hidden items-center gap-2.5 mb-2 rounded-2xl bg-gray-50 border border-gray-200 px-3.5 py-2.5">
                 <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path stroke-linecap="round" d="M8 10V7a4 4 0 018 0v3"></path></svg>
-                <p class="text-xs text-gray-600 flex-1 leading-snug">Kuota AI harian sedang habis — pesanmu aman di kolom ketik.</p>
-                <button type="button" id="quota-retry-btn" class="text-xs font-semibold text-gray-900 bg-white border border-gray-300 rounded-full px-3 py-1.5 hover:bg-gray-100 transition-colors shrink-0 cursor-pointer">Coba lagi</button>
+                <p id="quota-banner-text" class="text-xs text-gray-600 flex-1 leading-snug">Kuota AI sedang habis — pesanmu aman di kolom ketik.</p>
+                <a href="#" id="quota-retry-btn" class="text-xs font-semibold text-white bg-gray-900 border border-gray-900 rounded-full px-3 py-1.5 hover:opacity-90 transition-colors shrink-0 cursor-pointer whitespace-nowrap">Upgrade Paket</a>
             </div>
             <div id="file-preview-container" class="hidden flex-nowrap overflow-x-auto hide-scrollbar gap-2 mb-2 w-full"></div>
             
@@ -1652,25 +1652,28 @@
 
         const LOCK_SVG = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path stroke-linecap="round" d="M8 10V7a4 4 0 018 0v3"></path></svg>`;
         const quotaBanner = document.getElementById('quota-banner');
+        const quotaBannerText = document.getElementById('quota-banner-text');
         const quotaRetryBtn = document.getElementById('quota-retry-btn');
+        function upgradeUrl() {
+            var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+            return base + '/akun/langganan/';
+        }
         let quotaLocked = false;
-        function setQuotaLock(locked) {
+        // Kuota/limit AI habis: KUNCI komposer, tidak ada jalur "coba kirim ulang" diam-diam —
+        // satu-satunya CTA adalah upgrade paket (lewat banner atau tombol kirim yg terkunci).
+        function setQuotaLock(locked, bannerMsg) {
             quotaLocked = locked;
             if (quotaLocked) {
                 btnAction.innerHTML = LOCK_SVG;
-                btnAction.title = 'Kuota AI habis — klik untuk coba kirim ulang';
+                btnAction.title = 'Kuota/limit AI penuh — upgrade paket untuk lanjut';
+                if (quotaBannerText) quotaBannerText.textContent = bannerMsg || 'Kuota AI sedang habis — pesanmu aman di kolom ketik.';
+                if (quotaRetryBtn) quotaRetryBtn.href = upgradeUrl();
                 if (quotaBanner) { quotaBanner.classList.remove('hidden'); quotaBanner.classList.add('flex'); }
             } else {
                 btnAction.title = '';
                 if (quotaBanner) { quotaBanner.classList.add('hidden'); quotaBanner.classList.remove('flex'); }
                 toggleActionState(false);
             }
-        }
-        if (quotaRetryBtn) {
-            quotaRetryBtn.addEventListener('click', function (e) {
-                e.preventDefault();
-                if (quotaLocked && !isGenerating) { setQuotaLock(false); handleSubmit(); }
-            });
         }
         function toggleActionState(isGen) {
             isGenerating = isGen;
@@ -2638,7 +2641,8 @@
                             if (response) {
                                 try { const errJson = await response.json(); errDetail = errJson.error || ''; quotaHit = !!errJson.quota_exhausted; } catch(e) {}
                             }
-                            hopError = new Error(quotaHit ? '__QUOTA__' : (errDetail || `Proxy AI HTTP error! status: ${response ? response.status : 'No response'}`));
+                            if (quotaHit) { hopError = new Error('__QUOTA__'); hopError.quotaMsg = errDetail; }
+                            else { hopError = new Error(errDetail || `Proxy AI HTTP error! status: ${response ? response.status : 'No response'}`); }
                             break;
                         }
 
@@ -2689,7 +2693,8 @@
                 } catch (e) {
                     if (e.name !== 'AbortError') {
                         if (e.message === '__QUOTA__') {
-                            streamingBuffer = "Kuota AI Clincoo hari ini sudah habis. Pesanmu sudah dikembalikan ke kolom ketik — ketuk **Coba lagi** di atas kolom ketik untuk mengirim ulang, atau tunggu reset kuota besok.";
+                            const qMsg = e.quotaMsg || 'Kuota/limit AI sedang penuh.';
+                            streamingBuffer = qMsg + " Pesanmu aman di kolom ketik — upgrade paket untuk kuota & prioritas lebih besar.";
                             const lastUserIdx = messages.map(m => m.role).lastIndexOf('user');
                             if (lastUserIdx !== -1 && !chatInput.value.trim()) {
                                 chatInput.value = messages[lastUserIdx].text || '';
@@ -2697,7 +2702,7 @@
                                 renderMessages();
                                 adjustInputHeight();
                             }
-                            setQuotaLock(true);
+                            setQuotaLock(true, qMsg + ' Pesanmu aman di kolom ketik.');
                         } else {
                         streamingBuffer = "Maaf, terjadi kesalahan: " + (e.message || "Gagal menghubungi server AI") + ". Silakan coba lagi nanti.";
                         isFetchComplete = true;
@@ -2770,8 +2775,8 @@
         btnAction.addEventListener('click', (e) => {
             e.preventDefault();
             if (quotaLocked && !isGenerating) {
-                setQuotaLock(false);
-                handleSubmit();
+                // Terkunci: satu-satunya jalan keluar adalah upgrade paket, bukan kirim ulang diam-diam
+                window.location.href = upgradeUrl();
                 return;
             }
             if (isGenerating) {

@@ -207,7 +207,11 @@ async function fetchGemini(apiKey, model, systemInstruction, contents, tools) {
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) return { error: `Model ${model} returned ${res.status}: ${(await res.text()).slice(0, 300)}`, status: res.status };
+  if (!res.ok) {
+    await res.text().catch(() => ''); // buang body error mentah, jangan pernah diteruskan ke user
+    const reason = res.status === 429 ? 'limit tercapai' : (res.status >= 500 ? 'server bermasalah' : 'gagal (' + res.status + ')');
+    return { error: `Model ${model}: ${reason}`, status: res.status };
+  }
   return { data: await res.json() };
 }
 
@@ -304,7 +308,11 @@ async function tryOpenRouter(apiKey, messages, tools, models) {
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'HTTP-Referer': 'https://clincoo-be2.pages.dev', 'X-Title': 'Clincoo' },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) { lastError = `OpenRouter ${model} returned ${res.status}: ${(await res.text()).slice(0, 200)}`; statuses.push(res.status); continue; }
+      if (!res.ok) {
+        await res.text().catch(() => ''); // buang body error mentah provider
+        const reason = res.status === 429 ? 'limit tercapai' : (res.status >= 500 ? 'server bermasalah' : 'gagal (' + res.status + ')');
+        lastError = `OpenRouter ${model}: ${reason}`; statuses.push(res.status); continue;
+      }
       const d = await res.json();
       const m = d?.choices?.[0]?.message;
       const text = (typeof m?.content === 'string' ? m.content : '') || '';
@@ -319,7 +327,8 @@ async function tryOpenRouter(apiKey, messages, tools, models) {
       lastError = `OpenRouter ${model} returned empty response`; statuses.push(0);
     } catch (err) { lastError = 'OpenRouter ' + err.message; statuses.push(0); }
   }
-  return { error: lastError || 'Semua model OpenRouter gagal', statuses };
+  const quotaExhausted = statuses.length > 0 && statuses.every(st => st === 429);
+  return { error: lastError || 'Semua model OpenRouter gagal', statuses, quotaExhausted };
 }
 
 // ===== MODE TIM AI: beberapa model berdiskusi lalu membangun web =====
@@ -347,12 +356,15 @@ async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tool
     { role: 'user', content: userText }
   ];
   let r = null;
-  if (orKey) r = await tryOpenRouter(orKey, messages, tools || null, TEAM_STAGE_MODELS[stage]);
+  let orQuotaExhausted = false;
+  if (orKey) { r = await tryOpenRouter(orKey, messages, tools || null, TEAM_STAGE_MODELS[stage]); orQuotaExhausted = !!(r && r.quotaExhausted); }
   if ((!r || r.error) && apiKey) {
     // cadangan Gemini (format konversi sederhana; tools Gemini pakai functionDeclarations)
     const { systemInstruction, contents } = toGeminiPayload(messages);
     const gTools = tools ? [{ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS }] : null;
     r = await tryModels(apiKey, systemInstruction, contents, gTools);
+    // limit provider hanya benar-benar "penuh" bila OpenRouter DAN Gemini cadangan sama-sama 429
+    if (r) r.quotaExhausted = orQuotaExhausted && !!r.quotaExhausted;
   }
   return r || { error: 'Tidak ada provider AI tersedia' };
 }
@@ -371,11 +383,13 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
   let usedModel = null;
   let lastText = '';
   let usedGeminiFallback = false;
+  let orQuotaExhausted = false;
+  let geminiQuotaExhausted = false;
 
   for (let hop = 0; hop < maxHops; hop++) {
     if (deadline && Date.now() > deadline) break; // jaga total waktu orkestrasi
     let r = null;
-    if (orKey && !usedGeminiFallback) r = await tryOpenRouter(orKey, messages, orBuildTools(), TEAM_STAGE_MODELS[stage]);
+    if (orKey && !usedGeminiFallback) { r = await tryOpenRouter(orKey, messages, orBuildTools(), TEAM_STAGE_MODELS[stage]); if (r && r.error) orQuotaExhausted = !!r.quotaExhausted; }
     if ((!r || r.error) && apiKey) {
       // Gemini cadangan: satu kali percobaan non-loop (format tool berbeda), lalu hentikan loop
       const { systemInstruction, contents } = toGeminiPayload(messages.filter(m => m.role !== 'tool' && !(m.role === 'assistant' && !m.content)));
@@ -384,6 +398,8 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
       if (!rg.error) {
         usedModel = rg.model; lastText = rg.text || lastText;
         for (const tc of (rg.tool_calls || [])) if (tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
+      } else {
+        geminiQuotaExhausted = !!rg.quotaExhausted;
       }
       usedGeminiFallback = true;
       break; // Gemini fallback tidak diloop (format function_call beda skema)
@@ -402,7 +418,10 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
       messages.push({ role: 'tool', tool_call_id: callId, content: JSON.stringify({ success: true }) });
     }
   }
-  return { tool_calls: [...collected.values()], text: lastText, model: usedModel };
+  // limit provider "penuh" hanya bila tidak ada file yang berhasil dibuat SAMA SEKALI
+  // dan kedua provider (yang dicoba) memang kena 429
+  const quotaExhausted = collected.size === 0 && (orQuotaExhausted || geminiQuotaExhausted);
+  return { tool_calls: [...collected.values()], text: lastText, model: usedModel, quotaExhausted };
 }
 
 async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
@@ -412,7 +431,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
     'Kamu adalah ARSITEK WEB senior di Tim AI Clincoo. Dari permintaan user, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
     userPrompt, null);
-  if (r1.error) return { error: 'Arsitek gagal: ' + r1.error };
+  if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek' };
   transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
 
   // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
@@ -420,11 +439,11 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   const r2 = await teamBuildLoop(env, orKey, apiKey, 'programmer',
     'Kamu adalah PROGRAMMER WEB di Tim AI Clincoo. Kerjakan rencana arsitek berikut SECARA PENUH: buat SEMUA file web (HTML/CSS/JS) yang disebut di rencana memakai tool write_file — konten lengkap per file, siap jalan, rapi, dan responsif.',
     'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS);
-  if (r2.error) return { error: 'Programmer gagal: ' + r2.error, transcript };
+  if (r2.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r2.quotaExhausted, transcript, stageFailed: 'programmer' };
   const draftCalls = (r2.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
   if (!draftCalls.length) {
     // programmer cuma ngobrol tanpa bikin file valid -> gagal tahap ini
-    return { error: 'Programmer tidak menghasilkan file', transcript, text: r2.text };
+    return { error: r2.quotaExhausted ? TEAM_BUSY_MSG : 'Programmer tidak menghasilkan file', quotaExhausted: !!r2.quotaExhausted, transcript, text: r2.text };
   }
   transcript.push({ stage: 'programmer', model: r2.model, text: draftCalls.map(tc => 'write_file: ' + tc.args.path).join(', ') });
 
@@ -442,7 +461,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   const r3 = await teamStage(env, orKey, apiKey, 'reviewer',
     'Kamu adalah REVIEWER KODE ketat di Tim AI Clincoo. Audit file web berikut terhadap rencana arsitek. Laporkan HANYA masalah yang benar-benar fatal atau penting (link/asset rusak, fitur hilang, HTML rusak, JS error, tidak responsif) — maks 150 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
     'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest, null);
-  if (r3.error) return { error: 'Reviewer gagal: ' + r3.error, transcript, tool_calls: draftCalls };
+  if (r3.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r3.quotaExhausted, transcript, tool_calls: draftCalls, stageFailed: 'reviewer' };
   const reviewText = (r3.text || '').trim();
   transcript.push({ stage: 'reviewer', model: r3.model, text: reviewText.slice(0, 1000) });
 
@@ -553,7 +572,14 @@ export async function onRequestPost({ request, env }) {
       }
       const t = await teamOrchestrate(env, orKey, apiKey, userPrompt, body.workspace_tools === true ? orTools() : null);
       if (t.error && !t.tool_calls) {
-        return new Response(JSON.stringify({ error: 'Tim AI gagal: ' + t.error }), { status: 502, headers: { 'Content-Type': 'application/json', ...CORS } });
+        // limit/kuota provider penuh -> kunci komposer di klien (sama seperti kuota harian habis)
+        if (t.quotaExhausted) {
+          return new Response(JSON.stringify({ quota_exhausted: true, error: TEAM_BUSY_MSG }), {
+            status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '120', ...CORS }
+          });
+        }
+        // error lain: jangan pernah bocorkan detail mentah provider ke user
+        return new Response(JSON.stringify({ error: TEAM_ERROR_MSG }), { status: 502, headers: { 'Content-Type': 'application/json', ...CORS } });
       }
       const out = {
         text: (t.tool_calls && t.tool_calls.length
