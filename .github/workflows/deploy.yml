@@ -24,7 +24,7 @@ jobs:
       - name: Pasang wrangler
         run: npm install -g wrangler
 
-      - name: Deploy ke Cloudflare Pages (project: clincoo)
+      - name: Deploy ke Cloudflare Pages
         run: npx wrangler pages deploy . --project-name=clincoo --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
