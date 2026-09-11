@@ -172,9 +172,6 @@
           <div class="w-full sm:w-80">
             <div class="flex items-center gap-2">
               <input type="text" value="" id="custom-domain-input" class="flex-1 min-w-0 px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 focus:outline-none domain-shimmer" placeholder="contohdomain.com" disabled>
-              <button type="button" id="btn-save-domain" onclick="saveDomainFromButton()" disabled aria-label="Simpan domain" title="Simpan domain" class="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
-                <i data-lucide="check" class="w-4 h-4 pointer-events-none"></i>
-              </button>
             </div>
             <p id="cf-domain-status" class="text-xs mt-1.5 hidden"></p>
           </div>
@@ -221,6 +218,10 @@
             <div id="sslAuto-knob" class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out translate-x-5"></div>
           </button>
         </div>
+        <!-- CTA Simpan Domain: di bawah toggle SSL, teks "Simpan" saja; klik -> spinner -> centang (bg tetap) -->
+        <div class="pb-2 flex justify-end">
+          <button type="button" id="btn-save-domain" onclick="saveDomainFromButton()" disabled aria-label="Simpan domain" title="Simpan domain" class="h-9 px-5 flex items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">Simpan</button>
+        </div>
 
         <!-- 4. Konfigurasi DNS -->
         <div class="py-5">
@@ -237,19 +238,19 @@
               </thead>
               <tbody>
                 <tr class="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-[#0a0a0a]">
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">CNAME</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-name">www</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-value">situs-anda.pages.dev</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-type">ALIAS / ANAME</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-name">@ (root) <span class="font-sans text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">Utama</span></td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-value">situs-anda.pages.dev</td>
                 </tr>
                 <tr class="bg-white dark:bg-[#0a0a0a]">
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-type">ALIAS / ANAME</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-name">@ (root)</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-value">situs-anda.pages.dev</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">CNAME</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-name">www <span class="font-sans text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Opsional</span></td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-value">situs-anda.pages.dev</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 leading-relaxed">Catatan untuk root (@): aturan DNS standar melarang CNAME di root, jadi mayoritas provider (Niagahoster, Hostinger, Namecheap, dll.) menolaknya. Jika nameserver domain Anda sudah di Cloudflare, gunakan CNAME (flattening otomatis). Jika di provider lain, gunakan tipe ALIAS/ANAME. Cara termudah: pindahkan nameserver domain ke Cloudflare (gratis), lalu CNAME @ pasti diterima. SSL aktif otomatis beberapa menit setelah DNS terverifikasi.</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 leading-relaxed">Record UTAMA untuk domain asli: <span class="font-mono">ALIAS/ANAME @ (root)</span> — dipakai supaya domain utama Anda langsung bisa dibuka tanpa www. Cloudflare Pages tidak punya IP tetap, jadi tipe A record tidak bisa dipakai; ALIAS/ANAME adalah pengganti CNAME di root (CNAME mentah dilarang di root oleh standar DNS). Kalau nameserver domain sudah di Cloudflare, cukup buat CNAME @ (flattening otomatis). Record CNAME www hanya diperlukan kalau Anda juga ingin alamat www.domain.com aktif — kalau tidak, boleh dihapus. SSL aktif otomatis beberapa menit setelah DNS terverifikasi.</p>
         </div>
 
       </div>
@@ -411,7 +412,7 @@
     function updateDNSRecords(domain, pagesUrl) {
         // Cloudflare Pages: custom domain pakai CNAME ke <project>.pages.dev (TANPA A record IP).
         // Nilai diambil real-time dari hasil deploy proyek (st.pages_url).
-        const target = (pagesUrl || '').replace('https://', '').replace(/\/$/, '') || 'situs-anda.pages.dev';
+        const target = (pagesUrl || '').replace('https://', '').replace(/\/$/, '') || 'memuat… (tunggu deploy terdeteksi)';
         const aName = document.getElementById('dns-a-name');
         const aValue = document.getElementById('dns-a-value');
         const cnameName = document.getElementById('dns-cname-name');
@@ -450,14 +451,19 @@
         } catch(e) { window.__domainSaveError = (e && e.message) ? e.message : 'gagal menyimpan'; }
     }
 
-    // Tombol Simpan Domain: icon centang di pojok kanan, tanpa teks.
-    // Idle: centang hitam/putih. Menyimpan: spinner. Sukses: centang hijau. Gagal: silang merah.
-    function setSaveBtnIcon(name, extraClass, bgClass) {
+    // Tombol Simpan Domain: teks "Simpan". Menyimpan: spinner. Sukses: centang (bg TETAP, tidak jadi hijau). Gagal: silang merah lalu balik teks.
+    const SAVE_BTN_IDLE_CLASS = 'h-9 px-5 flex items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors';
+    function setSaveBtnIdle() {
         const btn = document.getElementById('btn-save-domain');
         if (!btn) return;
-        btn.innerHTML = '<i data-lucide="' + name + '" class="w-4 h-4 pointer-events-none ' + (extraClass || '') + '"></i>';
-        btn.className = 'shrink-0 w-9 h-9 flex items-center justify-center rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed ' +
-            (bgClass || 'bg-black text-white dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200');
+        btn.innerHTML = 'Simpan';
+        btn.className = SAVE_BTN_IDLE_CLASS;
+    }
+    function setSaveBtnIcon(name, extraClass, iconColorClass) {
+        const btn = document.getElementById('btn-save-domain');
+        if (!btn) return;
+        btn.innerHTML = '<i data-lucide="' + name + '" class="w-4 h-4 pointer-events-none ' + (extraClass || '') + ' ' + (iconColorClass || '') + '"></i>';
+        btn.className = SAVE_BTN_IDLE_CLASS;
         if (typeof lucide !== 'undefined' && lucide.createIcons) { try { lucide.createIcons(); } catch (e) {} }
     }
     async function saveDomainFromButton() {
@@ -470,11 +476,11 @@
         window.__domainSaveError = '';
         try { await saveDomainSettings(); } catch (e) {}
         if (window.__domainSaveError) {
-            setSaveBtnIcon('x', '', 'bg-red-500 text-white');
-            setTimeout(function () { btn.disabled = false; setSaveBtnIcon('check'); }, 1800);
+            setSaveBtnIcon('x', '', 'text-red-500');
+            setTimeout(function () { btn.disabled = false; setSaveBtnIdle(); }, 1800);
         } else {
-            setSaveBtnIcon('check', '', 'bg-emerald-500 text-white');
-            setTimeout(function () { btn.disabled = false; setSaveBtnIcon('check'); }, 1500);
+            setSaveBtnIcon('check');
+            setTimeout(function () { btn.disabled = false; setSaveBtnIdle(); }, 2000);
         }
     }
 
@@ -502,6 +508,7 @@
             });
             const st = await res.json().catch(() => ({}));
             if (!res.ok || st.error) throw new Error(st.error || ('HTTP ' + res.status));
+            window.__statusRetries = 0;
             if (st.pages_url) { lastPagesUrl = st.pages_url; updateDNSRecords('', st.pages_url); writeDomainCache({ pagesUrl: st.pages_url }); }
             // Sumber sebenarnya: domain yang terpasang di Cloudflare (dipasang dari halaman deployment).
             // Bila input masih kosong, isi otomatis dari data Cloudflare.
@@ -524,8 +531,14 @@
                 paintDomainLabel('Domain belum terhubung', false);
             }
         } catch (e) {
+            // Retry dulu sebelum nunjukin merah — transient error (jaringan/CF) jangan bikin user panik.
+            window.__statusRetries = (window.__statusRetries || 0) + 1;
+            if (window.__statusRetries <= 3) {
+                setTimeout(loadRealDomainStatus, 1500 * window.__statusRetries);
+                return;
+            }
             const cached = readDomainCache();
-            if (!cached || !cached.label) paintDomainLabel('Gagal memuat status', false);
+            if (!cached || !cached.label) paintDomainLabel((e && e.message) ? ('Gagal memuat status (' + e.message + ')') : 'Gagal memuat status', false);
         }
     }
 
