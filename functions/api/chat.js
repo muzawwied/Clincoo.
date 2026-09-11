@@ -249,6 +249,15 @@ function orParam(schema) {
   if (schema && Array.isArray(schema.required)) out.required = schema.required;
   return out;
 }
+// Subset tools khusus tahap membangun (write_file + create_folder saja) — mencegah
+// programmer/perbaikan tersesat memanggil list_items/read_file/dll saat harusnya nulis file.
+const BUILD_FUNCTION_DECLARATIONS = WORKSPACE_FUNCTION_DECLARATIONS.filter(d => d.name === 'write_file' || d.name === 'create_folder');
+function orBuildTools() {
+  return BUILD_FUNCTION_DECLARATIONS.map(d => ({
+    type: 'function',
+    function: { name: d.name, description: d.description || '', parameters: orParam(d.parameters || { type: 'OBJECT', properties: {} }) }
+  }));
+}
 function orTools() {
   return WORKSPACE_FUNCTION_DECLARATIONS.map(d => ({
     type: 'function',
@@ -299,12 +308,13 @@ async function tryOpenRouter(apiKey, messages, tools, models) {
       const d = await res.json();
       const m = d?.choices?.[0]?.message;
       const text = (typeof m?.content === 'string' ? m.content : '') || '';
-      const toolCalls = (m?.tool_calls || []).map(tc => {
+      const rawToolCalls = m?.tool_calls || [];
+      const toolCalls = rawToolCalls.map(tc => {
         let args = {};
         try { args = JSON.parse(tc.function?.arguments || '{}'); } catch (e) {}
-        return { name: tc.function?.name || '', args };
+        return { name: tc.function?.name || '', args, id: tc.id };
       }).filter(tc => tc.name);
-      if (toolCalls.length > 0) return { tool_calls: toolCalls, text, model };
+      if (toolCalls.length > 0) return { tool_calls: toolCalls, text, model, raw_tool_calls: rawToolCalls };
       if (text) return { text, model };
       lastError = `OpenRouter ${model} returned empty response`; statuses.push(0);
     } catch (err) { lastError = 'OpenRouter ' + err.message; statuses.push(0); }
@@ -327,7 +337,7 @@ const TEAM_LABELS = {
   arsitek: 'Arsitek', programmer: 'Programmer', reviewer: 'Reviewer', perbaikan: 'Perbaikan'
 };
 
-// satu panggilan model peran (OR dulu, Gemini cadangan)
+// satu panggilan model peran (OR dulu, Gemini cadangan) — tanpa loop, untuk tahap teks (arsitek/reviewer)
 async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tools) {
   const messages = [
     { role: 'system', content: systemPrompt },
@@ -344,6 +354,53 @@ async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tool
   return r || { error: 'Tidak ada provider AI tersedia' };
 }
 
+// Loop multi-hop buat tahap MEMBANGUN (programmer/perbaikan): model kecil biasanya
+// cuma memanggil 1-2 tool per giliran, jadi harus diberi giliran berulang dengan
+// balasan sintetis "sukses" agar dia lanjut menulis file berikutnya — sama seperti
+// loop function-calling di sisi klien (MAX_TOOL_HOPS), tapi berjalan di server untuk
+// tahap Tim AI. Berhenti saat model tidak lagi memanggil tool, atau maxHops tercapai.
+async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, maxHops) {
+  const messages = [
+    { role: 'system', content: systemPrompt + '\n\nPENTING: panggil tool write_file SATU per SATU, boleh berkali-kali giliran berturut-turut, sampai SEMUA file dari rencana selesai ditulis. Setelah semua file selesai, berhenti memanggil tool dan balas teks singkat "selesai".' },
+    { role: 'user', content: userText }
+  ];
+  const collected = new Map(); // key: name+':'+path -> tool_call
+  let usedModel = null;
+  let lastText = '';
+  let usedGeminiFallback = false;
+
+  for (let hop = 0; hop < maxHops; hop++) {
+    let r = null;
+    if (orKey && !usedGeminiFallback) r = await tryOpenRouter(orKey, messages, orBuildTools(), TEAM_STAGE_MODELS[stage]);
+    if ((!r || r.error) && apiKey) {
+      // Gemini cadangan: satu kali percobaan non-loop (format tool berbeda), lalu hentikan loop
+      const { systemInstruction, contents } = toGeminiPayload(messages.filter(m => m.role !== 'tool' && !(m.role === 'assistant' && !m.content)));
+      const gTools = [{ functionDeclarations: BUILD_FUNCTION_DECLARATIONS }];
+      const rg = await tryModels(apiKey, systemInstruction, contents, gTools);
+      if (!rg.error) {
+        usedModel = rg.model; lastText = rg.text || lastText;
+        for (const tc of (rg.tool_calls || [])) if (tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
+      }
+      usedGeminiFallback = true;
+      break; // Gemini fallback tidak diloop (format function_call beda skema)
+    }
+    if (!r || r.error) break;
+    usedModel = r.model || usedModel;
+    lastText = r.text || lastText;
+    if (!r.tool_calls || !r.tool_calls.length) break; // model selesai, tidak ada tool call lagi
+
+    const rawList = r.raw_tool_calls || r.tool_calls.map((tc, i) => ({ id: 'call_h' + hop + '_' + i, type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.args || {}) } }));
+    messages.push({ role: 'assistant', content: r.text || null, tool_calls: rawList });
+    for (let i = 0; i < r.tool_calls.length; i++) {
+      const tc = r.tool_calls[i];
+      if (tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
+      const callId = (rawList[i] && rawList[i].id) || tc.id || ('call_h' + hop + '_' + i);
+      messages.push({ role: 'tool', tool_call_id: callId, content: JSON.stringify({ success: true }) });
+    }
+  }
+  return { tool_calls: [...collected.values()], text: lastText, model: usedModel };
+}
+
 async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   const transcript = [];
 
@@ -354,17 +411,17 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   if (r1.error) return { error: 'Arsitek gagal: ' + r1.error };
   transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
 
-  // Tahap 2: Programmer membangun file web
-  const r2 = await teamStage(env, orKey, apiKey, 'programmer',
-    'Kamu adalah PROGRAMMER WEB di Tim AI Clincoo. Kerjakan rencana arsitek berikut SECARA PENUH: buat SEMUA file web (HTML/CSS/JS) memakai tool write_file — satu write_file per file, konten lengkap, siap jalan. Kode harus rapi, responsif, dan sesuai rencana. Jangan tanya balik, langsung eksekusi semua file.',
-    'RENCANA ARSITEK:\n' + (r1.text || ''), oTools);
+  // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
+  const r2 = await teamBuildLoop(env, orKey, apiKey, 'programmer',
+    'Kamu adalah PROGRAMMER WEB di Tim AI Clincoo. Kerjakan rencana arsitek berikut SECARA PENUH: buat SEMUA file web (HTML/CSS/JS) yang disebut di rencana memakai tool write_file — konten lengkap per file, siap jalan, rapi, dan responsif.',
+    'RENCANA ARSITEK:\n' + (r1.text || ''), 10);
   if (r2.error) return { error: 'Programmer gagal: ' + r2.error, transcript };
-  const draftCalls = r2.tool_calls || [];
+  const draftCalls = (r2.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
   if (!draftCalls.length) {
-    // programmer cuma ngobrol tanpa bikin file -> gagal tahap ini
+    // programmer cuma ngobrol tanpa bikin file valid -> gagal tahap ini
     return { error: 'Programmer tidak menghasilkan file', transcript, text: r2.text };
   }
-  transcript.push({ stage: 'programmer', model: r2.model, text: draftCalls.map(tc => (tc.args && tc.args.path) ? 'write_file: ' + tc.args.path : tc.name).join(', ') });
+  transcript.push({ stage: 'programmer', model: r2.model, text: draftCalls.map(tc => 'write_file: ' + tc.args.path).join(', ') });
 
   // Tahap 3: Reviewer mengaudit hasil
   const filesDigest = draftCalls.filter(tc => tc.name === 'write_file').map(tc => {
@@ -384,17 +441,18 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   let finalCalls = draftCalls;
   let fixModel = null;
   if (needsFix) {
-    const r4 = await teamStage(env, orKey, apiKey, 'perbaikan',
-      'Kamu adalah PROGRAMMER WEB senior di Tim AI Clincoo. Temuan reviewer di bawah harus dibereskan. Tulis ULANG HANYA file yang bermasalah dengan tool write_file (overwrite penuh, konten lengkap diperbaiki). Jangan mengulang file yang sudah benar.',
-      'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, oTools);
-    if (!r4.error && r4.tool_calls && r4.tool_calls.length) {
+    const r4 = await teamBuildLoop(env, orKey, apiKey, 'perbaikan',
+      'Kamu adalah PROGRAMMER WEB senior di Tim AI Clincoo. Temuan reviewer di bawah harus dibereskan. Tulis ULANG HANYA file yang bermasalah/hilang dengan tool write_file (overwrite penuh, konten lengkap diperbaiki). Jangan mengulang file yang sudah benar dan tidak disebut reviewer.',
+      'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, 8);
+    const fixCalls = (r4.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
+    if (!r4.error && fixCalls.length) {
       // gabung: draft + revisi (revisi menimpa path sama)
       const byPath = new Map();
       for (const tc of draftCalls) byPath.set(tc.args.path, tc);
-      for (const tc of r4.tool_calls) byPath.set(tc.args.path, tc);
+      for (const tc of fixCalls) byPath.set(tc.args.path, tc);
       finalCalls = [...byPath.values()];
       fixModel = r4.model;
-      transcript.push({ stage: 'perbaikan', model: r4.model, text: r4.tool_calls.map(tc => 'revisi: ' + (tc.args && tc.args.path)).join(', ') });
+      transcript.push({ stage: 'perbaikan', model: r4.model, text: fixCalls.map(tc => 'revisi: ' + tc.args.path).join(', ') });
     }
   }
 
