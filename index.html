@@ -1159,23 +1159,9 @@
             return base + '/akun/langganan/upgrade/konfirmasi/?plan=Pro&billing=Bulanan';
         }
         function tmShowProLockPopup() {
-            if (document.getElementById('collab-pro-lock')) return;
-            var ov = document.createElement('div');
-            ov.id = 'collab-pro-lock';
-            ov.className = 'fixed inset-0 z-[90] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4';
-            ov.innerHTML = '<div class="bg-white border border-gray-100 rounded-2xl shadow-xl w-full max-w-xs p-5 relative">'
-                + '<button type="button" id="collab-pro-lock-x" class="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-900 rounded-lg transition-colors" title="Tutup"><i data-lucide="x" class="w-4 h-4"></i></button>'
-                + '<div class="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center mb-3"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.019a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"></path></svg></div>'
-                + '<span class="inline-flex items-center gap-1 text-[10px] font-bold tracking-wide uppercase bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400 rounded-md px-2 py-0.5"><svg class="w-3 h-3 " fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.019a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"></path></svg> Fitur Premium</span>'
-                + '<h3 class="text-base font-bold text-gray-900 mt-1.5">Kolaborasi khusus Paket Pro</h3>'
-                + '<p class="text-sm text-gray-500 mt-1 leading-relaxed">Mode tim AI multi-model hanya untuk Paket Pro. Upgrade untuk mengaktifkan diskusi tim &amp; membangun web bareng (5 kuota/pesan).</p>'
-                + '<a href="' + tmUpgradeUrlPro() + '" class="block w-full text-center mt-4 bg-gray-900 text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity">Upgrade ke Pro</a>'
-                + '</div>';
-            document.body.appendChild(ov);
-            try { lucide.createIcons(); } catch (e) {}
-            var x = document.getElementById('collab-pro-lock-x');
-            if (x) x.addEventListener('click', function () { ov.remove(); });
-            ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.remove(); });
+            // Kolaborasi khusus Paket Pro -> carousel daftar paket (bukan kartu ringkas).
+            var cached = tmReadSubCache();
+            tmShowCollabPlansModal({ plan: cached ? cached.plan : null, billingCycle: cached ? cached.billingCycle : null });
         }
     // Mahkota diklik -> popup daftar paket (sama seperti fitur Sync GitHub di workspace).
     async function tmOpenCollabPlansPopup() {
@@ -1351,6 +1337,8 @@ function tmShowCollabPlansModal(sub) {
                     if (tmIsPlanPro()) {
                         var lk = document.getElementById('collab-pro-lock');
                         if (lk) lk.remove();
+                        var mp = document.getElementById('upgrade-plans-modal');
+                        if (mp) { mp.remove(); var cs = document.getElementById('upgrade-plans-css'); if (cs) cs.remove(); }
                     }
                 }
             } catch (e) {}
