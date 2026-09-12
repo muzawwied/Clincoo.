@@ -81,6 +81,11 @@ async function ensureTable(DB) {
     created_at TEXT,
     updated_at TEXT
   )`).run();
+  await DB.prepare('CREATE TABLE IF NOT EXISTS agent_events (id INTEGER PRIMARY KEY AUTOINCREMENT, task_id TEXT, user_key TEXT, kind TEXT, text TEXT, created_at TEXT)').run();
+}
+async function addEvent(DB, task_id, user_key, kind, text) {
+  try { await DB.prepare('INSERT INTO agent_events (task_id, user_key, kind, text, created_at) VALUES (?,?,?,?,?)')
+    .bind(task_id, user_key, kind, String(text || '').slice(0, 500), new Date().toISOString()).run(); } catch (e) {}
 }
 async function loadTask(DB, id) {
   const row = await DB.prepare('SELECT * FROM agent_tasks WHERE id = ?').bind(id).first();
@@ -209,13 +214,14 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
     t.plan = JSON.stringify(plan);
     t.status = 'running'; t.error = null;
     await saveTask(env.DB, t);
+    addEvent(env.DB, t.id, t.user_key, 'start', 'Tugas dimulai — ' + plan.length + ' langkah direncanakan.');
   }
 
   // Tahap 2: eksekusi langkah satu per satu — TANPA konfirmasi
   while (t.current_step < plan.length) {
     if (Date.now() > deadline) {
       t.status = 'paused'; t.error = 'Budget waktu tercapai — task siap di-resume otomatis dari langkah ' + (t.current_step + 1) + '.';
-      await saveTask(env.DB, t); return t;
+      await saveTask(env.DB, t); addEvent(env.DB, t.id, t.user_key, 'paused', t.error); return t;
     }
     const step = plan[t.current_step];
     const msgs = [
@@ -226,7 +232,7 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
     if (r.error) {
       // provider mati total -> pause (resume nanti), JANGAN gagalkan progres
       t.status = 'paused'; t.error = 'Provider AI tidak tersedia: ' + r.error;
-      await saveTask(env.DB, t); return t;
+      await saveTask(env.DB, t); addEvent(env.DB, t.id, t.user_key, 'paused', t.error); return t;
     }
     transcript.push({ role: 'user', content: step.title + (step.detail ? ' — ' + step.detail : '') });
     transcript.push({ role: 'assistant', content: r.text });
@@ -237,6 +243,7 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
     t.transcript = JSON.stringify(transcript);
     t.status = 'running'; t.error = null;
     await saveTask(env.DB, t); // persist TIAP langkah — kena limit pun aman
+    addEvent(env.DB, t.id, t.user_key, 'progress', 'Langkah ' + t.current_step + '/' + plan.length + ' selesai: ' + step.title);
   }
 
   // Tahap 3: rangkum hasil akhir
@@ -248,6 +255,7 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
   t.result = rf.text || rf.error || '(rangkuman dilewati)';
   t.status = 'done'; t.error = null;
   await saveTask(env.DB, t);
+  addEvent(env.DB, t.id, t.user_key, 'done', 'Tugas selesai. ' + String(t.result || '').slice(0, 300));
   return t;
 }
 
@@ -266,7 +274,8 @@ export async function onRequestGet({ request, env }) {
     await ensureTable(env.DB);
     const t = await loadTask(env.DB, id);
     if (!t || t.user_key !== user.key) return json({ error: 'Task tidak ditemukan' }, 404);
-    return json({ ok: true, task: taskJson(t) });
+    const ev = await env.DB.prepare('SELECT kind, text, created_at FROM agent_events WHERE task_id = ? AND user_key = ? ORDER BY id ASC LIMIT 100').bind(id, user.key).all();
+    return json({ ok: true, task: taskJson(t), events: ev.results || [] });
   } catch (e) { return json({ error: 'Server error: ' + e.message }, 500); }
 }
 
