@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Clincoo — Buat Website Profesional dengan AI",
+  "name": "Clincoo — Bangun Website-mu & Publikasikan ke Dunia",
   "short_name": "Clincoo",
-  "description": "Platform pembuatan website berbasis AI — pilih template profesional, generate halaman dengan AI, dan edit kode langsung dari browser.",
+  "description": "Bangun website-mu dengan AI dan publikasikan ke dunia lewat Clincoo — pilih template profesional, generate halaman, edit langsung dari browser, dan websitemu tayang online.",
   "lang": "id",
   "dir": "ltr",
   "start_url": "./",
@@ -11,10 +11,29 @@
   "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
-  "categories": ["productivity", "developer tools", "utilities"],
+  "categories": [
+    "productivity",
+    "developer tools",
+    "utilities"
+  ],
   "icons": [
-    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
