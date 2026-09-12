@@ -1752,14 +1752,10 @@
       const apiBase = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
       const cached = readSubCache();
       const fresh = cached && cached.plan && (Date.now() - (cached.ts || 0)) < SUB_CACHE_TTL;
-      // jalur cepat: cache masih segar -> popup/modal langsung tampil tanpa nunggu server
-      if (fresh) {
-        if (cached.plan !== 'Starter') { openCreateModal('github'); return; }
-        showUpgradePlansModal({ plan: cached.plan, billingCycle: cached.billingCycle });
-      } else {
-        showUpgradePlansModal(null); // tampil instan dulu (default Starter), data disegarkan di bawah
-      }
-      // revalidasi di background: cache diperbarui & popup dikoreksi bila paket berubah
+      // jalur cepat: cache masih segar -> popup langsung tampil tanpa nunggu server
+      if (fresh && cached.plan !== 'Starter') { openCreateModal('github'); return; }
+      showGithubProLockPopup(); // Starter (atau belum diketahui) -> popup fitur premium
+      // revalidasi di background: cache diperbarui & popup ditutup bila paket sudah Pro
       try {
         const token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
         const res = await fetch(apiBase + '/subscription', { cache: 'no-store', headers: token ? { Authorization: 'Bearer ' + token } : {} });
@@ -1768,7 +1764,7 @@
           if (d && d.plan) {
             writeSubCache(d);
             if (d.plan !== 'Starter') {
-              var m0 = document.getElementById('upgrade-plans-modal');
+              var m0 = document.getElementById('syncgh-pro-lock');
               if (m0) m0.remove();
               openCreateModal('github');
             }
@@ -1777,143 +1773,31 @@
       } catch (e) {}
     }
 
-        function showUpgradePlansModal(sub) {
-      if (document.getElementById('upgrade-plans-modal')) return;
-      var m = document.createElement('div');
-      m.id = 'upgrade-plans-modal';
+    // Popup fitur premium — gaya sama dgn "Kolaborasi khusus Paket Pro" di halaman Chat.
+    function upgradeUrlProGithub() {
       var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
-      var current = (sub && sub.plan) ? sub.plan : 'Starter';
-      var billing = (sub && sub.billingCycle) ? sub.billingCycle : 'Bulanan';
-      var checkoutUrl = function (name, cyc) {
-        return base + '/akun/langganan/upgrade/konfirmasi/?plan=' + encodeURIComponent(name) + '&billing=' + encodeURIComponent(cyc || billing);
-      };
-
-      var plans = [
-        { name: 'Starter', tagline: 'Untuk individu yang baru memulai.', price: 'Gratis', per: '', hot: false,
-          items: [
-            ['Hingga 3 proyek aktif', true],
-            ['1 kolaborator per proyek', true],
-            ['Chat AI di setiap proyek', true],
-            ['3 template proyek siap pakai', true],
-            ['Tugas terjadwal & notifikasi', true],
-            ['Deploy web 2x per bulan', true],
-            ['Kolaborasi tim lebih besar', false],
-            ['Impor repository GitHub', false]
-          ] },
-        { name: 'Pro', tagline: 'Untuk profesional dan kreator aktif.', price: '49K', per: '/bln', hot: true,
-          items: [
-            ['Hingga 10 proyek aktif', true],
-            ['Hingga 5 kolaborator per proyek', true],
-            ['Semua fitur Starter: chat AI, template & tugas terjadwal', true],
-            ['Deploy web hingga 25x per bulan', true],
-            ['Impor repository GitHub ke workspace', true]
-          ] },
-        { name: 'Bisnis', tagline: 'Untuk tim dan operasi skala besar.', price: '129K', per: '/bln', hot: false,
-          items: [
-            ['Semua fitur Pro', true],
-            ['Hingga 50 proyek aktif', true],
-            ['Hingga 20 kolaborator per proyek', true],
-            ['Kontrol akses & keamanan proyek lanjutan', true],
-            ['Deploy web tanpa batas', true]
-          ] }
-      ];
-
-      var card = function (p) {
-        var isCurrent = (p.name === current);
-        var list = p.items.map(function (it) {
-          return '<li class="flex items-start gap-2.5 text-[13px] ' + (p.hot ? 'text-gray-900 font-medium' : (it[1] ? 'text-gray-700' : 'text-gray-400 opacity-70')) + '">' +
-            (it[1]
-              ? '<i data-lucide="' + (p.hot ? 'check-circle-2' : 'check') + '" class="w-4 h-4 shrink-0 ' + (p.hot ? 'text-accent' : 'text-gray-900') + '"></i>'
-              : '<i data-lucide="minus" class="w-4 h-4 shrink-0"></i>') +
-            '<span>' + it[0] + '</span></li>';
-        }).join('');
-        var btn;
-        if (isCurrent) {
-          btn = '<div class="w-full py-3 bg-gray-50 text-gray-500 border border-gray-200 rounded-xl font-semibold text-sm text-center cursor-not-allowed">Paket Saat Ini</div>';
-        } else if (p.hot) {
-          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-accent rounded-xl font-semibold text-sm text-center transition-all shadow-md active:scale-95">Upgrade ke ' + p.name + '</a>';
-        } else {
-          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm text-center transition-all">Mulai ' + p.name + '</a>';
-        }
-        return '<div class="w-full shrink-0 px-0.5"><div class="bg-white border ' + (p.hot ? 'border-2 border-accent shadow-xl' : 'border-gray-200') + ' rounded-3xl p-4 sm:p-5 flex flex-col relative text-left">' +
-          (p.hot ? '<div class="absolute top-0 right-0 bg-accent text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">Paling Populer</div>' : '') +
-          '<div class="mb-4 ' + (p.hot ? 'mt-2' : '') + '"><h3 class="text-lg font-bold text-gray-900 ' + (p.hot ? 'text-accent' : '') + '">' + p.name + '</h3>' +
-          '<p class="text-xs text-gray-500 mt-0.5">' + p.tagline + '</p></div>' +
-          '<div class="mb-4 flex items-baseline"><span class="text-2xl font-extrabold tracking-tight text-gray-900">' + p.price + '</span><span class="text-xs font-medium text-gray-500 ml-1">' + p.per + '</span></div>' +
-          '<ul class="flex flex-col gap-2.5 mb-4 flex-1">' + list + '</ul>' + btn + '</div></div>';
-      };
-
-      var slides = plans.map(card).join('');
-      var dots = plans.map(function (p, i) {
-        return '<button class="upc-dot rounded-full transition-all duration-200" data-i="' + i + '" style="width:6px;height:6px;background:#d1d5db;"></button>';
-      }).join('');
-
-      var css = document.createElement('style');
-      css.textContent =
-        '#upgrade-plans-modal .text-accent{color:var(--accent-color,#000000);} ' +
-        '#upgrade-plans-modal .bg-accent{background-color:var(--accent-color,#000000);color:#ffffff;} ' +
-        '#upgrade-plans-modal .border-accent{border-color:var(--accent-color,#000000);} ' +
-        'body.dark-mode #upgrade-plans-modal .text-accent{color:#ffffff !important;} ' +
-        'body.dark-mode #upgrade-plans-modal .bg-accent{background-color:#ffffff !important;color:#000000 !important;} ' +
-        'body.dark-mode #upgrade-plans-modal .border-accent{border-color:#ffffff !important;}';
-
-      m.innerHTML =
-        '<div class="fixed inset-0 z-[95] overflow-y-auto p-3 sm:p-4" style="background:rgba(0,0,0,0.45)">' +
-        '<div class="min-h-full flex items-center justify-center">' +
-        '<div class="bg-white rounded-2xl w-full max-w-sm relative px-4 sm:px-5 pt-9 pb-4 my-2">' +
-        '<button id="upgrade-plans-x" class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-black flex items-center justify-center transition-colors z-10" aria-label="Tutup"><i data-lucide="x" class="w-4 h-4"></i></button>' +
-        '<h3 class="text-base font-semibold text-gray-900 text-center pr-6">Impor repository GitHub</h3>' +
-        '<p class="text-[13px] sm:text-sm text-gray-500 mt-1 text-center leading-snug px-1">Fitur ini tersedia mulai paket Pro. Paket kamu saat ini: <b>' + current + '</b>.</p>' +
-        '<div class="relative mt-4">' +
-          '<div id="upc-viewport" class="overflow-hidden rounded-2xl" style="touch-action:pan-y;">' +
-            '<div id="upc-track" class="flex transition-transform duration-300 ease-out">' + slides + '</div>' +
-          '</div>' +
-          '<button id="upc-prev" class="absolute left-0 top-1/2 -translate-y-1/2 -ml-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>' +
-          '<button id="upc-next" class="absolute right-0 top-1/2 -translate-y-1/2 -mr-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>' +
-        '</div>' +
-        '<div class="flex items-center justify-center gap-2 mt-4">' + dots + '</div>' +
-        '</div></div>';
-      document.body.appendChild(css);
-      document.body.appendChild(m);
-      try { lucide.createIcons(); } catch (e) {}
-
-      var track = m.querySelector('#upc-track');
-      var dotsEls = m.querySelectorAll('.upc-dot');
-      var idx = 1;
-      function render() {
-        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
-        dotsEls.forEach(function (d, i) {
-          var on = (i === idx);
-          d.style.width = on ? '18px' : '6px';
-          d.style.background = on ? '' : '#d1d5db';
-          d.classList.toggle('bg-accent', on);
-        });
-      }
-      function go(i) { idx = (i + plans.length) % plans.length; render(); }
-      m.querySelector('#upc-prev').addEventListener('click', function () { go(idx - 1); });
-      m.querySelector('#upc-next').addEventListener('click', function () { go(idx + 1); });
-      dotsEls.forEach(function (d) { d.addEventListener('click', function () { go(parseInt(d.dataset.i, 10)); }); });
-
-      var vp = m.querySelector('#upc-viewport'), sx = null, dx = 0;
-      vp.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; dx = 0; track.style.transition = 'none'; }, { passive: true });
-      vp.addEventListener('touchmove', function (e) {
-        if (sx === null) return;
-        dx = e.touches[0].clientX - sx;
-        var w = vp.offsetWidth;
-        var lo = -(w * (plans.length - 1)) - 30;
-        var trackX = Math.min(Math.max(-(idx * w) + dx, lo), 30);
-        track.style.transform = 'translateX(' + trackX + 'px)';
-      }, { passive: true });
-      vp.addEventListener('touchend', function () {
-        track.style.transition = '';
-        if (Math.abs(dx) > 40) go(dx < 0 ? idx + 1 : idx - 1); else render();
-        sx = null;
-      });
-
-      m.querySelector('#upgrade-plans-x').addEventListener('click', function () { m.remove(); });
-      m.firstElementChild.addEventListener('click', function (e) { if (e.target === m.firstElementChild) m.remove(); });
-      render();
+      return base + '/akun/langganan/upgrade/konfirmasi/?plan=Pro&billing=Bulanan';
     }
+    function showGithubProLockPopup() {
+      if (document.getElementById('syncgh-pro-lock')) return;
+      var ov = document.createElement('div');
+      ov.id = 'syncgh-pro-lock';
+      ov.className = 'fixed inset-0 z-[95] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4';
+      ov.innerHTML = '<div class="bg-white border border-gray-100 rounded-2xl shadow-xl w-full max-w-xs p-5 relative">'
+        + '<button type="button" id="syncgh-pro-lock-x" class="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-900 rounded-lg transition-colors" title="Tutup"><i data-lucide="x" class="w-4 h-4"></i></button>'
+        + '<div class="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center mb-3"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.019a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"></path></svg></div>'
+        + '<span class="inline-flex items-center gap-1 text-[10px] font-bold tracking-wide uppercase bg-amber-100 text-amber-700 rounded-md px-2 py-0.5"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.019a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"></path></svg> Fitur Premium</span>'
+        + '<h3 class="text-base font-bold text-gray-900 mt-1.5">Impor GitHub khusus Paket Pro</h3>'
+        + '<p class="text-sm text-gray-500 mt-1 leading-relaxed">Impor repository GitHub ke workspace hanya untuk Paket Pro. Upgrade untuk mengaktifkan impor repo &amp; sync otomatis.</p>'
+        + '<a href="' + upgradeUrlProGithub() + '" class="block w-full text-center mt-4 bg-gray-900 text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity">Upgrade ke Pro</a>'
+        + '</div>';
+      document.body.appendChild(ov);
+      try { lucide.createIcons(); } catch (e) {}
+      var x = document.getElementById('syncgh-pro-lock-x');
+      if (x) x.addEventListener('click', function () { ov.remove(); });
+      ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.remove(); });
+    }
+
 
     function handleImportFiles(e) {
       const files = e.target.files;
