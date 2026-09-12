@@ -1720,7 +1720,6 @@
           if (st.on) {
             WSGitHubSync.disable();
             syncghRefresh();
-            addNotification('GitHub', 'Sync GitHub dimatikan untuk proyek ini.');
             return;
           }
           if (!st.ready) return; // toggle hanya muncul setelah import repo
@@ -1729,7 +1728,6 @@
           WSGitHubSync.enable(st.owner, st.name, st.branch);
           WSGitHubSync.resetSnapshot();
           syncghRefresh();
-          addNotification('GitHub', 'Sync GitHub aktif — file workspace akan tersinkron ke ' + st.repo + '.');
           WSGitHubSync.syncNow().then(function (r) {
             if (r && r.error) addNotification('GitHub', 'Sync GitHub gagal: ' + r.error);
           });
