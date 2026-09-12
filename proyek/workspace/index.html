@@ -316,16 +316,11 @@
                     <svg class="w-4 h-4 text-gray-900" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                     Import dari GitHub
                   </button>
-                  <div class="h-px bg-gray-100 my-1"></div>
-                  <div id="syncgh-toggle-row" class="flex items-center gap-3 w-full px-3 py-2.5">
-                    <svg class="w-4 h-4 text-gray-900 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-1.5">
-                        <span class="text-sm text-gray-700 font-medium">Sync GitHub</span>
-                        <span id="syncgh-dot" class="w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0"></span>
-                      </div>
-                      <p id="syncgh-status-text" class="text-[11px] text-gray-400 truncate">Belum aktif</p>
-                    </div>
+                  <div id="syncgh-sep" class="hidden h-px bg-gray-100 my-1"></div>
+                  <div id="syncgh-toggle-row" class="hidden items-center gap-2.5 w-full px-3 py-2.5">
+                    <span id="syncgh-dot" class="w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0"></span>
+                    <span class="text-sm text-gray-700 font-medium flex-shrink-0">Sync GitHub</span>
+                    <span id="syncgh-status-text" class="flex-1 min-w-0 text-xs text-gray-400 truncate"></span>
                     <button id="syncgh-toggle-btn" type="button" class="relative flex-shrink-0 cursor-pointer focus:outline-none" title="Sync GitHub — sinkronkan file workspace ke repo GitHub">
                       <div id="syncgh-toggle-bg" class="w-11 h-6 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out"></div>
                       <div id="syncgh-toggle-knob" class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out"></div>
@@ -623,6 +618,10 @@
         }
         saveData(); renderFileList();
         addNotification('GitHub', 'Berhasil import ' + owner + '/' + repo);
+        try {
+          if (window.WSGitHubSync && !WSGitHubSync.enabled()) WSGitHubSync.prepare(owner, repo, 'main');
+          if (typeof syncghRefresh === 'function') syncghRefresh();
+        } catch (e) {}
       } catch(err) {
         if (err && err.name === 'AbortError') {
           saveData(); renderFileList();
@@ -1656,7 +1655,7 @@
     // ===== Sync GitHub: toggle + popup pengaturan & konfirmasi ubah file =====
     function syncghState() {
       var c = window.WSGitHubSync ? WSGitHubSync.cfg() : null;
-      return { on: !!(c && c.on && c.owner && c.repo), repo: c ? (c.owner + '/' + c.repo) : '', branch: c ? (c.branch || 'main') : 'main' };
+      return { on: !!(c && c.on && c.owner && c.repo), ready: !!(c && c.owner && c.repo), owner: c ? c.owner : '', name: c ? c.repo : '', repo: c ? (c.owner + '/' + c.repo) : '', branch: c ? (c.branch || 'main') : 'main' };
     }
     function syncghPaintDot(state, ok) {
       var dot = document.getElementById('syncgh-dot');
@@ -1666,12 +1665,19 @@
     }
     function syncghRefresh() {
       var st = syncghState();
+      var row = document.getElementById('syncgh-toggle-row');
+      var sep = document.getElementById('syncgh-sep');
+      if (row) {
+        if (st.ready) { row.classList.remove('hidden'); row.classList.add('flex'); }
+        else { row.classList.add('hidden'); row.classList.remove('flex'); }
+      }
+      if (sep) sep.classList.toggle('hidden', !st.ready);
       var bg = document.getElementById('syncgh-toggle-bg');
       var knob = document.getElementById('syncgh-toggle-knob');
       if (bg) bg.className = 'w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ' + (st.on ? 'bg-gray-900' : 'bg-gray-200');
       if (knob) knob.classList.toggle('translate-x-5', st.on);
       var statusText = document.getElementById('syncgh-status-text');
-      if (statusText) statusText.textContent = st.on ? ('Aktif ke ' + st.repo) : 'Belum aktif';
+      if (statusText) statusText.textContent = st.on ? ('Aktif ke ' + st.repo) : st.repo;
       syncghPaintDot(st, true);
     }
     function syncghClosePopup() {
@@ -1696,90 +1702,6 @@
       var cb = document.getElementById('syncgh-connect-btn');
       if (cb) cb.addEventListener('click', function () { syncghClosePopup(); connectGitHub(); });
     }
-    // Popup konfirmasi ubah file — muncul SEBELUM sync pertama kali diaktifkan
-    function syncghShowConfirm(owner, repo, branch) {
-      var ov = document.createElement('div');
-      ov.id = 'syncgh-popup';
-      ov.className = 'fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4';
-      ov.innerHTML = '<div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-sm p-5 relative">'
-        + '<button type="button" class="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-900 rounded-lg transition-colors" onclick="syncghClosePopup()" title="Tutup"><i data-lucide="x" class="w-4 h-4"></i></button>'
-        + '<h3 class="text-base font-bold text-gray-900">Aktifkan Sync GitHub?</h3>'
-        + '<p class="text-sm text-gray-500 mt-1.5 leading-relaxed">Setiap perubahan file di workspace proyek ini akan <strong>otomatis menimpa file dengan nama yang sama</strong> di repo <span class="font-semibold text-gray-900">' + escapeGithubHtml(owner + '/' + repo) + '</span> (branch ' + escapeGithubHtml(branch) + '). File yang dihapus di workspace juga akan dihapus di repo.</p>'
-        + '<div class="flex gap-2 mt-4">'
-        + '<button id="syncgh-confirm-no" class="flex-1 border border-gray-200 text-gray-700 rounded-xl py-2.5 text-sm font-semibold hover:bg-gray-50 transition-colors">Batal</button>'
-        + '<button id="syncgh-confirm-yes" class="flex-1 bg-gray-900 text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity">Ya, aktifkan</button>'
-        + '</div></div>';
-      document.body.appendChild(ov);
-      try { lucide.createIcons(); } catch (e) {}
-      ov.addEventListener('click', function (ev) { if (ev.target === ov) syncghClosePopup(); });
-      document.getElementById('syncgh-confirm-no').addEventListener('click', syncghClosePopup);
-      document.getElementById('syncgh-confirm-yes').addEventListener('click', function () {
-        WSGitHubSync.enable(owner, repo, branch);
-        WSGitHubSync.resetSnapshot();
-        syncghClosePopup();
-        syncghRefresh();
-        addNotification('GitHub', 'Sync GitHub aktif — file workspace akan tersinkron ke ' + owner + '/' + repo + '.');
-        // Sinkron pertama langsung (bukan nunggu perubahan berikutnya)
-        WSGitHubSync.syncNow(function (d, t, p) {
-          var dot = document.getElementById('syncgh-dot');
-          if (dot && t > 0) dot.className = 'w-1.5 h-1.5 rounded-full flex-shrink-0 bg-green-500 animate-pulse';
-        }).then(function (r) {
-          if (r && r.error) addNotification('GitHub', 'Sync GitHub gagal: ' + r.error);
-          syncghPaintDot(syncghState(), r ? r.ok : false);
-        });
-      });
-    }
-    function syncghShowSettings() {
-      var st = syncghState();
-      var ov = document.createElement('div');
-      ov.id = 'syncgh-popup';
-      ov.className = 'fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4';
-      ov.innerHTML = '<div class="bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-sm p-5 relative">'
-        + '<button type="button" class="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-900 rounded-lg transition-colors" onclick="syncghClosePopup()" title="Tutup"><i data-lucide="x" class="w-4 h-4"></i></button>'
-        + '<h3 class="text-base font-bold text-gray-900">Sync GitHub</h3>'
-        + '<p class="text-xs text-gray-400 mt-0.5">Proyek ini' + (st.on ? ' — aktif ke <strong>' + escapeGithubHtml(st.repo) + '</strong>' : ' belum aktif') + '</p>'
-        + '<label class="block text-xs font-semibold text-gray-500 mt-3 mb-1">Repo tujuan (owner/nama-repo)</label>'
-        + '<input id="syncgh-repo-input" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-400" placeholder="username/nama-repo" value="' + escapeGithubHtml(st.repo) + '">'
-        + '<label class="block text-xs font-semibold text-gray-500 mt-3 mb-1">Branch</label>'
-        + '<input id="syncgh-branch-input" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-400" placeholder="main" value="' + escapeGithubHtml(st.branch || 'main') + '">'
-        + '<button id="syncgh-save-btn" class="mt-4 w-full bg-gray-900 text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity">Simpan &amp; Sinkronkan</button>'
-        + (st.on ? '<button id="syncgh-off-btn" class="mt-2 w-full border border-gray-200 text-gray-700 rounded-xl py-2.5 text-sm font-semibold hover:bg-gray-50 transition-colors">Matikan Sync</button>' : '')
-        + '<button id="syncgh-now-btn" class="mt-2 w-full text-gray-500 text-xs font-semibold hover:text-gray-900 transition-colors">Sinkronkan sekarang</button>'
-        + '</div>';
-      document.body.appendChild(ov);
-      try { lucide.createIcons(); } catch (e) {}
-      ov.addEventListener('click', function (ev) { if (ev.target === ov) syncghClosePopup(); });
-      document.getElementById('syncgh-save-btn').addEventListener('click', function () {
-        var v = document.getElementById('syncgh-repo-input').value.trim();
-        var b = document.getElementById('syncgh-branch-input').value.trim() || 'main';
-        if (!v || v.indexOf('/') === -1) { alert('Format repo: owner/nama-repo'); return; }
-        var parts = v.split('/');
-        var owner = parts[0].trim(), repo = parts.slice(1).join('/').trim();
-        if (!owner || !repo) { alert('Format repo: owner/nama-repo'); return; }
-        var changedRepo = st.repo !== (owner + '/' + repo);
-        syncghClosePopup();
-        if (!st.on || changedRepo) {
-          syncghShowConfirm(owner, repo, b); // popup konfirmasi ubah file sebelum aktif
-        } else {
-          WSGitHubSync.enable(owner, repo, b);
-          syncghRefresh();
-        }
-      });
-      var offBtn = document.getElementById('syncgh-off-btn');
-      if (offBtn) offBtn.addEventListener('click', function () {
-        WSGitHubSync.disable();
-        syncghClosePopup();
-        syncghRefresh();
-        addNotification('GitHub', 'Sync GitHub dimatikan untuk proyek ini.');
-      });
-      document.getElementById('syncgh-now-btn').addEventListener('click', function () {
-        syncghClosePopup();
-        WSGitHubSync.syncNow().then(function (r) {
-          syncghPaintDot(syncghState(), r ? r.ok : false);
-          addNotification('GitHub', (r && r.ok) ? ('Sync GitHub selesai — ' + (r.changed || 0) + ' file diperbarui.') : ('Sync GitHub gagal: ' + ((r && r.error) || 'tidak diketahui')));
-        });
-      });
-    }
     window.syncghClosePopup = syncghClosePopup;
     (function () {
       var toggleBtn = document.getElementById('syncgh-toggle-btn');
@@ -1794,8 +1716,19 @@
             addNotification('GitHub', 'Sync GitHub dimatikan untuk proyek ini.');
             return;
           }
+          if (!st.ready) return; // toggle hanya muncul setelah import repo
           if (!getGitHubToken()) { syncghShowConnect(); return; }
-          syncghShowSettings();
+          // Otomatis: langsung aktif & sync pakai repo hasil import, tanpa popup URL
+          WSGitHubSync.enable(st.owner, st.name, st.branch);
+          WSGitHubSync.resetSnapshot();
+          syncghRefresh();
+          addNotification('GitHub', 'Sync GitHub aktif — file workspace akan tersinkron ke ' + st.repo + '.');
+          var dot = document.getElementById('syncgh-dot');
+          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full flex-shrink-0 bg-green-500 animate-pulse';
+          WSGitHubSync.syncNow().then(function (r) {
+            if (r && r.error) addNotification('GitHub', 'Sync GitHub gagal: ' + r.error);
+            syncghPaintDot(syncghState(), r ? r.ok : false);
+          });
         });
       }
       if (window.WSGitHubSync) {

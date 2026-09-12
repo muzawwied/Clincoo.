@@ -189,12 +189,15 @@
 
   function disable() { setCfg(Object.assign({}, cfg() || {}, { on: false })); }
   function enable(owner, repo, branch) { setCfg({ on: true, owner: owner, repo: repo, branch: branch || 'main' }); }
+  // Simpan repo hasil import (belum aktif) — toggle Sync GitHub muncul berdasarkan ini.
+  function prepare(owner, repo, branch) { setCfg({ on: false, owner: owner, repo: repo, branch: branch || 'main' }); }
   function resetSnapshot() { clearSnap(); }
 
   window.WSGitHubSync = {
     cfg: cfg,
     enabled: enabled,
     enable: enable,
+    prepare: prepare,
     disable: disable,
     resetSnapshot: resetSnapshot,
     schedule: schedule,
