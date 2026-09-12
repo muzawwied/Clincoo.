@@ -93,7 +93,7 @@
   <div id="page-file-editor" class="page-view w-full min-h-screen flex flex-col bg-[#141820] text-gray-200 font-sans overflow-hidden">
     <div class="bg-[#1b202b] border-b border-[#2a303f] flex items-center px-4 h-12 flex-shrink-0 select-none justify-between">
       <div class="flex items-center gap-3 min-w-0">
-        <button onclick="navigateBackFromEditor()" class="p-1.5 text-gray-400 hover:text-white rounded-lg transition-colors flex items-center gap-1.5 focus:outline-none" title="Kembali & Simpan Otomatis">
+        <button onclick="navigateBackFromEditor()" class="p-1.5 text-gray-400 hover:text-white rounded-lg transition-colors flex items-center gap-1.5 focus:outline-none" title="Kembali ke Workspace">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
           <span class="text-xs font-medium text-gray-300 hidden sm:inline">Kembali</span>
         </button>
@@ -140,6 +140,8 @@
     let editingFileName = null;
     let projectFilesData = { 'root': [] };
     let codeEditor = null;
+    let editorOriginalContent = null;
+    let editorDirty = false;
 
     function wsFilesKey() {
       let pid = null;
@@ -324,6 +326,11 @@
           lineWrapping: true,
           scrollbarStyle: 'native'
         });
+        codeEditor.on('change', function() {
+          if (editorOriginalContent !== null && codeEditor.getValue() !== editorOriginalContent) {
+            editorDirty = true;
+          }
+        });
       }
     }
 
@@ -385,11 +392,44 @@
           codeEditor.setValue(fileObj.content || '');
           setTimeout(() => codeEditor.refresh(), 50);
         }
+        editorOriginalContent = fileObj.content || '';
+        editorDirty = false;
       }
     }
 
+    function showEditorExitConfirm() {
+      const oldModal = document.getElementById('editor-exit-modal');
+      if (oldModal) oldModal.remove();
+      const ov = document.createElement('div');
+      ov.id = 'editor-exit-modal';
+      ov.className = 'fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4';
+      const fileName = editingFileName || 'file ini';
+      ov.innerHTML = '<div class="bg-[#12151c] border border-white/10 rounded-2xl p-5 w-full max-w-[320px] shadow-2xl">'
+        + '<h3 class="text-white font-semibold text-base mb-1">Simpan perubahan?</h3>'
+        + '<p class="text-sm text-gray-400 mb-5">Ada perubahan pada <span class="font-medium text-gray-200"></span> yang belum disimpan.</p>'
+        + '<div class="flex flex-col gap-2">'
+        + '<button id="ee-save" class="w-full bg-black text-white text-sm font-medium py-2.5 rounded-lg hover:bg-gray-800 transition-colors">Simpan &amp; Keluar</button>'
+        + '<button id="ee-discard" class="w-full border border-white/15 text-gray-300 text-sm py-2.5 rounded-lg hover:bg-white/5 transition-colors">Keluar Tanpa Simpan</button>'
+        + '<button id="ee-cancel" class="w-full text-gray-500 text-sm py-2 rounded-lg hover:text-gray-300 transition-colors">Batal</button>'
+        + '</div></div>';
+      ov.querySelector('p span').textContent = fileName;
+      document.body.appendChild(ov);
+      ov.querySelector('#ee-cancel').onclick = function () { ov.remove(); };
+      ov.querySelector('#ee-discard').onclick = function () { ov.remove(); editorDoExit(false); };
+      ov.querySelector('#ee-save').onclick = function () { ov.remove(); editorDoExit(true); };
+      ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.remove(); });
+    }
+
     async function navigateBackFromEditor() {
-      if (editingFileName && codeEditor && getFileType(editingFileName) === 'code') {
+      if (editingFileName && codeEditor && editorDirty && getFileType(editingFileName) === 'code') {
+        showEditorExitConfirm();
+        return;
+      }
+      await editorDoExit(true);
+    }
+
+    async function editorDoExit(saveChanges) {
+      if (saveChanges && editingFileName && codeEditor && getFileType(editingFileName) === 'code') {
         const codeContent = codeEditor.getValue();
         if (Array.isArray(projectFilesData[currentFolderPath])) {
           const itemIndex = projectFilesData[currentFolderPath].findIndex(function(i) { return i.type === 'file' && i.name === editingFileName; });
@@ -399,6 +439,7 @@
           }
         }
         saveData();
+        editorDirty = false;
       }
       const audioPlayer = document.getElementById('audio-player');
       if (audioPlayer) { audioPlayer.pause(); audioPlayer.src = ''; }
@@ -409,6 +450,10 @@
       try { await wsCloudPushNow(); } catch (e) {}
       window.location.href = '../?id=' + encodeURIComponent(wsProjectId());
     }
+
+    window.addEventListener('beforeunload', function (e) {
+      if (editorDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
       const params = new URLSearchParams(window.location.search);
