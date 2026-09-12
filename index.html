@@ -70,15 +70,33 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            background-image: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.74) 38%, rgba(255,255,255,0.46) 100%), url('assets/backgrounds/bg-light-morning.webp');
+            background-image: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.55) 30%, rgba(255,255,255,0.28) 100%), url('assets/backgrounds/bg-light-morning.webp');
             background-size: cover;
             background-position: center bottom;
             background-repeat: no-repeat;
         }
         body.dark-mode #site-footer {
-            background-image: linear-gradient(180deg, #000000 0%, rgba(0,0,0,0.66) 38%, rgba(0,0,0,0.48) 100%), url('assets/backgrounds/bg-dark-night2.webp');
+            background-image: linear-gradient(180deg, #000000 0%, rgba(0,0,0,0.58) 30%, rgba(0,0,0,0.42) 100%), url('assets/backgrounds/bg-dark-night2.webp');
         }
         body.dark-mode #site-footer a:hover { color: #ffffff !important; }
+        /* Wordmark 3D nempel di dalem gambar */
+        #site-footer .footer-wordmark {
+            display: inline-block;
+            font-weight: 800;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            line-height: 1;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            text-shadow: 0 1px 0 #d1d5db, 0 2px 0 #9ca3af, 0 3px 0 #6b7280, 0 4px 0 #4b5563, 0 6px 12px rgba(0,0,0,0.35);
+            transform: perspective(420px) rotateX(14deg);
+            transform-origin: center bottom;
+        }
+        body.dark-mode #site-footer .footer-wordmark {
+            text-shadow: 0 1px 0 #6b7280, 0 2px 0 #4b5563, 0 3px 0 #374151, 0 4px 0 #1f2937, 0 6px 14px rgba(0,0,0,0.6);
+        }
+        /* Teks kecil di dalem gambar tetap kebaca */
+        #site-footer .footer-sub { text-shadow: 0 1px 3px rgba(255,255,255,0.75); }
+        body.dark-mode #site-footer .footer-sub { text-shadow: 0 1px 3px rgba(0,0,0,0.75); }
         .page-view { position: relative; z-index: 1; }
         :root {
             --accent-color: #000000;
@@ -565,19 +583,17 @@
 
     <!-- ===== Footer halaman utama ===== -->
     <footer id="site-footer" class="w-full mt-2">
-        <div class="max-w-3xl mx-auto px-5 pt-5 pb-4 flex flex-col items-center text-center gap-1.5">
-            <div class="flex items-baseline justify-center gap-2 flex-wrap">
-                <span class="font-[800] text-lg tracking-tight text-gray-900">Clincoo</span>
-                <span class="text-[12px] text-gray-700">Publikasikan situs anda bersama Clincoo.</span>
-            </div>
-            <div class="flex items-center justify-center gap-2 text-[12px] flex-wrap">
-                <a href="akun/tentang/" class="text-gray-500 hover:text-black transition-colors">Tentang</a>
+        <div class="max-w-3xl mx-auto px-5 pt-6 pb-4 flex flex-col items-center text-center gap-1.5">
+            <span class="footer-wordmark">Clincoo</span>
+            <p class="footer-sub text-[12px] text-gray-700">Publikasikan situs anda bersama Clincoo.</p>
+            <div class="footer-sub flex items-center justify-center gap-2 text-[12px] flex-wrap">
+                <a href="akun/tentang/" class="text-gray-600 hover:text-black transition-colors">Tentang</a>
                 <span class="text-gray-400">|</span>
-                <a href="#" class="text-gray-500 hover:text-black transition-colors">Ketentuan</a>
+                <a href="#" class="text-gray-600 hover:text-black transition-colors">Ketentuan</a>
                 <span class="text-gray-400">|</span>
-                <a href="#" class="text-gray-500 hover:text-black transition-colors">Privasi</a>
-                <span class="text-gray-400">·</span>
-                <span class="text-gray-500">&copy; 2026 Clincoo. Semua hak dilindungi.</span>
+                <a href="#" class="text-gray-600 hover:text-black transition-colors">Privasi</a>
+                <span class="text-gray-400">&middot;</span>
+                <span class="text-gray-600">&copy; 2026 Clincoo. Semua hak dilindungi.</span>
             </div>
         </div>
     </footer>
