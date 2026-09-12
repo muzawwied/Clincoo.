@@ -104,7 +104,8 @@
     body.dark-mode .text-gray-400 { color: #666666; }
     body.dark-mode .text-black { color: #ffffff; }
     body.dark-mode .bg-white { background-color: #0a0a0a !important; }
-    body.dark-mode #syncgh-toggle-knob.bg-white { background-color: #ffffff !important; }
+    body.dark-mode #syncgh-toggle-bg.bg-gray-900 { background-color: #ffffff !important; }
+    body.dark-mode #syncgh-toggle-knob.bg-white { background-color: #0a0a0a !important; }
 
         body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
         body.dark-mode #sidebar-toggle,
@@ -319,7 +320,6 @@
                   </button>
                   <div id="syncgh-sep" class="hidden h-px bg-gray-100 my-1"></div>
                   <div id="syncgh-toggle-row" class="hidden items-center gap-2.5 w-full px-3 py-2.5">
-                    <span id="syncgh-dot" class="w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0"></span>
                     <span class="text-sm text-gray-700 font-medium flex-shrink-0">Sync GitHub</span>
                     <span id="syncgh-status-text" class="flex-1 min-w-0 text-xs text-gray-400 truncate"></span>
                     <button id="syncgh-toggle-btn" type="button" class="relative flex-shrink-0 cursor-pointer focus:outline-none" title="Sync GitHub — sinkronkan file workspace ke repo GitHub">
@@ -1667,12 +1667,6 @@
       var c = window.WSGitHubSync ? WSGitHubSync.cfg() : null;
       return { on: !!(c && c.on && c.owner && c.repo), ready: !!(c && c.owner && c.repo), owner: c ? c.owner : '', name: c ? c.repo : '', repo: c ? (c.owner + '/' + c.repo) : '', branch: c ? (c.branch || 'main') : 'main' };
     }
-    function syncghPaintDot(state, ok) {
-      var dot = document.getElementById('syncgh-dot');
-      if (!dot) return;
-      if (!state.on) { dot.className = 'w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0'; return; }
-      dot.className = 'w-1.5 h-1.5 rounded-full flex-shrink-0 ' + (ok === false ? 'bg-red-500' : 'bg-blue-500');
-    }
     function syncghRefresh() {
       var st = syncghState();
       var row = document.getElementById('syncgh-toggle-row');
@@ -1688,7 +1682,6 @@
       if (knob) knob.classList.toggle('translate-x-5', st.on);
       var statusText = document.getElementById('syncgh-status-text');
       if (statusText) statusText.textContent = st.on ? ('Aktif ke ' + st.repo) : st.repo;
-      syncghPaintDot(st, true);
     }
     function syncghClosePopup() {
       var ov = document.getElementById('syncgh-popup');
@@ -1733,17 +1726,13 @@
           WSGitHubSync.resetSnapshot();
           syncghRefresh();
           addNotification('GitHub', 'Sync GitHub aktif — file workspace akan tersinkron ke ' + st.repo + '.');
-          var dot = document.getElementById('syncgh-dot');
-          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full flex-shrink-0 bg-blue-500 animate-pulse';
           WSGitHubSync.syncNow().then(function (r) {
             if (r && r.error) addNotification('GitHub', 'Sync GitHub gagal: ' + r.error);
-            syncghPaintDot(syncghState(), r ? r.ok : false);
           });
         });
       }
       if (window.WSGitHubSync) {
         WSGitHubSync.onChange(function (r) {
-          syncghPaintDot(syncghState(), r ? r.ok : false);
           if (r && r.error) addNotification('GitHub', 'Sync GitHub: ' + r.error);
         });
       }
