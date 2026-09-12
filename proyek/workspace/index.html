@@ -324,7 +324,7 @@
                     <span id="syncgh-status-text" class="flex-1 min-w-0 text-xs text-gray-400 truncate"></span>
                     <button id="syncgh-toggle-btn" type="button" class="relative flex-shrink-0 cursor-pointer focus:outline-none" title="Sync GitHub — sinkronkan file workspace ke repo GitHub">
                       <div id="syncgh-toggle-bg" class="w-11 h-6 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out"></div>
-                      <div id="syncgh-toggle-knob" class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out"></div>
+                      <div id="syncgh-toggle-knob" class="absolute left-0.5 top-0.5 bg-gray-900 w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out"></div>
                     </button>
                   </div>
                 </div>
@@ -1679,7 +1679,7 @@
       var bg = document.getElementById('syncgh-toggle-bg');
       var knob = document.getElementById('syncgh-toggle-knob');
       if (bg) bg.className = 'w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ' + (st.on ? 'bg-gray-900' : 'bg-gray-200');
-      if (knob) knob.classList.toggle('translate-x-5', st.on);
+      if (knob) knob.className = 'absolute left-0.5 top-0.5 w-5 h-5 rounded-full shadow transition-transform duration-200 ease-in-out ' + (st.on ? 'bg-white translate-x-5' : 'bg-gray-900');
       var statusText = document.getElementById('syncgh-status-text');
       if (statusText) statusText.textContent = st.on ? ('Aktif ke ' + st.repo) : st.repo;
     }
