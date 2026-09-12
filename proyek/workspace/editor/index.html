@@ -15,15 +15,15 @@
 
   <style>/* fallback styling modal konfirmasi editor (tahan CDN gagal) */
   #editor-exit-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.6); z-index: 999; padding: 1rem; }
-  #editor-exit-modal > div { background: #12151c; border: 1px solid rgba(255,255,255,.1); border-radius: 1rem; padding: 1.25rem; width: 100%; max-width: 320px; }
-  #editor-exit-modal h3 { color: #fff; font-weight: 600; font-size: 1rem; margin-bottom: .25rem; }
-  #editor-exit-modal p { font-size: .875rem; color: #9ca3af; margin-bottom: 1.25rem; }
+  #editor-exit-modal > div { background: #12151c; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 1rem; width: 100%; max-width: 300px; }
+  #editor-exit-modal h3 { color: #fff; font-weight: 500; font-size: .9375rem; margin: 0 0 .25rem; }
+  #editor-exit-modal p { font-size: .8125rem; color: #9ca3af; margin: 0 0 1rem; }
   #editor-exit-modal span { color: #e5e7eb; font-weight: 500; }
-  #editor-exit-modal button { cursor: pointer; font-size: .875rem; border-radius: .5rem; padding: .625rem .5rem; }
-  #editor-exit-modal #ee-save { background: #000; color: #fff; font-weight: 500; }
-  #editor-exit-modal #ee-discard { border: 1px solid rgba(255,255,255,.15); color: #d1d5db; background: transparent; }
-  #editor-exit-modal #ee-cancel { color: #6b7280; background: transparent; }
-  #editor-exit-modal .ee-btns { display: flex; flex-direction: column; gap: .5rem; }
+  #editor-exit-modal button { cursor: pointer; font-size: .8125rem; }
+  #editor-exit-modal #ee-save { background: #000; color: #fff; font-weight: 500; border-radius: 6px; padding: .5rem; width: 100%; }
+  #editor-exit-modal #ee-discard { border: 1px solid rgba(255,255,255,.12); color: #d1d5db; background: transparent; border-radius: 6px; padding: .5rem; width: 100%; margin-top: .375rem; }
+  #editor-exit-modal #ee-cancel { color: #6b7280; background: none; border: none; padding: .4rem 0 0; width: 100%; margin-top: .125rem; }
+  #editor-exit-modal .ee-btns { display: flex; flex-direction: column; }
   </style>
 
     <meta name="description" content="Editor Kode — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
@@ -418,13 +418,13 @@
       ov.id = 'editor-exit-modal';
       ov.className = 'fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4';
       const fileName = editingFileName || 'file ini';
-      ov.innerHTML = '<div class="bg-[#12151c] border border-white/10 rounded-2xl p-5 w-full max-w-[320px] shadow-2xl">'
-        + '<h3 class="text-white font-semibold text-base mb-1">Simpan perubahan?</h3>'
-        + '<p class="text-sm text-gray-400 mb-5">Ada perubahan pada <span class="font-medium text-gray-200"></span> yang belum disimpan.</p>'
-        + '<div class="ee-btns flex flex-col gap-2">'
-        + '<button id="ee-save" class="w-full bg-black text-white text-sm font-medium py-2.5 rounded-lg hover:bg-gray-800 transition-colors">Simpan &amp; Keluar</button>'
-        + '<button id="ee-discard" class="w-full border border-white/15 text-gray-300 text-sm py-2.5 rounded-lg hover:bg-white/5 transition-colors">Keluar Tanpa Simpan</button>'
-        + '<button id="ee-cancel" class="w-full text-gray-500 text-sm py-2 rounded-lg hover:text-gray-300 transition-colors">Batal</button>'
+      ov.innerHTML = '<div class="bg-[#12151c] border border-white/[.08] rounded-lg p-4 w-full max-w-[300px] shadow-xl">'
+        + '<h3 class="text-white font-medium text-[15px] mb-1">Simpan perubahan?</h3>'
+        + '<p class="text-[13px] text-gray-400 mb-4">Ada perubahan pada <span class="font-medium text-gray-200"></span> yang belum disimpan.</p>'
+        + '<div class="ee-btns flex flex-col">'
+        + '<button id="ee-save" class="w-full bg-black text-white text-[13px] font-medium py-2 rounded-md hover:bg-gray-800 transition-colors">Simpan &amp; Keluar</button>'
+        + '<button id="ee-discard" class="w-full border border-white/10 text-gray-300 text-[13px] py-2 mt-1.5 rounded-md hover:bg-white/5 transition-colors">Keluar Tanpa Simpan</button>'
+        + '<button id="ee-cancel" class="w-full text-gray-500 text-[13px] pt-2 hover:text-gray-300 transition-colors">Batal</button>'
         + '</div></div>';
       ov.querySelector('p span').textContent = fileName;
       document.body.appendChild(ov);
