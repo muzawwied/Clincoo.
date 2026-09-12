@@ -555,23 +555,162 @@
 
         function showDeployErrorModal(err) {
             var msg = (err && err.message) ? String(err.message) : '';
+            var isQuota = msg.indexOf('Kuota deploy') !== -1;
+            if (isQuota) { showDeployQuotaCarousel(msg); return; } // kuota habis -> carousel daftar paket
             if (document.getElementById('deploy-error-modal')) return;
             var m = document.createElement('div');
             m.id = 'deploy-error-modal';
-            var isQuota = msg.indexOf('Kuota deploy') !== -1;
-            var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
             m.innerHTML =
                 '<div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
                 '<div class="bg-white rounded-2xl w-full max-w-xs px-5 pt-5 pb-4 text-center">' +
-                '<h3 class="text-base font-semibold text-gray-900">' + (isQuota ? 'Kuota deploy habis' : 'Deploy gagal') + '</h3>' +
-                '<p class="text-sm text-gray-500 mt-1.5 leading-snug px-1">' + (isQuota ? msg.replace('Upgrade paket di halaman Langganan untuk deploy lagi.', '').trim() : (msg || 'Terjadi kesalahan tak terduga. Coba lagi.')) + '</p>' +
-                (isQuota ? '<a href="' + base + '/akun/langganan/upgrade/" class="mt-4 block w-full py-2.5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">Upgrade Paket</a>' : '') +
-                '<button id="deploy-error-close" class="mt-2 w-full py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors">' + (isQuota ? 'Nanti saja' : 'Tutup') + '</button>' +
+                '<h3 class="text-base font-semibold text-gray-900">Deploy gagal</h3>' +
+                '<p class="text-sm text-gray-500 mt-1.5 leading-snug px-1">' + (msg || 'Terjadi kesalahan tak terduga. Coba lagi.') + '</p>' +
+                '<button id="deploy-error-close" class="mt-2 w-full py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors">Tutup</button>' +
                 '</div></div>';
             document.body.appendChild(m);
             var btn = m.querySelector('#deploy-error-close');
             if (btn) btn.addEventListener('click', function () { m.remove(); });
         }
+
+    function showDeployQuotaCarousel(msg) {
+      if (document.getElementById('deploy-quota-modal')) return;
+      var m = document.createElement('div');
+      m.id = 'deploy-quota-modal';
+      var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+      var current = 'Starter';
+      var billing = 'Bulanan';
+      var checkoutUrl = function (name, cyc) {
+        return base + '/akun/langganan/upgrade/konfirmasi/?plan=' + encodeURIComponent(name) + '&billing=' + encodeURIComponent(cyc || billing);
+      };
+
+      var plans = [
+        { name: 'Starter', tagline: 'Untuk individu yang baru memulai.', price: 'Gratis', per: '', hot: false,
+          items: [
+            ['Hingga 3 proyek aktif', true],
+            ['1 kolaborator per proyek', true],
+            ['Chat AI di setiap proyek', true],
+            ['3 template proyek siap pakai', true],
+            ['Tugas terjadwal & notifikasi', true],
+            ['Deploy web 2x per bulan', true],
+            ['Kolaborasi tim lebih besar', false],
+            ['Impor repository GitHub', false]
+          ] },
+        { name: 'Pro', tagline: 'Untuk profesional dan kreator aktif.', price: '49K', per: '/bln', hot: true,
+          items: [
+            ['Hingga 10 proyek aktif', true],
+            ['Hingga 5 kolaborator per proyek', true],
+            ['Semua fitur Starter: chat AI, template & tugas terjadwal', true],
+            ['Deploy web hingga 25x per bulan', true],
+            ['Impor repository GitHub ke workspace', true]
+          ] },
+        { name: 'Bisnis', tagline: 'Untuk tim dan operasi skala besar.', price: '129K', per: '/bln', hot: false,
+          items: [
+            ['Semua fitur Pro', true],
+            ['Hingga 50 proyek aktif', true],
+            ['Hingga 20 kolaborator per proyek', true],
+            ['Kontrol akses & keamanan proyek lanjutan', true],
+            ['Deploy web tanpa batas', true]
+          ] }
+      ];
+
+      var card = function (p) {
+        var isCurrent = (p.name === current);
+        var list = p.items.map(function (it) {
+          return '<li class="flex items-start gap-2.5 text-[13px] ' + (p.hot ? 'text-gray-900 font-medium' : (it[1] ? 'text-gray-700' : 'text-gray-400 opacity-70')) + '">' +
+            (it[1]
+              ? '<i data-lucide="' + (p.hot ? 'check-circle-2' : 'check') + '" class="w-4 h-4 shrink-0 ' + (p.hot ? 'text-accent' : 'text-gray-900') + '"></i>'
+              : '<i data-lucide="minus" class="w-4 h-4 shrink-0"></i>') +
+            '<span>' + it[0] + '</span></li>';
+        }).join('');
+        var btn;
+        if (isCurrent) {
+          btn = '<div class="w-full py-3 bg-gray-50 text-gray-500 border border-gray-200 rounded-xl font-semibold text-sm text-center cursor-not-allowed">Paket Saat Ini</div>';
+        } else if (p.hot) {
+          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-accent rounded-xl font-semibold text-sm text-center transition-all shadow-md active:scale-95">Upgrade ke ' + p.name + '</a>';
+        } else {
+          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm text-center transition-all">Mulai ' + p.name + '</a>';
+        }
+        return '<div class="w-full shrink-0 px-0.5"><div class="bg-white border ' + (p.hot ? 'border-2 border-accent shadow-xl' : 'border-gray-200') + ' rounded-3xl p-4 sm:p-5 flex flex-col relative text-left">' +
+          (p.hot ? '<div class="absolute top-0 right-0 bg-accent text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">Paling Populer</div>' : '') +
+          '<div class="mb-4 ' + (p.hot ? 'mt-2' : '') + '"><h3 class="text-lg font-bold text-gray-900 ' + (p.hot ? 'text-accent' : '') + '">' + p.name + '</h3>' +
+          '<p class="text-xs text-gray-500 mt-0.5">' + p.tagline + '</p></div>' +
+          '<div class="mb-4 flex items-baseline"><span class="text-2xl font-extrabold tracking-tight text-gray-900">' + p.price + '</span><span class="text-xs font-medium text-gray-500 ml-1">' + p.per + '</span></div>' +
+          '<ul class="flex flex-col gap-2.5 mb-4 flex-1">' + list + '</ul>' + btn + '</div></div>';
+      };
+
+      var slides = plans.map(card).join('');
+      var dots = plans.map(function (p, i) {
+        return '<button class="dqc-dot rounded-full transition-all duration-200" data-i="' + i + '" style="width:6px;height:6px;background:#d1d5db;"></button>';
+      }).join('');
+
+      var css = document.createElement('style');
+      css.textContent =
+        '#deploy-quota-modal .text-accent{color:var(--accent-color,#000000);} ' +
+        '#deploy-quota-modal .bg-accent{background-color:var(--accent-color,#000000);color:#ffffff;} ' +
+        '#deploy-quota-modal .border-accent{border-color:var(--accent-color,#000000);} ' +
+        'body.dark-mode #deploy-quota-modal .text-accent{color:#ffffff !important;} ' +
+        'body.dark-mode #deploy-quota-modal .bg-accent{background-color:#ffffff !important;color:#000000 !important;} ' +
+        'body.dark-mode #deploy-quota-modal .border-accent{border-color:#ffffff !important;}';
+
+      var subtitle = (msg || 'Kuota deploy paket Starter sudah habis bulan ini.').replace('Upgrade paket di halaman Langganan untuk deploy lagi.', '').trim();
+
+      m.innerHTML =
+        '<div class="fixed inset-0 z-[95] overflow-y-auto p-3 sm:p-4" style="background:rgba(0,0,0,0.45)">' +
+        '<div class="min-h-full flex items-center justify-center">' +
+        '<div class="bg-white rounded-2xl w-full max-w-sm relative px-4 sm:px-5 pt-9 pb-4 my-2">' +
+        '<button id="deploy-quota-x" class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-black flex items-center justify-center transition-colors z-10" aria-label="Tutup"><i data-lucide="x" class="w-4 h-4"></i></button>' +
+        '<h3 class="text-base font-semibold text-gray-900 text-center pr-6">Kuota deploy habis</h3>' +
+        '<p class="text-[13px] sm:text-sm text-gray-500 mt-1 text-center leading-snug px-1">' + subtitle + '</p>' +
+        '<div class="relative mt-4">' +
+          '<div id="dqc-viewport" class="overflow-hidden rounded-2xl" style="touch-action:pan-y;">' +
+            '<div id="dqc-track" class="flex transition-transform duration-300 ease-out">' + slides + '</div>' +
+          '</div>' +
+          '<button id="dqc-prev" class="absolute left-0 top-1/2 -translate-y-1/2 -ml-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>' +
+          '<button id="dqc-next" class="absolute right-0 top-1/2 -translate-y-1/2 -mr-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>' +
+        '</div>' +
+        '<div class="flex items-center justify-center gap-2 mt-4">' + dots + '</div>' +
+        '</div></div>';
+      document.body.appendChild(css);
+      document.body.appendChild(m);
+      try { lucide.createIcons(); } catch (e) {}
+
+      var track = m.querySelector('#dqc-track');
+      var dotsEls = m.querySelectorAll('.dqc-dot');
+      var idx = 1;
+      function render() {
+        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+        dotsEls.forEach(function (d, i) {
+          var on = (i === idx);
+          d.style.width = on ? '18px' : '6px';
+          d.style.background = on ? '' : '#d1d5db';
+          d.classList.toggle('bg-accent', on);
+        });
+      }
+      function go(i) { idx = (i + plans.length) % plans.length; render(); }
+      m.querySelector('#dqc-prev').addEventListener('click', function () { go(idx - 1); });
+      m.querySelector('#dqc-next').addEventListener('click', function () { go(idx + 1); });
+      dotsEls.forEach(function (d) { d.addEventListener('click', function () { go(parseInt(d.dataset.i, 10)); }); });
+
+      var vp = m.querySelector('#dqc-viewport'), sx = null, dx = 0;
+      vp.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; dx = 0; track.style.transition = 'none'; }, { passive: true });
+      vp.addEventListener('touchmove', function (e) {
+        if (sx === null) return;
+        dx = e.touches[0].clientX - sx;
+        var w = vp.offsetWidth;
+        var lo = -(w * (plans.length - 1)) - 30;
+        var trackX = Math.min(Math.max(-(idx * w) + dx, lo), 30);
+        track.style.transform = 'translateX(' + trackX + 'px)';
+      }, { passive: true });
+      vp.addEventListener('touchend', function () {
+        track.style.transition = '';
+        if (Math.abs(dx) > 40) go(dx < 0 ? idx + 1 : idx - 1); else render();
+        sx = null;
+      });
+
+      m.querySelector('#deploy-quota-x').addEventListener('click', function () { m.remove(); });
+      m.firstElementChild.addEventListener('click', function (e) { if (e.target === m.firstElementChild) m.remove(); });
+      render();
+    }
 
         async function unpublishSite() {
             if (!confirm("Apakah Anda yakin ingin menarik publikasi dan menonaktifkan situs ini?")) return;
