@@ -118,10 +118,11 @@ async function getCreds(db) {
 }
 
 // Nama project Pages untuk proyek ini: pakai yang tersimpan (stabil), kalau belum ada
-// turunkan dari app_name (subdomain saat deploy pertama) dengan fallback ke project_id.
-// Suffix unik per proyek: dua akun BERBEDA yang memakai template sama (app_name sama)
-// tidak boleh berakhir di project Pages yang sama — deployment satu sama lain akan bocor
-// (status + link publik saling terlihat / saling menimpa). Hash pendek project_id memastikan unik.
+// TURUNKAN DARI NAMA PROYEK (app_name > ai_name > title) lalu tambahkan suffix
+// huruf+angka (hash pendek project_id, terlihat acak namun deterministik supaya
+// GET dan POST tidak pernah menghasilkan nama berbeda untuk proyek yang sama).
+// Suffix unik per proyek: dua akun BERBEDA yang memakai nama sama tidak boleh
+// berakhir di project Pages yang sama — deployment satu sama lain akan bocor.
 function projHash(projectId) {
   let h = 5381;
   const s = String(projectId || '');
@@ -129,11 +130,27 @@ function projHash(projectId) {
   return h.toString(36).padStart(5, '0').slice(-5);
 }
 
+// Nama proyek pilihan (sesuai isi situs): app_name manual > ai_name (dibuat AI dari
+// konten situs) > title. Dibaca dari project_settings lalu user_projects.
+async function getPreferredName(db, table, projectId) {
+  const app = await getSetting(db, table, projectId, 'app_name');
+  if (app) return app;
+  try {
+    const row = await db.prepare('SELECT ai_name, title FROM user_projects WHERE id = ?').bind(String(projectId)).first();
+    if (row) return row.ai_name || row.title || '';
+  } catch (e) {}
+  return '';
+}
+
 async function resolvePagesName(db, table, projectId) {
   const stored = await getSetting(db, table, projectId, 'pages_project');
   if (stored) return stored;
-  // Subdomain pendek (maks 9 karakter): cno-<hash5> — unik per project, isolasi antar akun tetap terjaga.
-  return 'cno-' + projHash(projectId);
+  const preferred = await getPreferredName(db, table, projectId);
+  // slug dari nama proyek, tanpa tanda hubung, maks 12 karakter agar CNAME target tetap pendek
+  const slug = slugify(String(preferred || '')).replace(/-/g, '').slice(0, 12);
+  const name = ('cno-' + (slug || projHash(projectId)) + '-' + projHash(projectId)).slice(0, 60);
+  await setSetting(db, table, projectId, 'pages_project', name); // simpan -> stabil selamanya
+  return name;
 }
 
 // Halaman gerbang password — disuntik ke deploy saat visibilitas = Dilindungi Password.
@@ -305,7 +322,18 @@ export async function onRequestPost({ request, env }) {
     const creds = await getCreds(db);
     if (!creds.apiKey) return json({ error: 'Cloudflare API key belum dikonfigurasi' }, 500);
     const T = await getProjectTables(db, projectId);
-    const name = await resolvePagesName(db, T.projectSettings, projectId);
+    let name = await resolvePagesName(db, T.projectSettings, projectId);
+    // Rename subdomain (input "Subdomain Publik" di halaman Pengaturan Deploy):
+    // nama baru dipakai untuk situs yang dideploy berikutnya. Project Pages lama
+    // dibiarkan apa adanya — bisa ditarik manual lewat Batalkan Publikasi.
+    const subRaw = String(body.subdomain || '').trim().toLowerCase();
+    if (subRaw) {
+      const sub = slugify(subRaw);
+      if (sub && sub.length >= 3 && sub.length <= 40 && sub !== name) {
+        name = (sub + '-' + projHash(projectId)).slice(0, 60);
+        await setSetting(db, T.projectSettings, projectId, 'pages_project', name);
+      }
+    }
     const pagesUrl = 'https://' + name + '.pages.dev';
 
     if (body.action === 'unpublish') {

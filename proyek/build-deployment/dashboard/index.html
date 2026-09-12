@@ -257,7 +257,7 @@
                     <button onclick="saveCustomDomain()" id="btn-save-domain" class="custom-domain-btn min-w-[72px] h-[34px] px-3 bg-white text-gray-900 border border-gray-300 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center shadow-sm">Simpan</button>
                 </div>
 
-                <p class="pt-2"><span id="cf-domain-status" class="text-xs font-medium text-gray-500">memuat status…</span></p>
+                <p class="pt-2"><span id="cf-domain-status" class="text-xs mt-1.5 font-medium hidden"></span></p>
 
                 <div class="pt-4 flex items-start gap-3">
                     <div class="mt-0.5">
@@ -499,15 +499,17 @@
         function renderRealDomains(domains) {
             const badge = document.getElementById('cf-domain-status');
             if (!badge) return;
+            // Status domain: teks polos saja — hijau saat aktif, merah saat belum, TANPA card.
+            // Belum ada domain: tidak ada teks apa pun.
             if (!domains.length) {
-                badge.textContent = 'Domain kustom belum terhubung ke Cloudflare';
-                badge.className = 'text-xs mt-1.5 font-medium text-gray-500';
+                badge.textContent = '';
+                badge.className = 'text-xs mt-1.5 font-medium hidden';
                 return;
             }
             const d = domains[domains.length - 1];
             const active = d.status === 'active';
-            badge.textContent = d.name + ' — ' + (active ? 'AKTIF' : 'menunggu verifikasi DNS (' + (d.status || 'pending') + ')');
-            badge.className = 'text-xs mt-1.5 font-medium ' + (active ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400 animate-pulse');
+            badge.textContent = active ? (d.name + ' — aktif') : (d.name + ' — belum aktif, menunggu verifikasi DNS');
+            badge.className = 'text-xs mt-1.5 font-medium ' + (active ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400');
             if (!active) {
                 if (deployState.domainTimer) clearInterval(deployState.domainTimer);
                 deployState.domainTimer = setInterval(async () => {

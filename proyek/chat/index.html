@@ -1726,6 +1726,16 @@
                                     projects[projIndex].aiDesc = cleanText.substring(0, 120);
                                     projects[projIndex].updatedAt = new Date().toISOString();
                                     localStorage.setItem('clincoo_projects', JSON.stringify(projects));
+                                    // Dorong nama & deskripsi buatan AI ke server (D1) agar sinkron
+                                    // antar device — dipakai juga deploy engine untuk subdomain otomatis.
+                                    try {
+                                        var _pushBase = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+                                        fetch(_pushBase + '/api/projects', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ action: 'upsert', project: projects[projIndex] })
+                                        }).catch(function () {});
+                                    } catch (e2) {}
                                 }
                             }
                         }
