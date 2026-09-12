@@ -185,7 +185,7 @@
           </div>
           <div class="w-full sm:w-80 relative" id="redirect-popover-container">
             <!-- Popover Trigger Button -->
-            <button type="button" id="redirect-popover-btn" onclick="togglePopover('redirect-popover')" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white flex items-center justify-between focus:outline-none hover:border-gray-400 dark:hover:border-slate-500 transition-colors cursor-pointer select-none">
+            <button type="button" id="redirect-popover-btn" onclick="uiTogglePopover('redirect-popover')" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white flex items-center justify-between focus:outline-none hover:border-gray-400 dark:hover:border-slate-500 transition-colors cursor-pointer select-none">
               <span id="redirect-selected-text" class="truncate">Redirect ke domain utama</span>
               <svg id="redirect-arrow" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 transition-transform duration-200 shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -263,18 +263,18 @@
 
   <script>
     // --- Fungsi Popover Dropdown Kustom ---
-    function togglePopover(popoverId) {
+    function uiTogglePopover(popoverId) {
       const popover = document.getElementById(popoverId);
       const arrow = document.getElementById(popoverId.replace('-popover', '-arrow'));
       
       const isOpen = !popover.classList.contains('hidden');
 
       if (isOpen) {
-        closePopover(popoverId);
+        uiClosePopover(popoverId);
       } else {
         // Tutup popover lain jika ada
         document.querySelectorAll('[id$="-popover"]').forEach(p => {
-          if (p.id !== popoverId) closePopover(p.id);
+          if (p.id !== popoverId) uiClosePopover(p.id);
         });
 
         popover.classList.remove('hidden');
@@ -286,7 +286,7 @@
       }
     }
 
-    function closePopover(popoverId) {
+    function uiClosePopover(popoverId) {
       const popover = document.getElementById(popoverId);
       const arrow = document.getElementById(popoverId.replace('-popover', '-arrow'));
       
@@ -325,13 +325,13 @@
         });
       }
 
-      closePopover(`${prefix}-popover`);
+      uiClosePopover(`${prefix}-popover`);
     }
 
     // Close Popover saat klik di luar areanya
     document.addEventListener('click', (e) => {
       if (!e.target.closest('[id$="-popover-container"]')) {
-        document.querySelectorAll('[id$="-popover"]').forEach(p => closePopover(p.id));
+        document.querySelectorAll('[id$="-popover"]').forEach(p => uiClosePopover(p.id));
       }
     });
 
@@ -556,7 +556,7 @@
             // "tiba-tiba ada isinya" padahal user belum mengisi domain kustom.
             // Section Konfigurasi DNS hanya muncul setelah proyek pernah dideploy.
             const dnsSection = document.getElementById('dns-section');
-            if (dnsSection) dnsSection.classList.toggle('hidden', !st.last_deployment);
+            if (dnsSection) dnsSection.classList.toggle('hidden', !(st.deployed || st.last_deployment));
             if ((st.domains || []).length) {
                 const d = st.domains[st.domains.length - 1];
                 const active = d.status === 'active';
@@ -620,6 +620,9 @@
                         { headers: tok ? { Authorization: 'Bearer ' + tok } : {} });
                     const st = await res.json().catch(() => ({}));
                     if (st.pages_url) { lastPagesUrl = st.pages_url; updateDNSRecords('', st.pages_url); writeDomainCache({ pagesUrl: st.pages_url }); }
+                    // Flag 'deployed' dari log D1: section DNS tampil pasti setelah deploy pertama,
+                    // tanpa bergantung pada status API Cloudflare (yang bisa gagal/rate-limit).
+                    if (st.deployed) { var _dns = document.getElementById('dns-section'); if (_dns) _dns.classList.remove('hidden'); }
                 } catch (e) {}
             })();
         }

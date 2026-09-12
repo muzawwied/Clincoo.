@@ -264,7 +264,12 @@ export async function onRequestGet({ request, env }) {
     // Dipakai halaman domain kustom supaya nilai record DNS terisi < 200 ms,
     // bukan menunggu status deployment (yang bisa masing-masing ratusan ms).
     if (url.searchParams.get('fast') === '1') {
-      return json({ pages_project: name, pages_url: pagesUrl, fast: true, api_rev: 'uniq3' });
+      let deployed = false;
+      try {
+        const r = await db.prepare(`SELECT 1 FROM ${T.deployLogs} WHERE project_id = ? AND status = 'success' LIMIT 1`).bind(projectId).first();
+        deployed = !!r;
+      } catch (e) {}
+      return json({ pages_project: name, pages_url: pagesUrl, deployed, fast: true, api_rev: 'uniq4' });
     }
 
     // Ambil project, deployment terakhir, dan domains PARALEL.
@@ -300,7 +305,8 @@ export async function onRequestGet({ request, env }) {
 
     const lastDeployBy = await getSetting(db, T.projectSettings, projectId, 'last_deploy_by');
     const deployPhase = await getSetting(db, T.projectSettings, projectId, 'deploy_phase');
-    return json({ pages_project: name, pages_url: pagesUrl, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, deploy_phase: deployPhase || '', api_rev: 'uniq2' });
+    const deployed = Array.isArray(logs) && logs.some(l => l && l.status === 'success');
+    return json({ pages_project: name, pages_url: pagesUrl, deployed, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, deploy_phase: deployPhase || '', api_rev: 'uniq4' });
   } catch (err) {
     try {
       const db = env.DB;
