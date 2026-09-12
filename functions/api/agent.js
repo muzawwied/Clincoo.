@@ -220,7 +220,7 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
     const step = plan[t.current_step];
     const msgs = [
       { role: 'system', content: AGENT_SYSTEM },
-      { role: 'user', content: 'TUJUAN: ' + t.goal + '\n\nRENCANA:\n' + plan.map((p, i) => (i + 1) + '. ' + p.title + (p.done ? ' (selesai)' : '')).join('\n') + '\n\nLANGKAH SEKARANG (' + (t.current_step + 1) + '/' + plan.length + '): ' + step.title + (step.detail ? '\n' + step.detail : '') + (transcript.length ? '\n\nKERJA SEBELUMNYA (ringkas):\n' + transcript.slice(-6).map(m => (m.role === 'user' ? '[user] ' : '[agent] ') + String(m.content).slice(0, 400)).join('\n') : '')) }
+      { role: 'user', content: 'TUJUAN: ' + t.goal + '\n\nRENCANA:\n' + plan.map((p, i) => (i + 1) + '. ' + p.title + (p.done ? ' (selesai)' : '')).join('\n') + '\n\nLANGKAH SEKARANG (' + (t.current_step + 1) + '/' + plan.length + '): ' + step.title + (step.detail ? '\n' + step.detail : '') + (transcript.length ? '\n\nKERJA SEBELUMNYA (ringkas):\n' + transcript.slice(-6).map(m => (m.role === 'user' ? '[user] ' : '[agent] ') + String(m.content).slice(0, 400)).join('\n') : '') }
     ];
     const r = await aiCall(env, msgs, orKey, gemKey);
     if (r.error) {
