@@ -12,6 +12,20 @@
     <link rel="apple-touch-icon" href="../../../assets/icons/apple-touch-icon.png">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://unpkg.com; img-src 'self' https: data: blob:; connect-src 'self' https: blob:;">
   <title>Editor Kode — Clincoo</title>
+
+  <style>/* fallback styling modal konfirmasi editor (tahan CDN gagal) */
+  #editor-exit-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.6); z-index: 999; padding: 1rem; }
+  #editor-exit-modal > div { background: #12151c; border: 1px solid rgba(255,255,255,.1); border-radius: 1rem; padding: 1.25rem; width: 100%; max-width: 320px; }
+  #editor-exit-modal h3 { color: #fff; font-weight: 600; font-size: 1rem; margin-bottom: .25rem; }
+  #editor-exit-modal p { font-size: .875rem; color: #9ca3af; margin-bottom: 1.25rem; }
+  #editor-exit-modal span { color: #e5e7eb; font-weight: 500; }
+  #editor-exit-modal button { cursor: pointer; font-size: .875rem; border-radius: .5rem; padding: .625rem .5rem; }
+  #editor-exit-modal #ee-save { background: #000; color: #fff; font-weight: 500; }
+  #editor-exit-modal #ee-discard { border: 1px solid rgba(255,255,255,.15); color: #d1d5db; background: transparent; }
+  #editor-exit-modal #ee-cancel { color: #6b7280; background: transparent; }
+  #editor-exit-modal .ee-btns { display: flex; flex-direction: column; gap: .5rem; }
+  </style>
+
     <meta name="description" content="Editor Kode — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#ffffff">
@@ -407,7 +421,7 @@
       ov.innerHTML = '<div class="bg-[#12151c] border border-white/10 rounded-2xl p-5 w-full max-w-[320px] shadow-2xl">'
         + '<h3 class="text-white font-semibold text-base mb-1">Simpan perubahan?</h3>'
         + '<p class="text-sm text-gray-400 mb-5">Ada perubahan pada <span class="font-medium text-gray-200"></span> yang belum disimpan.</p>'
-        + '<div class="flex flex-col gap-2">'
+        + '<div class="ee-btns flex flex-col gap-2">'
         + '<button id="ee-save" class="w-full bg-black text-white text-sm font-medium py-2.5 rounded-lg hover:bg-gray-800 transition-colors">Simpan &amp; Keluar</button>'
         + '<button id="ee-discard" class="w-full border border-white/15 text-gray-300 text-sm py-2.5 rounded-lg hover:bg-white/5 transition-colors">Keluar Tanpa Simpan</button>'
         + '<button id="ee-cancel" class="w-full text-gray-500 text-sm py-2 rounded-lg hover:text-gray-300 transition-colors">Batal</button>'
