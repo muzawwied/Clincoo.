@@ -218,7 +218,34 @@ const WORKSPACE_FUNCTION_DECLARATIONS = [
     parameters: { type: 'OBJECT', properties: { key: { type: 'STRING', description: 'Nama variable, contoh: "STRIPE_KEY".' }, value: { type: 'STRING', description: 'Nilai variable.' }, is_secret: { type: 'BOOLEAN', description: 'true jika sensitif (disembunyikan). Default false.' } }, required: ['key', 'value'] } },
   { name: 'list_env_vars',
     description: 'Lihat daftar environment variable milik proyek aktif (nilai secret ditampilkan tersembunyi).',
-    parameters: { type: 'OBJECT', properties: {} } }
+    parameters: { type: 'OBJECT', properties: {} } },
+  // ===== TOOLS BACKEND FUNCTION (dieksekusi otomatis di server) =====
+  { name: 'create_backend_function',
+    description: 'Buat backend function baru milik user (ala platform builder): tulis kode -> terpasang -> bisa dipanggil via URL /api/fn/<nama>. Kode adalah badan fungsi async dengan parameter `args` (objek), boleh pakai `fetch` dan `JSON`, WAJIB return nilai. Contoh kode: "const r = await fetch(args.url); return { ok: r.status === 200, status: r.status };". Gunakan saat user minta API endpoint, webhook, integrasi data, atau logika backend.',
+    parameters: { type: 'OBJECT', properties: {
+      name: { type: 'STRING', description: 'Nama function: huruf kecil/angka/garis tengah, 2-40 karakter, contoh: "cek-harga".' },
+      description: { type: 'STRING', description: 'Deskripsi singkat kegunaan function (bahasa Indonesia).' },
+      code: { type: 'STRING', description: 'Badan fungsi async JavaScript (bukan deklarasi function). Parameter `args` objek input. Wajib return nilai.' }
+    }, required: ['name', 'code'] } },
+  { name: 'list_backend_functions',
+    description: 'Lihat semua backend function milik user beserta URL pemanggilannya.',
+    parameters: { type: 'OBJECT', properties: {} } },
+  { name: 'delete_backend_function',
+    description: 'Hapus backend function milik user. Konfirmasi dulu ke user sebelum menghapus.',
+    parameters: { type: 'OBJECT', properties: { name: { type: 'STRING', description: 'Nama function yang dihapus.' } }, required: ['name'] } },
+  { name: 'call_backend_function',
+    description: 'Jalankan backend function milik user dengan args tertentu dan kembalikan hasilnya. Gunakan untuk menguji function yang baru dibuat.',
+    parameters: { type: 'OBJECT', properties: {
+      name: { type: 'STRING', description: 'Nama function.' },
+      args: { type: 'OBJECT', description: 'Objek argumen input untuk function, contoh: {"url": "https://contoh.com"}.' }
+    }, required: ['name'] } },
+  // ===== TOOLS BROWSER/SCREENSHOT (dieksekusi otomatis di server) =====
+  { name: 'take_screenshot',
+    description: 'Ambil screenshot halaman web dari sebuah URL dan kembalikan LINK gambar pratinjau yang bisa dibagikan ke user. Gunakan saat user minta screenshot/preview situs, baik situs user maupun situs lain.',
+    parameters: { type: 'OBJECT', properties: {
+      url: { type: 'STRING', description: 'URL lengkap halaman, contoh: "https://contoh.com".' },
+      width: { type: 'NUMBER', description: 'Lebar gambar 400-1600 px. Default 1200.' }
+    }, required: ['url'] } }
 ];
 
 async function fetchGemini(apiKey, model, systemInstruction, contents, tools) {
@@ -264,6 +291,28 @@ async function tryModels(apiKey, systemInstruction, contents, tools) {
 }
 
 // ===== OpenRouter: konversi format =====
+// ===== TOOLS SERVER-SIDE (backend function & screenshot) =====
+// Tool ini dieksekusi DI SERVER (bukan di browser user): hasil langsung
+// ditempel ke percakapan dan provider dipanggil lagi — user/frontend tidak berubah.
+const SERVER_TOOLS = new Set(['create_backend_function', 'list_backend_functions', 'delete_backend_function', 'call_backend_function', 'take_screenshot']);
+async function executeServerTool(env, user, tc) {
+  const a = tc.args || {};
+  try {
+    if (tc.name === 'take_screenshot') {
+      const m = await import('./screenshot.js');
+      return await m.takeScreenshot(a.url, a.width);
+    }
+    const m = await import('./fns.js');
+    if (tc.name === 'create_backend_function') return await m.createFunction(env.DB, user.key, a.name, a.description, a.code);
+    if (tc.name === 'list_backend_functions') return await m.listFunctions(env.DB, user.key);
+    if (tc.name === 'delete_backend_function') return await m.deleteFunction(env.DB, user.key, a.name);
+    if (tc.name === 'call_backend_function') return await m.invokeFunction(env.DB, user.key, a.name, a.args);
+    return { error: 'Tool server tidak dikenal: ' + tc.name };
+  } catch (e) {
+    return { error: 'Gagal mengeksekusi tool server: ' + (e && e.message) };
+  }
+}
+
 // Skema Gemini (OBJECT/STRING uppercase) -> JSON Schema OpenAI (lowercase)
 function orParam(schema) {
   const t = String((schema && schema.type) || '').toLowerCase();
@@ -672,13 +721,39 @@ export async function onRequestPost({ request, env }) {
     const hasImages = messages.some(m => Array.isArray(m?.content) && m.content.some(b => b && b.type === 'image_url' && b.image_url?.url));
 
     // PROVIDER UTAMA: OpenRouter. Gagal/limit/tanpa kunci -> cadangan Gemini.
+    // TOOLS SERVER (backend function & screenshot) dieksekusi di sini: hasil
+    // ditempel ke pesan lalu provider dipanggil lagi (max 4 hop server) —
+    // jalur klien (frontend) tidak berubah sama sekali.
     let r = null;
-    if (orKey && !hasImages) {
-      r = await tryOpenRouter(orKey, orMessages(messages), oTools);
-    }
-    if ((!r || r.error) && apiKey) {
-      const { systemInstruction, contents } = toGeminiPayload(messages);
-      r = await tryModels(apiKey, systemInstruction, contents, gTools);
+    const workMessages = messages; // array sama — kita append blok function_call/response
+    for (let sHop = 0; sHop <= 4; sHop++) {
+      r = null;
+      if (orKey && !hasImages) {
+        r = await tryOpenRouter(orKey, orMessages(workMessages), oTools);
+      }
+      if ((!r || r.error) && apiKey) {
+        const { systemInstruction, contents } = toGeminiPayload(workMessages);
+        r = await tryModels(apiKey, systemInstruction, contents, gTools);
+      }
+      if (!r || r.error) break; // error/kutipan ditangani di bawah seperti biasa
+      const stCalls = (r.tool_calls || []).filter(tc => SERVER_TOOLS.has(tc.name));
+      if (!stCalls.length) break; // jawaban final ATAU tools klien -> keluar, kirim ke klien
+      const clientCalls = (r.tool_calls || []).filter(tc => !SERVER_TOOLS.has(tc.name));
+      const results = [];
+      for (const tc of stCalls) results.push(await executeServerTool(env, user, tc));
+      // catat pemanggilan & hasil ke percakapan (format blok sama seperti klien)
+      workMessages.push({ role: 'assistant', content: (r.tool_calls || []).map(tc => ({ type: 'function_call', name: tc.name, args: tc.args || {}, thought_signature: tc.thought_signature || undefined })) });
+      workMessages.push({ role: 'user', content: stCalls.map((tc, i) => ({ type: 'function_response', name: tc.name, result: results[i] })) });
+      if (clientCalls.length) {
+        // campuran: tool server sudah selesai (result terisi supaya klien tak
+        // mengeksekusinya lagi), tool klien tetap dieksekusi klien seperti biasa.
+        r.tool_calls = r.tool_calls.map(tc => {
+          const i = stCalls.indexOf(tc);
+          return i !== -1 ? Object.assign({}, tc, { result: results[i] }) : tc;
+        });
+        break;
+      }
+      // semua tool server -> minta giliran model berikutnya (lanjut loop)
     }
     if (!r || (r.error && !apiKey)) {
       if (!r) r = { error: 'Tidak ada provider AI tersedia' };
