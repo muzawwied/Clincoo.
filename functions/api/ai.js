@@ -116,7 +116,11 @@ function normalizeMessages(messages) {
 }
 
 // ===== Provider 1: Workers AI (binding "AI") =====
-const WORKERS_AI_MODELS = ['@cf/meta/llama-3.3-70b-instruct-fp8-fast', '@cf/meta/llama-3.1-8b-instruct'];
+// Rantai model 2026 (NON-Llama, agentic + jago kode + paham bahasa manusia):
+//   glm-5.2      : flagship agentic coding (Z.ai) — reasoning, function calling, ctx 262K
+//   deepseek-v4  : agentic cepat, reasoning, ctx 1.3M token
+//   glm-4.7-flash: cepat & multilingual (100+ bahasa — ramah Bahasa Indonesia)
+const WORKERS_AI_MODELS = ['@cf/zai-org/glm-5.2', '@cf/deepseek-ai/deepseek-v4-flash-0731', '@cf/zai-org/glm-4.7-flash'];
 
 async function tryWorkersAI(env, messages, stream) {
   if (!env.AI) return { error: 'Workers AI binding tidak tersedia' };
@@ -133,7 +137,8 @@ async function tryWorkersAI(env, messages, stream) {
       if (stream && result && typeof result.pipeThrough === 'function') {
         return { stream: result, model };
       }
-      const text = (result && (result.response || (typeof result === 'string' ? result : ''))) || '';
+      const raw = (result && (result.response || (typeof result === 'string' ? result : ''))) || '';
+      const text = raw || ((result && Array.isArray(result.choices) && result.choices[0] && result.choices[0].message && result.choices[0].message.content) || '');
       if (text) return { text, model };
       lastErr = `Model ${model}: respons kosong`;
     } catch (e) {
