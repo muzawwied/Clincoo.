@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<title>Debug DNS — Clincoo</title>
+</head>
+<body style="font-family: monospace; background:#000; color:#0f0; padding:16px; word-break: break-all;">
+<pre id="out">memulai...</pre>
+<script src="../js/auth-client.js?v=2"></script>
+<script>
+(async function () {
+  const out = [];
+  const log = (k, v) => { try { out.push(k + ': ' + (typeof v === 'string' ? v : JSON.stringify(v))); } catch (e) { out.push(k + ': <unserializable>'); } };
+  try {
+    const pid = localStorage.getItem('clincoo_current_project_id') || '';
+    log('pid', pid || '(KOSONG)');
+    const tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+    log('token_len', tok.length);
+    let keys = [];
+    for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+    log('ls_keys', keys);
+    log('onOrigin', location.origin);
+
+    const base = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+
+    // fast=1 persis seperti domain-kustom
+    const t0 = performance.now();
+    try {
+      const ctl = new AbortController();
+      const tm = setTimeout(() => ctl.abort(), 8000);
+      const res = await fetch(base + '/deploy?project_id=' + encodeURIComponent(pid) + '&fast=1', { headers: tok ? { Authorization: 'Bearer ' + tok } : {}, signal: ctl.signal }).finally(() => clearTimeout(tm));
+      const txt = await res.text();
+      log('fast_status', res.status);
+      log('fast_body', txt.slice(0, 400));
+    } catch (e) { log('fast_error', (e && e.name) + ': ' + (e && e.message)); }
+    log('fast_ms', Math.round(performance.now() - t0));
+
+    // full persis seperti loadRealDomainStatus
+    const t1 = performance.now();
+    try {
+      const ctl2 = new AbortController();
+      const tm2 = setTimeout(() => ctl2.abort(), 8000);
+      const res2 = await fetch(base + '/deploy?project_id=' + encodeURIComponent(pid), { headers: tok ? { Authorization: 'Bearer ' + tok } : {}, signal: ctl2.signal }).finally(() => clearTimeout(tm2));
+      const txt2 = await res2.text();
+      log('full_status', res2.status);
+      log('full_body', txt2.slice(0, 600));
+    } catch (e) { log('full_error', (e && e.name) + ': ' + (e && e.message)); }
+    log('full_ms', Math.round(performance.now() - t1));
+
+    log('sw', (navigator.serviceWorker && navigator.serviceWorker.controller) ? 'AKTIF mengendalikan halaman ini' : 'tidak mengendalikan');
+  } catch (e) {
+    log('fatal', (e && e.message));
+  }
+  document.getElementById('out').textContent = out.join('\n');
+})();
+</script>
+</body>
+</html>
