@@ -80,23 +80,56 @@
         }
         body.dark-mode #site-footer a:hover { color: #ffffff !important; }
         /* Wordmark 3D nempel di dalem gambar */
+        /* Panggung footer: wordmark besar DI BELAKANG (dgn refleksi kaya air),
+           teks navigasi + copyright abu-abu DI DEPAN, menimpa wordmark. Murni CSS (ringan, tanpa library 3D). */
+        #site-footer .footer-stage {
+            position: relative;
+            display: grid;
+            place-items: center;
+            padding: 10px 0 30px;
+            min-height: 92px;
+        }
+        #site-footer .footer-stage > * { grid-area: 1 / 1; }
         #site-footer .footer-wordmark {
+            position: relative;
+            z-index: 1;
             display: inline-block;
             font-weight: 800;
-            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-size: clamp(2.2rem, 7vw, 3.5rem);
             line-height: 1;
             letter-spacing: -0.03em;
             color: #ffffff;
-            text-shadow: 0 1px 0 #d1d5db, 0 2px 0 #9ca3af, 0 3px 0 #6b7280, 0 4px 0 #4b5563, 0 6px 12px rgba(0,0,0,0.35);
-            transform: perspective(420px) rotateX(14deg);
-            transform-origin: center bottom;
+            opacity: 0.94;
+            text-shadow: 0 3px 14px rgba(0,0,0,0.28);
+        }
+        /* Refleksi kaya di air: mirror teks, pudar ke bawah */
+        #site-footer .footer-wordmark::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 100%;
+            width: 100%;
+            transform: scaleY(-1);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.32), transparent 75%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,0.32), transparent 75%);
         }
         body.dark-mode #site-footer .footer-wordmark {
-            text-shadow: 0 1px 0 #6b7280, 0 2px 0 #4b5563, 0 3px 0 #374151, 0 4px 0 #1f2937, 0 6px 14px rgba(0,0,0,0.6);
+            color: #f3f4f6;
+            opacity: 0.92;
+            text-shadow: 0 3px 16px rgba(0,0,0,0.55);
         }
-        /* Teks kecil di dalem gambar tetap kebaca */
-        #site-footer .footer-sub { text-shadow: 0 1px 3px rgba(255,255,255,0.75); }
-        body.dark-mode #site-footer .footer-sub { text-shadow: 0 1px 3px rgba(0,0,0,0.75); }
+        /* Teks abu-abu di depan: tetap kebaca & terlihat menimpa wordmark */
+        #site-footer .footer-front {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        #site-footer .footer-front .footer-sub,
+        #site-footer .footer-front a,
+        #site-footer .footer-front span { text-shadow: 0 1px 4px rgba(0,0,0,0.45), 0 1px 1px rgba(255,255,255,0.25); }
         .page-view { position: relative; z-index: 1; }
         :root {
             --accent-color: #000000;
@@ -583,17 +616,19 @@
 
     <!-- ===== Footer halaman utama ===== -->
     <footer id="site-footer" class="w-full mt-2">
-        <div class="max-w-3xl mx-auto px-5 pt-6 pb-4 flex flex-col items-center text-center gap-1.5">
-            <span class="footer-wordmark">Clincoo</span>
-            <p class="footer-sub text-[12px] text-gray-700">Publikasikan situs anda bersama Clincoo.</p>
-            <div class="footer-sub flex items-center justify-center gap-2 text-[12px] flex-wrap">
-                <a href="akun/tentang/" class="text-gray-600 hover:text-black transition-colors">Tentang</a>
-                <span class="text-gray-400">|</span>
-                <a href="#" class="text-gray-600 hover:text-black transition-colors">Ketentuan</a>
-                <span class="text-gray-400">|</span>
-                <a href="#" class="text-gray-600 hover:text-black transition-colors">Privasi</a>
-                <span class="text-gray-400">&middot;</span>
-                <span class="text-gray-600">&copy; 2026 Clincoo. Semua hak dilindungi.</span>
+        <div class="max-w-3xl mx-auto px-5 text-center">
+            <div class="footer-stage">
+                <span class="footer-wordmark" data-text="Clincoo">Clincoo</span>
+                <div class="footer-front">
+                    <div class="flex items-center justify-center gap-2 text-[12px] flex-wrap text-gray-600 dark:text-gray-300">
+                        <a href="akun/tentang/" class="hover:text-black dark:hover:text-white transition-colors">Tentang</a>
+                        <span class="text-gray-400 dark:text-gray-500">|</span>
+                        <a href="#" class="hover:text-black dark:hover:text-white transition-colors">Ketentuan</a>
+                        <span class="text-gray-400 dark:text-gray-500">|</span>
+                        <a href="#" class="hover:text-black dark:hover:text-white transition-colors">Privasi</a>
+                    </div>
+                    <span class="footer-sub text-[11px] text-gray-600 dark:text-gray-300">&copy; 2026 Clincoo. Semua hak dilindungi.</span>
+                </div>
             </div>
         </div>
     </footer>
