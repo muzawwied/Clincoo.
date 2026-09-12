@@ -104,6 +104,7 @@
     body.dark-mode .text-gray-400 { color: #666666; }
     body.dark-mode .text-black { color: #ffffff; }
     body.dark-mode .bg-white { background-color: #0a0a0a !important; }
+    body.dark-mode #syncgh-toggle-knob.bg-white { background-color: #ffffff !important; }
 
         body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
         body.dark-mode #sidebar-toggle,
@@ -1670,7 +1671,7 @@
       var dot = document.getElementById('syncgh-dot');
       if (!dot) return;
       if (!state.on) { dot.className = 'w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0'; return; }
-      dot.className = 'w-1.5 h-1.5 rounded-full flex-shrink-0 ' + (ok === false ? 'bg-red-500' : 'bg-green-500');
+      dot.className = 'w-1.5 h-1.5 rounded-full flex-shrink-0 ' + (ok === false ? 'bg-red-500' : 'bg-blue-500');
     }
     function syncghRefresh() {
       var st = syncghState();
@@ -1733,7 +1734,7 @@
           syncghRefresh();
           addNotification('GitHub', 'Sync GitHub aktif — file workspace akan tersinkron ke ' + st.repo + '.');
           var dot = document.getElementById('syncgh-dot');
-          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full flex-shrink-0 bg-green-500 animate-pulse';
+          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full flex-shrink-0 bg-blue-500 animate-pulse';
           WSGitHubSync.syncNow().then(function (r) {
             if (r && r.error) addNotification('GitHub', 'Sync GitHub gagal: ' + r.error);
             syncghPaintDot(syncghState(), r ? r.ok : false);
