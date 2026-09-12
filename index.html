@@ -365,11 +365,37 @@
                     </div>
                     <input type="file" id="real-file-input" class="hidden" multiple>
                 </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                <div class="relative shrink-0">
+                    <button id="team-mode-capsule" type="button" class="flex items-center gap-1.5 h-10 pl-3 pr-2.5 rounded-full border border-gray-200 text-[13px] font-medium text-gray-600 hover:border-gray-400 hover:text-gray-900 transition-colors cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <span id="team-mode-label">Biasa</span>
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="team-mode-menu" class="absolute bottom-full right-0 mb-2 w-60 bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-xl p-1.5 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50 origin-bottom-right">
+                        <button type="button" data-team-mode="kolaborasi" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
+                            <span class="text-sm font-semibold flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                Kolaborasi
+                                <span id="collab-pro-badge" class="hidden ml-auto text-[10px] font-bold tracking-wide bg-gray-900 text-white rounded-md px-1.5 py-0.5">PRO</span>
+                            </span>
+                            <span class="text-xs text-gray-500 mt-0.5">Tim AI berdiskusi &amp; membangun web (5 kuota/pesan)</span>
+                        </button>
+                        <button type="button" data-team-mode="biasa" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
+                            <span class="text-sm font-semibold flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0zM7 21v-2.13A8.966 8.966 0 0112 21a8.966 8.966 0 004.494-1.13A8.966 8.966 0 0012 21a8.966 8.966 0 01-5-1.13V21z"></path></svg>
+                                Biasa
+                            </span>
+                            <span class="text-xs text-gray-500 mt-0.5">Chat dengan satu AI (1 kuota/pesan)</span>
+                        </button>
+                    </div>
+                </div>
                 <button id="submit-prompt-btn" class="w-10 h-10 bg-accent text-white rounded-full hover:bg-accent-hover transition-all duration-200 active:scale-90 flex items-center justify-center cursor-pointer shadow-sm hover:shadow-md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
                     </svg>
                 </button>
+                </div>
             </div>
         </div>
         <div class="w-full mt-6">
@@ -1059,6 +1085,112 @@
                 window.scrollTo(0, 0);
             }
         }
+        // ===== MODE TIM AI: kapsul dropdown di samping tombol kirim (sama seperti di halaman chat) =====
+        // Pilihan tersimpan di localStorage 'clincoo_team_mode' dan otomatis dipakai halaman chat saat pindah.
+        const TM_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+        let teamModeOn = false;
+        try { teamModeOn = localStorage.getItem('clincoo_team_mode') === '1'; } catch (e) {}
+        const teamCapsule = document.getElementById('team-mode-capsule');
+        const teamMenu = document.getElementById('team-mode-menu');
+        const teamLabel = document.getElementById('team-mode-label');
+        function applyTeamModeStyle() {
+            if (!teamCapsule || !teamLabel) return;
+            teamLabel.textContent = teamModeOn ? 'Kolaborasi' : 'Biasa';
+            if (teamModeOn) {
+                teamCapsule.classList.add('bg-gray-900', 'border-gray-900', 'text-white');
+                teamCapsule.classList.remove('border-gray-200', 'text-gray-600');
+            } else {
+                teamCapsule.classList.remove('bg-gray-900', 'border-gray-900', 'text-white');
+                teamCapsule.classList.add('border-gray-200', 'text-gray-600');
+            }
+            document.querySelectorAll('.team-mode-option').forEach(function (btn) {
+                const active = (btn.getAttribute('data-team-mode') === 'kolaborasi') === teamModeOn;
+                btn.classList.toggle('bg-gray-100', active);
+            });
+        }
+        function toggleTeamMenu(show) {
+            if (!teamMenu) return;
+            if (show) {
+                teamMenu.classList.remove('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
+                teamMenu.classList.add('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+            } else {
+                teamMenu.classList.add('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
+                teamMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+            }
+        }
+        // Kolaborasi = fitur Paket Pro
+        const TM_SUB_CACHE_KEY = 'clincoo_subscription_cache';
+        function tmReadSubCache() { try { return JSON.parse(localStorage.getItem(TM_SUB_CACHE_KEY) || 'null') || null; } catch (e) { return null; } }
+        function tmIsPlanPro() { var c = tmReadSubCache(); return !!(c && c.plan && c.plan !== 'Starter'); }
+        function tmRefreshCollabBadge() {
+            var b = document.getElementById('collab-pro-badge');
+            if (b) b.classList.toggle('hidden', tmIsPlanPro());
+        }
+        function tmUpgradeUrlPro() {
+            var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+            return base + '/akun/langganan/upgrade/konfirmasi/?plan=Pro&billing=Bulanan';
+        }
+        function tmShowProLockPopup() {
+            if (document.getElementById('collab-pro-lock')) return;
+            var ov = document.createElement('div');
+            ov.id = 'collab-pro-lock';
+            ov.className = 'fixed inset-0 z-[90] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4';
+            ov.innerHTML = '<div class="bg-white border border-gray-100 rounded-2xl shadow-xl w-full max-w-xs p-5 relative">'
+                + '<button type="button" id="collab-pro-lock-x" class="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-gray-900 rounded-lg transition-colors" title="Tutup"><i data-lucide="x" class="w-4 h-4"></i></button>'
+                + '<div class="w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center mb-3"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div>'
+                + '<h3 class="text-base font-bold text-gray-900">Kolaborasi khusus Paket Pro</h3>'
+                + '<p class="text-sm text-gray-500 mt-1 leading-relaxed">Mode tim AI multi-model hanya untuk Paket Pro. Upgrade untuk mengaktifkan diskusi tim &amp; membangun web bareng (5 kuota/pesan).</p>'
+                + '<a href="' + tmUpgradeUrlPro() + '" class="block w-full text-center mt-4 bg-gray-900 text-white rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity">Upgrade ke Pro</a>'
+                + '</div>';
+            document.body.appendChild(ov);
+            try { lucide.createIcons(); } catch (e) {}
+            var x = document.getElementById('collab-pro-lock-x');
+            if (x) x.addEventListener('click', function () { ov.remove(); });
+            ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.remove(); });
+        }
+        async function tmRevalidatePlan() {
+            try {
+                var tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+                var res = await fetch(TM_API_BASE + '/api/subscription', { cache: 'no-store', headers: tok ? { Authorization: 'Bearer ' + tok } : {} });
+                if (!res.ok) return;
+                var d = await res.json();
+                if (d && d.plan) {
+                    try { localStorage.setItem(TM_SUB_CACHE_KEY, JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
+                    tmRefreshCollabBadge();
+                    if (tmIsPlanPro()) {
+                        var lk = document.getElementById('collab-pro-lock');
+                        if (lk) lk.remove();
+                    }
+                }
+            } catch (e) {}
+        }
+        if (teamCapsule) {
+            applyTeamModeStyle();
+            tmRefreshCollabBadge();
+            tmRevalidatePlan();
+            teamCapsule.addEventListener('click', function (e) {
+                e.stopPropagation();
+                toggleTeamMenu(teamMenu.classList.contains('invisible'));
+            });
+            document.querySelectorAll('.team-mode-option').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var want = btn.getAttribute('data-team-mode') === 'kolaborasi';
+                    if (want && !tmIsPlanPro()) {
+                        toggleTeamMenu(false);
+                        tmShowProLockPopup();
+                        tmRevalidatePlan();
+                        return;
+                    }
+                    teamModeOn = want;
+                    try { localStorage.setItem('clincoo_team_mode', teamModeOn ? '1' : '0'); } catch (err) {}
+                    applyTeamModeStyle();
+                    toggleTeamMenu(false);
+                });
+            });
+            document.addEventListener('click', function () { toggleTeamMenu(false); });
+        }
+
         const submitPromptBtn = document.getElementById('submit-prompt-btn');
         const mainPromptInput = document.getElementById('main-prompt-input');
         function processPromptSubmission(customTitle) {
