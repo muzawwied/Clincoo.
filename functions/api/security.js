@@ -1,5 +1,7 @@
 import { getProjectTables } from './_tables.js';
-import { guardProject } from './user-scope.js';
+import { guardProject, currentUser } from './user-scope.js';
+import { ADMIN_EMAILS, getEffectivePlanByUserKey } from './plan-helpers.js';
+import { userKeyPrefix } from './plan-gate.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -96,6 +98,12 @@ export async function onRequestPost({ request, env }) {
       if (k === 'site_password' || k === 'password') {
         const rawPass = String(v || '').trim();
         if (rawPass) {
+          const _u = await currentUser(env, request);
+          const _allowed = ADMIN_EMAILS.has((_u && _u.email) || '') ||
+            (await getEffectivePlanByUserKey(env.DB, userKeyPrefix(_u))).plan === 'Bisnis';
+          if (!_allowed) {
+            return new Response(JSON.stringify({ error: 'Fitur Dilindungi Password hanya tersedia untuk Paket Bisnis. Upgrade paket untuk menggunakannya.', need_upgrade: 'Bisnis' }), { status: 402, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
           const hashHex = await hashSitePassword(rawPass, projectId);
           await saveSettingRecord(env.DB, tableName, projectId, 'site_password_hash', hashHex);
           await saveSettingRecord(env.DB, tableName, projectId, 'site_password_active', '1');
@@ -107,6 +115,14 @@ export async function onRequestPost({ request, env }) {
 
       if (k === 'visibility_mode' || k === 'visibility') {
         const mode = String(v || '').toLowerCase();
+        if (mode === 'password') {
+          const _u = await currentUser(env, request);
+          const _allowed = ADMIN_EMAILS.has((_u && _u.email) || '') ||
+            (await getEffectivePlanByUserKey(env.DB, userKeyPrefix(_u))).plan === 'Bisnis';
+          if (!_allowed) {
+            return new Response(JSON.stringify({ error: 'Fitur Dilindungi Password hanya tersedia untuk Paket Bisnis. Upgrade paket untuk menggunakannya.', need_upgrade: 'Bisnis' }), { status: 402, headers: { 'Content-Type': 'application/json', ...CORS } });
+          }
+        }
         await saveSettingRecord(env.DB, tableName, projectId, 'visibility_mode', mode);
         await saveSettingRecord(env.DB, tableName, projectId, 'visibility', mode);
         if (mode === 'password') {

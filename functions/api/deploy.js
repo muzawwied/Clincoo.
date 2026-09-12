@@ -6,7 +6,7 @@
 
 import { getProjectTables } from './_tables.js';
 import { guardProject, currentUser } from './user-scope.js';
-import { getEffectivePlan, getMonthlyDeployCount, bumpMonthlyDeployCount } from './plan-helpers.js';
+import { getEffectivePlan, getMonthlyDeployCount, bumpMonthlyDeployCount, ADMIN_EMAILS } from './plan-helpers.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -379,7 +379,7 @@ export async function onRequestPost({ request, env }) {
       return json({ success: true, action: body.action, domain });
     }
 
-    // Kuota deploy per paket langganan (Starter 2x/bln, Pro 25x/bln, Bisnis tanpa batas)
+    // Kuota deploy per paket langganan (Starter 5x/bln, Pro 25x/bln, Bisnis tanpa batas)
     const user = await currentUser(env, request);
     const planInfo = await getEffectivePlan(db, user);
     if (planInfo.limits.deployLimit !== null && planInfo.limits.deployLimit !== undefined) {
@@ -403,6 +403,12 @@ export async function onRequestPost({ request, env }) {
       vis = visRaw ? JSON.parse(visRaw) : null;
     } catch (e) { vis = null; }
 
+    const visGateAllowed = ADMIN_EMAILS.has((user && user.email) || '') || planInfo.plan === 'Bisnis';
+    if (!visGateAllowed && vis && vis.mode === 'password') {
+      // Enforcement paket: gerbang password = fitur Paket Bisnis — deploy tetap jalan tanpa gerbang
+      vis = null;
+      try { await setPhase(db, T.projectSettings, projectId, ''); } catch (e) {}
+    }
     if (vis && vis.mode === 'password' && /^[a-f0-9]{64}$/.test(String(vis.pass_hash || ''))) {
       const workerJs = [
         'const GATE_TOKEN = "' + vis.pass_hash + '";',

@@ -6,10 +6,43 @@
 
 export const PLAN_LIMITS = {
   // deployLimit = deploy web per bulan per akun; null = tanpa batas
-  Starter: { projectLimit: 3, collaboratorLimit: 1, deployLimit: 2 },
+  Starter: { projectLimit: 3, collaboratorLimit: 1, deployLimit: 5 },
   Pro: { projectLimit: 10, collaboratorLimit: 5, deployLimit: 25 },
   Bisnis: { projectLimit: 50, collaboratorLimit: 20, deployLimit: null }
 };
+
+// Kuota chat AI per hari per paket (benar-benar diterapkan di /api/chat).
+export const PLAN_AI_LIMITS = { Starter: 25, Pro: 100, Bisnis: 300 };
+
+// Email admin: bypass semua gate paket (kebijakan internal).
+export const ADMIN_EMAILS = new Set(['devconium@gmail.com', 'muzawwied@gmail.com']);
+
+// Rencana efektif dari key user ('u<id>') — dipakai lintas endpoint tanpa bentuk objek user penuh.
+export async function getEffectivePlanByUserKey(db, userKey) {
+  const fallback = { plan: 'Starter', limits: PLAN_LIMITS.Starter, expiredFrom: null };
+  try {
+    if (!db || !userKey) return fallback;
+    const pfx = String(userKey).replace(/:$/, '') + ':';
+    const rows = await db.prepare(
+      'SELECT key, value FROM subscription WHERE key IN (?, ?, ?)'
+    ).bind(pfx + 'plan', pfx + 'start_date', pfx + 'billing_cycle').all();
+    const m = {};
+    for (const r of rows.results || []) m[r.key.slice(pfx.length)] = r.value;
+    let plan = (m.plan && PLAN_LIMITS[m.plan]) ? m.plan : 'Starter';
+    let expiredFrom = null;
+    if (plan !== 'Starter') {
+      const start = m.start_date ? new Date(String(m.start_date).replace(' ', 'T')) : null;
+      const days = (m.billing_cycle === 'Tahunan') ? 365 : 30;
+      if (start && !isNaN(start.getTime()) && (Date.now() - start.getTime()) > days * 86400000) {
+        expiredFrom = plan;
+        plan = 'Starter';
+      }
+    }
+    return { plan, limits: PLAN_LIMITS[plan], expiredFrom };
+  } catch (e) {
+    return fallback;
+  }
+}
 
 // Kuota deploy bulanan disimpan di tabel `subscription` (key per-akun per-bulan)
 export async function getMonthlyDeployCount(db, userId) {

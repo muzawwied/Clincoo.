@@ -200,6 +200,38 @@ var ClincooTemplates = (function () {
     showToast('Terima kasih, laporanmu sudah kami terima.');
   }
 
+  // ---------- Template premium (hanya Paket Pro & Bisnis) ----------
+  var PRO_TEMPLATES = ['properti', 'saas'];
+
+  function planFromCache() {
+    try { return (JSON.parse(localStorage.getItem('clincoo_subscription_cache') || 'null') || {}).plan || 'Starter'; }
+    catch (e) { return 'Starter'; }
+  }
+  function isProPlan() { var p = planFromCache(); return p === 'Pro' || p === 'Bisnis'; }
+
+  function upgradeUrlPro() {
+    var base = location.origin + (location.hostname.indexOf('github.io') !== -1 ? '/Clincoo.' : '');
+    return base + '/akun/langganan/upgrade/konfirmasi/?plan=Pro&billing=Bulanan';
+  }
+
+  function showProLockTemplate(name) {
+    var old = document.getElementById('clincoo-tmpl-prolock');
+    if (old) old.remove();
+    var ov = document.createElement('div');
+    ov.id = 'clincoo-tmpl-prolock';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;font-family:system-ui,-apple-system,sans-serif;';
+    ov.innerHTML = '<div style="background:#fff;border-radius:18px;padding:28px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);">'
+      + '<div style="font-size:30px;margin-bottom:8px;">\u1F512</div>'
+      + '<h3 style="margin:0 0 6px;font-size:17px;font-weight:700;color:#111;">Template Premium</h3>'
+      + '<p style="margin:0 0 18px;font-size:13px;color:#555;line-height:1.5;">Template \u201C' + name + '\u201D hanya tersedia untuk Paket Pro dan Bisnis. Upgrade untuk membuka semua template premium.</p>'
+      + '<a href="' + upgradeUrlPro() + '" style="display:block;background:#111;color:#fff;border-radius:12px;padding:11px;font-size:14px;font-weight:600;text-decoration:none;">Upgrade ke Pro</a>'
+      + '<button type="button" id="clincoo-tmpl-prolock-x" style="margin-top:10px;background:none;border:0;font-size:13px;color:#777;cursor:pointer;padding:8px;">Nanti saja</button>'
+      + '</div>';
+    document.body.appendChild(ov);
+    document.getElementById('clincoo-tmpl-prolock-x').onclick = function () { ov.remove(); };
+    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+  }
+
   // ---------- GUNAKAN TEMPLATE: pasang file web jadi langsung ----------
   function use(key, event) {
     if (event) { event.preventDefault(); event.stopPropagation(); }
@@ -207,6 +239,10 @@ var ClincooTemplates = (function () {
     var t = list[key];
     var site = files[key];
     if (!t || !site) return;
+    if (PRO_TEMPLATES.indexOf(key) !== -1 && !isProPlan()) {
+      showProLockTemplate(t.name);
+      return;
+    }
 
     var pid = 'proj_' + Date.now();
     var newProject = { id: pid, title: t.name, prompt: t.desc, template: key, updatedAt: new Date().toISOString() };
@@ -322,6 +358,8 @@ var ClincooTemplates = (function () {
     unfavorite: unfavorite,
     report: report,
     use: use,
+    isProTemplate: function (key) { return PRO_TEMPLATES.indexOf(key) !== -1; },
+    isProPlan: isProPlan,
     preview: preview,
     showToast: showToast
   };

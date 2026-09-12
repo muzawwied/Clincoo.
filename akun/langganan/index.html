@@ -317,7 +317,7 @@
 
         const price = d.price || 0;
         const bulanan = price > 0 ? 'Bulanan - ' + fmtID(price) + '/bulan' : 'Bulanan - Gratis';
-        const tahunan = price > 0 ? 'Tahunan - ' + fmtID(price * 12) + '/tahun' : 'Tahunan - Gratis';
+        const tahunan = price > 0 ? 'Tahunan - ' + fmtID(price * 10) + '/tahun (hemat 2 bulan)' : 'Tahunan - Gratis';
         const opts = document.getElementById('billing-options');
         if(opts){
             opts.innerHTML =

@@ -11,6 +11,7 @@
 // dalam satu request — Gemini API menolak kombinasi itu (HTTP 400), dan itulah
 // akar bug "AI pura-pura membuat file". Mode tools = functionDeclarations saja.
 
+import { PLAN_AI_LIMITS, ADMIN_EMAILS, getEffectivePlanByUserKey } from './plan-helpers.js';
 import { initTables as initAuthTables, getUserByToken, getToken } from './auth/shared.js';
 
 const CORS = {
@@ -55,9 +56,31 @@ const OPENROUTER_MODELS = [
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const QUOTA_MSG = 'Kuota AI Clincoo hari ini sudah habis. Kuota reset otomatis setiap hari — silakan coba lagi besok.';
 
-const ADMIN_EMAILS = new Set(['devconium@gmail.com', 'muzawwied@gmail.com']);
-const DAILY_LIMIT = 25;
+const DAILY_LIMIT = 25; // fallback (Starter) — limit asli per paket: PLAN_AI_LIMITS
 const ADMIN_DAILY_LIMIT = 500;
+
+// Limit kuota AI harian sesuai paket langganan akun (Starter 25 / Pro 100 / Bisnis 300).
+// Admin selalu minimal ADMIN_DAILY_LIMIT.
+async function dailyAiLimit(env, user) {
+  try {
+    const eff = await getEffectivePlanByUserKey(env.DB, user.key);
+    const byPlan = (PLAN_AI_LIMITS[eff.plan] || DAILY_LIMIT);
+    return ADMIN_EMAILS.has(user.email) ? Math.max(ADMIN_DAILY_LIMIT, byPlan) : byPlan;
+  } catch (e) {
+    return ADMIN_EMAILS.has(user.email) ? ADMIN_DAILY_LIMIT : DAILY_LIMIT;
+  }
+}
+
+// Mode Tim AI hanya untuk Pro & Bisnis — diterapkan di server, bukan cuma popup UI.
+async function teamModeAllowed(env, user) {
+  if (ADMIN_EMAILS.has(user.email)) return true;
+  try {
+    const eff = await getEffectivePlanByUserKey(env.DB, user.key);
+    return eff.plan === 'Pro' || eff.plan === 'Bisnis';
+  } catch (e) {
+    return false;
+  }
+}
 
 async function getApiKey(env) {
   if (env.GEMINI_API_KEY) return env.GEMINI_API_KEY;
@@ -90,7 +113,7 @@ async function resolveUser(env, request) {
 
 async function quotaCheck(env, user, cost = 1) {
   const isAdmin = ADMIN_EMAILS.has(user.email);
-  const limit = isAdmin ? ADMIN_DAILY_LIMIT : DAILY_LIMIT;
+  const limit = await dailyAiLimit(env, user);
   const day = new Date().toISOString().slice(0, 10);
   try {
     await env.DB.prepare(
@@ -507,8 +530,7 @@ export async function onRequestGet({ request, env }) {
         status: 401, headers: { 'Content-Type': 'application/json', ...CORS }
       });
     }
-    const isAdmin = ADMIN_EMAILS.has(user.email);
-    const limit = isAdmin ? ADMIN_DAILY_LIMIT : DAILY_LIMIT;
+    const limit = await dailyAiLimit(env, user);
     const day = new Date().toISOString().slice(0, 10);
     let used = 0;
     try {
@@ -576,6 +598,16 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify({ error: 'Pesan kosong' }), {
         status: 400, headers: { 'Content-Type': 'application/json', ...CORS }
       });
+    }
+
+    // --- Mode Tim AI: wajib paket Pro/Bisnis (enforcement server, bukan cuma UI) ---
+    if (body.team === true) {
+      const allowed = await teamModeAllowed(env, user);
+      if (!allowed) {
+        return new Response(JSON.stringify({ need_pro: true, error: 'Mode Tim AI hanya tersedia untuk Paket Pro dan Bisnis. Upgrade paketmu untuk mengaktifkannya.' }), {
+          status: 402, headers: { 'Content-Type': 'application/json', ...CORS }
+        });
+      }
     }
 
     // --- Kuota: hanya pesan asli (hop 0). Hop tool lanjutan tidak dihitung ---

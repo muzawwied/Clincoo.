@@ -218,7 +218,11 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Periode pembayaran langganan</p>
           </div>
           <div class="w-full sm:w-80">
-            <span id="order-billing" class="clincoo-shimmer text-sm text-gray-600 dark:text-gray-400">-</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" data-billing="Bulanan" onclick="setBilling('Bulanan')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-gray-700 transition-colors">Bulanan</button>
+              <button type="button" data-billing="Tahunan" onclick="setBilling('Tahunan')" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-gray-700 transition-colors">Tahunan · hemat 2 bulan</button>
+              <span id="order-billing" class="hidden">-</span>
+            </div>
           </div>
         </div>
 
@@ -301,9 +305,30 @@
 
     const params = new URLSearchParams(window.location.search);
     const PLAN = params.get('plan') || 'Starter';
-    const BILLING = params.get('billing') === 'Tahunan' ? 'Tahunan' : 'Bulanan';
+    let BILLING = params.get('billing') === 'Tahunan' ? 'Tahunan' : 'Bulanan';
+    function setBilling(cycle){
+      BILLING = (cycle === 'Tahunan') ? 'Tahunan' : 'Bulanan';
+      renderOrder();
+    }
+    function renderOrder(){
+      totalPrice = BILLING === 'Tahunan' ? PRICES[PLAN] * 10 : PRICES[PLAN];
+      setVal('order-billing', BILLING);
+      setVal('order-total', totalPrice === 0 ? 'Gratis' : fmtID(totalPrice));
+      const bal = (typeof lastBalance === 'number') ? lastBalance : null;
+      if (bal !== null) {
+        setVal('wallet-after', totalPrice === 0 ? fmtID(bal) : fmtID(bal - totalPrice));
+      }
+      document.querySelectorAll('[data-billing]').forEach(function(b){
+        const on = b.getAttribute('data-billing') === BILLING;
+        b.classList.toggle('bg-gray-900', on);
+        b.classList.toggle('text-white', on);
+        b.classList.toggle('dark:bg-white', on);
+        b.classList.toggle('dark:text-gray-900', on);
+      });
+    }
 
     let totalPrice = 0;
+    let lastBalance = null;
     let alreadyActive = false;
     let slideEnabled = false;
     let slideCompleted = false;
@@ -347,7 +372,7 @@
         fallbackBtn.classList.add('opacity-60','cursor-not-allowed');
         return;
       }
-      totalPrice = BILLING === 'Tahunan' ? PRICES[PLAN] * 12 : PRICES[PLAN];
+      lastBalance = 0;
 
       let sub = null, wallet = null;
       try { const r = await fetch(SUB_API); sub = await r.json(); } catch(e) {}
@@ -356,13 +381,12 @@
       const badge = document.getElementById('order-plan-badge');
       badge.className = 'inline-flex items-center self-start sm:self-auto px-3 py-1 rounded-full text-xs font-medium ' + planBadgeClass(PLAN);
       setVal('order-plan-badge', PLAN);
-      setVal('order-billing', BILLING);
       setVal('order-price', PRICES[PLAN] === 0 ? 'Gratis' : fmtID(PRICES[PLAN]) + '/bulan');
-      setVal('order-total', totalPrice === 0 ? 'Gratis' : fmtID(totalPrice));
 
       const balance = (wallet && typeof wallet.balance === 'number') ? wallet.balance : 0;
+      lastBalance = balance;
       setVal('wallet-balance', fmtID(balance));
-      setVal('wallet-after', totalPrice === 0 ? fmtID(balance) : fmtID(balance - totalPrice));
+      renderOrder();
 
       if(totalPrice > 0 && balance < totalPrice){
         document.getElementById('pay-error-text').textContent = 'Saldo dompet tidak cukup. Butuh ' + fmtID(totalPrice) + ', saldo Anda ' + fmtID(balance) + '.';

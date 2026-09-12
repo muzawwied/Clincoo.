@@ -16,7 +16,7 @@ export async function onRequestOptions() {
 }
 
 const PLANS = {
-  'Starter': { price: 0, projectLimit: 3, storageLimit: 5, bandwidthLimit: 10, collaboratorLimit: 1, deployLimit: 2 },
+  'Starter': { price: 0, projectLimit: 3, storageLimit: 5, bandwidthLimit: 10, collaboratorLimit: 1, deployLimit: 5 },
   'Pro': { price: 49000, projectLimit: 10, storageLimit: 50, bandwidthLimit: 100, collaboratorLimit: 5, deployLimit: 25 },
   'Bisnis': { price: 129000, projectLimit: 50, storageLimit: 200, bandwidthLimit: 500, collaboratorLimit: 20, deployLimit: null }
 };
@@ -139,7 +139,7 @@ export async function onRequestPost({ request, env }) {
       const validPlan = PLANS[plan] ? plan : 'Starter';
       const planPrice = PLANS[validPlan].price;
       const billing = billingCycle || 'Bulanan';
-      const totalPrice = billing === 'Tahunan' ? planPrice * 12 : planPrice;
+      const totalPrice = billing === 'Tahunan' ? planPrice * 10 : planPrice; // Tahunan: bayar 10 bulan, dapat 12
 
       // Check wallet balance for paid plans
       if (planPrice > 0) {
