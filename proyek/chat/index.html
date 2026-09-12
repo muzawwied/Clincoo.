@@ -2868,10 +2868,39 @@ function showCollabPlansModal(sub) {
                             }
                             setQuotaLock(true, qMsg + ' Pesanmu aman di kolom ketik.');
                         } else {
+                        // FALLBACK: /api/chat gagal karena provider (bukan kuota) -> coba /api/ai
+                        // (Clincoo AI: Workers AI di backend, tanpa API key). Kuota habis TIDAK
+                        // difallback — UX kuota tetap seperti sebelumnya.
+                        let fbOk = false;
+                        try {
+                            const fbTok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+                            const fbRes = await fetch(TOOL_API_BASE + '/api/ai', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', ...(fbTok ? { Authorization: 'Bearer ' + fbTok } : {}) },
+                                body: JSON.stringify({ messages: apiMessages })
+                            });
+                            if (fbRes.ok) {
+                                const fbJson = await fbRes.json();
+                                if (fbJson && fbJson.text) {
+                                    console.log('Clincoo AI fallback aktif:', fbJson.model || 'workers-ai');
+                                    streamingBuffer = fbJson.text;
+                                    hasReceivedData = true;
+                                    if (quotaLocked) setQuotaLock(false);
+                                    clearTimeout(apiTimeout);
+                                    clearInterval(statusInterval);
+                                    const fbIdx = messages.findIndex(m => m.id === aiMsgObj.id);
+                                    if (fbIdx !== -1 && messages[fbIdx].isProcessing) { messages[fbIdx].isProcessing = false; messages[fbIdx].isTyping = true; }
+                                    isFetchComplete = true;
+                                    fbOk = true;
+                                }
+                            }
+                        } catch (e2) { console.warn('Fallback /api/ai gagal:', e2 && e2.message); }
+                        if (!fbOk) {
                         streamingBuffer = "Maaf, terjadi kesalahan: " + (e.message || "Gagal menghubungi server AI") + ". Silakan coba lagi nanti.";
                         isFetchComplete = true;
                         const msgIndex = messages.findIndex(m => m.id === aiMsgObj.id);
                         if (msgIndex !== -1) messages[msgIndex].isError = true;
+                    }
                     }
                 }
             }
