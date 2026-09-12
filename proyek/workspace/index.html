@@ -619,7 +619,16 @@
         saveData(); renderFileList();
         addNotification('GitHub', 'Berhasil import ' + owner + '/' + repo);
         try {
-          if (window.WSGitHubSync && !WSGitHubSync.enabled()) WSGitHubSync.prepare(owner, repo, 'main');
+          var _cfg = (window.WSGitHubSync && WSGitHubSync.cfg) ? WSGitHubSync.cfg() : null;
+          if (!_cfg || (!_cfg.on && !_cfg.owner)) {
+            if (window.WSGitHubSync && typeof WSGitHubSync.prepare === 'function') {
+              WSGitHubSync.prepare(owner, repo, 'main');
+            } else {
+              // fallback: engine lama masih ter-cache (tanpa prepare) — tulis langsung
+              var _pk = 'clincoo_syncgh_cfg_' + (localStorage.getItem('clincoo_current_project_id') || 'global');
+              localStorage.setItem(_pk, JSON.stringify({ on: false, owner: owner, repo: repo, branch: 'main' }));
+            }
+          }
           if (typeof syncghRefresh === 'function') syncghRefresh();
         } catch (e) {}
       } catch(err) {
