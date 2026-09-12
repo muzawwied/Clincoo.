@@ -3,7 +3,8 @@
 
 import { getProjectTables } from './_tables.js';
 import { currentUser } from './user-scope.js';
-import { ADMIN_EMAILS, getEffectivePlanByUserKey, userKeyPrefix } from './plan-gate.js';
+import { ADMIN_EMAILS, getEffectivePlanByUserKey } from './plan-helpers.js';
+import { userKeyPrefix } from './plan-gate.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
