@@ -63,6 +63,22 @@
             background-image: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.68) 60%, #000000 100%), url('assets/backgrounds/bg-dark-night2.webp');
         }
         /* konten halaman selalu di atas lapisan BG hero */
+        /* ===== Footer halaman utama =====
+           BG = lanjutan/versi lain dari BG hero: asset sama, tapi crop bagian bawah gambar.
+           Gradasi menyatu dengan warna halaman di tepi atas, makin transparan ke bawah. */
+        #site-footer {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            background-image: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.74) 38%, rgba(255,255,255,0.46) 100%), url('assets/backgrounds/bg-light-morning.webp');
+            background-size: cover;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+        }
+        body.dark-mode #site-footer {
+            background-image: linear-gradient(180deg, #000000 0%, rgba(0,0,0,0.66) 38%, rgba(0,0,0,0.48) 100%), url('assets/backgrounds/bg-dark-night2.webp');
+        }
+        body.dark-mode #site-footer a:hover { color: #ffffff !important; }
         .page-view { position: relative; z-index: 1; }
         :root {
             --accent-color: #000000;
@@ -546,6 +562,22 @@
                 </div>            </div>
         </div>
     </main>
+
+    <!-- ===== Footer halaman utama ===== -->
+    <footer id="site-footer" class="w-full mt-2">
+        <div class="max-w-3xl mx-auto px-5 pt-16 pb-10 flex flex-col items-center text-center">
+            <span class="font-[800] text-3xl tracking-tight text-gray-900">Clincoo</span>
+            <p class="text-sm text-gray-700 mt-2">Publikasikan situs anda bersama Clincoo.</p>
+            <nav class="flex items-center justify-center gap-3 mt-5 text-sm">
+                <a href="akun/tentang/" class="text-gray-500 hover:text-black transition-colors">Tentang</a>
+                <span class="text-gray-400">|</span>
+                <a href="#" class="text-gray-500 hover:text-black transition-colors">Ketentuan</a>
+                <span class="text-gray-400">|</span>
+                <a href="#" class="text-gray-500 hover:text-black transition-colors">Privasi</a>
+            </nav>
+            <p class="text-xs text-gray-500 mt-8">&copy; 2026 Clincoo. Semua hak dilindungi.</p>
+        </div>
+    </footer>
     <script>
     
     // ============================================
