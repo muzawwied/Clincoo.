@@ -238,19 +238,19 @@
               </thead>
               <tbody>
                 <tr class="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-[#0a0a0a]">
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-type">ALIAS / ANAME</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-name">@ (root) <span class="font-sans text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">Utama</span></td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-type">CNAME</td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-name"><span id="dns-a-name-text">@</span> <span class="font-sans text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">Utama</span></td>
                   <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-a-value">situs-anda.pages.dev</td>
                 </tr>
                 <tr class="bg-white dark:bg-[#0a0a0a]">
                   <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400">CNAME</td>
-                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-name">www <span class="font-sans text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Opsional</span></td>
+                  <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-name"><span id="dns-cname-name-text">www</span> <span class="font-sans text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Opsional</span></td>
                   <td class="py-3 px-4 font-mono text-gray-600 dark:text-gray-400" id="dns-cname-value">situs-anda.pages.dev</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 leading-relaxed">Record UTAMA untuk domain asli: <span class="font-mono">ALIAS/ANAME @ (root)</span> — dipakai supaya domain utama Anda langsung bisa dibuka tanpa www. Cloudflare Pages tidak punya IP tetap, jadi tipe A record tidak bisa dipakai; ALIAS/ANAME adalah pengganti CNAME di root (CNAME mentah dilarang di root oleh standar DNS). Kalau nameserver domain sudah di Cloudflare, cukup buat CNAME @ (flattening otomatis). Record CNAME www hanya diperlukan kalau Anda juga ingin alamat www.domain.com aktif — kalau tidak, boleh dihapus. SSL aktif otomatis beberapa menit setelah DNS terverifikasi.</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 leading-relaxed">Record UTAMA menunjuk ke <span class="font-mono">domain utama Anda</span> (root, tanpa www): CNAME <span class="font-mono">@</span> dengan nilai di atas — di root, Cloudflare otomatis melakukan flattening sehingga domain utama langsung bisa dibuka tanpa www. Cloudflare Pages tidak punya IP tetap, jadi tipe A record tidak bisa dipakai; pastikan nameserver domain Anda diarahkan ke Cloudflare terlebih dahulu. Kalau nameserver masih di provider lain (mis. IDWebhost) dan tersedia tipe ALIAS/ANAME, gunakan tipe itu untuk @. Record CNAME www hanya diperlukan kalau alamat www.domain.com juga ingin diaktifkan. SSL aktif otomatis beberapa menit setelah DNS terverifikasi.</p>
         </div>
 
       </div>
@@ -413,14 +413,15 @@
         // Cloudflare Pages: custom domain pakai CNAME ke <project>.pages.dev (TANPA A record IP).
         // Nilai diambil real-time dari hasil deploy proyek (st.pages_url).
         const target = (pagesUrl || '').replace('https://', '').replace(/\/$/, '') || 'memuat… (tunggu deploy terdeteksi)';
-        const aName = document.getElementById('dns-a-name');
+        const aNameText = document.getElementById('dns-a-name-text');
         const aValue = document.getElementById('dns-a-value');
-        const cnameName = document.getElementById('dns-cname-name');
+        const cnameNameText = document.getElementById('dns-cname-name-text');
         const cnameValue = document.getElementById('dns-cname-value');
-        if (cnameName) cnameName.textContent = 'www';
-        if (cnameValue) cnameValue.textContent = target;
-        if (aName) aName.textContent = '@ (root)';
+        // Hanya teks nama yang diganti — badge "Utama"/"Opsional" di sel yang sama dipertahankan.
+        if (aNameText) aNameText.textContent = '@';
+        if (cnameNameText) cnameNameText.textContent = 'www';
         if (aValue) aValue.textContent = target;
+        if (cnameValue) cnameValue.textContent = target;
     }
 
     // Save domain settings to D1
@@ -567,6 +568,20 @@
                 domainInput.disabled = false;
                 var _sb2 = document.getElementById('btn-save-domain'); if (_sb2) _sb2.disabled = false;
             }
+        }
+        // 1b) Nilai record DNS instan: fast mode hanya baca D1 (nama project Pages),
+        // tanpa menunggu status deployment dari API Cloudflare. Sekali termuat, disimpan ke cache.
+        if (!cached || !cached.pagesUrl) {
+            (async function () {
+                try {
+                    const pid = localStorage.getItem('clincoo_current_project_id') || '';
+                    const tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+                    const res = await fetchTimeout(DEPLOY_API_BASE + '/deploy?project_id=' + encodeURIComponent(pid) + '&fast=1',
+                        { headers: tok ? { Authorization: 'Bearer ' + tok } : {} });
+                    const st = await res.json().catch(() => ({}));
+                    if (st.pages_url) { lastPagesUrl = st.pages_url; updateDNSRecords('', st.pages_url); writeDomainCache({ pagesUrl: st.pages_url }); }
+                } catch (e) {}
+            })();
         }
         // 2) Muat data segar dari server — PARALEL, bukan berurutan
         Promise.all([loadDomainSettings(), loadRealDomainStatus()]);

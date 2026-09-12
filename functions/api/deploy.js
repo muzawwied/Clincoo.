@@ -243,28 +243,36 @@ export async function onRequestGet({ request, env }) {
     const name = await resolvePagesName(db, T.projectSettings, projectId);
     const pagesUrl = 'https://' + name + '.pages.dev';
 
-    let project = null;
-    try { project = await lookupProject(creds, name); } catch (e) { project = null; }
+    // Mode cepat: hanya nama Pages + URL (murni D1, tanpa round-trip API Cloudflare).
+    // Dipakai halaman domain kustom supaya nilai record DNS terisi < 200 ms,
+    // bukan menunggu status deployment (yang bisa masing-masing ratusan ms).
+    if (url.searchParams.get('fast') === '1') {
+      return json({ pages_project: name, pages_url: pagesUrl, fast: true, api_rev: 'uniq3' });
+    }
+
+    // Ambil project, deployment terakhir, dan domains PARALEL.
+    // Sebelumnya 3x round-trip Cloudflare BERURUTAN -> halaman domain terasa lambat.
+    const [project, deps, doms] = await Promise.all([
+      lookupProject(creds, name).catch(() => null),
+      cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/deployments?per_page=1', creds.apiKey).catch(() => null),
+      cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/domains', creds.apiKey).catch(() => null)
+    ]);
 
     let last = null;
     let domains = [];
-    if (project) {
-      try {
-        const deps = await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/deployments?per_page=1', creds.apiKey);
-        const d = (deps && deps[0]) || null;
-        if (d) {
-          last = {
-            id: d.id,
-            status: (d.latest_stage && d.latest_stage.status) || d.status || 'idle',
-            url: (d.aliases && d.aliases[0]) || d.url || pagesUrl,
-            created: d.created_on
-          };
-        }
-      } catch (e) {}
-      try {
-        const doms = await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/domains', creds.apiKey);
-        domains = (doms || []).map(x => ({ name: x.name, status: x.status || 'pending' }));
-      } catch (e) {}
+    if (project && Array.isArray(deps)) {
+      const d = (deps && deps[0]) || null;
+      if (d) {
+        last = {
+          id: d.id,
+          status: (d.latest_stage && d.latest_stage.status) || d.status || 'idle',
+          url: (d.aliases && d.aliases[0]) || d.url || pagesUrl,
+          created: d.created_on
+        };
+      }
+    }
+    if (project && Array.isArray(doms)) {
+      domains = doms.map(x => ({ name: x.name, status: x.status || 'pending' }));
     }
 
     let logs = [];
