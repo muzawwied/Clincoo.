@@ -293,7 +293,7 @@
             <a href="https://muzawwied.github.io/Clincoo-Editor/" data-page="editor" id="sidebar-editor-link" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
                 <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
                 <span class="font-medium text-[14px]">Editor</span>
-                <span class="clincoo-editor-crown text-amber-500 shrink-0 cursor-pointer hover:text-amber-600 transition-colors ml-auto" title="Lihat daftar paket" onclick="event.preventDefault(); event.stopPropagation(); clincooOpenPlansPopup();"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.019a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/></svg></span>
+                <span class="clincoo-editor-crown text-amber-500 shrink-0 cursor-pointer hover:text-amber-600 transition-colors ml-auto" style="display:none" title="Lihat daftar paket" onclick="event.preventDefault(); event.stopPropagation(); clincooOpenPlansPopup();"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.019a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/></svg></span>
             </a>
       </div>
   </aside>
@@ -563,21 +563,54 @@
   function clincooAuthToken() {
     try { return localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; } catch (e) { return ''; }
   }
-  window.clincooOpenPlansPopup = async function () {
-    var current = 'Starter', billing = 'Bulanan';
+  window.clincooEditorPlan = null;
+  function clincooShowCrowns(show) {
+    document.querySelectorAll('.clincoo-editor-crown').forEach(function (c) { c.style.display = show ? '' : 'none'; });
+  }
+  function clincooReadSubCache() {
+    try { return JSON.parse(localStorage.getItem('TM_SUB_CACHE_KEY') || 'null'); } catch (e) { return null; }
+  }
+  async function clincooRefreshEditorCrown() {
+    var cached = clincooReadSubCache();
+    if (cached && cached.plan) {
+      window.clincooEditorPlan = cached.plan;
+      clincooShowCrowns(cached.plan === 'Starter');
+    }
     try {
-      var cached = JSON.parse(localStorage.getItem('TM_SUB_CACHE_KEY') || 'null');
-      if (cached && cached.plan) { current = cached.plan; billing = cached.billingCycle || 'Bulanan'; }
+      var t = clincooAuthToken();
+      var res = await fetch(clincooApiBase() + '/api/subscription', { cache: 'no-store', headers: t ? { Authorization: 'Bearer ' + t } : {} });
+      if (res.ok) {
+        var d = await res.json();
+        if (d && d.plan) {
+          window.clincooEditorPlan = d.plan;
+          try { localStorage.setItem('TM_SUB_CACHE_KEY', JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
+          clincooShowCrowns(d.plan === 'Starter');
+        }
+      }
     } catch (e) {}
+    if (!window.clincooEditorPlan) clincooShowCrowns(true); // paket tak diketahui (mis. API gagal): fail-open
+  }
+  window.clincooOpenPlansPopup = async function () {
+    if (window.clincooEditorPlan && window.clincooEditorPlan !== 'Starter') return;
+    var current = 'Starter', billing = 'Bulanan';
+    var cached = clincooReadSubCache();
+    if (cached && cached.plan) { current = cached.plan; billing = cached.billingCycle || 'Bulanan'; }
     clincooShowPlansModal(current, billing);
     try {
       var res = await fetch(clincooApiBase() + '/api/subscription', { cache: 'no-store', headers: clincooAuthToken() ? { Authorization: 'Bearer ' + clincooAuthToken() } : {} });
       if (res.ok) {
         var d = await res.json();
         if (d && d.plan) {
+          window.clincooEditorPlan = d.plan;
           try { localStorage.setItem('TM_SUB_CACHE_KEY', JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
-          var badge = document.getElementById('upgrade-plans-modal');
-          if (badge && d.plan !== current) { badge.remove(); var cs0 = document.getElementById('upgrade-plans-css'); if (cs0) cs0.remove(); clincooShowPlansModal(d.plan, d.billingCycle || 'Bulanan'); }
+          clincooShowCrowns(d.plan === 'Starter');
+          if (d.plan !== 'Starter') {
+            var mp = document.getElementById('upgrade-plans-modal');
+            if (mp) { mp.remove(); var cs0 = document.getElementById('upgrade-plans-css'); if (cs0) cs0.remove(); }
+          } else if (d.plan !== current) {
+            var badge = document.getElementById('upgrade-plans-modal');
+            if (badge) { badge.remove(); var cs1 = document.getElementById('upgrade-plans-css'); if (cs1) cs1.remove(); clincooShowPlansModal(d.plan, d.billingCycle || 'Bulanan'); }
+          }
         }
       }
     } catch (e) {}
@@ -700,6 +733,8 @@
     m.firstElementChild.addEventListener('click', function (e) { if (e.target === m.firstElementChild) m.remove(); });
     render();
   }
+  clincooRefreshEditorCrown();
+  window.addEventListener('storage', function (ev) { if (ev.key === 'TM_SUB_CACHE_KEY') clincooRefreshEditorCrown(); });
 })();
 </script>
 </body>
