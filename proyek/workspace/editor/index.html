@@ -139,6 +139,26 @@
     body.dark-mode .CodeMirror-activeline .CodeMirror-linenumber{color:#9a9aa4!important}
     body:not(.dark-mode) .CodeMirror-activeline .CodeMirror-linenumber{color:#5c5c66!important}
 
+    /* ===== Quick tools ===== */
+    #quicktools{height:40px;display:flex;align-items:center;background:var(--bg2);border-bottom:1px solid var(--line);flex-shrink:0;padding:0 6px;gap:6px}
+    .qt-fixed{display:flex;align-items:center;gap:2px;flex-shrink:0}
+    .qt-btn{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--text2);font-size:13px;font-weight:700;flex-shrink:0}
+    .qt-btn:hover{background:var(--bg4);color:var(--text)}
+    .qt-sep{width:1px;height:20px;background:var(--line);flex-shrink:0}
+    .qt-swatch{width:16px;height:16px;border-radius:50%;background:conic-gradient(from 180deg,#ff5f5f,#ffd15f,#6bff6b,#5fd8ff,#7a6bff,#ff5fd1,#ff5f5f);border:1.5px solid var(--line2)}
+    .qt-snippets{flex:1;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;min-width:0}
+    .qt-snippets::-webkit-scrollbar{display:none}
+    .qt-chip{flex-shrink:0;height:28px;padding:0 11px;border-radius:7px;background:var(--bg3);border:1px solid var(--line);color:var(--text);font-family:'Fira Code',monospace;font-size:12px;white-space:nowrap;cursor:pointer}
+    .qt-chip:hover{border-color:var(--line2);background:var(--bg4)}
+    #color-picker{position:fixed;z-index:970;display:none;background:var(--bg3);border:1px solid var(--line2);border-radius:12px;box-shadow:var(--shadow);padding:12px;width:216px}
+    #color-picker.show{display:block}
+    .cp-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:10px}
+    .cp-swatch{width:20px;height:20px;border-radius:6px;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+    .cp-swatch:hover{transform:scale(1.15)}
+    .cp-hexrow{display:flex;gap:6px}
+    .cp-hexrow input{flex:1;height:30px;background:var(--bg);border:1px solid var(--line2);border-radius:7px;padding:0 9px;font-size:12px;font-family:'Fira Code',monospace;outline:none;color:var(--text)}
+    .cp-hexrow button{height:30px;padding:0 12px;border-radius:7px;background:var(--btn-bg);color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+
     /* ===== Status bar ===== */
     #statusbar{height:25px;background:var(--status);color:#fff;display:flex;align-items:center;font-size:11.5px;flex-shrink:0;user-select:none}
     #statusbar .sb{padding:0 10px;height:100%;display:flex;align-items:center;gap:5px;cursor:default;white-space:nowrap;color:rgba(255,255,255,.85)}
@@ -191,7 +211,7 @@
     </div>
     <div class="spacer"></div>
     <button id="save-btn" onclick="editorSaveInPlace()" disabled title="Simpan">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
       <span>Simpan</span>
     </button>
   </div>
@@ -204,6 +224,19 @@
       </div>
     </div>
   </div>
+  <div id="quicktools" class="hidden">
+    <div class="qt-fixed">
+      <button class="qt-btn" onclick="edAction('undo')" title="Urungkan"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 8"/></svg></button>
+      <button class="qt-btn" onclick="edAction('redo')" title="Ulangi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg></button>
+      <button class="qt-btn" onclick="qtInsert('\t')" title="Tab">&#8677;</button>
+      <button class="qt-btn" onclick="qtMoveCursor(-1)" title="Kiri"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="qt-btn" onclick="qtMoveCursor(1)" title="Kanan"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="qt-btn qt-color" onclick="toggleColorPicker(event)" title="Pemetik warna"><span class="qt-swatch" id="qt-swatch-dot"></span></button>
+    </div>
+    <div class="qt-sep"></div>
+    <div class="qt-snippets" id="qt-snippets"></div>
+  </div>
+  <div id="color-picker"></div>
   <div id="stage">
     <div id="editor-code-container">
       <textarea id="editor-code-textarea" class="hidden"></textarea>
@@ -419,6 +452,9 @@
       const saveBtn = document.getElementById('save-btn');
       if (tab) tab.classList.toggle('dirty', !!(isCode && editorDirty));
       if (saveBtn) saveBtn.disabled = !isCode;
+      const qt = document.getElementById('quicktools');
+      if (qt) qt.classList.toggle('hidden', !isCode);
+      if (isCode) renderQuickTools();
       if (sbPath) {
         const folder = (currentFolderPath === 'root' || !currentFolderPath) ? '' : currentFolderPath + '/';
         sbPath.textContent = 'workspace/' + folder + (editingFileName || '');
@@ -597,6 +633,94 @@
       try { await wsCloudPushNow(); } catch (e) {}
       window.location.href = '../?id=' + encodeURIComponent(wsProjectId());
     }
+
+    // ---------- Quick tools (ala Clincoo-Editor) ----------
+    const SNIPPETS = {
+      html: ['<div>|</div>','<a href="|"></a>','<img src="|" alt="">',' class="|"',' id="|"','<!-- | -->','<span>|</span>','&nbsp;'],
+      css: ['{\n\t|\n}',':hover{|}','@media{|}','.class{|}','#id{|}','px','rem','%'],
+      javascript: ['(|)','{|}','[|]','=>','console.log(|)','function () {|}','const |','===','!=='],
+      python: ['(|)','{|}','[|]','=>','print(|)','def |():\n\t','if |:\n\t','===','!='],
+      json: ['{|}','[|]',':',',','"|": ""'],
+      markdown: ['**|**','_|_','# |','- |','[|]()','```|```','> |'],
+      plaintext: ['(',')','[',']','{','}','<','>','=','-','_','|']
+    };
+    function qtLangOf(filename) {
+      const ext = getFileExtension(filename || '');
+      if (ext === 'html' || ext === 'htm') return 'html';
+      if (ext === 'css') return 'css';
+      if (ext === 'js' || ext === 'jsx' || ext === 'ts') return 'javascript';
+      if (ext === 'py' || ext === 'python') return 'python';
+      if (ext === 'json') return 'json';
+      if (ext === 'md' || ext === 'markdown') return 'markdown';
+      return 'plaintext';
+    }
+    function qtEsc(x) { return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    let qtRenderedLang = null;
+    function renderQuickTools() {
+      const lang = editingFileName ? qtLangOf(editingFileName) : 'plaintext';
+      const list = SNIPPETS[lang] || SNIPPETS.plaintext;
+      const el = document.getElementById('qt-snippets');
+      if (!el) return;
+      if (qtRenderedLang === lang) return;
+      qtRenderedLang = lang;
+      el.innerHTML = list.map(function(sn, i) {
+        return '<button class="qt-chip" data-qi="' + i + '">' + qtEsc(sn.replace(/\|/g,'').replace(/\n/g,' ').replace(/\t/g,'')) + '</button>';
+      }).join('');
+      Array.prototype.forEach.call(el.querySelectorAll('.qt-chip'), function(btn) {
+        btn.onclick = function() { qtInsert(list[+btn.dataset.qi]); };
+      });
+    }
+    function qtInsert(snippet) {
+      if (!codeEditor || !editingFileName) return;
+      const idx = snippet.indexOf('|');
+      const clean = idx >= 0 ? snippet.replace('|', '') : snippet;
+      const from = codeEditor.getCursor('from');
+      codeEditor.replaceSelection(clean);
+      if (idx >= 0) {
+        const before = clean.slice(0, idx);
+        const bl = before.split('\n');
+        if (bl.length === 1) codeEditor.setCursor({ line: from.line, ch: from.ch + before.length });
+        else codeEditor.setCursor({ line: from.line + bl.length - 1, ch: bl[bl.length - 1].length });
+      }
+      codeEditor.focus();
+    }
+    function qtMoveCursor(dir) {
+      if (!codeEditor) return;
+      const cur = codeEditor.getCursor();
+      codeEditor.setCursor({ line: cur.line, ch: Math.max(0, cur.ch + dir) });
+      codeEditor.focus();
+    }
+    function edAction(a) {
+      if (!codeEditor) return;
+      if (a === 'undo') codeEditor.undo();
+      else if (a === 'redo') codeEditor.redo();
+      codeEditor.focus();
+    }
+    const CP_COLORS = ['#000000','#ffffff','#e55454','#f0ad4e','#f5d76e','#2fbf71','#3ba9e0','#5c6bc0','#8a5cf6','#e5604f','#9a9aa4','#4a4a55','#d6d6dc','#6c6c76','#26262b','#1a1a1d'];
+    function toggleColorPicker(e) {
+      const cp = document.getElementById('color-picker');
+      if (!cp) return;
+      if (cp.classList.contains('show')) { closeColorPicker(); return; }
+      cp.innerHTML = '<div class="cp-grid">' + CP_COLORS.map(function(c) { return '<div class="cp-swatch" style="background:' + c + '" onclick="pickColor(\'' + c + '\')" title="' + c + '"></div>'; }).join('') +
+        '</div><div class="cp-hexrow"><input id="cp-hex" placeholder="#3ba9e0" maxlength="9"><button onclick="pickColor(document.getElementById(\'cp-hex\').value)">Sisip</button></div>';
+      cp.classList.add('show');
+      const r = e.currentTarget.getBoundingClientRect();
+      cp.style.left = Math.min(r.left, innerWidth - 226) + 'px';
+      cp.style.top = (r.bottom + 8) + 'px';
+    }
+    function closeColorPicker() { const cp = document.getElementById('color-picker'); if (cp) cp.classList.remove('show'); }
+    function pickColor(hex) {
+      if (!hex) return;
+      hex = String(hex).trim();
+      if (!hex.startsWith('#')) hex = '#' + hex;
+      const dot = document.getElementById('qt-swatch-dot');
+      if (dot) dot.style.background = hex;
+      qtInsert(hex);
+      closeColorPicker();
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#color-picker') && !e.target.closest('.qt-color')) closeColorPicker();
+    });
 
     window.addEventListener('beforeunload', function (e) {
       if (editorDirty) { e.preventDefault(); e.returnValue = ''; }
