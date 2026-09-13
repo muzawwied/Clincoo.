@@ -16,7 +16,22 @@
 
   function cfg() { try { return JSON.parse(localStorage.getItem(pkey(CFG_PREFIX)) || 'null') || null; } catch (e) { return null; } }
   function setCfg(c) { try { localStorage.setItem(pkey(CFG_PREFIX), JSON.stringify(c)); } catch (e) {} }
-  function enabled() { var c = cfg(); return !!(c && c.on && c.owner && c.repo); }
+  // PENGAMAN: repo Wallet (situs ClincooPay) dikunci — tidak boleh jadi target sync.
+  // Pernah 2x tertimpa file proyek lain karena salah sasaran konfigurasi (11 & 13 Sep 2026).
+  var BLOCKED_TARGETS = {
+    'muzawwied/wallet': 'Repo Wallet (situs ClincooPay) dikunci dan tidak bisa dipakai sebagai target Sync GitHub.'
+  };
+  function blockedReason() {
+    var c = cfg();
+    if (!c || !c.owner || !c.repo) return null;
+    var k = String(c.owner).toLowerCase() + '/' + String(c.repo).toLowerCase();
+    return BLOCKED_TARGETS[k] || null;
+  }
+  function enabled() {
+    var why = blockedReason();
+    if (why) { try { console.warn('[SyncGitHub] ' + why); } catch (e) {} return false; }
+    var c = cfg(); return !!(c && c.on && c.owner && c.repo);
+  }
 
   function token() { try { return localStorage.getItem(GITHUB_TOKEN_KEY) || ''; } catch (e) { return ''; } }
 
