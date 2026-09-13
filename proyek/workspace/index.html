@@ -394,8 +394,8 @@
                 <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
                 <span class="font-medium text-[14px]">Workspace</span>
             </a>
-            <a href="https://muzawwied.github.io/Clincoo-Editor/" data-page="editor" id="sidebar-editor-link" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
-                <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
+            <a href="https://muzawwied.github.io/Clincoo-Editor/" onclick="openFullEditor(event)" data-page="editor" id="sidebar-editor-link" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+                <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                 <span class="font-medium text-[14px]">Editor</span>
             </a>
         </div>
@@ -709,6 +709,17 @@
       }
     }
 
+
+    // Real-time dua arah: perubahan berkas dari editor (tab lain) langsung muncul di sini
+    window.addEventListener('storage', function (e) {
+      if (e.key === wsFilesKey() && e.newValue) {
+        try {
+          projectFilesData = JSON.parse(e.newValue);
+          renderFileList();
+          try { addNotification('Editor', 'Berkas diperbarui dari editor kode.'); } catch (err) {}
+        } catch (err) {}
+      }
+    });
 
     // ===== Sinkronisasi workspace ke Cloudflare D1 (data per-proyek) =====
     const WS_CLOUD_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
@@ -2091,6 +2102,22 @@
           await addFolderToZipAsync(zipFolder.folder(child.name), child.path);
         }
       }
+    }
+
+    // Buka editor kode lengkap (Clincoo-Editor) — berkas proyek ini tersinkron dua arah
+    // via localStorage 'clincoo_workspace_files_<id>' + cloud D1 (push/pull).
+    function openFullEditor(e) {
+      if (e) e.preventDefault();
+      var pid = ''; try { pid = localStorage.getItem('clincoo_current_project_id') || ''; } catch (err) {}
+      var name = 'Proyek';
+      try {
+        var ps = JSON.parse(localStorage.getItem('clincoo_projects') || '[]');
+        var p = ps.find(function (x) { return x && x.id === pid; });
+        if (p && p.name) name = p.name; else if (p && p.aiName) name = p.aiName;
+      } catch (err) {}
+      var base = (location.hostname.indexOf('github.io') !== -1) ? 'https://muzawwied.github.io/Clincoo-Editor/' : 'https://muzawwied.github.io/Clincoo-Editor/';
+      window.open(base + '?pid=' + encodeURIComponent(pid) + '&name=' + encodeURIComponent(name), '_blank');
+      try { addNotification('Editor', 'Editor lengkap dibuka — berkas tersinkron dengan proyek ini.'); } catch (err) {}
     }
 
     function openFileInEditor(filename) {
