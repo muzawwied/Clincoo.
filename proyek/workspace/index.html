@@ -2109,14 +2109,37 @@
     function openFullEditor(e) {
       if (e) e.preventDefault();
       var pid = ''; try { pid = localStorage.getItem('clincoo_current_project_id') || ''; } catch (err) {}
+      if (!pid) { try { addNotification('Editor', 'Buka proyek dulu untuk mengakses editor.'); } catch (err) {} return; }
       var name = 'Proyek';
       try {
         var ps = JSON.parse(localStorage.getItem('clincoo_projects') || '[]');
         var p = ps.find(function (x) { return x && x.id === pid; });
         if (p && p.name) name = p.name; else if (p && p.aiName) name = p.aiName;
       } catch (err) {}
-      var base = (location.hostname.indexOf('github.io') !== -1) ? 'https://muzawwied.github.io/Clincoo-Editor/' : 'https://muzawwied.github.io/Clincoo-Editor/';
-      window.open(base + '?pid=' + encodeURIComponent(pid) + '&name=' + encodeURIComponent(name), '_blank');
+      var w = window.open('https://muzawwied.github.io/Clincoo-Editor/?pid=' + encodeURIComponent(pid) + '&name=' + encodeURIComponent(name), '_blank');
+      // Kirim berkas proyek + token ke editor lewat postMessage (mendukung domain berbeda).
+      var sendInit = function () {
+        var files = null;
+        try { files = JSON.parse(localStorage.getItem('clincoo_workspace_files_' + pid) || 'null'); } catch (err) {}
+        if (!files) { try { files = JSON.parse(localStorage.getItem('clincoo_workspace_files') || 'null'); } catch (err) {} }
+        var token = ''; try { token = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || ''; } catch (err) {}
+        try {
+          w.postMessage({ type: 'clincoo-editor-init', pid: pid, name: name, token: token, files: files }, '*');
+        } catch (err) {}
+      };
+      var tries = 0;
+      var tmr = setInterval(function () {
+        tries++;
+        if (tries > 20 || w.closed) { clearInterval(tmr); return; }
+        sendInit();
+      }, 500);
+      var ack = function (ev) {
+        if (ev && ev.data && ev.data.type === 'clincoo-editor-ack') {
+          clearInterval(tmr);
+          window.removeEventListener('message', ack);
+        }
+      };
+      window.addEventListener('message', ack);
       try { addNotification('Editor', 'Editor lengkap dibuka — berkas tersinkron dengan proyek ini.'); } catch (err) {}
     }
 
