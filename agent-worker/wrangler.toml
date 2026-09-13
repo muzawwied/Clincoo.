@@ -17,6 +17,7 @@ binding = "AI"
 [[workflows]]
 name = "agent-flow"
 binding = "AGENT_FLOW"
+class_name = "AGENT_FLOW"
 
 # Cron: jemput task dari antrean tiap menit + sweep task macet
 [triggers]
