@@ -32,7 +32,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/js/path-router.js"></script>
     <style>
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fade-in 0.25s ease-out; }
         .otp-hidden { display: none; }
@@ -64,129 +64,195 @@
 <script src="../../../../../js/i18n-dict.js" defer></script>
 <script src="../../../../../js/i18n.js" defer></script>
 </head>
-<body class="min-h-screen flex flex-col text-gray-900 bg-white">
+<body class="min-h-screen flex flex-col text-slate-900 bg-white dark:text-white">
+    <style>
+        /* ==== Style ClincooPay — halaman integrasi ==== */
+        .cp-glow { background: radial-gradient(70% 90% at 50% 0%, rgba(56,189,248,.13) 0%, rgba(255,255,255,0) 72%); }
+        body.dark-mode .cp-glow { background: radial-gradient(70% 90% at 50% 0%, rgba(56,189,248,.09) 0%, rgba(10,10,10,0) 72%); }
+        .cp-card { border-radius: 18px; border: 1px solid #eef2f7; background: #ffffff; box-shadow: 0 2px 16px rgba(15,23,42,.05); }
+        body.dark-mode .cp-card { border-color: rgba(30,41,59,.5); background: #111111; box-shadow: none; }
+        .cp-logo-tile { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(15,23,42,.06); overflow: hidden; position: relative; flex-shrink: 0; }
+        body.dark-mode .cp-logo-tile { background: #111111; border-color: #1e293b; }
+        .cp-link-line { width: 100%; border-top: 2px dashed #7dd3fc; }
+        .cp-link-badge { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 26px; height: 26px; border-radius: 9999px; background: linear-gradient(135deg,#38bdf8,#0284c7); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 5px rgba(56,189,248,.15), 0 4px 10px rgba(56,189,248,.35); }
+        .cp-pulse { animation: cpPulse 2.2s ease-in-out infinite; }
+        @keyframes cpPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(56,189,248,.30), 0 4px 10px rgba(56,189,248,.35); } 50% { box-shadow: 0 0 0 9px rgba(56,189,248,0), 0 4px 10px rgba(56,189,248,.35); } }
+        .cp-btn-primary { background: linear-gradient(135deg,#38bdf8 0%,#0284c7 100%); box-shadow: 0 6px 16px rgba(14,165,233,.28); transition: all .2s ease; }
+        .cp-btn-primary:hover { filter: brightness(1.06); }
+        .cp-btn-primary:active { transform: scale(.98); }
+        /* Step indicator */
+        .cp-steps { display: flex; align-items: flex-start; width: 100%; margin-bottom: 20px; }
+        .cp-step { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 62px; }
+        .cp-step-dot { width: 28px; height: 28px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #f1f5f9; color: #94a3b8; transition: all .3s ease; }
+        body.dark-mode .cp-step-dot { background: #1a1a1a; color: #64748b; }
+        .cp-step.done .cp-step-dot { background: #e0f2fe; color: #0284c7; }
+        body.dark-mode .cp-step.done .cp-step-dot { background: rgba(14,165,233,.15); color: #38bdf8; }
+        .cp-step.active .cp-step-dot { background: linear-gradient(135deg,#38bdf8,#0284c7); color: #fff; box-shadow: 0 4px 12px rgba(14,165,233,.45); }
+        .cp-step-label { font-size: 9.5px; font-weight: 700; color: #94a3b8; letter-spacing: .03em; text-align: center; }
+        .cp-step.active .cp-step-label, .cp-step.done .cp-step-label { color: #0284c7; }
+        body.dark-mode .cp-step.active .cp-step-label, body.dark-mode .cp-step.done .cp-step-label { color: #38bdf8; }
+        .cp-sep { flex: 1; height: 2px; background: #e2e8f0; margin-top: 13px; border-radius: 2px; transition: background .3s ease; }
+        body.dark-mode .cp-sep { background: #1e293b; }
+        .cp-sep.done { background: #7dd3fc; }
+    </style>
 
     <div class="flex flex-col bg-white dark:bg-[#0a0a0a] min-h-screen w-full overflow-x-hidden">
 
-        <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
-            <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
-                <i data-lucide="arrow-left" class="w-5 h-5"></i>
-            </button>
+        <header class="sticky top-0 z-40 w-full bg-white/85 dark:bg-[#0a0a0a]/85 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/70">
+            <div class="flex items-center gap-3 px-4 py-3" style="max-width: 26rem; margin: 0 auto;">
+                <button onclick="goBack()" aria-label="Kembali" class="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all cursor-pointer text-slate-700 dark:text-slate-300 shadow-sm shrink-0">
+                    <i data-lucide="arrow-left" class="w-[18px] h-[18px]"></i>
+                </button>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[13px] font-bold text-slate-900 dark:text-white leading-tight">ClincooPay</p>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">Integrasi dompet digital</p>
+                </div>
+                <div class="cp-logo-tile" style="width:36px;height:36px;border-radius:9999px;">
+                    <img src="https://muzawwied.github.io/Wallet/logo.png" alt="ClincooPay" class="absolute inset-0 w-full h-full object-cover scale-[1.42]">
+                </div>
+            </div>
         </header>
 
-        <main class="flex-1 w-full flex flex-col px-5 py-5" style="max-width: 24rem; margin: 0 auto;">
-            <div class="mb-6 w-full flex flex-col items-center text-center" style="background:radial-gradient(circle, rgba(56,189,248,0.12) 0%, rgba(255,255,255,0) 70%); border-radius:20px; padding:20px 12px 16px; margin-left:-12px; margin-right:-12px;">
-                <div class="flex items-center justify-center w-full mb-3.5">
-                    <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-slate-200">
-                        <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="Clincoo" class="w-full h-full object-cover">
+        <main class="flex-1 w-full flex flex-col px-5 py-6" style="max-width: 26rem; margin: 0 auto;">
+
+            <!-- HERO: logo Clincoo x ClincooPay -->
+            <div class="cp-glow -mx-5 px-5 pt-5 pb-7 mb-5 text-center" style="border-radius: 0 0 26px 26px;">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="cp-logo-tile">
+                        <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="Clincoo" class="absolute inset-0 w-full h-full object-contain p-2">
                     </div>
-                    <div class="flex-1 flex items-center px-1.5 relative" style="max-width:92px">
-                        <div class="w-full border-t-2 border-dashed border-sky-400"></div>
-                        <div class="absolute left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-sky-400 text-white flex items-center justify-center" style="box-shadow:0 4px 10px rgba(56,189,248,.35)">
-                            <i data-lucide="link" class="w-3.5 h-3.5"></i>
-                        </div>
+                    <div class="relative flex-1 max-w-[96px] mx-1.5">
+                        <div class="cp-link-line"></div>
+                        <div class="cp-link-badge cp-pulse"><i data-lucide="link" class="w-3.5 h-3.5"></i></div>
                     </div>
-                    <div class="relative w-11 h-11 rounded-xl flex items-center justify-center shrink-0 overflow-hidden bg-white shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div class="cp-logo-tile">
                         <img src="https://muzawwied.github.io/Wallet/logo.png" alt="ClincooPay" class="absolute inset-0 w-full h-full object-cover scale-[1.42]">
                     </div>
                 </div>
-                <h2 class="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Hubungkan ClincooPay</h2>
-                <p id="page-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sinkronkan dompet Wallet kamu dengan Clincoo.</p>
-            <p id="cp-credits" class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 hidden"></p>
+                <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Hubungkan ClincooPay</h1>
+                <p id="page-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed px-6">Sinkronkan dompet Wallet kamu dengan Clincoo.</p>
+                <p id="cp-credits" class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 hidden"></p>
             </div>
 
-            <!-- STEP 1: INPUT ID WALLET -->
-            <div id="step-id" class="w-full space-y-3 animate-fade-in">
-                <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 block">ID Wallet</label>
-                    <input id="cp-wallet-id" type="text" maxlength="10" placeholder="Contoh: aYSRRPE5yX" autocomplete="off"
-                        class="w-full px-4 py-3 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0a0a0a] text-sm font-bold text-slate-900 dark:text-white placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:border-sky-400 tracking-widest uppercase">
-                    <p class="text-[10px] text-slate-400 mt-1.5 px-1">Buka aplikasi Wallet → Profil → salin 10 karakter ID kamu.</p>
-                </div>
-                <p class="text-[10px] text-center leading-relaxed px-2">Belum punya akun ClincooPay? Daftar gratis di <a href="https://muzawwied.github.io/Wallet/" target="_blank" rel="noopener" class="text-sky-500 font-semibold underline underline-offset-2">muzawwied.github.io/Wallet</a></p>
-                <p id="cp-id-error" class="text-xs text-red-500 hidden px-1"></p>
-                <button id="cp-send-btn" onclick="sendRequest()" class="w-full py-3 bg-sky-400 text-white rounded-full font-semibold text-sm hover:bg-sky-500 transition-all active:scale-[0.98]" style="box-shadow:0 4px 12px rgba(56,189,248,.25)">Kirim Permintaan</button>
-                <p class="text-[10px] text-slate-400 text-center leading-relaxed px-2">Setelah terkirim: konfirmasi di notifikasi Wallet, lalu masukkan PIN wallet di sini. PIN tidak pernah disimpan Clincoo.</p>
+            <!-- INDIKATOR LANGKAH -->
+            <div id="cp-steps" class="cp-steps otp-hidden">
+                <div class="cp-step" id="cp-si-1"><span class="cp-step-dot">1</span><span class="cp-step-label">ID Wallet</span></div>
+                <div class="cp-sep" id="cp-sep-1"></div>
+                <div class="cp-step" id="cp-si-2"><span class="cp-step-dot">2</span><span class="cp-step-label">Konfirmasi</span></div>
+                <div class="cp-sep" id="cp-sep-2"></div>
+                <div class="cp-step" id="cp-si-3"><span class="cp-step-dot">3</span><span class="cp-step-label">PIN</span></div>
             </div>
 
             <!-- STEP 0: MEMERIKSA KONEKSI -->
             <div id="step-check" class="w-full otp-hidden">
-                <div class="py-8 text-center">
-                    <div class="w-10 h-10 rounded-full bg-sky-50 dark:bg-sky-400/10 flex items-center justify-center mx-auto">
-                        <svg class="animate-spin text-sky-400" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <div class="cp-card px-5 py-9 text-center animate-fade-in">
+                    <div class="w-11 h-11 rounded-full bg-sky-50 dark:bg-sky-400/10 flex items-center justify-center mx-auto cp-pulse">
+                        <svg class="animate-spin text-sky-500" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                     </div>
-                    <p class="text-sm font-bold text-slate-900 dark:text-white mt-3">Memeriksa Koneksi…</p>
-                    <p class="text-[10px] text-slate-400 mt-1">Sebentar, cek status dompet dulu.</p>
+                    <p class="text-sm font-bold text-slate-900 dark:text-white mt-4">Memeriksa Koneksi…</p>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Sebentar, cek status dompet dulu.</p>
+                </div>
+            </div>
+
+            <!-- STEP 1: INPUT ID WALLET -->
+            <div id="step-id" class="w-full otp-hidden animate-fade-in">
+                <div class="cp-card p-5 space-y-4">
+                    <div>
+                        <label for="cp-wallet-id" class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
+                            <i data-lucide="wallet" class="w-3 h-3"></i>ID Wallet
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="hash" class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600 pointer-events-none"></i>
+                            <input id="cp-wallet-id" type="text" maxlength="10" placeholder="Contoh: aYSRRPE5yX" autocomplete="off"
+                                class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-[#161616] text-sm font-bold text-slate-900 dark:text-white placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100 dark:focus:ring-sky-400/10 tracking-widest uppercase transition-all">
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-2 px-0.5">Buka aplikasi Wallet → Profil → salin 10 karakter ID kamu.</p>
+                        <p id="cp-id-error" class="text-xs text-red-500 hidden px-0.5 mt-1"></p>
+                    </div>
+                    <div class="rounded-xl bg-sky-50/70 dark:bg-sky-400/5 border border-sky-100 dark:border-sky-400/10 px-3.5 py-2.5 text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Belum punya akun ClincooPay? Daftar gratis di <a href="https://muzawwied.github.io/Wallet/" target="_blank" rel="noopener" class="text-sky-600 dark:text-sky-400 font-bold underline underline-offset-2">muzawwied.github.io/Wallet</a>
+                    </div>
+                    <button id="cp-send-btn" onclick="sendRequest()" class="cp-btn-primary w-full py-3.5 text-white rounded-xl font-bold text-sm">Kirim Permintaan</button>
+                    <p class="flex items-start gap-1.5 text-[10px] text-slate-400 leading-relaxed">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 shrink-0 mt-px text-sky-400"></i>
+                        Setelah terkirim: konfirmasi di notifikasi Wallet, lalu masukkan PIN wallet di sini. PIN tidak pernah disimpan Clincoo.
+                    </p>
                 </div>
             </div>
 
             <!-- STEP 2: MENUNGGU KONFIRMASI DI APLIKASI WALLET -->
-            <div id="step-wait" class="w-full otp-hidden">
-                <div class="py-8 text-center">
-                    <div class="w-10 h-10 rounded-full bg-sky-50 dark:bg-sky-400/10 flex items-center justify-center mx-auto">
-                        <svg class="animate-spin text-sky-400" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <div id="step-wait" class="w-full otp-hidden animate-fade-in">
+                <div class="cp-card px-5 py-8 text-center">
+                    <div class="relative w-12 h-12 mx-auto mb-4">
+                        <div class="absolute inset-0 rounded-full bg-sky-100 dark:bg-sky-400/10 cp-pulse" style="box-shadow:none"></div>
+                        <div class="absolute inset-0 flex items-center justify-center text-sky-500 dark:text-sky-400"><i data-lucide="bell-ring" class="w-5 h-5"></i></div>
                     </div>
-                    <p class="text-sm font-bold text-slate-900 dark:text-white mt-3">Menunggu Konfirmasi</p>
+                    <p class="text-sm font-bold text-slate-900 dark:text-white">Menunggu Konfirmasi</p>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed px-2">Buka aplikasi <b>Wallet</b> → <b>Notifikasi</b> → tekan <b>Konfirmasi</b> pada permintaan ClincooPay.</p>
-                    <button onclick="cancelWait()" class="mt-4 px-6 py-2.5 rounded-full border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:border-sky-400 hover:text-sky-500 transition-all">Batalkan</button>
+                    <button onclick="cancelWait()" class="mt-5 px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:border-sky-400 hover:text-sky-500 transition-all">Batalkan</button>
                 </div>
             </div>
 
             <!-- STEP 3: INPUT PIN WALLET -->
-            <div id="step-pin" class="w-full space-y-3 animate-fade-in">
-                <div>
-                    <div class="flex items-center space-x-2 mb-2">
-                        <div class="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"><i data-lucide="check" class="w-3.5 h-3.5"></i></div>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400">Dompet sudah dikonfirmasi di aplikasi Wallet</p>
+            <div id="step-pin" class="w-full otp-hidden animate-fade-in">
+                <div class="cp-card p-5">
+                    <div class="flex items-center gap-2 mb-3 rounded-xl bg-emerald-50 dark:bg-emerald-400/5 border border-emerald-100 dark:border-emerald-400/10 px-3 py-2">
+                        <div class="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"><i data-lucide="check" class="w-3 h-3"></i></div>
+                        <p class="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">Dompet sudah dikonfirmasi di aplikasi Wallet</p>
                     </div>
                     <p class="text-sm font-bold text-slate-900 dark:text-white text-center">Masukkan PIN Wallet</p>
                     <p class="text-[10px] text-slate-400 mt-1 text-center">Ketuk angka di keypad di bawah. PIN tidak pernah disimpan Clincoo.</p>
                     <div id="cp-pin-dots" class="pin-dots"></div>
                     <p id="cp-pin-error" class="text-xs text-red-500 hidden text-center" style="min-height: 1em;"></p>
                     <div id="cp-pin-pad" class="pin-pad"></div>
+                    <button id="cp-pin-btn" onclick="confirmPin()" class="cp-btn-primary w-full py-3.5 text-white rounded-xl font-bold text-sm mt-5">Konfirmasi &amp; Hubungkan</button>
                 </div>
-                <button id="cp-pin-btn" onclick="confirmPin()" class="w-full py-3 bg-sky-400 text-white rounded-full font-semibold text-sm hover:bg-sky-500 transition-all active:scale-[0.98]" style="box-shadow:0 4px 12px rgba(56,189,248,.25)">Konfirmasi &amp; Hubungkan</button>
             </div>
 
             <!-- STEP 4: TERHUBUNG -->
-            <div id="step-done" class="w-full otp-hidden">
-                <div class="py-6 text-center">
-                    <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
-                        <i data-lucide="check-circle" class="w-6 h-6"></i>
+            <div id="step-done" class="w-full otp-hidden animate-fade-in">
+                <div class="cp-card px-5 py-8 text-center">
+                    <div class="w-14 h-14 rounded-full bg-emerald-50 dark:bg-emerald-400/10 text-emerald-500 dark:text-emerald-400 flex items-center justify-center mx-auto mb-1" style="box-shadow: 0 0 0 6px rgba(16,185,129,.08);">
+                        <i data-lucide="check-circle" class="w-7 h-7"></i>
                     </div>
                     <p class="text-sm font-bold text-slate-900 dark:text-white mt-3">Dompet Terhubung</p>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Terhubung ke <span id="cp-done-addr" class="font-semibold"></span></p>
-                    <p class="text-base font-bold text-slate-900 dark:text-white mt-2.5" id="cp-done-balance"></p>
-                    <p class="text-[10px] text-slate-400 mt-1">Saldo Clincoo dan Wallet kini tersinkron otomatis.</p>
+                    <div class="mt-4 rounded-xl bg-slate-50 dark:bg-[#161616] border border-slate-100 dark:border-slate-800 px-4 py-3.5">
+                        <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Saldo Tersinkron</p>
+                        <p class="text-lg font-extrabold text-slate-900 dark:text-white mt-0.5" id="cp-done-balance"></p>
+                        <p class="text-[10px] text-slate-400 mt-1">Saldo Clincoo dan Wallet kini tersinkron otomatis.</p>
+                    </div>
                     <div class="space-y-2 mt-4">
-                        <button onclick="location.href='../../'" class="w-full py-3 bg-sky-400 text-white rounded-full font-semibold text-sm hover:bg-sky-500 transition-all" style="box-shadow:0 4px 12px rgba(56,189,248,.25)">Kembali ke Dompet</button>
-                        <button id="cp-unlink-btn" onclick="doUnlink()" class="w-full py-2.5 rounded-full border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:border-slate-900 dark:hover:border-white transition-all">Putuskan Dompet</button>
+                        <button onclick="location.href='../../'" class="cp-btn-primary w-full py-3 text-white rounded-xl font-bold text-sm">Kembali ke Dompet</button>
+                        <button id="cp-unlink-btn" onclick="doUnlink()" class="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:border-red-300 dark:hover:border-red-400/40 hover:text-red-500 transition-all">Putuskan Dompet</button>
                     </div>
                 </div>
             </div>
         </main>
 
-        <footer class="w-full px-5 pb-6 pt-2" style="max-width: 24rem; margin: 0 auto">
-            <div class="flex items-center justify-center gap-3 mb-2">
-                <a href="https://www.tiktok.com/@vylonium.vy" target="_blank" rel="noopener" aria-label="TikTok" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-400/10 transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.9 2.9 0 1 1-2.31-2.83V9.37a6.36 6.36 0 1 0 5.76 6.35V8.71a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.14z"/></svg></a>
-                <a href="https://www.instagram.com/vylonium.vy" target="_blank" rel="noopener" aria-label="Instagram" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-400/10 transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.012-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-                <a href="https://wa.me/6283849297259" target="_blank" rel="noopener" aria-label="WhatsApp" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-400/10 transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652a11.98 11.98 0 0 0 5.71 1.448h.006c6.585 0 11.946-5.336 11.949-11.897 0-3.179-1.24-6.165-3.495-8.411M12.05 21.785h-.004a9.87 9.87 0 0 1-5.031-1.378l-.36-.214-3.742.976 1.005-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.002-5.45 4.457-9.884 9.942-9.884 2.652 0 5.145 1.035 7.021 2.91a9.83 9.83 0 0 1 2.909 6.99c-.003 5.45-4.458 9.884-9.995 9.884"/></svg></a>
-                <a href="https://github.com/muzawwied" target="_blank" rel="noopener" aria-label="GitHub" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-400/10 transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
+        <footer class="w-full px-5 pb-6 pt-3 mt-auto" style="max-width: 26rem; margin: 0 auto;">
+            <div class="border-t border-slate-100 dark:border-slate-800/70 pt-4 flex flex-col items-center gap-2.5">
+                <div class="flex items-center justify-center gap-1">
+                    <a href="https://www.tiktok.com/@vylonium.vy" target="_blank" rel="noopener" aria-label="TikTok" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 dark:text-slate-600 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-400/10 transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.9 2.9 0 1 1-2.31-2.83V9.37a6.36 6.36 0 1 0 5.76 6.35V8.71a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.14z"/></svg></a>
+                    <a href="https://www.instagram.com/vylonium.vy" target="_blank" rel="noopener" aria-label="Instagram" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 dark:text-slate-600 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-400/10 transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.012-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                    <a href="https://wa.me/6283849297259" target="_blank" rel="noopener" aria-label="WhatsApp" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 dark:text-slate-600 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-400/10 transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652a11.98 11.98 0 0 0 5.71 1.448h.006c6.585 0 11.946-5.336 11.949-11.897 0-3.179-1.24-6.165-3.495-8.411M12.05 21.785h-.004a9.87 9.87 0 0 1-5.031-1.378l-.36-.214-3.742.976 1.005-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.002-5.45 4.457-9.884 9.942-9.884 2.652 0 5.145 1.035 7.021 2.91a9.83 9.83 0 0 1 2.909 6.99c-.003 5.45-4.458 9.884-9.995 9.884"/></svg></a>
+                    <a href="https://github.com/muzawwied" target="_blank" rel="noopener" aria-label="GitHub" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 dark:text-slate-600 hover:text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-400/10 transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
+                </div>
+                <p class="text-center text-[10px] text-slate-300 dark:text-slate-600">© 2026 ClincooPay — bagian dari Clincoo</p>
             </div>
-            <p class="text-center text-[10px] text-slate-400">© 2026 ClincooPay — bagian dari Clincoo</p>
         </footer>
     </div>
 
     <!-- Modal -->
     <div id="system-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
-        <div class="bg-white dark:bg-[#121212] rounded-xl p-5 md:p-6 w-full max-w-sm relative z-10 shadow-xl border border-gray-100 dark:border-gray-800 animate-fade-in text-center">
+        <div class="bg-white dark:bg-[#121212] rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl border border-slate-100 dark:border-slate-800 animate-fade-in text-center">
             <div id="modal-icon-wrap" class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 mx-auto">
                 <i data-lucide="check-circle" class="w-6 h-6"></i>
             </div>
-            <h3 id="modal-title" class="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2"></h3>
+            <h3 id="modal-title" class="text-base font-bold text-gray-900 dark:text-white mb-2"></h3>
             <p id="modal-message" class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed"></p>
-            <button onclick="closeModal()" class="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-black rounded-lg font-semibold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors shadow-sm active:scale-95">Tutup</button>
+            <button onclick="closeModal()" class="cp-btn-primary w-full py-3 text-white rounded-xl font-bold text-sm active:scale-[0.98] transition-all">Tutup</button>
         </div>
     </div>
 
@@ -230,7 +296,7 @@
         });
 
         function goBack() {
-            if (window.ClincooBack) { window.ClincoBack('../'); return; }
+            if (window.ClincooBack) { window.ClincooBack('../'); return; }
             if (history.length > 1) { history.back(); } else { location.replace('../'); }
         }
 
@@ -242,10 +308,38 @@
             ['step-check', 'step-id', 'step-wait', 'step-pin', 'step-done'].forEach(function (s) {
                 document.getElementById(s).classList.toggle('otp-hidden', s !== id);
             });
+            var map = { 'step-id': 1, 'step-wait': 2, 'step-pin': 3, 'step-done': 'done' };
+            setStepIndicator(map.hasOwnProperty(id) ? map[id] : null);
+        }
+        function setStepIndicator(state) {
+            var wrap = document.getElementById('cp-steps'); if (!wrap) return;
+            if (state == null) { wrap.classList.add('otp-hidden'); return; }
+            wrap.classList.remove('otp-hidden');
+            var doneAll = state === 'done';
+            var cur = doneAll ? 4 : state;
+            for (var i = 1; i <= 3; i++) {
+                var st = document.getElementById('cp-si-' + i); if (!st) continue;
+                st.classList.remove('done', 'active');
+                if (doneAll || i < cur) st.classList.add('done');
+                else if (i === cur) st.classList.add('active');
+            }
+            var s1 = document.getElementById('cp-sep-1'), s2 = document.getElementById('cp-sep-2');
+            if (s1) s1.classList.toggle('done', doneAll || cur > 1);
+            if (s2) s2.classList.toggle('done', doneAll || cur > 2);
         }
         function showModal(title, message, okIcon) {
-        return;
-    }
+            var m = document.getElementById('system-modal'); if (!m) return;
+            document.getElementById('modal-title').textContent = title || '';
+            document.getElementById('modal-message').textContent = message || '';
+            var good = okIcon !== false;
+            var w = document.getElementById('modal-icon-wrap');
+            if (w) {
+                w.className = 'w-12 h-12 rounded-full flex items-center justify-center mb-4 mx-auto ' + (good ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600');
+                w.innerHTML = '<i data-lucide="' + (good ? 'check-circle' : 'alert-circle') + '" class="w-6 h-6"></i>';
+                try { lucide.createIcons(); } catch (e) {}
+            }
+            m.classList.remove('hidden'); m.classList.add('flex');
+        }
         function closeModal() {
             var m = document.getElementById('system-modal');
             m.classList.add('hidden'); m.classList.remove('flex');
@@ -266,7 +360,7 @@
 
         function renderDone(addr, balance) {
             document.getElementById('cp-done-addr').textContent = maskAddr(addr);
-            document.getElementById('cp-done-balance').textContent = balance == null ? '' : 'Saldo tersinkron: ' + fmtIDR(balance);
+            document.getElementById('cp-done-balance').textContent = balance == null ? '—' : 'Rp ' + fmtIDR(balance);
         }
 
         async function sendRequest() {
