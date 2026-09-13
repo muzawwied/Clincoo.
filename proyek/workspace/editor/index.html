@@ -13,18 +13,6 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://unpkg.com; img-src 'self' https: data: blob:; connect-src 'self' https: blob:;">
   <title>Editor Kode — Clincoo</title>
 
-  <style>/* fallback styling modal konfirmasi editor (tahan CDN gagal) */
-  #editor-exit-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.6); z-index: 999; padding: 1rem; }
-  #editor-exit-modal > div { background: #12151c; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 1rem; width: 100%; max-width: 300px; }
-  #editor-exit-modal h3 { color: #fff; font-weight: 500; font-size: .9375rem; margin: 0 0 .25rem; }
-  #editor-exit-modal p { font-size: .8125rem; color: #9ca3af; margin: 0 0 1rem; }
-  #editor-exit-modal span { color: #e5e7eb; font-weight: 500; }
-  #editor-exit-modal button { cursor: pointer; font-size: .8125rem; }
-  #editor-exit-modal #ee-save { background: #000; color: #fff; font-weight: 500; border-radius: 6px; padding: .5rem; width: 100%; }
-  #editor-exit-modal #ee-discard { border: 1px solid rgba(255,255,255,.12); color: #d1d5db; background: transparent; border-radius: 6px; padding: .5rem; width: 100%; margin-top: .375rem; }
-  #editor-exit-modal #ee-cancel { color: #6b7280; background: none; border: none; padding: .4rem 0 0; width: 100%; margin-top: .125rem; }
-  #editor-exit-modal .ee-btns { display: flex; flex-direction: column; }
-  </style>
 
     <meta name="description" content="Editor Kode — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
     <meta name="robots" content="noindex">
@@ -42,45 +30,134 @@
     <meta name="twitter:title" content="Editor Kode — Clincoo">
     <meta name="twitter:description" content="Editor Kode — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
     <meta name="twitter:image" content="https://muzawwied.github.io/Clincoo./assets/og-image.jpg">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; background-color: #141820; }
-    .CodeMirror {
-      width: 100% !important;
-      height: 100% !important;
-      font-family: 'Fira Code', monospace;
-      font-size: 14px;
-      background-color: transparent !important;
+    /* ===== Clincoo Code — style editor workspace (dari repo Clincoo-Editor) ===== */
+    :root{ --err:#e55454; --ok:#7dca7d; --status:#131316; --radius:10px; }
+    body{
+      --accent:#4a4a55; --accent-soft:rgba(74,74,85,.12); --btn-bg:#1a1a1e;
+      --bg:#f4f4f6; --bg2:#ececef; --bg3:#e4e4e8; --bg4:#dcdce2;
+      --line:#d8d8de; --line2:#c8c8d0;
+      --text:#24242a; --text2:#5c5c66; --text3:#90909a;
+      --tab-bg:#e9e9ee; --editor-bg:#ffffff;
+      --shadow:0 12px 40px rgba(0,0,0,.18);
     }
-    .cm-s-dracula.CodeMirror {
-      background-color: #12151c !important;
-      color: #f8f8f2 !important;
+    body.dark-mode{
+      --accent:#b6b6c2; --accent-soft:rgba(182,182,194,.13); --btn-bg:#34343c;
+      --bg:#141416; --bg2:#1a1a1d; --bg3:#202024; --bg4:#26262b;
+      --line:#2c2c33; --line2:#3a3a42;
+      --text:#d6d6dc; --text2:#9a9aa4; --text3:#6c6c76;
+      --tab-bg:#1d1d21; --editor-bg:#1a1a1d;
+      --shadow:0 12px 40px rgba(0,0,0,.5);
     }
-    .cm-s-dracula .CodeMirror-gutters {
-      background-color: #151821 !important;
-      border-right: 1px solid #212733 !important;
-    }
-    .cm-s-dracula .CodeMirror-linenumber {
-      color: #4d5668 !important;
-    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;overflow:hidden}
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:13px;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+    button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+    svg{flex-shrink:0}
+    .hidden{display:none!important}
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:6px;border:2px solid transparent;background-clip:content-box}
+    ::-webkit-scrollbar-thumb:hover{background:var(--text3);border:2px solid transparent;background-clip:content-box}
+
+    /* ===== Title bar ===== */
+    #titlebar{height:48px;background:var(--bg2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 10px;gap:10px;flex-shrink:0;user-select:none}
+    .tb-btn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--text2)}
+    .tb-btn:hover{background:var(--bg4);color:var(--text)}
+    #logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:14px;letter-spacing:-.01em;padding:0 4px}
+    #logo svg{width:22px;height:22px;color:var(--text)}
+    #logo b{color:var(--text)}#logo span{color:var(--accent)}
+    #titlebar .spacer{flex:1}
+    #save-btn{display:flex;align-items:center;gap:7px;height:32px;padding:0 13px;border-radius:8px;background:var(--btn-bg);color:#fff;font-weight:600;font-size:12.5px;transition:.15s}
+    #save-btn:hover{filter:brightness(1.12)}
+    #save-btn:disabled{opacity:.4;pointer-events:none}
+
+    /* ===== Tabs bar ===== */
+    #tabsbar{height:40px;background:var(--tab-bg);display:flex;align-items:stretch;border-bottom:1px solid var(--line);flex-shrink:0}
+    #tabs{display:flex;overflow-x:auto;scrollbar-width:none}
+    #tabs::-webkit-scrollbar{display:none}
+    .tab{display:flex;align-items:center;gap:7px;padding:0 16px;font-size:12.6px;color:var(--text2);cursor:default;border-right:1px solid var(--line);position:relative;white-space:nowrap;max-width:260px}
+    .tab .nm{overflow:hidden;text-overflow:ellipsis;font-weight:500}
+    .tab.active{color:var(--text);background:var(--editor-bg)}
+    .tab.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
+    .tab .dirty{width:7px;height:7px;border-radius:50%;background:var(--text2);display:none}
+    .tab.dirty .dirty{display:block}
+    .fico{width:15px;height:15px;display:inline-grid;place-items:center;flex-shrink:0}
+    .fico svg{width:15px;height:15px;display:block}
+
+    /* ===== Editor stage ===== */
+    #stage{flex:1;display:flex;min-height:0;position:relative}
+    #editor-code-container{flex:1;display:flex;min-width:0}
+    #editor-code-container .CodeMirror{flex:1;height:100%;font-family:'Fira Code',monospace;font-size:14px;line-height:1.65}
+    .media-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;background:var(--editor-bg)}
+    .media-inner{display:flex;flex-direction:column;align-items:center;gap:26px;width:100%;max-width:420px}
+    .audio-circle{width:112px;height:112px;border-radius:50%;background:var(--bg3);border:1px solid var(--line2);display:grid;place-items:center;color:var(--accent)}
+    .audio-circle svg{width:52px;height:52px}
+    #audio-player{width:100%;border-radius:12px;outline:none}
+    .media-card{background:var(--bg3);border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--shadow);max-width:100%}
+    .media-card.wide{width:100%;max-width:960px;display:flex;justify-content:center}
+    #video-player{width:100%;max-height:calc(100vh - 200px);border-radius:9px;background:#000;outline:none;object-fit:contain}
+    #image-preview{max-width:100%;max-height:calc(100vh - 200px);object-fit:contain;border-radius:9px;display:block}
+
+    /* ===== CodeMirror theme: clincoo-dark / clincoo-light ===== */
+    .CodeMirror{background:var(--editor-bg)!important;color:var(--text)!important}
+    .CodeMirror-gutters{background:var(--editor-bg)!important;border-right:1px solid var(--line)!important}
+    .CodeMirror-linenumber{color:var(--text3)!important}
+    .CodeMirror-activeline-background{background:rgba(127,127,140,.08)}
+    .CodeMirror-selected{background:rgba(127,127,140,.22)!important}
+    .CodeMirror-focused .CodeMirror-selected{background:rgba(127,127,140,.26)!important}
+    .CodeMirror-cursor{border-left:2px solid var(--accent)!important}
+    .CodeMirror-matchingbracket{color:var(--accent)!important;font-weight:600;text-decoration:none!important}
+    .cm-s-clincoo-dark .cm-keyword{color:#569cd6}.cm-s-clincoo-dark .cm-atom{color:#569cd6}
+    .cm-s-clincoo-dark .cm-number{color:#b5cea8}.cm-s-clincoo-dark .cm-def{color:#9cdcfe}
+    .cm-s-clincoo-dark .cm-variable{color:#9cdcfe}.cm-s-clincoo-dark .cm-variable-2{color:#9cdcfe}
+    .cm-s-clincoo-dark .cm-variable-3{color:#9cdcfe}.cm-s-clincoo-dark .cm-property{color:#9cdcfe}
+    .cm-s-clincoo-dark .cm-operator{color:#d4d4d4}.cm-s-clincoo-dark .cm-comment{color:#6a9955;font-style:italic}
+    .cm-s-clincoo-dark .cm-string{color:#ce9178}.cm-s-clincoo-dark .cm-string-2{color:#ce9178}
+    .cm-s-clincoo-dark .cm-meta{color:#c586c0}.cm-s-clincoo-dark .cm-qualifier{color:#d7ba7d}
+    .cm-s-clincoo-dark .cm-builtin{color:#dcdcaa}.cm-s-clincoo-dark .cm-bracket{color:#d6d6dc}
+    .cm-s-clincoo-dark .cm-tag{color:#569cd6}.cm-s-clincoo-dark .cm-attribute{color:#9cdcfe}
+    .cm-s-clincoo-dark .cm-error{color:#e55454}
+    .cm-s-clincoo-light .cm-keyword{color:#0000ff}.cm-s-clincoo-light .cm-atom{color:#0000ff}
+    .cm-s-clincoo-light .cm-number{color:#098658}.cm-s-clincoo-light .cm-def{color:#001080}
+    .cm-s-clincoo-light .cm-variable{color:#001080}.cm-s-clincoo-light .cm-variable-2{color:#001080}
+    .cm-s-clincoo-light .cm-variable-3{color:#001080}.cm-s-clincoo-light .cm-property{color:#001080}
+    .cm-s-clincoo-light .cm-operator{color:#24242a}.cm-s-clincoo-light .cm-comment{color:#008000;font-style:italic}
+    .cm-s-clincoo-light .cm-string{color:#a31515}.cm-s-clincoo-light .cm-string-2{color:#a31515}
+    .cm-s-clincoo-light .cm-meta{color:#795e26}.cm-s-clincoo-light .cm-qualifier{color:#0000cc}
+    .cm-s-clincoo-light .cm-builtin{color:#0000ff}.cm-s-clincoo-light .cm-bracket{color:#24242a}
+    .cm-s-clincoo-light .cm-tag{color:#800000}.cm-s-clincoo-light .cm-attribute{color:#e50000}
+    .cm-s-clincoo-light .cm-error{color:#e55454}
+    body.dark-mode .CodeMirror-linenumber{color:#4c4c56!important}
+    body.dark-mode .CodeMirror-activeline .CodeMirror-linenumber{color:#9a9aa4!important}
+    body:not(.dark-mode) .CodeMirror-activeline .CodeMirror-linenumber{color:#5c5c66!important}
+
+    /* ===== Status bar ===== */
+    #statusbar{height:25px;background:var(--status);color:#fff;display:flex;align-items:center;font-size:11.5px;flex-shrink:0;user-select:none}
+    #statusbar .sb{padding:0 10px;height:100%;display:flex;align-items:center;gap:5px;cursor:default;white-space:nowrap;color:rgba(255,255,255,.85)}
+    #statusbar .spacer{flex:1}
+    #statusbar .sb.err{color:#ff9b9b}
+    #statusbar .sb.ok{color:rgba(255,255,255,.85)}
+
+    /* ===== Modal konfirmasi (minimalis) ===== */
+    .ee-overlay{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:1rem}
+    .ee-card{background:var(--bg3);border:1px solid var(--line2);border-radius:8px;padding:1rem;width:100%;max-width:300px;box-shadow:var(--shadow)}
+    .ee-card h3{color:var(--text);font-weight:500;font-size:.9375rem;margin:0 0 .25rem}
+    .ee-card p{font-size:.8125rem;color:var(--text2);margin:0 0 1rem}
+    .ee-card p span{color:var(--text);font-weight:500}
+    .ee-btns{display:flex;flex-direction:column}
+    .ee-btns button{cursor:pointer;font-size:.8125rem;border-radius:6px;width:100%}
+    #ee-save{background:#000;color:#fff;font-weight:500;padding:.5rem}
+    #ee-discard{border:1px solid var(--line2);color:var(--text);background:transparent;padding:.5rem;margin-top:.375rem}
+    #ee-cancel{color:var(--text3);background:none;border:none;padding:.4rem 0 0;margin-top:.125rem}
+    #ee-cancel:hover{color:var(--text2)}
   </style>
 <!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
 <script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
@@ -100,55 +177,60 @@
 <script src="../../../js/i18n-dict.js" defer></script>
 <script src="../../../js/i18n.js" defer></script>
 </head>
-<body class="bg-[#141820]">
+<body>
     <script>(function(){var t=localStorage.getItem("clincoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
 
 
-  <div id="page-file-editor" class="page-view w-full min-h-screen flex flex-col bg-[#141820] text-gray-200 font-sans overflow-hidden">
-    <div class="bg-[#1b202b] border-b border-[#2a303f] flex items-center px-4 h-12 flex-shrink-0 select-none justify-between">
-      <div class="flex items-center gap-3 min-w-0">
-        <button onclick="navigateBackFromEditor()" class="p-1.5 text-gray-400 hover:text-white rounded-lg transition-colors flex items-center gap-1.5 focus:outline-none" title="Kembali ke Workspace">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-          <span class="text-xs font-medium text-gray-300 hidden sm:inline">Kembali</span>
-        </button>
-        <div class="h-4 w-px bg-[#2a303f]"></div>
-        <div class="flex items-center gap-2 min-w-0">
-          <span id="editor-file-icon" class="flex-shrink-0"></span>
-          <span id="editor-filename-label" class="text-sm font-semibold text-gray-100 truncate">../index/</span>
-        </div>
-      </div>
+  <div id="titlebar">
+    <button id="back-btn" class="tb-btn" onclick="navigateBackFromEditor()" title="Kembali ke Workspace">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+    <div id="logo">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg>
+      <b>Clincoo</b> <span>Code</span>
     </div>
-
-    <div class="relative flex-1 flex overflow-hidden bg-[#12151c]">
-      <div id="editor-code-container" class="w-full h-full flex flex-1 overflow-hidden">
-        <textarea id="editor-code-textarea" class="hidden"></textarea>
-      </div>
-      <div id="editor-audio-container" class="hidden w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#12151c]">
-        <div class="w-full flex-1 flex flex-col items-center justify-center max-w-md">
-          <div class="w-28 h-28 rounded-full bg-[#1b202b] border-2 border-[#2d3547] flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-            <svg viewBox="0 0 24 24" class="w-14 h-14 text-red-500 ml-1" fill="currentColor">
-              <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/>
-            </svg>
-          </div>
-          <audio id="audio-player" controls class="w-full rounded-full shadow-lg focus:outline-none"></audio>
-        </div>
-      </div>
-      <div id="editor-video-container" class="hidden w-full h-full flex flex-col items-center justify-center p-6 text-center bg-black">
-        <div class="w-full flex-1 flex items-center justify-center max-w-4xl">
-          <video id="video-player" controls class="w-full max-h-[80vh] rounded-lg shadow-2xl focus:outline-none bg-black object-contain"></video>
-        </div>
-      </div>
-      <div id="editor-image-container" class="hidden w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#0d1017]">
-        <div class="w-full flex-1 flex items-center justify-center max-w-4xl">
-          <div class="p-2 bg-[#1b202b]/50 border border-[#2d3547]/50 rounded-xl shadow-2xl overflow-hidden flex items-center justify-center max-h-full">
-            <img id="image-preview" src="" alt="Preview" class="max-w-full max-h-[75vh] object-contain rounded-lg">
-          </div>
-        </div>
+    <div class="spacer"></div>
+    <button id="save-btn" onclick="editorSaveInPlace()" disabled title="Simpan">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+      <span>Simpan</span>
+    </button>
+  </div>
+  <div id="tabsbar">
+    <div id="tabs">
+      <div class="tab active" id="editor-tab">
+        <span class="ico" id="editor-file-icon"></span>
+        <span class="nm" id="editor-filename-label">…</span>
+        <span class="dirty"></span>
       </div>
     </div>
   </div>
+  <div id="stage">
+    <div id="editor-code-container">
+      <textarea id="editor-code-textarea" class="hidden"></textarea>
+    </div>
+    <div id="editor-audio-container" class="hidden media-wrap">
+      <div class="media-inner">
+        <div class="audio-circle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 3h-7v10.55A3.98 3.98 0 0 0 11 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h5v6.55A3.98 3.98 0 0 0 14 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V3z"/></svg>
+        </div>
+        <audio id="audio-player" controls></audio>
+      </div>
+    </div>
+    <div id="editor-video-container" class="hidden media-wrap">
+      <div class="media-card wide"><video id="video-player" controls></video></div>
+    </div>
+    <div id="editor-image-container" class="hidden media-wrap">
+      <div class="media-card"><img id="image-preview" src="" alt="Preview"></div>
+    </div>
+  </div>
+  <div id="statusbar">
+    <div class="sb" id="sb-path">workspace/</div>
+    <div class="spacer"></div>
+    <div class="sb ok" id="sb-saved">Tersimpan</div>
+    <div class="sb" id="sb-pos"></div>
+  </div>
 
-  <script>
+    <script>
     const WS_CLOUD_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
     let currentFolderPath = 'root';
     let editingFileName = null;
@@ -304,26 +386,73 @@
 
     function getFileIcon(filename) {
       let ext = getFileExtension(filename);
+      const w = function(inner){ return '<span class="fico">' + inner + '</span>'; };
       switch(ext) {
         case 'mp3': case 'wav': case 'ogg': case 'flac': case 'm4a':
-          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="#E04A3A"><path d="M20 3h-7v10.55A3.98 3.98 0 0 0 11 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h5v6.55A3.98 3.98 0 0 0 14 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V3z"/></svg></div>`;
+          return w('<svg viewBox="0 0 24 24" fill="#E04A3A"><path d="M20 3h-7v10.55A3.98 3.98 0 0 0 11 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h5v6.55A3.98 3.98 0 0 0 14 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V3z"/></svg>');
         case 'mp4': case 'avi': case 'mkv': case 'mov': case 'webm':
-          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none"><rect x="2" y="4" width="20" height="16" rx="3.5" fill="#5B51DC"/><polygon points="10,8.5 15,12 10,15.5" fill="#FFFFFF"/></svg></div>`;
+          return w('<svg viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="3.5" fill="#5B51DC"/><polygon points="10,8.5 15,12 10,15.5" fill="#FFFFFF"/></svg>');
         case 'png': case 'jpg': case 'jpeg': case 'svg': case 'gif': case 'webp':
-          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="8.5" cy="8.5" r="1.5" fill="#0D9488" stroke="none" /><path d="M21 15l-5-5L5 21" /></svg></div>`;
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5" fill="#0D9488" stroke="none"/><path d="M21 15l-5-5L5 21"/></svg>');
         case 'py': case 'python':
-          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4"><path fill="#3776AB" d="M11.898 2c-3.15 0-5.068.322-5.068 2.373v1.89h10.136v.945H6.83c-2.453 0-4.33 1.488-4.33 4.33 0 2.843 1.877 4.33 4.33 4.33h1.892v-2.373c0-2.316 1.83-4.254 4.148-4.254h5.068c1.94 0 2.453-.562 2.453-2.373 0-2.115-1.913-4.868-8.523-4.868zm-2.58 1.418a.945.945 0 1 1 0 1.89.945.945 0 0 1 0-1.89z"/><path fill="#FFD43B" d="M12.102 22c3.15 0 5.068-.322 5.068-2.373v-1.89H7.034v-.945h10.136c2.453 0 4.33-1.488 4.33-4.33 0-2.843-1.877-4.33-4.33-4.33h-1.892v2.373c0 2.316-1.83 4.254-4.148 4.254H6.062c-1.94 0-2.453.562-2.453 2.373 0 2.115 1.913 4.868 8.493 4.868zm2.58-1.418a.945.945 0 1 1 0-1.89.945.945 0 0 1 0 1.89z"/></svg></div>`;
+          return w('<svg viewBox="0 0 24 24"><path fill="#3776AB" d="M11.898 2c-3.15 0-5.068.322-5.068 2.373v1.89h10.136v.945H6.83c-2.453 0-4.33 1.488-4.33 4.33 0 2.843 1.877 4.33 4.33 4.33h1.892v-2.373c0-2.316 1.83-4.254 4.148-4.254h5.068c1.94 0 2.453-.562 2.453-2.373 0-2.115-1.913-4.868-8.523-4.868zm-2.58 1.418a.945.945 0 1 1 0 1.89.945.945 0 0 1 0-1.89z"/><path fill="#FFD43B" d="M12.102 22c3.15 0 5.068-.322 5.068-2.373v-1.89H7.034v-.945h10.136c2.453 0 4.33-1.488 4.33-4.33 0-2.843-1.877-4.33-4.33-4.33h-1.892v2.373c0 2.316-1.83 4.254-4.148 4.254H6.062c-1.94 0-2.453.562-2.453 2.373 0 2.115 1.913 4.868 8.493 4.868zm2.58-1.418a.945.945 0 1 1 0-1.89.945.945 0 0 1 0 1.89z"/></svg>');
         case 'txt':
-          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#546E7A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`;
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#546E7A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>');
         case 'html': case 'htm':
-          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#E34F26" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div>`;
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#E34F26" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>');
         case 'js': case 'ts': case 'jsx':
-          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#F7DF1E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4" fill="#F7DF1E"/><text x="12" y="16" font-size="8" font-weight="800" fill="#000" stroke="none" text-anchor="middle">JS</text></svg></div>`;
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#F7DF1E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4" fill="#F7DF1E"/><text x="12" y="16" font-size="8" font-weight="800" fill="#000" stroke="none" text-anchor="middle">JS</text></svg>');
         case 'css':
-          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="#16A34A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><text x="12" y="15.5" font-size="7" font-weight="800" fill="#16A34A" stroke="none" text-anchor="middle">css</text></svg></div>`;
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><text x="12" y="15.5" font-size="7" font-weight="800" fill="#16A34A" stroke="none" text-anchor="middle">css</text></svg>');
         default:
-          return `<div class="flex-shrink-0 w-5 h-5 flex items-center justify-center text-[#718096]"><svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`;
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>');
       }
+    }
+
+    // Status bar & tab dirty — dipanggil setiap perubahan/kursor
+    function updateEditorStatus() {
+      const isCode = editingFileName && getFileType(editingFileName) === 'code';
+      const tab = document.getElementById('editor-tab');
+      const sbSaved = document.getElementById('sb-saved');
+      const sbPos = document.getElementById('sb-pos');
+      const sbPath = document.getElementById('sb-path');
+      const saveBtn = document.getElementById('save-btn');
+      if (tab) tab.classList.toggle('dirty', !!(isCode && editorDirty));
+      if (saveBtn) saveBtn.disabled = !isCode;
+      if (sbPath) {
+        const folder = (currentFolderPath === 'root' || !currentFolderPath) ? '' : currentFolderPath + '/';
+        sbPath.textContent = 'workspace/' + folder + (editingFileName || '');
+      }
+      if (sbSaved) {
+        if (!editingFileName) { sbSaved.textContent = ''; }
+        else if (!isCode) { sbSaved.textContent = 'Media'; sbSaved.className = 'sb'; }
+        else if (editorDirty) { sbSaved.textContent = '\u25CF Belum tersimpan'; sbSaved.className = 'sb err'; }
+        else { sbSaved.textContent = 'Tersimpan'; sbSaved.className = 'sb ok'; }
+      }
+      if (sbPos) {
+        if (isCode && codeEditor) {
+          const pos = codeEditor.getCursor();
+          sbPos.textContent = 'Ln ' + (pos.line + 1) + ', Col ' + (pos.ch + 1);
+        } else { sbPos.textContent = ''; }
+      }
+    }
+
+    // Simpan tanpa keluar (tombol Simpan di title bar)
+    async function editorSaveInPlace() {
+      if (!editingFileName || !codeEditor || getFileType(editingFileName) !== 'code') return;
+      const codeContent = codeEditor.getValue();
+      if (Array.isArray(projectFilesData[currentFolderPath])) {
+        const itemIndex = projectFilesData[currentFolderPath].findIndex(function(i) { return i.type === 'file' && i.name === editingFileName; });
+        if (itemIndex !== -1) {
+          projectFilesData[currentFolderPath][itemIndex].content = codeContent;
+          projectFilesData[currentFolderPath][itemIndex].size = wsSizeLabel(codeContent);
+        }
+      }
+      saveData();
+      editorOriginalContent = codeContent;
+      editorDirty = false;
+      updateEditorStatus();
+      try { await wsCloudPushNow(); } catch (e) {}
     }
 
 
@@ -332,19 +461,22 @@
       if (codeEditor) return;
       const textarea = document.getElementById('editor-code-textarea');
       if (textarea) {
+        const cmTheme = document.body.classList.contains('dark-mode') ? 'clincoo-dark' : 'clincoo-light';
         codeEditor = CodeMirror.fromTextArea(textarea, {
           lineNumbers: true,
-          theme: 'dracula',
+          theme: cmTheme,
           mode: 'htmlmixed',
           indentUnit: 4,
           lineWrapping: true,
           scrollbarStyle: 'native'
         });
         codeEditor.on('change', function() {
-          if (editorOriginalContent !== null && codeEditor.getValue() !== editorOriginalContent) {
-            editorDirty = true;
+          if (editorOriginalContent !== null) {
+            editorDirty = codeEditor.getValue() !== editorOriginalContent;
           }
+          updateEditorStatus();
         });
+        codeEditor.on('cursorActivity', function() { updateEditorStatus(); });
       }
     }
 
@@ -409,6 +541,7 @@
         editorOriginalContent = fileObj.content || '';
         editorDirty = false;
       }
+      updateEditorStatus();
     }
 
     function showEditorExitConfirm() {
@@ -416,15 +549,15 @@
       if (oldModal) oldModal.remove();
       const ov = document.createElement('div');
       ov.id = 'editor-exit-modal';
-      ov.className = 'fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4';
+      ov.className = 'ee-overlay';
       const fileName = editingFileName || 'file ini';
-      ov.innerHTML = '<div class="bg-[#12151c] border border-white/[.08] rounded-lg p-4 w-full max-w-[300px] shadow-xl">'
-        + '<h3 class="text-white font-medium text-[15px] mb-1">Simpan perubahan?</h3>'
-        + '<p class="text-[13px] text-gray-400 mb-4">Ada perubahan pada <span class="font-medium text-gray-200"></span> yang belum disimpan.</p>'
-        + '<div class="ee-btns flex flex-col">'
-        + '<button id="ee-save" class="w-full bg-black text-white text-[13px] font-medium py-2 rounded-md hover:bg-gray-800 transition-colors">Simpan &amp; Keluar</button>'
-        + '<button id="ee-discard" class="w-full border border-white/10 text-gray-300 text-[13px] py-2 mt-1.5 rounded-md hover:bg-white/5 transition-colors">Keluar Tanpa Simpan</button>'
-        + '<button id="ee-cancel" class="w-full text-gray-500 text-[13px] pt-2 hover:text-gray-300 transition-colors">Batal</button>'
+      ov.innerHTML = '<div class="ee-card">'
+        + '<h3>Simpan perubahan?</h3>'
+        + '<p>Ada perubahan pada <span></span> yang belum disimpan.</p>'
+        + '<div class="ee-btns">'
+        + '<button id="ee-save">Simpan &amp; Keluar</button>'
+        + '<button id="ee-discard">Keluar Tanpa Simpan</button>'
+        + '<button id="ee-cancel">Batal</button>'
         + '</div></div>';
       ov.querySelector('p span').textContent = fileName;
       document.body.appendChild(ov);
