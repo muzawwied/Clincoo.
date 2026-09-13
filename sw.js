@@ -5,7 +5,7 @@ var PRECACHE = [
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/icon-maskable-512.png',
-  './assets/og-image.jpg'
+  './assets/og-image.png'
 ];
 // CDN statis yang aman di-cache — icon lucide, fonts, dan library tampil instan
 var CDN_HOSTS = [
