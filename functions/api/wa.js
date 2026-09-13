@@ -81,6 +81,36 @@ async function aiCall(env, messages) {
   return { error: 'Semua provider AI gagal' };
 }
 
+// ===== Agent Mode via WA — tugas background (Cloudflare Workflows) =====
+async function ensureAgentTables(DB) {
+  await DB.prepare(`CREATE TABLE IF NOT EXISTS agent_tasks (
+    id TEXT PRIMARY KEY, user_key TEXT, project_id TEXT, goal TEXT, status TEXT,
+    plan TEXT, transcript TEXT, current_step INTEGER DEFAULT 0,
+    result TEXT, error TEXT, created_at TEXT, updated_at TEXT
+  )`).run();
+  try { await DB.prepare('ALTER TABLE agent_tasks ADD COLUMN wa_number TEXT').run(); } catch (e) {}
+  await DB.prepare('CREATE TABLE IF NOT EXISTS agent_events (id INTEGER PRIMARY KEY AUTOINCREMENT, task_id TEXT, user_key TEXT, kind TEXT, text TEXT, created_at TEXT)').run();
+}
+async function waAgentStart(env, phone, goal) {
+  await ensureAgentTables(env.DB);
+  const now = new Date().toISOString();
+  const id = 'agt_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  await env.DB.prepare('INSERT INTO agent_tasks (id, user_key, project_id, goal, status, plan, transcript, current_step, result, error, wa_number, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(id, 'wa:' + phone, null, goal, 'queued', '[]', '[]', 0, null, null, phone, now, now).run();
+  await env.DB.prepare('INSERT INTO agent_events (task_id, user_key, kind, text, created_at) VALUES (?,?,?,?,?)')
+    .bind(id, 'wa:' + phone, 'queued', 'Tugas diterima via WhatsApp, masuk antrean.', now).run();
+  return id;
+}
+async function waAgentStatus(env, phone) {
+  await ensureAgentTables(env.DB);
+  const t = await env.DB.prepare('SELECT * FROM agent_tasks WHERE user_key = ? ORDER BY updated_at DESC LIMIT 1').bind('wa:' + phone).first();
+  if (!t) return null;
+  let planLen = 0; try { planLen = (JSON.parse(t.plan) || []).length; } catch (e) {}
+  const ev = await env.DB.prepare('SELECT kind, text FROM agent_events WHERE task_id = ? ORDER BY id DESC LIMIT 1').bind(t.id).first();
+  return { goal: t.goal, status: t.status, step: t.current_step, planLen, lastEvent: ev?.text || '', error: t.error };
+}
+const WA_TUGAS_HELP = 'Kirim "tugas: <tujuan>" — contoh: tugas: buatkan rencana konten IG 30 hari untuk brand kopi.\nAku kerjakan di latar belakang dan kirim progresnya ke chat ini tiap langkah. Cek progres dengan "status". (Clincoo AI)';
+
 // ===== D1: sesi + kuota =====
 async function ensureTables(DB) {
   await DB.prepare('CREATE TABLE IF NOT EXISTS wa_sessions (phone TEXT PRIMARY KEY, messages TEXT, updated_at TEXT)').run();
@@ -136,6 +166,29 @@ async function handleIncoming(env, msg) {
     await waSend(env, phoneId, token, from, 'Maaf, untuk saat ini aku baru bisa membaca pesan teks ya 🙂 — kirim pertanyaanmu dalam bentuk teks. (Clincoo AI)');
     return;
   }
+  // ==== Perintah "tugas ..." — lempar ke Agent Mode background (Workflows) ====
+  const mTugas = userText.match(/^tugas\s*[:\-]?\s+(.{3,2000})$/i);
+  if (mTugas) {
+    const goal = mTugas[1].trim();
+    try {
+      await waAgentStart(env, from, goal);
+      await waSend(env, phoneId, token, from, '✅ Tugas dicatat: "' + goal.slice(0, 120) + '"\n\nAku susun rencana dan kerjakan di latar belakang — progres kutulis ke chat ini tiap langkah. Ketik "status" kapan pun untuk cek. (Clincoo AI)');
+    } catch (e) {
+      await waSend(env, phoneId, token, from, 'Maaf, gagal mencatat tugas — coba kirim ulang ya. (Clincoo AI)');
+    }
+    return;
+  }
+  // ==== Perintah "status" — progres tugas terakhir via WhatsApp ====
+  if (/^(status|cek)( tugas)?$/i.test(userText.trim())) {
+    const st = await waAgentStatus(env, from);
+    if (!st) { await waSend(env, phoneId, token, from, WA_TUGAS_HELP); return; }
+    let msg = '📋 Tugas terakharmu:\n"' + String(st.goal).slice(0, 150) + '"\n';
+    msg += 'Status: ' + st.status + (st.planLen ? ' — langkah ' + st.step + '/' + st.planLen : '') + '\n';
+    if (st.lastEvent) msg += 'Kabar terakhir: ' + String(st.lastEvent).slice(0, 250);
+    await waSend(env, phoneId, token, from, msg);
+    return;
+  }
+
   if (!(await quotaOk(env.DB, from))) {
     await waSend(env, phoneId, token, from, 'Kamu sudah mencapai batas chat 30 pesan hari ini lewat WhatsApp. Lanjut lagi besok ya! (Clincoo AI)');
     return;

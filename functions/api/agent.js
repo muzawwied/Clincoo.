@@ -67,6 +67,7 @@ Jangan menawarkan "sebaiknya hubungi" — kamu sendiri yang mengeksekusi. Bahasa
 
 // ===== D1 =====
 async function ensureTable(DB) {
+  try { await DB.prepare('ALTER TABLE agent_tasks ADD COLUMN wa_number TEXT').run(); } catch (e) { /* kolom sudah ada */ }
   await DB.prepare(`CREATE TABLE IF NOT EXISTS agent_tasks (
     id TEXT PRIMARY KEY,
     user_key TEXT,
@@ -309,6 +310,32 @@ export async function onRequestPost({ request, env }) {
       const budget = Math.min(parseInt(body.budget_seconds || '', 10) * 1000 || DEFAULT_BUDGET_MS, MAX_BUDGET_MS);
       const done = await agentTick(env, t, budget, orKey, gemKey);
       return json({ ok: true, task: taskJson(done) });
+    }
+
+    // action === 'start_bg' — tugas masuk antrean, dijalankan Clincoo Agent Worker
+    // (Cloudflare Workflows) di latar belakang. Request balik LANGSUNG; progres
+    // dipantau lewat GET /api/agent?task_id=... (events) atau dikirim ke WhatsApp
+    // bila wa_number diisi.
+    if (action === 'start_bg') {
+      const goal = String(body?.goal || '').trim();
+      if (goal.length < 3) return json({ error: 'Tulis tujuan tugas (minimal 3 karakter).' }, 400);
+      const q = await quotaSpend(env, user, 1);
+      if (q.exceeded) return json({ quota_exhausted: true, error: QUOTA_MSG }, 429);
+      const now = new Date().toISOString();
+      const t = {
+        id: 'agt_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+        user_key: user.key,
+        project_id: String(body?.project_id || '') || null,
+        goal, status: 'queued',
+        plan: '[]', transcript: '[]',
+        current_step: 0, result: null, error: null,
+        wa_number: String(body?.wa_number || '').replace(/[^0-9+]/g, '') || null,
+        created_at: now, updated_at: now
+      };
+      await env.DB.prepare('INSERT INTO agent_tasks (id, user_key, project_id, goal, status, plan, transcript, current_step, result, error, wa_number, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)')
+        .bind(t.id, t.user_key, t.project_id, t.goal, t.status, t.plan, t.transcript, t.current_step, t.result, t.error, t.wa_number, t.created_at, t.updated_at).run();
+      addEvent(env.DB, t.id, t.user_key, 'queued', 'Tugas masuk antrean — Clincoo Agent Worker menjalankannya di latar belakang.');
+      return json({ ok: true, task: taskJson(t), background: true, message: 'Tugas masuk antrean. Pantau progres via GET /api/agent?task_id=' + t.id });
     }
 
     // action === 'start'
