@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<title>Debug Fetch — Clincoo</title>
+</head>
+<body style="font-family: monospace; background:#000; color:#0f0; padding:16px; word-break: break-all;">
+<pre id="out">memulai...</pre>
+<script>
+(async function () {
+  const out = [];
+  const log = (k, v) => { out.push(k + ': ' + (typeof v === 'string' ? v : JSON.stringify(v))); };
+  const be2 = 'https://clincoo-be2.pages.dev';
+
+  function raceFetch(label, url, opts) {
+    return new Promise((resolve) => {
+      const t0 = performance.now();
+      let done = false;
+      const to = setTimeout(() => { if (!done) { done = true; log(label, 'HANG >6s'); resolve(); } }, 6000);
+      fetch(url, opts).then((r) => {
+        if (done) return;
+        done = true; clearTimeout(to);
+        log(label, 'OK status=' + r.status + ' type=' + r.type + ' (' + Math.round(performance.now() - t0) + 'ms)');
+        resolve();
+      }).catch((e) => {
+        if (done) return;
+        done = true; clearTimeout(to);
+        log(label, 'REJECT ' + (e && e.name) + ': ' + (e && e.message) + ' (' + Math.round(performance.now() - t0) + 'ms)');
+        resolve();
+      });
+    });
+  }
+
+  log('origin', location.origin);
+  await raceFetch('T1_root_no-cors', be2 + '/manifest.json', { mode: 'no-cors' });
+  await raceFetch('T2_root_cors', be2 + '/manifest.json', { mode: 'cors' });
+  await raceFetch('T3_api_no-cors', be2 + '/api/deploy?fast=1', { mode: 'no-cors' });
+  await raceFetch('T4_api_cors_plain', be2 + '/api/deploy?fast=1', { mode: 'cors' });
+  await raceFetch('T5_api_cors_auth', be2 + '/api/deploy?fast=1', { mode: 'cors', headers: { Authorization: 'Bearer x' } });
+  await raceFetch('T6_github_static', location.origin + '/manifest.json', { mode: 'cors' });
+  await raceFetch('T7_other_cfpages', 'https://clincoo-be2.pages.dev/debug/dns-check.html', { mode: 'cors' });
+  log('selesai', new Date().toISOString());
+  document.getElementById('out').textContent = out.join('\n');
+})();
+</script>
+</body>
+</html>
